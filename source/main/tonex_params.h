@@ -212,7 +212,12 @@ enum TonexParameters
     TONEX_GLOBAL_MASTER_VOLUME, 
 
     // must be last actual global
-    TONEX_GLOBAL_LAST
+    TONEX_GLOBAL_LAST,
+
+    TONEX_CONTROLLER_FOOTSWITCH_ALT_MODE, 
+
+    // must be last actual controller parameter
+    TONEX_CONTROLLER_LAST
 };
 
 // special cases for handling effect switches that use Midi but don't change a parameter

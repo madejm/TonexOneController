@@ -181,6 +181,9 @@ static tTonexParameter TonexParameters[TONEX_GLOBAL_LAST] =
     {440,    415,    465,  "TUNEREF", TONEX_PARAM_TYPE_RANGE},              // TONEX_GLOBAL_TUNING_REFERENCE
     {0,      0,      1,    "BYPASS",  TONEX_PARAM_TYPE_SWITCH},             // TONEX_GLOBAL_BYPASS
     {0,     -40,     3,    "MVOL", TONEX_PARAM_TYPE_RANGE},                 // TONEX_GLOBAL_MASTER_VOLUME
+
+    //************* Config params *****************
+    {0,      0,      1,    "FS_ALT", TONEX_PARAM_TYPE_SWITCH},                 // TONEX_CONTROLLER_FOOTSWITCH_ALT_MODE
 };
 
 static tTonexPresetColor TonexPresetColors[MAX_SUPPORTED_PRESETS];

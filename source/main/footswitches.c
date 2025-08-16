@@ -91,7 +91,10 @@ typedef struct
     uint8_t onboard_switch_mode;   
     uint8_t external_switch_mode;
     tFootswitchEffectHandler ExternalFootswitchEffectHandler[MAX_EXTERNAL_EFFECT_FOOTSWITCHES];
+    tFootswitchEffectHandler ExternalFootswitchAltEffectHandler[MAX_EXTERNAL_EFFECT_FOOTSWITCHES];
     tFootswitchEffectHandler OnboardFootswitchEffectHandler[MAX_INTERNAL_EFFECT_FOOTSWITCHES];
+    tFootswitchEffectHandler OnboardFootswitchAltEffectHandler[MAX_INTERNAL_EFFECT_FOOTSWITCHES];
+    bool footswitch_alt_mode;
 } tFootswitchControl;
 
 typedef struct
@@ -655,7 +658,15 @@ static void footswitch_handle_effects(tFootswitchHandler* handler, tFootswitchEf
                                         }
 
                                         tonex_params_release_locked_access();
-                                        usb_modify_parameter(param, new_value);
+
+                                        if (param == TONEX_CONTROLLER_FOOTSWITCH_ALT_MODE)
+                                        {
+                                            FootswitchControl.footswitch_alt_mode = new_value;
+                                        }
+                                        else
+                                        {
+                                            usb_modify_parameter(param, new_value);
+                                        }
                                     }
                                     else if (param_ptr[param].Type == TONEX_PARAM_TYPE_SELECT)
                                     {
@@ -787,6 +798,11 @@ void footswitch_task(void *arg)
         FootswitchControl.ExternalFootswitchEffectHandler[configs].config.CC = control_get_config_item_int(CONFIG_ITEM_EXT_FOOTSW_EFFECT1_CC + (configs * 4));
         FootswitchControl.ExternalFootswitchEffectHandler[configs].config.Value_1 = control_get_config_item_int(CONFIG_ITEM_EXT_FOOTSW_EFFECT1_VAL1 + (configs * 4));
         FootswitchControl.ExternalFootswitchEffectHandler[configs].config.Value_2 = control_get_config_item_int(CONFIG_ITEM_EXT_FOOTSW_EFFECT1_VAL2 + (configs * 4));
+        
+        FootswitchControl.ExternalFootswitchAltEffectHandler[configs].config.Switch = control_get_config_item_int(CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT1_SW + (configs * 4));
+        FootswitchControl.ExternalFootswitchAltEffectHandler[configs].config.CC = control_get_config_item_int(CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT1_CC + (configs * 4));
+        FootswitchControl.ExternalFootswitchAltEffectHandler[configs].config.Value_1 = control_get_config_item_int(CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT1_VAL1 + (configs * 4));
+        FootswitchControl.ExternalFootswitchAltEffectHandler[configs].config.Value_2 = control_get_config_item_int(CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT1_VAL2 + (configs * 4));
     }
 
     // load config for internal effect buttons
@@ -796,6 +812,11 @@ void footswitch_task(void *arg)
         FootswitchControl.OnboardFootswitchEffectHandler[configs].config.CC = control_get_config_item_int(CONFIG_ITEM_INT_FOOTSW_EFFECT1_CC + (configs * 4));
         FootswitchControl.OnboardFootswitchEffectHandler[configs].config.Value_1 = control_get_config_item_int(CONFIG_ITEM_INT_FOOTSW_EFFECT1_VAL1 + (configs * 4));
         FootswitchControl.OnboardFootswitchEffectHandler[configs].config.Value_2 = control_get_config_item_int(CONFIG_ITEM_INT_FOOTSW_EFFECT1_VAL2 + (configs * 4));
+
+        FootswitchControl.OnboardFootswitchAltEffectHandler[configs].config.Switch = control_get_config_item_int(CONFIG_ITEM_INT_ALT_FOOTSW_EFFECT1_SW + (configs * 4));
+        FootswitchControl.OnboardFootswitchAltEffectHandler[configs].config.CC = control_get_config_item_int(CONFIG_ITEM_INT_ALT_FOOTSW_EFFECT1_CC + (configs * 4));
+        FootswitchControl.OnboardFootswitchAltEffectHandler[configs].config.Value_1 = control_get_config_item_int(CONFIG_ITEM_INT_ALT_FOOTSW_EFFECT1_VAL1 + (configs * 4));
+        FootswitchControl.OnboardFootswitchAltEffectHandler[configs].config.Value_2 = control_get_config_item_int(CONFIG_ITEM_INT_ALT_FOOTSW_EFFECT1_VAL2 + (configs * 4));
 
         // debug
         //ESP_LOGI(TAG, "Config Internal Footswitch %d, %d, %d, %d, %d", (int)configs, 
@@ -824,84 +845,104 @@ void footswitch_task(void *arg)
     {
         // Waveshare 4.3 (not B) development board has different pinout 
 #if !CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43DEVONLY        
-        // handle onboard IO foot switches (direct GPIO and IO expander on main PCB)
-        switch (FootswitchControl.onboard_switch_mode) 
+        if (!FootswitchControl.footswitch_alt_mode)
         {
-            case FOOTSWITCH_LAYOUT_1X2:
-            {
-                // run dual mode next/previous
-                footswitch_handle_dual_mode(&FootswitchControl.Handlers[FOOTSWITCH_HANDLER_ONBOARD_PRESETS]);
-            } break;
-
-            case FOOTSWITCH_LAYOUT_1X3: // fallthrough
-            case FOOTSWITCH_LAYOUT_1X4:
-            {
-                // run bankedswitches
-                footswitch_handle_banked(&FootswitchControl.Handlers[FOOTSWITCH_HANDLER_ONBOARD_PRESETS], (tFootswitchLayoutEntry*)&FootswitchLayouts[FootswitchControl.onboard_switch_mode]);
-            } break;
-
-            case FOOTSWITCH_LAYOUT_1X4_BINARY:
-            {
-                // run 4 switch binary mode
-                footswitch_handle_quad_binary(&FootswitchControl.Handlers[FOOTSWITCH_HANDLER_ONBOARD_PRESETS]);
-            } break;
-
-            case FOOTSWITCH_LAYOUT_DISABLED:
-            default:
-            {
-                // nothing to do
-            } break;
-        }
-
-        // handle effects switching
-        footswitch_handle_effects(&FootswitchControl.Handlers[FOOTSWITCH_HANDLER_ONBOARD_EFFECTS], FootswitchControl.OnboardFootswitchEffectHandler, MAX_INTERNAL_EFFECT_FOOTSWITCHES);
-#endif 
-
-        // did we find an IO expander on boot?
-        if (FootswitchControl.io_expander_ok)
-        {
-            switch (FootswitchControl.external_switch_mode) 
+            // handle onboard IO foot switches (direct GPIO and IO expander on main PCB)
+            switch (FootswitchControl.onboard_switch_mode) 
             {
                 case FOOTSWITCH_LAYOUT_1X2:
                 {
                     // run dual mode next/previous
-                    footswitch_handle_dual_mode(&FootswitchControl.Handlers[FOOTSWITCH_HANDLER_EXTERNAL_PRESETS]);
+                    footswitch_handle_dual_mode(&FootswitchControl.Handlers[FOOTSWITCH_HANDLER_ONBOARD_PRESETS]);
+                } break;
+
+                case FOOTSWITCH_LAYOUT_1X3: // fallthrough
+                case FOOTSWITCH_LAYOUT_1X4:
+                {
+                    // run bankedswitches
+                    footswitch_handle_banked(&FootswitchControl.Handlers[FOOTSWITCH_HANDLER_ONBOARD_PRESETS], (tFootswitchLayoutEntry*)&FootswitchLayouts[FootswitchControl.onboard_switch_mode]);
                 } break;
 
                 case FOOTSWITCH_LAYOUT_1X4_BINARY:
                 {
                     // run 4 switch binary mode
-                    footswitch_handle_quad_binary(&FootswitchControl.Handlers[FOOTSWITCH_HANDLER_EXTERNAL_PRESETS]);
+                    footswitch_handle_quad_binary(&FootswitchControl.Handlers[FOOTSWITCH_HANDLER_ONBOARD_PRESETS]);
                 } break;
 
-                case FOOTSWITCH_LAYOUT_1X3:   // fallthrough
-                case FOOTSWITCH_LAYOUT_1X4:   // fallthrough
-                case FOOTSWITCH_LAYOUT_1X5A:  // fallthrough
-                case FOOTSWITCH_LAYOUT_1X5B:  // fallthrough
-                case FOOTSWITCH_LAYOUT_1X6A:  // fallthrough
-                case FOOTSWITCH_LAYOUT_1X6B:  // fallthrough
-                case FOOTSWITCH_LAYOUT_1X7A:  // fallthrough
-                case FOOTSWITCH_LAYOUT_1X7B:  // fallthrough
-                case FOOTSWITCH_LAYOUT_2X3:   // fallthrough
-                case FOOTSWITCH_LAYOUT_2X4:   // fallthrough
-                case FOOTSWITCH_LAYOUT_2X5A:  // fallthrough
-                case FOOTSWITCH_LAYOUT_2X5B:  // fallthrough
-                case FOOTSWITCH_LAYOUT_2X6A:  // fallthrough
-                case FOOTSWITCH_LAYOUT_2X6B:
-                {
-                    // handle external footswitches as banked
-                    footswitch_handle_banked(&FootswitchControl.Handlers[FOOTSWITCH_HANDLER_EXTERNAL_PRESETS], (tFootswitchLayoutEntry*)&FootswitchLayouts[FootswitchControl.external_switch_mode]);
-                } break;
-          
                 case FOOTSWITCH_LAYOUT_DISABLED:
                 default:
                 {
                     // nothing to do
                 } break;
             }
+        }
+
+        // handle effects switching
+        if (FootswitchControl.footswitch_alt_mode)
+        {
+            footswitch_handle_effects(&FootswitchControl.Handlers[FOOTSWITCH_HANDLER_ONBOARD_EFFECTS], FootswitchControl.OnboardFootswitchAltEffectHandler, MAX_INTERNAL_EFFECT_FOOTSWITCHES);
+        }
+        else
+        {
+            footswitch_handle_effects(&FootswitchControl.Handlers[FOOTSWITCH_HANDLER_ONBOARD_EFFECTS], FootswitchControl.OnboardFootswitchEffectHandler, MAX_INTERNAL_EFFECT_FOOTSWITCHES);
+        }
+#endif 
+
+        // did we find an IO expander on boot?
+        if (FootswitchControl.io_expander_ok)
+        {
+            if (!FootswitchControl.footswitch_alt_mode)
+            {
+                switch (FootswitchControl.external_switch_mode) 
+                {
+                    case FOOTSWITCH_LAYOUT_1X2:
+                    {
+                        // run dual mode next/previous
+                        footswitch_handle_dual_mode(&FootswitchControl.Handlers[FOOTSWITCH_HANDLER_EXTERNAL_PRESETS]);
+                    } break;
+
+                    case FOOTSWITCH_LAYOUT_1X4_BINARY:
+                    {
+                        // run 4 switch binary mode
+                        footswitch_handle_quad_binary(&FootswitchControl.Handlers[FOOTSWITCH_HANDLER_EXTERNAL_PRESETS]);
+                    } break;
+
+                    case FOOTSWITCH_LAYOUT_1X3:   // fallthrough
+                    case FOOTSWITCH_LAYOUT_1X4:   // fallthrough
+                    case FOOTSWITCH_LAYOUT_1X5A:  // fallthrough
+                    case FOOTSWITCH_LAYOUT_1X5B:  // fallthrough
+                    case FOOTSWITCH_LAYOUT_1X6A:  // fallthrough
+                    case FOOTSWITCH_LAYOUT_1X6B:  // fallthrough
+                    case FOOTSWITCH_LAYOUT_1X7A:  // fallthrough
+                    case FOOTSWITCH_LAYOUT_1X7B:  // fallthrough
+                    case FOOTSWITCH_LAYOUT_2X3:   // fallthrough
+                    case FOOTSWITCH_LAYOUT_2X4:   // fallthrough
+                    case FOOTSWITCH_LAYOUT_2X5A:  // fallthrough
+                    case FOOTSWITCH_LAYOUT_2X5B:  // fallthrough
+                    case FOOTSWITCH_LAYOUT_2X6A:  // fallthrough
+                    case FOOTSWITCH_LAYOUT_2X6B:
+                    {
+                        // handle external footswitches as banked
+                        footswitch_handle_banked(&FootswitchControl.Handlers[FOOTSWITCH_HANDLER_EXTERNAL_PRESETS], (tFootswitchLayoutEntry*)&FootswitchLayouts[FootswitchControl.external_switch_mode]);
+                    } break;
+            
+                    case FOOTSWITCH_LAYOUT_DISABLED:
+                    default:
+                    {
+                        // nothing to do
+                    } break;
+                }
+            }
                     
             // handle effects switching
-            footswitch_handle_effects(&FootswitchControl.Handlers[FOOTSWITCH_HANDLER_EXTERNAL_EFFECTS], FootswitchControl.ExternalFootswitchEffectHandler, MAX_EXTERNAL_EFFECT_FOOTSWITCHES);
+            if (FootswitchControl.footswitch_alt_mode == true)
+            {
+                footswitch_handle_effects(&FootswitchControl.Handlers[FOOTSWITCH_HANDLER_EXTERNAL_EFFECTS], FootswitchControl.ExternalFootswitchAltEffectHandler, MAX_EXTERNAL_EFFECT_FOOTSWITCHES);
+            }
+            else
+            {
+                footswitch_handle_effects(&FootswitchControl.Handlers[FOOTSWITCH_HANDLER_EXTERNAL_EFFECTS], FootswitchControl.ExternalFootswitchEffectHandler, MAX_EXTERNAL_EFFECT_FOOTSWITCHES);
+            }
         }
 
 #if !CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43DEVONLY  
