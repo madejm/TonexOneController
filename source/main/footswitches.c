@@ -65,6 +65,20 @@ enum FootswitchHandlers
     FOOTSWITCH_HANDLER_MAX
 };
 
+enum FootswitchEvents
+{
+    FOOTSWITCH_EVENT_BANK_DOWN,
+    FOOTSWITCH_EVENT_BANK_UP
+};
+
+typedef struct
+{
+    uint8_t Event;
+} tFootswitchMessage;
+
+
+static uint8_t process_footswitch_command(tFootswitchMessage* message);
+
 static const char *TAG = "app_footswitches";
 
 typedef struct
@@ -107,6 +121,7 @@ typedef struct
 
 static tFootswitchControl FootswitchControl;
 static SemaphoreHandle_t I2CMutexHandle;
+static QueueHandle_t footswitch_input_queue;
 
 static const __attribute__((unused)) tFootswitchLayoutEntry FootswitchLayouts[FOOTSWITCH_LAYOUT_LAST] = 
 {
@@ -666,6 +681,7 @@ static void footswitch_handle_effects(tFootswitchHandler* handler, tFootswitchEf
                                         else
                                         {
                                             usb_modify_parameter(param, new_value);
+                                            // midi_helper_adjust_param_via_midi(fx_handler[loop].config.CC, new_value); 
                                         }
                                     }
                                     else if (param_ptr[param].Type == TONEX_PARAM_TYPE_SELECT)
@@ -980,10 +996,105 @@ void footswitch_task(void *arg)
         }
 #endif 
 
+        tFootswitchMessage message;
+        // check for any input messages
+        if (xQueueReceive(footswitch_input_queue, (void*)&message, pdMS_TO_TICKS(20)) == pdPASS)
+        {
+            // process it
+            process_footswitch_command(&message);
+        }
+
         // handle leds from this task, to save wasting ram on another task for it
         leds_handle();
 
         vTaskDelay(pdMS_TO_TICKS(20));
+    }
+}
+
+static uint8_t process_footswitch_command(tFootswitchMessage* message)
+{
+    ESP_LOGI(TAG, "Footswitch command %d", message->Event);
+
+    // check what we got
+    switch (message->Event)
+    {
+        case FOOTSWITCH_EVENT_BANK_UP:
+        {
+                uint8_t banks_count = get_banks_count((tFootswitchLayoutEntry*)&FootswitchLayouts[FootswitchControl.external_switch_mode]);
+
+                for (int16_t index = 0; index < FOOTSWITCH_HANDLER_MAX; index++) {
+                    tFootswitchHandler *handler = &FootswitchControl.Handlers[index];
+
+                    if (control_get_config_item_int(CONFIG_ITEM_LOOP_AROUND))
+                    {
+                        uint8_t newBank = ((handler->current_bank + 1) < banks_count) ? (handler->current_bank + 1) : 0;
+                        // bank up
+                        handler->current_bank = newBank;
+                        ESP_LOGI(TAG, "Footswitch banked up %d", handler->current_bank);
+                        control_request_bank_index(handler->current_bank);
+                    }
+                    else if ((handler->current_bank + 1) < banks_count)
+                    {
+                        // bank up
+                        handler->current_bank++;
+                        ESP_LOGI(TAG, "Footswitch banked up %d", handler->current_bank);
+                        control_request_bank_index(handler->current_bank);
+                    }
+                }
+
+                return 0;
+        } break;
+
+        case FOOTSWITCH_EVENT_BANK_DOWN:
+        {
+            uint8_t banks_count = get_banks_count((tFootswitchLayoutEntry*)&FootswitchLayouts[FootswitchControl.external_switch_mode]);
+
+            for (int16_t index = 0; index < FOOTSWITCH_HANDLER_MAX; index++) {
+                tFootswitchHandler *handler = &FootswitchControl.Handlers[index];
+                
+                if (control_get_config_item_int(CONFIG_ITEM_LOOP_AROUND))
+                {
+                    uint8_t newBank = (handler->current_bank > 0) ? (handler->current_bank - 1) : (banks_count - 1);
+                    // bank down
+                    handler->current_bank = newBank;
+                    ESP_LOGI(TAG, "Footswitch banked down %d", handler->current_bank);
+                    control_request_bank_index(handler->current_bank);
+                }
+                else if (handler->current_bank > 0)
+                {
+                    // bank down
+                    handler->current_bank--;   
+                    ESP_LOGI(TAG, "Footswitch banked down %d", handler->current_bank);
+                    control_request_bank_index(handler->current_bank);
+                }
+            }
+
+            return 0;
+        } break;
+    }
+
+    return 1;
+}
+
+void footswitches_bank_down() {
+    tFootswitchMessage message;
+
+    message.Event = FOOTSWITCH_EVENT_BANK_DOWN;
+
+    // send to queue
+    if (xQueueSend(footswitch_input_queue, (void*)&message, 0) != pdPASS)
+    {      
+    }
+}
+
+void footswitches_bank_up() {
+    tFootswitchMessage message;
+
+    message.Event = FOOTSWITCH_EVENT_BANK_UP;
+
+    // send to queue
+    if (xQueueSend(footswitch_input_queue, (void*)&message, 0) != pdPASS)
+    {      
     }
 }
 
@@ -1033,6 +1144,13 @@ void footswitches_init(i2c_master_bus_handle_t bus_handle, SemaphoreHandle_t I2C
     else
     {
         ESP_LOGI(TAG, "External IO Expander not found");
+    }
+
+    // create queue for commands from other threads
+    footswitch_input_queue = xQueueCreate(10, sizeof(tFootswitchMessage));
+    if (footswitch_input_queue == NULL)
+    {
+        ESP_LOGE(TAG, "Failed to create footswithc input queue!");
     }
 
     // init leds

@@ -49,6 +49,11 @@ void UI_SetWiFiStatus(uint8_t state);
 void UI_SetPresetLabel(uint16_t index, char* name);
 void UI_SetBankIndex(uint16_t index);
 void UI_SetAmpSkin(uint16_t index);
+void UI_SetAmpSkinSlot(uint16_t skinIndex, uint16_t slotIndex);
+void UI_SetPresetButtonSelected(uint16_t buttonIndex, uint16_t selected);
+void UI_SetAltButton(bool active);
+void UI_SetFS6Button(uint32_t color, bool active, char *effect, char *value);
+void UI_SetFS7Button(uint32_t color, bool active, char *effect, char *value);
 void UI_SetPresetDescription(char* text);
 void UI_RefreshParameterValues(void);
 

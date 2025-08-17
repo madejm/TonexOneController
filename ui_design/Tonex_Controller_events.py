@@ -70,3 +70,59 @@ def toggle_effect_reverb(event_struct):
 def show_settings_tab(event_struct):
     return
 
+
+def PresetClicked1(event_struct):
+    return
+
+
+def PresetClicked2(event_struct):
+    return
+
+
+def PresetClicked3(event_struct):
+    return
+
+
+def PresetClicked4(event_struct):
+    return
+
+
+def PreviousBankClicked(event_struct):
+    return
+
+
+def NextBankClicked(event_struct):
+    return
+
+
+def PreviousBank(event_struct):
+    return
+
+
+def NextBank(event_struct):
+    return
+
+
+def PreviousButton(event_struct):
+    return
+
+
+def NextButton(event_struct):
+    return
+
+
+def FS7Action(event_struct):
+    return
+
+
+def FS6Action(event_struct):
+    return
+
+
+def AltButtonAction(event_struct):
+    return
+
+
+def FS9Action(event_struct):
+    return
+

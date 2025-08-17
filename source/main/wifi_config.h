@@ -22,10 +22,12 @@ enum WiFiSyncTypes
     WIFI_SYNC_TYPE_PARAMS,
     WIFI_SYNC_TYPE_PRESET_NAME,
     WIFI_SYNC_TYPE_PRESET,
-    WIFI_SYNC_TYPE_CONFIG
+    WIFI_SYNC_TYPE_CONFIG,
+    WIFI_SYNC_TYPE_LOG
 };
 
 void wifi_config_init(void);
 
 // threadsafe API
 void wifi_request_sync(uint8_t type, void* arg1, void* arg2);
+void wifi_log_msg(void* arg1);

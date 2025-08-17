@@ -85,7 +85,8 @@ enum WiFivents
     EVENT_SYNC_PARAMS,
     EVENT_SYNC_PRESET_NAME,
     EVENT_SYNC_PRESET,
-    EVENT_SYNC_CONFIG
+    EVENT_SYNC_CONFIG,
+    EVENT_SYNC_LOG
 };
 
 typedef struct
@@ -111,9 +112,11 @@ typedef struct
     uint8_t ParamsChanged : 1;
     uint8_t PresetChanged : 1;
     uint8_t ConfigChanged : 1;
+    uint8_t LogChanged : 1;
     char wifi_ssid[MAX_WIFI_SSID_PW];
     char wifi_password[MAX_WIFI_SSID_PW];
     char TempBuffer[MAX_TEMP_BUFFER];
+    char Log [MAX_PRESET_NAME_LENGTH];
 } tWebConfigData;
 
 static const httpd_uri_t index_get = 
@@ -176,10 +179,21 @@ static uint8_t process_wifi_command(tWiFiMessage* message)
         case EVENT_SYNC_CONFIG:
         {
             pWebConfig->ConfigChanged = 1;
-        } break;    
+        } break;
+
+        case EVENT_SYNC_LOG:
+        {
+            pWebConfig->LogChanged = 1;
+            memcpy((void*)pWebConfig->Log, (void*)message->Text, MAX_PRESET_NAME_LENGTH - 1);
+        } break;
     }
 
     return 1;
+}
+
+void wifi_log_msg(void* arg1)
+{
+    wifi_request_sync(WIFI_SYNC_TYPE_LOG, arg1, 0);
 }
 
 /****************************************************************************
@@ -226,6 +240,12 @@ void wifi_request_sync(uint8_t type, void* arg1, void* arg2)
         case WIFI_SYNC_TYPE_CONFIG:
         {
             message.Event = EVENT_SYNC_CONFIG;
+        } break;
+
+        case WIFI_SYNC_TYPE_LOG:
+        {
+            message.Event = EVENT_SYNC_LOG;
+            sprintf(message.Text, arg1);
         } break;
     }
 
@@ -580,6 +600,28 @@ static void wifi_build_preset_names_json(uint8_t* presetIndexes, uint8_t indexCo
         json_gen_obj_set_string(&pWebConfig->jstr, preset_index_string, pWebConfig->PresetNames[preset_index]);
     }
     json_gen_pop_object(&pWebConfig->jstr);
+
+    // add the }
+    json_gen_end_object(&pWebConfig->jstr);
+
+    // end generation
+    json_gen_str_end(&pWebConfig->jstr);
+
+    //debug ESP_LOGI(TAG, "Json: %s", pWebConfig->TempBuffer);
+}
+
+static void wifi_build_log()
+{
+    // init generation of json response
+    json_gen_str_start(&pWebConfig->jstr, pWebConfig->TempBuffer, MAX_TEMP_BUFFER, NULL, NULL);
+
+    // start json object, adds {
+    json_gen_start_object(&pWebConfig->jstr);
+
+    // add response
+    json_gen_obj_set_string(&pWebConfig->jstr, "CMD", "LOG");
+
+    json_gen_obj_set_string(&pWebConfig->jstr, "LOG", pWebConfig->Log);
 
     // add the }
     json_gen_end_object(&pWebConfig->jstr);
@@ -1205,6 +1247,20 @@ static esp_err_t ws_handler(httpd_req_t *req)
 
                             pWebConfig->ConfigChanged = 0;
                         }
+    
+                        if (pWebConfig->LogChanged)
+                        {
+                            // send current config
+                            ESP_LOGI(TAG, "Config update");
+
+                            // build response
+                            wifi_build_log();
+                        
+                            // build packet and send
+                            build_send_ws_response_packet(req, pWebConfig->TempBuffer);
+
+                            pWebConfig->LogChanged = 0;
+                        }
                     }
                     else if (strcmp(str_val, "SETPRESETORDER") == 0)
                     {
@@ -1229,7 +1285,7 @@ static esp_err_t ws_handler(httpd_req_t *req)
                                 control_save_user_data(0);
                             }
                         }
-                    }               
+                    }
                 }
 
                 json_parse_end(&pWebConfig->jctx);

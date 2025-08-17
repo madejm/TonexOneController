@@ -4,10 +4,12 @@ SET(SOURCES screens/ui_Screen1.c
     components/ui_comp_hook.c
     ui_helpers.c
     ui_events.c
+    images/ui_img_wifi_disconn_png.c
+    images/ui_img_bt_disconn_png.c
+    images/ui_img_usb_fail_png.c
+    images/ui_img_skin_jcm_png.c
     images/ui_img_previous_png.c
-    images/ui_img_previous_down_png.c
     images/ui_img_next_png.c
-    images/ui_img_next_down_png.c
     images/ui_img_effect_icon_eq_png.c
     images/ui_img_effect_icon_gate_off_png.c
     images/ui_img_effect_icon_amp_off_png.c
@@ -17,17 +19,10 @@ SET(SOURCES screens/ui_Screen1.c
     images/ui_img_effect_icon_delay_off_png.c
     images/ui_img_effect_icon_reverb_off_png.c
     images/ui_img_settings_png.c
-    images/ui_img_smythbuilt_png.c
-    images/ui_img_bt_conn_png.c
-    images/ui_img_bt_disconn_png.c
-    images/ui_img_usb_ok_png.c
-    images/ui_img_usb_fail_png.c
-    images/ui_img_wifi_conn_png.c
-    images/ui_img_wifi_disconn_png.c
-    images/ui_img_skin_jcm_png.c
     images/ui_img_arrow_left_png.c
     images/ui_img_arrow_right_png.c
     images/ui_img_tick_png.c
+    images/ui_img_bt_conn_png.c
     images/ui_img_effect_icon_amp_on_png.c
     images/ui_img_effect_icon_cab_on_png.c
     images/ui_img_effect_icon_comp_on_png.c
@@ -45,6 +40,8 @@ SET(SOURCES screens/ui_Screen1.c
     images/ui_img_effect_icon_reverb_on_s2_png.c
     images/ui_img_effect_icon_reverb_on_s3_png.c
     images/ui_img_effect_icon_reverb_on_s4_png.c
+    images/ui_img_next_down_png.c
+    images/ui_img_previous_down_png.c
     images/ui_img_pskin_bigmuff_png.c
     images/ui_img_pskin_bossblack_png.c
     images/ui_img_pskin_bosssilver_png.c
@@ -93,6 +90,9 @@ SET(SOURCES screens/ui_Screen1.c
     images/ui_img_skin_tonexampblack_png.c
     images/ui_img_skin_tonexampred_png.c
     images/ui_img_skin_whitemodern_png.c
-    images/ui_img_skin_woodamp_png.c)
+    images/ui_img_skin_woodamp_png.c
+    images/ui_img_smythbuilt_png.c
+    images/ui_img_usb_ok_png.c
+    images/ui_img_wifi_conn_png.c)
 
 add_library(ui ${SOURCES})

@@ -99,3 +99,78 @@ void show_settings_tab(lv_event_t * e)
 {
 	// Your code here
 }
+
+void PresetClicked1(lv_event_t * e)
+{
+	// Your code here
+}
+
+void PresetClicked2(lv_event_t * e)
+{
+	// Your code here
+}
+
+void PresetClicked3(lv_event_t * e)
+{
+	// Your code here
+}
+
+void PresetClicked4(lv_event_t * e)
+{
+	// Your code here
+}
+
+void PreviousBankClicked(lv_event_t * e)
+{
+	// Your code here
+}
+
+void NextBankClicked(lv_event_t * e)
+{
+	// Your code here
+}
+
+void PreviousBank(lv_event_t * e)
+{
+	// Your code here
+}
+
+void NextBank(lv_event_t * e)
+{
+	// Your code here
+}
+
+void PreviousButton(lv_event_t * e)
+{
+	// Your code here
+}
+
+void NextButton(lv_event_t * e)
+{
+	// Your code here
+}
+
+void FS7Action(lv_event_t * e)
+{
+	// Your code here
+}
+
+void FS6Action(lv_event_t * e)
+{
+	// Your code here
+}
+
+void AltButtonAction(lv_event_t * e)
+{
+	// Your code here
+}
+
+void FS9Action(lv_event_t * e)
+{
+	// Your code here
+}
+
+void TapTempoAction(lv_event_t * e)
+{
+	// Your code here
+}

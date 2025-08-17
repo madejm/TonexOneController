@@ -65,7 +65,10 @@ enum CommandEvents
     EVENT_PRESET_DOWN,
     EVENT_PRESET_UP,
     EVENT_PRESET_INDEX,
+    EVENT_PRESET_IN_BANK_INDEX,
     EVENT_BANK_INDEX,
+    EVENT_BANK_UP,
+    EVENT_BANK_DOWN,
     EVENT_SET_PRESET_NAME,
     EVENT_SET_PRESET_DETAILS,
     EVENT_SET_USB_STATUS,
@@ -230,6 +233,7 @@ typedef struct
 typedef struct 
 {
     uint32_t PresetIndex;                        // 0-based index
+    uint32_t BankIndex;                        // 0-based index
     char PresetNames[MAX_SUPPORTED_PRESETS][MAX_PRESET_NAME_LENGTH];
     uint32_t USBStatus;
     uint32_t BTStatus;
@@ -311,6 +315,16 @@ static uint8_t process_control_command(tControlMessage* message)
             }
         } break;
 
+        case EVENT_BANK_DOWN:
+        {
+            footswitches_bank_down();
+        } break;
+
+        case EVENT_BANK_UP:
+        {
+            footswitches_bank_up();
+        } break;
+
         case EVENT_PRESET_INDEX:
         {
             if (ControlData.USBStatus != 0)
@@ -322,11 +336,38 @@ static uint8_t process_control_command(tControlMessage* message)
             }
         } break;
 
+        case EVENT_PRESET_IN_BANK_INDEX:
+        {
+            if (ControlData.USBStatus != 0)
+            {
+                uint8_t index = (ControlData.BankIndex * 4) + message->Value;
+                uint8_t preset = ControlData.ConfigData.PresetOrderMappingConfig.PresetOrder[index];
+
+                // send message to USB
+                usb_set_preset(preset);
+            }
+        } break;
+
         case EVENT_BANK_INDEX:
         {
 #if CONFIG_TONEX_CONTROLLER_HAS_DISPLAY
             // update UI
-            UI_SetBankIndex(message->Value);
+            ControlData.BankIndex = message->Value;
+
+            UI_SetBankIndex(ControlData.BankIndex);
+
+            UI_SetAmpSkinSlot(ControlData.ConfigData.SkinConfig.SkinIndex[(ControlData.BankIndex * 4)], 0);
+            UI_SetAmpSkinSlot(ControlData.ConfigData.SkinConfig.SkinIndex[(ControlData.BankIndex * 4) + 1], 1);
+            UI_SetAmpSkinSlot(ControlData.ConfigData.SkinConfig.SkinIndex[(ControlData.BankIndex * 4) + 2], 2);
+            UI_SetAmpSkinSlot(ControlData.ConfigData.SkinConfig.SkinIndex[(ControlData.BankIndex * 4) + 3], 3);
+
+            bool isInCurrentBank = (ControlData.PresetIndex/4) == ControlData.BankIndex;
+            uint16_t selectedPresetButtonIndex = ControlData.PresetIndex % 4;
+
+            UI_SetPresetButtonSelected(0, isInCurrentBank && selectedPresetButtonIndex == 0);
+            UI_SetPresetButtonSelected(1, isInCurrentBank && selectedPresetButtonIndex == 1);
+            UI_SetPresetButtonSelected(2, isInCurrentBank && selectedPresetButtonIndex == 2);
+            UI_SetPresetButtonSelected(3, isInCurrentBank && selectedPresetButtonIndex == 3);
 #endif
         } break;
 
@@ -357,6 +398,15 @@ static uint8_t process_control_command(tControlMessage* message)
             // load user text and set it
             LoadPresetUserText(message->Value, preset_user_text);
             UI_SetPresetDescription(preset_user_text);
+
+
+            bool isInCurrentBank = (ControlData.PresetIndex/4) == ControlData.BankIndex;
+            uint16_t selectedPresetButtonIndex = ControlData.PresetIndex % 4;
+
+            UI_SetPresetButtonSelected(0, isInCurrentBank && selectedPresetButtonIndex == 0);
+            UI_SetPresetButtonSelected(1, isInCurrentBank && selectedPresetButtonIndex == 1);
+            UI_SetPresetButtonSelected(2, isInCurrentBank && selectedPresetButtonIndex == 2);
+            UI_SetPresetButtonSelected(3, isInCurrentBank && selectedPresetButtonIndex == 3);
 #endif
 
             // update web UI
@@ -959,6 +1009,22 @@ void control_request_preset_index(uint8_t index)
     }
 }
 
+void control_request_preset_in_bank_index(uint8_t index)
+{
+    tControlMessage message;
+
+    ESP_LOGI(TAG, "control_request_preset_index %d", index);
+
+    message.Event = EVENT_PRESET_IN_BANK_INDEX;
+    message.Value = index;
+
+    // send to queue
+    if (xQueueSend(control_input_queue, (void*)&message, 0) != pdPASS)
+    {
+        ESP_LOGE(TAG, "control_request_preset_index queue send failed!");            
+    }
+}
+
 /****************************************************************************
 * NAME:        
 * DESCRIPTION: 
@@ -974,6 +1040,36 @@ void control_request_bank_index(uint8_t index)
 
     message.Event = EVENT_BANK_INDEX;
     message.Value = index;
+
+    // send to queue
+    if (xQueueSend(control_input_queue, (void*)&message, 0) != pdPASS)
+    {
+        ESP_LOGE(TAG, "control_request_bank_index queue send failed!");            
+    }
+}
+
+void control_request_bank_up()
+{
+    tControlMessage message;
+
+    ESP_LOGI(TAG, "control_request_bank_up");
+
+    message.Event = EVENT_BANK_UP;
+
+    // send to queue
+    if (xQueueSend(control_input_queue, (void*)&message, 0) != pdPASS)
+    {
+        ESP_LOGE(TAG, "control_request_bank_index queue send failed!");            
+    }
+}
+
+void control_request_bank_down()
+{
+    tControlMessage message;
+
+    ESP_LOGI(TAG, "control_request_bank_down");
+
+    message.Event = EVENT_BANK_DOWN;
 
     // send to queue
     if (xQueueSend(control_input_queue, (void*)&message, 0) != pdPASS)

@@ -73,6 +73,8 @@ limitations under the License.
 #include "LP5562.h"
 #include "tonex_params.h"
 #include "platform_common.h"
+#include "wifi_config.h"
+#include "midi_helper.h"
 
 static const char *TAG = "app_display";
 
@@ -99,6 +101,18 @@ enum UIElements
     UI_ELEMENT_PRESET_NAME,
     UI_ELEMENT_BANK_INDEX,
     UI_ELEMENT_AMP_SKIN,
+    UI_ELEMENT_AMP_SKIN_1,
+    UI_ELEMENT_AMP_SKIN_2,
+    UI_ELEMENT_AMP_SKIN_3,
+    UI_ELEMENT_AMP_SKIN_4,
+    UI_ELEMENT_PRESET_BUTTON_1,
+    UI_ELEMENT_PRESET_BUTTON_2,
+    UI_ELEMENT_PRESET_BUTTON_3,
+    UI_ELEMENT_PRESET_BUTTON_4,
+    UI_ELEMENT_ALT_BUTTON,
+    UI_ELEMENT_PRESET_FS6_BUTTON,
+    UI_ELEMENT_PRESET_FS7_BUTTON,
+    UI_ELEMENT_PRESET_FS9_BUTTON,
     UI_ELEMENT_PRESET_DESCRIPTION,
     UI_ELEMENT_PARAMETERS
 };
@@ -108,6 +122,9 @@ enum UIAction
     UI_ACTION_SET_STATE,
     UI_ACTION_SET_LABEL_TEXT,
     UI_ACTION_SET_ENTRY_TEXT,
+    UI_ACTION_SET_AMP_SKIN_SLOT,
+    UI_ACTION_SET_PRESET_BUTTON_SELECTED,
+    UI_ACTION_SET_FS_BUTTON,
     UI_ACTION_NONE = 0xFF
 };
 
@@ -116,6 +133,7 @@ typedef struct
     uint8_t ElementID;
     uint8_t Action;
     uint32_t Value;
+    bool State;
     char Text[MAX_UI_TEXT];
 } tUIUpdate;
 
@@ -291,6 +309,127 @@ void NextClicked(lv_event_t * e)
     control_request_preset_up();        
 }
 
+void PresetClicked1(lv_event_t * e) {
+    control_request_preset_in_bank_index(0);
+}
+void PresetClicked2(lv_event_t * e) {
+    control_request_preset_in_bank_index(1);
+}
+void PresetClicked3(lv_event_t * e) {
+    control_request_preset_in_bank_index(2);
+}
+void PresetClicked4(lv_event_t * e) {
+    control_request_preset_in_bank_index(3);
+}
+void PreviousBankClicked(lv_event_t * e)
+{
+    control_request_bank_down();
+}
+void NextBankClicked(lv_event_t * e)
+{
+    control_request_bank_up();
+}
+void TapTempoAction(lv_event_t * e)
+{
+    control_trigger_tap_tempo();
+}
+
+void FSButtonAction(uint32_t buttonIndex)
+{
+    for (uint32_t item = CONFIG_ITEM_EXT_FOOTSW_EFFECT1_SW; item <= CONFIG_ITEM_EXT_FOOTSW_EFFECT8_SW; item += 4)
+    {
+        if (control_get_config_item_int(item) != buttonIndex) {
+            continue;
+        }
+
+        uint32_t cc = control_get_config_item_int(item + 1); // _CC
+        uint32_t param = midi_helper_get_param_for_change_num(cc);
+
+        if (param == TONEX_UNKNOWN) {
+            return;
+        }
+
+        tTonexParameter* param_ptr;
+        if (tonex_params_get_locked_access(&param_ptr) != ESP_OK) {
+            return;
+        }
+
+        float new_value;
+
+        if (param_ptr[param].Type == TONEX_PARAM_TYPE_SWITCH) {
+
+            // toggle the current value
+            if (param_ptr[param].Value == 0)
+            {
+                new_value = 1;
+            }
+            else
+            {
+                new_value = 0;
+            }
+
+            tonex_params_release_locked_access();
+
+            // midi_helper_adjust_param_via_midi(cc, new_value); 
+            usb_modify_parameter(param, new_value);
+        }
+        else if (param_ptr[param].Type == TONEX_PARAM_TYPE_SELECT)
+        {
+            // save current value before we release the locked access
+            // select params are really integers saved as floats
+            uint8_t current_select_val = (uint8_t)param_ptr[param].Value;
+
+            // release access now as midi helper needs the mutex
+            tonex_params_release_locked_access();
+
+            uint32_t val1 = control_get_config_item_int(item + 2); // _VAL1
+            uint32_t val2 = control_get_config_item_int(item + 3); // _VAL2
+
+            if (current_select_val == val1)
+            {
+                new_value = (float)val2;
+            }
+            else
+            {
+                new_value = (float)val1;
+            }
+
+            midi_helper_adjust_param_via_midi(cc, new_value);     
+        }
+        else
+        {
+            tonex_params_release_locked_access();
+        }
+
+        return;
+    }
+}
+
+void FS6Action(lv_event_t * e)
+{
+    wifi_log_msg("UI FS6");
+    FSButtonAction(6);
+}
+
+void FS7Action(lv_event_t * e)
+{
+    wifi_log_msg("UI FS7");
+    FSButtonAction(7);
+}
+
+void FS9Action(lv_event_t * e)
+{
+    wifi_log_msg("UI FS9");
+    FSButtonAction(9);
+}
+
+void AltButtonAction(lv_event_t * e)
+{
+    wifi_log_msg("UI ALT");
+
+    uint8_t opacity = lv_obj_get_style_bg_opa(ui_AltButton, 0x000000);
+    UI_SetAltButton(opacity == 0);
+}
 #else   //CONFIG_TONEX_CONTROLLER_HAS_TOUCH
 
 // Dummy functions so that 1.69 and 1.69 Touch can share the same UI project
@@ -638,11 +777,11 @@ void BTBondsClearRequest(lv_event_t * e)
 *****************************************************************************/
 void PresetDescriptionChanged(lv_event_t * e)
 {
-    char* text = (char*)lv_textarea_get_text(ui_PresetDetailsTextArea);
+    // char* text = (char*)lv_textarea_get_text(ui_PresetDetailsTextArea);
 
-    ESP_LOGI(TAG, "PresetDescriptionChanged: %s", text);
+    // ESP_LOGI(TAG, "PresetDescriptionChanged: %s", text);
 
-    control_set_user_text(text);      
+    // control_set_user_text(text);      
 }
 
 /****************************************************************************
@@ -1415,6 +1554,131 @@ void UI_SetAmpSkin(uint16_t index)
     }
 }
 
+void UI_SetAmpSkinSlot(uint16_t skinIndex, uint16_t slotIndex)
+{
+    tUIUpdate ui_update;
+
+    // build commands
+    switch (slotIndex)
+    {
+        case 0:
+        {
+            ui_update.ElementID = UI_ELEMENT_AMP_SKIN_1;
+        } break;
+        case 1:
+        {
+            ui_update.ElementID = UI_ELEMENT_AMP_SKIN_2;
+        } break;
+        case 2:
+        {
+            ui_update.ElementID = UI_ELEMENT_AMP_SKIN_3;
+        } break;
+        case 3:
+        {
+            ui_update.ElementID = UI_ELEMENT_AMP_SKIN_4;
+        } break;
+    }
+    ui_update.Action = UI_ACTION_SET_AMP_SKIN_SLOT;
+    ui_update.Value = skinIndex;
+
+    // send to queue
+    if (xQueueSend(ui_update_queue, (void*)&ui_update, 0) != pdPASS)
+    {
+        ESP_LOGE(TAG, "UI Update queue send failed!");            
+    }
+}
+
+void UI_SetPresetButtonSelected(uint16_t buttonIndex, uint16_t selected)
+{
+    tUIUpdate ui_update;
+
+    // build commands
+    switch (buttonIndex)
+    {
+        case 0:
+        {
+            ui_update.ElementID = UI_ELEMENT_PRESET_BUTTON_1;
+        } break;
+        case 1:
+        {
+            ui_update.ElementID = UI_ELEMENT_PRESET_BUTTON_2;
+        } break;
+        case 2:
+        {
+            ui_update.ElementID = UI_ELEMENT_PRESET_BUTTON_3;
+        } break;
+        case 3:
+        {
+            ui_update.ElementID = UI_ELEMENT_PRESET_BUTTON_4;
+        } break;
+    }
+    ui_update.Action = UI_ACTION_SET_PRESET_BUTTON_SELECTED;
+    ui_update.Value = selected;
+
+    // send to queue
+    if (xQueueSend(ui_update_queue, (void*)&ui_update, 0) != pdPASS)
+    {
+        ESP_LOGE(TAG, "UI Update queue send failed!");            
+    }
+}
+
+void UI_SetFSButton(uint32_t buttonIndex, uint32_t color, bool active, char *effect, char *value)
+{
+    tUIUpdate ui_update;
+    
+    switch (buttonIndex) {
+        case 6: {
+            ui_update.ElementID = UI_ELEMENT_PRESET_FS6_BUTTON;
+        } break;
+
+        case 7: {
+            ui_update.ElementID = UI_ELEMENT_PRESET_FS7_BUTTON;
+        } break;
+
+        case 9: {
+            ui_update.ElementID = UI_ELEMENT_PRESET_FS9_BUTTON;
+        } break;
+
+        default: {
+            return;
+        } break;
+    }
+    ui_update.Action = UI_ACTION_SET_FS_BUTTON;
+    ui_update.Value = color;
+    ui_update.State = active;
+
+    sprintf(ui_update.Text, effect);
+    strncat(ui_update.Text, ": ", MAX_UI_TEXT - 1);
+    strncat(ui_update.Text, value, MAX_UI_TEXT - 1);
+
+    // send to queue
+    if (xQueueSend(ui_update_queue, (void*)&ui_update, 0) != pdPASS)
+    {
+        ESP_LOGE(TAG, "UI Update queue send failed!");            
+    }
+}
+
+void UI_SetAltButton(bool active)
+{
+    tUIUpdate ui_update;
+    
+    ui_update.ElementID = UI_ELEMENT_ALT_BUTTON;
+    ui_update.Action = UI_ACTION_SET_FS_BUTTON;
+    ui_update.Value = 0xFB9230;
+    ui_update.State = active;
+
+    char *value = active ? "ON" : "OFF";
+    sprintf(ui_update.Text, "ALT");
+    strncat(ui_update.Text, ": ", MAX_UI_TEXT - 1);
+    strncat(ui_update.Text, value, MAX_UI_TEXT - 1);
+
+    // send to queue
+    if (xQueueSend(ui_update_queue, (void*)&ui_update, 0) != pdPASS)
+    {
+        ESP_LOGE(TAG, "UI Update queue send failed!");            
+    }
+}
+
 /****************************************************************************
 * NAME:        
 * DESCRIPTION: 
@@ -1843,7 +2107,7 @@ static uint8_t update_ui_element(tUIUpdate* update)
     {
         case UI_ELEMENT_USB_STATUS:
         {
-            element_1 = ui_USBStatusFail;
+            element_1 = ui_USBStatusOK;
         } break;
 
         case UI_ELEMENT_BT_STATUS:
@@ -1875,10 +2139,95 @@ static uint8_t update_ui_element(tUIUpdate* update)
 #endif            
         } break;
 
+        case UI_ELEMENT_AMP_SKIN_1:
+        {
+#if CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI
+            element_1 = ui_SkinImage1;
+#endif            
+        } break;
+
+        case UI_ELEMENT_AMP_SKIN_2:
+        {
+#if CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI
+            element_1 = ui_SkinImage2;
+#endif            
+        } break;
+
+        case UI_ELEMENT_AMP_SKIN_3:
+        {
+#if CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI
+            element_1 = ui_SkinImage3;
+#endif            
+        } break;
+
+        case UI_ELEMENT_AMP_SKIN_4:
+        {
+#if CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI
+            element_1 = ui_SkinImage4;
+#endif            
+        } break;
+
+        case UI_ELEMENT_PRESET_BUTTON_1:
+        {
+#if CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI
+            element_1 = ui_PresetButton1;
+#endif            
+        } break;
+
+        case UI_ELEMENT_PRESET_BUTTON_2:
+        {
+#if CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI
+            element_1 = ui_PresetButton2;
+#endif            
+        } break;
+
+        case UI_ELEMENT_PRESET_BUTTON_3:
+        {
+#if CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI
+            element_1 = ui_PresetButton3;
+#endif            
+        } break;
+
+        case UI_ELEMENT_PRESET_BUTTON_4:
+        {
+#if CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI
+            element_1 = ui_PresetButton4;
+#endif            
+        } break;
+
+        case UI_ELEMENT_ALT_BUTTON:
+        {
+#if CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI
+            element_1 = ui_AltButton;
+#endif            
+        } break;
+
+        case UI_ELEMENT_PRESET_FS6_BUTTON:
+        {
+#if CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI
+            element_1 = ui_FS6Button;
+#endif            
+        } break;
+
+        case UI_ELEMENT_PRESET_FS7_BUTTON:
+        {
+#if CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI
+            element_1 = ui_FS7Button;
+#endif            
+        } break;
+
+        case UI_ELEMENT_PRESET_FS9_BUTTON:
+        {
+#if CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI
+            element_1 = ui_FS9Button;
+#endif            
+        } break;
+
         case UI_ELEMENT_PRESET_DESCRIPTION:
         {
 #if CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI
-            element_1 = ui_PresetDetailsTextArea;
+            // element_1 = ui_PresetDetailsTextArea;
+            return 0;
 #endif            
         } break;
 
@@ -2890,6 +3239,11 @@ static uint8_t update_ui_element(tUIUpdate* update)
                                 lv_obj_clear_state(ui_DelayEnableSwitch, LV_STATE_CHECKED);
                                 lv_img_set_src(ui_IconDelay, (lv_obj_t*)&ui_img_effect_icon_delay_off_png);
                             }
+
+                            // == TONEX_PARAM_DELAY_ENABLE
+                            // char *effect = "DELAY";
+                            // char *value = param_entry->Value == 1 ? "ON" : "OFF";
+                            // UI_SetFS7Button(0x00FF00, param_entry->Value == 1, effect, value);
                         } break;
 
                         case TONEX_PARAM_DELAY_MODEL:
@@ -3095,6 +3449,60 @@ static uint8_t update_ui_element(tUIUpdate* update)
                     tonex_params_release_locked_access();
                 }               
             }
+
+            if (tonex_params_get_locked_access(&param_ptr) == ESP_OK)
+            {
+                for (uint32_t buttonIndex = 6; buttonIndex <= 9; buttonIndex++)
+                {
+                    for (uint32_t item = CONFIG_ITEM_EXT_FOOTSW_EFFECT1_SW; item <= CONFIG_ITEM_EXT_FOOTSW_EFFECT8_SW; item += 4)
+                    {
+                        if (control_get_config_item_int(item) != buttonIndex) {
+                            continue;
+                        }
+
+                        uint32_t cc = control_get_config_item_int(item + 1); // _CC
+                        uint32_t param = midi_helper_get_param_for_change_num(cc);
+
+                        if (param == TONEX_UNKNOWN) {
+                            continue;
+                        }
+
+                        tTonexParameter* param_entry = &param_ptr[param];
+
+                        if (param_entry->Type == TONEX_PARAM_TYPE_SWITCH) {
+                            bool isEnabled = param_entry->Value == 1;
+                            
+                            if (param == TONEX_PARAM_DELAY_ENABLE) {
+                                char *value = isEnabled ? "ON" : "OFF";
+                                UI_SetFSButton(buttonIndex, 0x72ac3a, isEnabled, "DELAY", value);
+                            } else if (param == TONEX_PARAM_MODULATION_ENABLE) {
+                                char *value = isEnabled ? "ON" : "OFF";
+                                UI_SetFSButton(buttonIndex, 0xe3a929, isEnabled, "MOD", value);
+                            } else {
+                                continue;
+                            }
+                        } else if (param_entry->Type == TONEX_PARAM_TYPE_SELECT) {
+                            wifi_log_msg("TONEX_PARAM_TYPE_SELECT");
+                            uint32_t val2 = control_get_config_item_int(item + 3); // _VAL2
+                            bool isEnabled = param_entry->Value == (uint8_t)val2;
+                            
+                            if (param == TONEX_PARAM_REVERB_MODEL) {
+                                wifi_log_msg("TONEX_PARAM_REVERB_MODEL");
+                                char *value = isEnabled ? "PLATE" : "SPRING 1";
+                                UI_SetFSButton(buttonIndex, 0x006ff3, isEnabled, "REV", value);
+                            } else {
+                                wifi_log_msg("cont 1");
+                                continue;
+                            }
+                        } else {
+                            wifi_log_msg("cont 2");
+                            continue;
+                        }
+                    }
+                }
+
+                tonex_params_release_locked_access();
+            }
 #endif
 
 #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_169 \
@@ -3193,19 +3601,17 @@ static uint8_t update_ui_element(tUIUpdate* update)
         case UI_ACTION_SET_STATE:
         {
             // check the element
-            if (element_1 == ui_USBStatusFail)
+            if (element_1 == ui_USBStatusOK)
             {
                 if (update->Value == 0)
                 {
                     // show the USB disconnected image
-                    lv_obj_add_flag(ui_USBStatusOK, LV_OBJ_FLAG_HIDDEN);
-                    lv_obj_clear_flag(ui_USBStatusFail, LV_OBJ_FLAG_HIDDEN);
+                    lv_img_set_src(ui_USBStatusOK, &ui_img_usb_fail_png);
                 }
                 else
                 {
                     // show the USB connected image
-                    lv_obj_add_flag(ui_USBStatusFail, LV_OBJ_FLAG_HIDDEN);
-                    lv_obj_clear_flag(ui_USBStatusOK, LV_OBJ_FLAG_HIDDEN);
+                    lv_img_set_src(ui_USBStatusOK, &ui_img_usb_ok_png);
                 }
             }
             else if (element_1 == ui_BTStatusConn)
@@ -3213,14 +3619,12 @@ static uint8_t update_ui_element(tUIUpdate* update)
                 if (update->Value == 0)
                 {
                     // show the BT disconnected image
-                    lv_obj_add_flag(ui_BTStatusConn, LV_OBJ_FLAG_HIDDEN);
-                    lv_obj_clear_flag(ui_BTStatusDisconn, LV_OBJ_FLAG_HIDDEN);
+                    lv_img_set_src(ui_BTStatusConn, &ui_img_bt_disconn_png);
                 }
                 else
                 {
                     // show the BT connected image
-                    lv_obj_add_flag(ui_BTStatusDisconn, LV_OBJ_FLAG_HIDDEN);
-                    lv_obj_clear_flag(ui_BTStatusConn, LV_OBJ_FLAG_HIDDEN);
+                    lv_img_set_src(ui_BTStatusConn, &ui_img_bt_conn_png);
                 }
             }
             else if (element_1 == ui_WiFiStatusConn)
@@ -3230,16 +3634,14 @@ static uint8_t update_ui_element(tUIUpdate* update)
                     ESP_LOGI(TAG, "Show WiFi disconn");
 
                     // show the Wifi disconnected image
-                    lv_obj_add_flag(ui_WiFiStatusConn, LV_OBJ_FLAG_HIDDEN);
-                    lv_obj_clear_flag(ui_WiFiStatusDisconn, LV_OBJ_FLAG_HIDDEN);
+                    lv_img_set_src(ui_WiFiStatusConn, &ui_img_wifi_disconn_png);
                 }
                 else
                 {
                     ESP_LOGI(TAG, "Show WiFi conn");
 
                     // show the WiFi connected image
-                    lv_obj_add_flag(ui_WiFiStatusDisconn, LV_OBJ_FLAG_HIDDEN);
-                    lv_obj_clear_flag(ui_WiFiStatusConn, LV_OBJ_FLAG_HIDDEN);
+                    lv_img_set_src(ui_WiFiStatusConn, &ui_img_wifi_conn_png);
                 }
             }
 #if CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI
@@ -3256,6 +3658,44 @@ static uint8_t update_ui_element(tUIUpdate* update)
                 lv_label_set_text(ui_BankValueLabel, buf);
             }
 #endif            
+        } break;
+
+        case UI_ACTION_SET_AMP_SKIN_SLOT:
+        {
+#if CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI
+            lv_img_set_src(element_1, ui_get_skin_image(update->Value));
+#endif
+        } break;
+
+        case UI_ACTION_SET_PRESET_BUTTON_SELECTED:
+        {
+#if CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI
+            if (update->Value == 0) {
+                lv_obj_set_style_outline_width(element_1, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+            } else {
+                lv_obj_set_style_outline_width(element_1, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
+            }
+#endif   
+        } break;
+
+        case UI_ACTION_SET_FS_BUTTON:
+        {
+#if CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI
+            lv_label_set_text(element_1, update->Text);
+
+            lv_obj_set_style_bg_color(element_1, lv_color_hex(update->Value), LV_PART_MAIN | LV_STATE_DEFAULT);
+            lv_obj_set_style_border_color(element_1, lv_color_hex(update->Value), LV_PART_MAIN | LV_STATE_DEFAULT);
+
+            if (update->State == true) {
+                lv_obj_set_style_text_color(element_1, lv_color_hex(0x1F1F1F), LV_PART_MAIN | LV_STATE_DEFAULT);
+                lv_obj_set_style_bg_opa(element_1, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+                lv_obj_set_style_border_opa(element_1, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+            } else {
+                lv_obj_set_style_text_color(element_1, lv_color_hex(update->Value), LV_PART_MAIN | LV_STATE_DEFAULT);
+                lv_obj_set_style_bg_opa(element_1, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+                lv_obj_set_style_border_opa(element_1, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+            }
+#endif   
         } break;
 
         case UI_ACTION_SET_LABEL_TEXT:

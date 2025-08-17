@@ -41,7 +41,7 @@ static const char *TAG = "app_ToneParams";
 static SemaphoreHandle_t ParamMutex;
 
 // "value" below is just a default, is overridden by the preset on load
-static tTonexParameter TonexParameters[TONEX_GLOBAL_LAST] = 
+static tTonexParameter TonexParameters[TONEX_CONTROLLER_LAST] = 
 {
     //value, Min,    Max,  Name         Type
     {0,      0,      1,    "NG POST", TONEX_PARAM_TYPE_SWITCH},            // TONEX_PARAM_NOISE_GATE_POST   
@@ -180,7 +180,10 @@ static tTonexParameter TonexParameters[TONEX_GLOBAL_LAST] =
     {0,      0,      1,    "TEMPOS", TONEX_PARAM_TYPE_SWITCH},              // TONEX_GLOBAL_TEMPO_SOURCE
     {440,    415,    465,  "TUNEREF", TONEX_PARAM_TYPE_RANGE},              // TONEX_GLOBAL_TUNING_REFERENCE
     {0,      0,      1,    "BYPASS",  TONEX_PARAM_TYPE_SWITCH},             // TONEX_GLOBAL_BYPASS
-    {0,     -40,     3,    "MVOL", TONEX_PARAM_TYPE_RANGE},                 // TONEX_GLOBAL_MASTER_VOLUME
+    {5,      0,      10,   "MVOL", TONEX_PARAM_TYPE_RANGE},                 // TONEX_GLOBAL_MASTER_VOLUME
+    
+    // dummy end of globals marker
+    {0,      0,      0,    "GLOBAL_LAST", TONEX_PARAM_TYPE_RANGE},                // TONEX_GLOBAL_LAST,
 
     //************* Config params *****************
     {0,      0,      1,    "FS_ALT", TONEX_PARAM_TYPE_SWITCH},                 // TONEX_CONTROLLER_FOOTSWITCH_ALT_MODE
