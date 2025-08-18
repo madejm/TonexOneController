@@ -44,6 +44,7 @@ limitations under the License.
 #include "SX1509.h"
 #include "midi_helper.h"
 #include "tonex_params.h"
+#include "display.h"
 
 #define FOOTSWITCH_TASK_STACK_SIZE          (3 * 1024)
 #define FOOTSWITCH_SAMPLE_COUNT             5       // 20 msec per sample
@@ -67,6 +68,7 @@ enum FootswitchHandlers
 
 enum FootswitchEvents
 {
+    FOOTSWITCH_EVENT_SWITCH_ALT_MODE,
     FOOTSWITCH_EVENT_BANK_DOWN,
     FOOTSWITCH_EVENT_BANK_UP
 };
@@ -74,6 +76,7 @@ enum FootswitchEvents
 typedef struct
 {
     uint8_t Event;
+    uint32_t Value;
 } tFootswitchMessage;
 
 
@@ -107,7 +110,6 @@ typedef struct
     tFootswitchEffectHandler ExternalFootswitchEffectHandler[MAX_EXTERNAL_EFFECT_FOOTSWITCHES];
     tFootswitchEffectHandler ExternalFootswitchAltEffectHandler[MAX_EXTERNAL_EFFECT_FOOTSWITCHES];
     tFootswitchEffectHandler OnboardFootswitchEffectHandler[MAX_INTERNAL_EFFECT_FOOTSWITCHES];
-    tFootswitchEffectHandler OnboardFootswitchAltEffectHandler[MAX_INTERNAL_EFFECT_FOOTSWITCHES];
     bool footswitch_alt_mode;
 } tFootswitchControl;
 
@@ -676,7 +678,8 @@ static void footswitch_handle_effects(tFootswitchHandler* handler, tFootswitchEf
 
                                         if (param == TONEX_CONTROLLER_FOOTSWITCH_ALT_MODE)
                                         {
-                                            FootswitchControl.footswitch_alt_mode = new_value;
+                                            FootswitchControl.footswitch_alt_mode = new_value == 1;
+                                            control_set_fs_alt_mode(FootswitchControl.footswitch_alt_mode);
                                         }
                                         else
                                         {
@@ -815,7 +818,7 @@ void footswitch_task(void *arg)
         FootswitchControl.ExternalFootswitchEffectHandler[configs].config.Value_1 = control_get_config_item_int(CONFIG_ITEM_EXT_FOOTSW_EFFECT1_VAL1 + (configs * 4));
         FootswitchControl.ExternalFootswitchEffectHandler[configs].config.Value_2 = control_get_config_item_int(CONFIG_ITEM_EXT_FOOTSW_EFFECT1_VAL2 + (configs * 4));
         
-        FootswitchControl.ExternalFootswitchAltEffectHandler[configs].config.Switch = control_get_config_item_int(CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT1_SW + (configs * 4));
+        FootswitchControl.ExternalFootswitchAltEffectHandler[configs].config.Switch = control_get_config_item_int(CONFIG_ITEM_EXT_FOOTSW_EFFECT1_SW + (configs * 4));
         FootswitchControl.ExternalFootswitchAltEffectHandler[configs].config.CC = control_get_config_item_int(CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT1_CC + (configs * 4));
         FootswitchControl.ExternalFootswitchAltEffectHandler[configs].config.Value_1 = control_get_config_item_int(CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT1_VAL1 + (configs * 4));
         FootswitchControl.ExternalFootswitchAltEffectHandler[configs].config.Value_2 = control_get_config_item_int(CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT1_VAL2 + (configs * 4));
@@ -828,11 +831,6 @@ void footswitch_task(void *arg)
         FootswitchControl.OnboardFootswitchEffectHandler[configs].config.CC = control_get_config_item_int(CONFIG_ITEM_INT_FOOTSW_EFFECT1_CC + (configs * 4));
         FootswitchControl.OnboardFootswitchEffectHandler[configs].config.Value_1 = control_get_config_item_int(CONFIG_ITEM_INT_FOOTSW_EFFECT1_VAL1 + (configs * 4));
         FootswitchControl.OnboardFootswitchEffectHandler[configs].config.Value_2 = control_get_config_item_int(CONFIG_ITEM_INT_FOOTSW_EFFECT1_VAL2 + (configs * 4));
-
-        FootswitchControl.OnboardFootswitchAltEffectHandler[configs].config.Switch = control_get_config_item_int(CONFIG_ITEM_INT_ALT_FOOTSW_EFFECT1_SW + (configs * 4));
-        FootswitchControl.OnboardFootswitchAltEffectHandler[configs].config.CC = control_get_config_item_int(CONFIG_ITEM_INT_ALT_FOOTSW_EFFECT1_CC + (configs * 4));
-        FootswitchControl.OnboardFootswitchAltEffectHandler[configs].config.Value_1 = control_get_config_item_int(CONFIG_ITEM_INT_ALT_FOOTSW_EFFECT1_VAL1 + (configs * 4));
-        FootswitchControl.OnboardFootswitchAltEffectHandler[configs].config.Value_2 = control_get_config_item_int(CONFIG_ITEM_INT_ALT_FOOTSW_EFFECT1_VAL2 + (configs * 4));
 
         // debug
         //ESP_LOGI(TAG, "Config Internal Footswitch %d, %d, %d, %d, %d", (int)configs, 
@@ -896,7 +894,7 @@ void footswitch_task(void *arg)
         // handle effects switching
         if (FootswitchControl.footswitch_alt_mode)
         {
-            footswitch_handle_effects(&FootswitchControl.Handlers[FOOTSWITCH_HANDLER_ONBOARD_EFFECTS], FootswitchControl.OnboardFootswitchAltEffectHandler, MAX_INTERNAL_EFFECT_FOOTSWITCHES);
+            // footswitch_handle_effects(&FootswitchControl.Handlers[FOOTSWITCH_HANDLER_ONBOARD_EFFECTS], FootswitchControl.OnboardFootswitchAltEffectHandler, MAX_INTERNAL_EFFECT_FOOTSWITCHES);
         }
         else
         {
@@ -951,7 +949,7 @@ void footswitch_task(void *arg)
             }
                     
             // handle effects switching
-            if (FootswitchControl.footswitch_alt_mode == true)
+            if (FootswitchControl.footswitch_alt_mode)
             {
                 footswitch_handle_effects(&FootswitchControl.Handlers[FOOTSWITCH_HANDLER_EXTERNAL_EFFECTS], FootswitchControl.ExternalFootswitchAltEffectHandler, MAX_EXTERNAL_EFFECT_FOOTSWITCHES);
             }
@@ -1018,6 +1016,13 @@ static uint8_t process_footswitch_command(tFootswitchMessage* message)
     // check what we got
     switch (message->Event)
     {
+        case FOOTSWITCH_EVENT_SWITCH_ALT_MODE:
+        {
+            FootswitchControl.footswitch_alt_mode = !FootswitchControl.footswitch_alt_mode;
+            control_set_fs_alt_mode(FootswitchControl.footswitch_alt_mode);
+            return 0;
+        } break;
+
         case FOOTSWITCH_EVENT_BANK_UP:
         {
                 uint8_t banks_count = get_banks_count((tFootswitchLayoutEntry*)&FootswitchLayouts[FootswitchControl.external_switch_mode]);
@@ -1074,6 +1079,18 @@ static uint8_t process_footswitch_command(tFootswitchMessage* message)
     }
 
     return 1;
+}
+
+void footswitches_switch_alt_mode()
+{
+    tFootswitchMessage message;
+
+    message.Event = FOOTSWITCH_EVENT_SWITCH_ALT_MODE;
+
+    // send to queue
+    if (xQueueSend(footswitch_input_queue, (void*)&message, 0) != pdPASS)
+    {      
+    }
 }
 
 void footswitches_bank_down() {

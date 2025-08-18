@@ -126,3 +126,7 @@ def AltButtonAction(event_struct):
 def FS9Action(event_struct):
     return
 
+
+def TapTempoAction(event_struct):
+    return
+

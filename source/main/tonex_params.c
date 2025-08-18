@@ -222,6 +222,62 @@ const tTonexPresetColorMapping TonexColorMap[COLORS_COUNT] = {
     {0x000000, 0x595959}, // grey
 };
 
+esp_err_t tonex_params_get_ui_style(uint32_t param, uint32_t *color, char **name, bool isEnabled, char **value) {
+     if (param >= TONEX_PARAM_REVERB_POSITION && param <= TONEX_PARAM_REVERB_PLATE_MIX) {
+        *color = 0x006ff3;
+        *name = "REV";
+
+        switch (param) {
+            case TONEX_PARAM_REVERB_MODEL:
+                *value = isEnabled ? "PLATE" : "SPRING 1";
+                break;
+            default:
+                return ESP_FAIL;
+        }
+    } else if (param >= TONEX_PARAM_MODULATION_POST && param <= TONEX_PARAM_MODULATION_ROTARY_LEVEL) {
+        *color = 0xe3a929;
+        *name = "MOD";
+
+        switch (param) {
+            case TONEX_PARAM_MODULATION_ENABLE:
+                *value = isEnabled ? "ON" : "OFF";
+                break;
+            default:
+                return ESP_FAIL;
+        }
+    } else if (param >= TONEX_PARAM_DELAY_POST && param <= TONEX_PARAM_DELAY_TAPE_MIX) {
+        *color = 0x72ac3a;
+        *name = "DELAY";
+
+        switch (param) {
+            case TONEX_PARAM_DELAY_ENABLE:
+                *value = isEnabled ? "ON" : "OFF";
+                break;
+            default:
+                return ESP_FAIL;
+        }
+    } else if (param >= TONEX_GLOBAL_BPM && param <= TONEX_CONTROLLER_TAP_TEMPO) {
+        *color = 0xD1A60C;
+        
+        switch (param) {
+            case TONEX_CONTROLLER_FOOTSWITCH_ALT_MODE:
+                *name = "ALT MODE";
+                *value = NULL;
+                break;
+            case TONEX_CONTROLLER_TAP_TEMPO:
+                *name = "TAP TEMPO";
+                *value = NULL;
+                break;
+            default:
+                return ESP_FAIL;
+        }
+    } else {
+        return ESP_FAIL;
+    }
+    
+    return ESP_OK;
+}
+
 /****************************************************************************
 * NAME:        
 * DESCRIPTION: 

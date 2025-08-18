@@ -30,4 +30,4 @@ void wifi_config_init(void);
 
 // threadsafe API
 void wifi_request_sync(uint8_t type, void* arg1, void* arg2);
-void wifi_log_msg(void* arg1);
+void wifi_log_msg(char* arg1);

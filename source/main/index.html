@@ -443,6 +443,7 @@
 
         const img_eq = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAC0AAAAtCAMAAAANxBKoAAAAAXNSR0IB2cksfwAAAAlwSFlzAAALEwAACxMBAJqcGAAAATJQTFRFAAAApJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WyfBttQAAAGZ0Uk5TAP/vEt8iz97QC0AEtJX+xkU4BgrH54WAivHhrAnDGLGQ5onwN30Mq+ODiOAgAhDC3IL6xK70hteSAw/bcuRZ+QHpEdP4wI+9zi9/fNblpBS4nQ2MvkPijfbRVZ/1gYuihH7yTkQ8KSZlWgAAAdtJREFUeJzN1d0rQ2EcB/Dfr7VmYQqpaRkl06wJaVqSKCKakcKFUv4ryaULLiRvU/JW5GJKp6ElRkKRt2EvtvE8Z8/e7Nn23Ijfxfk95/Rp++53zrODIBcCRiBeiggoQolTZQiUQcZ+XasA/eI6tbJqdSzOu4guYKrAK6I1iEEVInoDIhpLkTTCb4Q0u6oV0+W+RwAdhjPoCnI3PAld+U5aPvoy6ETlTlIdnZQG3UzXXJMZ6rz5PK0L30UXdL6yNiDJXRLIc3G0yaUvlADMx3VHqUkMp1xdTyerLkYn003n9LND3CSm2Bc2Mt3sqbqkMyk94GoL7gNY0c90694Xvd6KO1xt/aBJ9G9OgSc2LUkObcnbIjN50DqTdlr7ZkJ3nIBxI6470W1AdDQm6+R9mVwmV8N9LcBuIIPuOZRbkyMc1b3LtPfd8nX/EuuL9GhbbHsuA9j+tC3wtHV/4I4MePBFuSafD73KrQjneNosDUvk1rYjzqb9CJ5mi5GYVtth5TmjHlsgD3DNlT2ms/2zmSVjhCZRhsX0zyTZ9cCZRGdSJqYVo+sA3ZF5v5Bmi44NIT0+T2YyqAKRJMVP2q5VsjeuLh4ENEzgDG3GlmkRnVa59CTglLD+yzfgP9DfayEUPR1QYysAAAAASUVORK5CYII=";
 
+        // var gateway = `ws://tonex.local/ws`;
         var gateway = `ws://${window.location.hostname}/ws`;
         var websocket;
         var pageTimer = 0;
@@ -604,6 +605,11 @@
         const TONEX_GLOBAL_TUNING_REFERENCE = 114;
         const TONEX_GLOBAL_BYPASS = 115;
         const TONEX_GLOBAL_MASTER_VOLUME = 116;
+        const TONEX_GLOBAL_LAST = 117;           // last actual parameter
+
+        // controller internal
+        const TONEX_CONTROLLER_FOOTSWITCH_ALT_MODE = 118;
+        const TONEX_CONTROLLER_LAST = 119;           // last actual parameter
 
         
         // External Footswitch midi associations
@@ -782,6 +788,8 @@
         midiControlChangeAssociations.set(117, { param: "CABSIM BYPASS", value: { type: "TOGGLE" } })
         midiControlChangeAssociations.set(118, { param: "TEMPO SOURCE", value: { type: "TOGGLE" } })
         midiControlChangeAssociations.set(119, { param: "TUNING REFERENCE", value: { type: "RANGE" } })
+        
+        midiControlChangeAssociations.set(123, { param: "ALT MODE", value: { type: "TOGGLE" } })
 
         // tap tempo
         let globalTapTempo = new TapTempo();
@@ -2038,53 +2046,108 @@
 
                     configureParamSelect("extfslay", data['EXTFS_PS_LAYOUT']);
                                         
-                    configureParamSelect("extfx1sw", data['EXTFS_ES1_SW']);
-                    setParamValue("extfx1cc", data['EXTFS_ES1_CC']);
-                    extFSChanged("extfx1");
-                    setExtFSValue("extfx1v1", data['EXTFS_ES1_V1']);
-                    setExtFSValue("extfx1v2", data['EXTFS_ES1_V2']);
+                    for (var i=1; i<=8; i++) {
+                        configureParamSelect(`extfx${i}sw`, data[`EXTFS_ES${i}_SW`]);
+                        setParamValue(`extfx${i}cc`, data[`EXTFS_ES${i}_CC`]);
+                        extFSChanged(`extfx${i}`);
+                        setExtFSValue(`extfx${i}v1`, data[`EXTFS_ES${i}_V1`]);
+                        setExtFSValue(`extfx${i}v2`, data[`EXTFS_ES${i}_V2`]);
+                        
+                        setParamValue(`extfx${i}cc-alt`, data[`EXTFS_ES${i}_CC_ALT`]);
+                        extFSChanged(`extfx${i}`, true);
+                        setExtFSValue(`extfx${i}v1`, data[`EXTFS_ES${i}_V1_ALT`], true);
+                        setExtFSValue(`extfx${i}v2`, data[`EXTFS_ES${i}_V2_ALT`], true);
+                    }
 
-                    configureParamSelect("extfx2sw", data['EXTFS_ES2_SW']);
-                    setParamValue("extfx2cc", data['EXTFS_ES2_CC']);
-                    extFSChanged("extfx2");
-                    setExtFSValue("extfx2v1", data['EXTFS_ES2_V1']);
-                    setExtFSValue("extfx2v2", data['EXTFS_ES2_V2']);
+                    // configureParamSelect("extfx1sw", data['EXTFS_ES1_SW']);
+                    // setParamValue("extfx1cc", data['EXTFS_ES1_CC']);
+                    // extFSChanged("extfx1");
+                    // setExtFSValue("extfx1v1", data['EXTFS_ES1_V1']);
+                    // setExtFSValue("extfx1v2", data['EXTFS_ES1_V2']);
 
-                    configureParamSelect("extfx3sw", data['EXTFS_ES3_SW']);
-                    setParamValue("extfx3cc", data['EXTFS_ES3_CC']);
-                    extFSChanged("extfx3");
-                    setExtFSValue("extfx3v1", data['EXTFS_ES3_V1']);
-                    setExtFSValue("extfx3v2", data['EXTFS_ES3_V2']);
+                    // configureParamSelect("extfx2sw", data['EXTFS_ES2_SW']);
+                    // setParamValue("extfx2cc", data['EXTFS_ES2_CC']);
+                    // extFSChanged("extfx2");
+                    // setExtFSValue("extfx2v1", data['EXTFS_ES2_V1']);
+                    // setExtFSValue("extfx2v2", data['EXTFS_ES2_V2']);
 
-                    configureParamSelect("extfx4sw", data['EXTFS_ES4_SW']);
-                    setParamValue("extfx4cc", data['EXTFS_ES4_CC']);
-                    extFSChanged("extfx4");
-                    setExtFSValue("extfx4v1", data['EXTFS_ES4_V1']);
-                    setExtFSValue("extfx4v2", data['EXTFS_ES4_V2']);
+                    // configureParamSelect("extfx3sw", data['EXTFS_ES3_SW']);
+                    // setParamValue("extfx3cc", data['EXTFS_ES3_CC']);
+                    // extFSChanged("extfx3");
+                    // setExtFSValue("extfx3v1", data['EXTFS_ES3_V1']);
+                    // setExtFSValue("extfx3v2", data['EXTFS_ES3_V2']);
 
-                    configureParamSelect("extfx5sw", data['EXTFS_ES5_SW']);
-                    setParamValue("extfx5cc", data['EXTFS_ES5_CC']);
-                    extFSChanged("extfx5");
-                    setExtFSValue("extfx5v1", data['EXTFS_ES5_V1']);
-                    setExtFSValue("extfx5v2", data['EXTFS_ES5_V2']);
+                    // configureParamSelect("extfx4sw", data['EXTFS_ES4_SW']);
+                    // setParamValue("extfx4cc", data['EXTFS_ES4_CC']);
+                    // extFSChanged("extfx4");
+                    // setExtFSValue("extfx4v1", data['EXTFS_ES4_V1']);
+                    // setExtFSValue("extfx4v2", data['EXTFS_ES4_V2']);
 
-                    configureParamSelect("extfx6sw", data['EXTFS_ES6_SW']);                    
-                    setParamValue("extfx6cc", data['EXTFS_ES6_CC']);
-                    extFSChanged("extfx6");
-                    setExtFSValue("extfx6v1", data['EXTFS_ES6_V1']);
-                    setExtFSValue("extfx6v2", data['EXTFS_ES6_V2']);
+                    // configureParamSelect("extfx5sw", data['EXTFS_ES5_SW']);
+                    // setParamValue("extfx5cc", data['EXTFS_ES5_CC']);
+                    // extFSChanged("extfx5");
+                    // setExtFSValue("extfx5v1", data['EXTFS_ES5_V1']);
+                    // setExtFSValue("extfx5v2", data['EXTFS_ES5_V2']);
 
-                    configureParamSelect("extfx7sw", data['EXTFS_ES7_SW']);
-                    setParamValue("extfx7cc", data['EXTFS_ES7_CC']);
-                    extFSChanged("extfx7");
-                    setExtFSValue("extfx7v1", data['EXTFS_ES7_V1']);
-                    setExtFSValue("extfx7v2", data['EXTFS_ES7_V2']);
+                    // configureParamSelect("extfx6sw", data['EXTFS_ES6_SW']);                    
+                    // setParamValue("extfx6cc", data['EXTFS_ES6_CC']);
+                    // extFSChanged("extfx6");
+                    // setExtFSValue("extfx6v1", data['EXTFS_ES6_V1']);
+                    // setExtFSValue("extfx6v2", data['EXTFS_ES6_V2']);
 
-                    configureParamSelect("extfx8sw", data['EXTFS_ES8_SW']);
-                    setParamValue("extfx8cc", data['EXTFS_ES8_CC']);
-                    extFSChanged("extfx8");
-                    setExtFSValue("extfx8v1", data['EXTFS_ES8_V1']);
-                    setExtFSValue("extfx8v2", data['EXTFS_ES8_V2']);
+                    // configureParamSelect("extfx7sw", data['EXTFS_ES7_SW']);
+                    // setParamValue("extfx7cc", data['EXTFS_ES7_CC']);
+                    // extFSChanged("extfx7");
+                    // setExtFSValue("extfx7v1", data['EXTFS_ES7_V1']);
+                    // setExtFSValue("extfx7v2", data['EXTFS_ES7_V2']);
+
+                    // configureParamSelect("extfx8sw", data['EXTFS_ES8_SW']);
+                    // setParamValue("extfx8cc", data['EXTFS_ES8_CC']);
+                    // extFSChanged("extfx8");
+                    // setExtFSValue("extfx8v1", data['EXTFS_ES8_V1']);
+                    // setExtFSValue("extfx8v2", data['EXTFS_ES8_V2']);
+
+
+                    // setParamValue("extfx1cc-alt", data['EXTFS_ES1_CC_ALT']);
+                    // extFSChanged("extfx1", true);
+                    // setExtFSValue("extfx1v1", data['EXTFS_ES1_V1_ALT'], true);
+                    // setExtFSValue("extfx1v2", data['EXTFS_ES1_V2_ALT'], true);
+
+                    // setParamValue("extfx2cc-alt", data['EXTFS_ES2_CC_ALT']);
+                    // extFSChanged("extfx2", true);
+                    // setExtFSValue("extfx2v1", data['EXTFS_ES2_V1_ALT'], true);
+                    // setExtFSValue("extfx2v2", data['EXTFS_ES2_V2_ALT'], true);
+
+                    // setParamValue("extfx3cc-alt", data['EXTFS_ES3_CC_ALT']);
+                    // extFSChanged("extfx3", true);
+                    // setExtFSValue("extfx3v1", data['EXTFS_ES3_V1_ALT'], true);
+                    // setExtFSValue("extfx3v2", data['EXTFS_ES3_V2_ALT'], true);
+
+                    // setParamValue("extfx4cc-alt", data['EXTFS_ES4_CC_ALT']);
+                    // extFSChanged("extfx4", true);
+                    // setExtFSValue("extfx4v1", data['EXTFS_ES4_V1_ALT'], true);
+                    // setExtFSValue("extfx4v2", data['EXTFS_ES4_V2_ALT'], true);
+
+                    // setParamValue("extfx5cc-alt", data['EXTFS_ES5_CC_ALT']);
+                    // extFSChanged("extfx5", true);
+                    // setExtFSValue("extfx5v1", data['EXTFS_ES5_V1_ALT'], true);
+                    // setExtFSValue("extfx5v2", data['EXTFS_ES5_V2_ALT'], true);
+
+                    // setParamValue("extfx6cc-alt", data['EXTFS_ES6_CC_ALT']);
+                    // extFSChanged("extfx6", true);
+                    // setExtFSValue("extfx6v1", data['EXTFS_ES6_V1_ALT'], true);
+                    // setExtFSValue("extfx6v2", data['EXTFS_ES6_V2_ALT'], true);
+
+                    // setParamValue("extfx7cc-alt", data['EXTFS_ES7_CC_ALT']);
+                    // extFSChanged("extfx7", true);
+                    // setExtFSValue("extfx7v1", data['EXTFS_ES7_V1_ALT'], true);
+                    // setExtFSValue("extfx7v2", data['EXTFS_ES7_V2_ALT'], true);
+
+                    // setParamValue("extfx8cc-alt", data['EXTFS_ES8_CC_ALT']);
+                    // extFSChanged("extfx8", true);
+                    // setExtFSValue("extfx8v1", data['EXTFS_ES8_V1_ALT'], true);
+                    // setExtFSValue("extfx8v2", data['EXTFS_ES8_V2_ALT'], true);
+
 
                     configureParamSelect("intfslay", data['FOOTSW_MODE']);
 
@@ -2318,45 +2381,79 @@
                 var presetslot = document.getElementById("presetslot").value;         
                 var extfslay = document.getElementById("extfslay").value;  
 
-                var extfx1sw = document.getElementById("extfx1sw").value;  
-                var extfx1cc = document.getElementById("extfx1cc").value;  
-                var extfx1v1 = getExtFSValue("1", "1");
-                var extfx1v2 = getExtFSValue("1", "2");
+                // var extfx1sw = document.getElementById("extfx1sw").value;  
+                // var extfx1cc = document.getElementById("extfx1cc").value;  
+                // var extfx1v1 = getExtFSValue("1", "1");
+                // var extfx1v2 = getExtFSValue("1", "2");
 
-                var extfx2sw = document.getElementById("extfx2sw").value;  
-                var extfx2cc = document.getElementById("extfx2cc").value;  
-                var extfx2v1 = getExtFSValue("2", "1");
-                var extfx2v2 = getExtFSValue("2", "2");
+                // var extfx2sw = document.getElementById("extfx2sw").value;  
+                // var extfx2cc = document.getElementById("extfx2cc").value;  
+                // var extfx2v1 = getExtFSValue("2", "1");
+                // var extfx2v2 = getExtFSValue("2", "2");
 
-                var extfx3sw = document.getElementById("extfx3sw").value;  
-                var extfx3cc = document.getElementById("extfx3cc").value;  
-                var extfx3v1 = getExtFSValue("3", "1");
-                var extfx3v2 = getExtFSValue("3", "2");
+                // var extfx3sw = document.getElementById("extfx3sw").value;  
+                // var extfx3cc = document.getElementById("extfx3cc").value;  
+                // var extfx3v1 = getExtFSValue("3", "1");
+                // var extfx3v2 = getExtFSValue("3", "2");
 
-                var extfx4sw = document.getElementById("extfx4sw").value;  
-                var extfx4cc = document.getElementById("extfx4cc").value;  
-                var extfx4v1 = getExtFSValue("4", "1");
-                var extfx4v2 = getExtFSValue("4", "2");
+                // var extfx4sw = document.getElementById("extfx4sw").value;  
+                // var extfx4cc = document.getElementById("extfx4cc").value;  
+                // var extfx4v1 = getExtFSValue("4", "1");
+                // var extfx4v2 = getExtFSValue("4", "2");
 
-                var extfx5sw = document.getElementById("extfx5sw").value;  
-                var extfx5cc = document.getElementById("extfx5cc").value;  
-                var extfx5v1 = getExtFSValue("5", "1");
-                var extfx5v2 = getExtFSValue("5", "2");
+                // var extfx5sw = document.getElementById("extfx5sw").value;  
+                // var extfx5cc = document.getElementById("extfx5cc").value;  
+                // var extfx5v1 = getExtFSValue("5", "1");
+                // var extfx5v2 = getExtFSValue("5", "2");
 
-                var extfx6sw = document.getElementById("extfx6sw").value;  
-                var extfx6cc = document.getElementById("extfx6cc").value;  
-                var extfx6v1 = getExtFSValue("6", "1");
-                var extfx6v2 = getExtFSValue("6", "2");
+                // var extfx6sw = document.getElementById("extfx6sw").value;  
+                // var extfx6cc = document.getElementById("extfx6cc").value;  
+                // var extfx6v1 = getExtFSValue("6", "1");
+                // var extfx6v2 = getExtFSValue("6", "2");
                 
-                var extfx7sw = document.getElementById("extfx7sw").value;  
-                var extfx7cc = document.getElementById("extfx7cc").value;  
-                var extfx7v1 = getExtFSValue("7", "1");
-                var extfx7v2 = getExtFSValue("7", "2");
+                // var extfx7sw = document.getElementById("extfx7sw").value;  
+                // var extfx7cc = document.getElementById("extfx7cc").value;  
+                // var extfx7v1 = getExtFSValue("7", "1");
+                // var extfx7v2 = getExtFSValue("7", "2");
                 
-                var extfx8sw = document.getElementById("extfx8sw").value;  
-                var extfx8cc = document.getElementById("extfx8cc").value;  
-                var extfx8v1 = getExtFSValue("8", "1");
-                var extfx8v2 = getExtFSValue("8", "2");
+                // var extfx8sw = document.getElementById("extfx8sw").value;  
+                // var extfx8cc = document.getElementById("extfx8cc").value;  
+                // var extfx8v1 = getExtFSValue("8", "1");
+                // var extfx8v2 = getExtFSValue("8", "2");
+
+                
+                // var extfx1cc_alt = document.getElementById("extfx1cc-alt").value;  
+                // var extfx1v1_alt = getExtFSValue("1", "1");
+                // var extfx1v2_alt = getExtFSValue("1", "2");
+
+                // var extfx2cc_alt = document.getElementById("extfx2cc-alt").value;  
+                // var extfx2v1_alt = getExtFSValue("2", "1");
+                // var extfx2v2_alt = getExtFSValue("2", "2");
+
+                // var extfx3cc_alt = document.getElementById("extfx3cc-alt").value;  
+                // var extfx3v1_alt = getExtFSValue("3", "1");
+                // var extfx3v2_alt = getExtFSValue("3", "2");
+
+                // var extfx4cc_alt = document.getElementById("extfx4cc-alt").value;  
+                // var extfx4v1_alt = getExtFSValue("4", "1");
+                // var extfx4v2_alt = getExtFSValue("4", "2");
+
+                // var extfx5cc_alt = document.getElementById("extfx5cc-alt").value;  
+                // var extfx5v1_alt = getExtFSValue("5", "1");
+                // var extfx5v2_alt = getExtFSValue("5", "2");
+
+                // var extfx6cc_alt = document.getElementById("extfx6cc-alt").value;  
+                // var extfx6v1_alt = getExtFSValue("6", "1");
+                // var extfx6v2_alt = getExtFSValue("6", "2");
+                
+                // var extfx7cc_alt = document.getElementById("extfx7cc-alt").value;  
+                // var extfx7v1_alt = getExtFSValue("7", "1");
+                // var extfx7v2_alt = getExtFSValue("7", "2");
+                
+                // var extfx8cc_alt = document.getElementById("extfx8cc-alt").value;  
+                // var extfx8v1_alt = getExtFSValue("8", "1");
+                // var extfx8v2_alt = getExtFSValue("8", "2");
+
 
 
                 var intfx1sw = document.getElementById("intfx1sw").value;  
@@ -2379,70 +2476,115 @@
                 var intfx4v1 = getIntFSValue("4", "1"); 
                 var intfx4v2 = getIntFSValue("4", "2");
 
-                sendWS({"CMD": "SETCONFIG", 
-                        "BT_MODE": parseInt(btmode),
-                        "BT_CHOC_EN": mvavechocen, 
-                        "BT_MD1_EN": xvivemd1en,
-                        "BT_CUST_EN": custombteen,
-                        "BT_CUST_NAME": custombt,
-                        "TOGGLE_BYPASS": togglebypassen,
-                        "LOOP_AROUND": looparounden,
-                        "S_MIDI_EN": midienableden,
-                        "S_MIDI_CH": parseInt(midichannel),
-                        "FOOTSW_MODE": parseInt(footmode),
-                        "BT_MIDI_CC": btmidiccen,
-                        "SCREEN_ROT": parseInt(screenrot),
-                        "PRESET_SLOT": parseInt(presetslot),
-                        "EXTFS_PS_LAYOUT": parseInt(extfslay),                        
-                        "EXTFS_ES1_SW": parseInt(extfx1sw),
-                        "EXTFS_ES1_CC": parseInt(extfx1cc),
-                        "EXTFS_ES1_V1": parseInt(extfx1v1),
-                        "EXTFS_ES1_V2": parseInt(extfx1v2),
-                        "EXTFS_ES2_SW": parseInt(extfx2sw),
-                        "EXTFS_ES2_CC": parseInt(extfx2cc),
-                        "EXTFS_ES2_V1": parseInt(extfx2v1),
-                        "EXTFS_ES2_V2": parseInt(extfx2v2),
-                        "EXTFS_ES3_SW": parseInt(extfx3sw),
-                        "EXTFS_ES3_CC": parseInt(extfx3cc),
-                        "EXTFS_ES3_V1": parseInt(extfx3v1),
-                        "EXTFS_ES3_V2": parseInt(extfx3v2),
-                        "EXTFS_ES4_SW": parseInt(extfx4sw),
-                        "EXTFS_ES4_CC": parseInt(extfx4cc),
-                        "EXTFS_ES4_V1": parseInt(extfx4v1),
-                        "EXTFS_ES4_V2": parseInt(extfx4v2),
-                        "EXTFS_ES5_SW": parseInt(extfx5sw),
-                        "EXTFS_ES5_CC": parseInt(extfx5cc),
-                        "EXTFS_ES5_V1": parseInt(extfx5v1),
-                        "EXTFS_ES5_V2": parseInt(extfx5v2),
-                        "EXTFS_ES6_SW": parseInt(extfx6sw),
-                        "EXTFS_ES6_CC": parseInt(extfx6cc),
-                        "EXTFS_ES6_V1": parseInt(extfx6v1),
-                        "EXTFS_ES6_V2": parseInt(extfx6v2),
-                        "EXTFS_ES7_SW": parseInt(extfx7sw),
-                        "EXTFS_ES7_CC": parseInt(extfx7cc),
-                        "EXTFS_ES7_V1": parseInt(extfx7v1),
-                        "EXTFS_ES7_V2": parseInt(extfx7v2),
-                        "EXTFS_ES8_SW": parseInt(extfx8sw),
-                        "EXTFS_ES8_CC": parseInt(extfx8cc),
-                        "EXTFS_ES8_V1": parseInt(extfx8v1),
-                        "EXTFS_ES8_V2": parseInt(extfx8v2),
-                        "INTFS_ES1_SW": parseInt(intfx1sw),
-                        "INTFS_ES1_CC": parseInt(intfx1cc),
-                        "INTFS_ES1_V1": parseInt(intfx1v1),
-                        "INTFS_ES1_V2": parseInt(intfx1v2),
-                        "INTFS_ES2_SW": parseInt(intfx2sw),
-                        "INTFS_ES2_CC": parseInt(intfx2cc),
-                        "INTFS_ES2_V1": parseInt(intfx2v1),
-                        "INTFS_ES2_V2": parseInt(intfx2v2),
-                        "INTFS_ES3_SW": parseInt(intfx3sw),
-                        "INTFS_ES3_CC": parseInt(intfx3cc),
-                        "INTFS_ES3_V1": parseInt(intfx3v1),
-                        "INTFS_ES3_V2": parseInt(intfx3v2),
-                        "INTFS_ES4_SW": parseInt(intfx4sw),
-                        "INTFS_ES4_CC": parseInt(intfx4cc),
-                        "INTFS_ES4_V1": parseInt(intfx4v1),
-                        "INTFS_ES4_V2": parseInt(intfx4v2),
-                    });  
+                var data = {"CMD": "SETCONFIG", 
+                    "BT_MODE": parseInt(btmode),
+                    "BT_CHOC_EN": mvavechocen, 
+                    "BT_MD1_EN": xvivemd1en,
+                    "BT_CUST_EN": custombteen,
+                    "BT_CUST_NAME": custombt,
+                    "TOGGLE_BYPASS": togglebypassen,
+                    "LOOP_AROUND": looparounden,
+                    "S_MIDI_EN": midienableden,
+                    "S_MIDI_CH": parseInt(midichannel),
+                    "FOOTSW_MODE": parseInt(footmode),
+                    "BT_MIDI_CC": btmidiccen,
+                    "SCREEN_ROT": parseInt(screenrot),
+                    "PRESET_SLOT": parseInt(presetslot),
+                    "EXTFS_PS_LAYOUT": parseInt(extfslay),                        
+                    // "EXTFS_ES1_SW": parseInt(extfx1sw),
+                    // "EXTFS_ES1_CC": parseInt(extfx1cc),
+                    // "EXTFS_ES1_V1": parseInt(extfx1v1),
+                    // "EXTFS_ES1_V2": parseInt(extfx1v2),
+                    // "EXTFS_ES2_SW": parseInt(extfx2sw),
+                    // "EXTFS_ES2_CC": parseInt(extfx2cc),
+                    // "EXTFS_ES2_V1": parseInt(extfx2v1),
+                    // "EXTFS_ES2_V2": parseInt(extfx2v2),
+                    // "EXTFS_ES3_SW": parseInt(extfx3sw),
+                    // "EXTFS_ES3_CC": parseInt(extfx3cc),
+                    // "EXTFS_ES3_V1": parseInt(extfx3v1),
+                    // "EXTFS_ES3_V2": parseInt(extfx3v2),
+                    // "EXTFS_ES4_SW": parseInt(extfx4sw),
+                    // "EXTFS_ES4_CC": parseInt(extfx4cc),
+                    // "EXTFS_ES4_V1": parseInt(extfx4v1),
+                    // "EXTFS_ES4_V2": parseInt(extfx4v2),
+                    // "EXTFS_ES5_SW": parseInt(extfx5sw),
+                    // "EXTFS_ES5_CC": parseInt(extfx5cc),
+                    // "EXTFS_ES5_V1": parseInt(extfx5v1),
+                    // "EXTFS_ES5_V2": parseInt(extfx5v2),
+                    // "EXTFS_ES6_SW": parseInt(extfx6sw),
+                    // "EXTFS_ES6_CC": parseInt(extfx6cc),
+                    // "EXTFS_ES6_V1": parseInt(extfx6v1),
+                    // "EXTFS_ES6_V2": parseInt(extfx6v2),
+                    // "EXTFS_ES7_SW": parseInt(extfx7sw),
+                    // "EXTFS_ES7_CC": parseInt(extfx7cc),
+                    // "EXTFS_ES7_V1": parseInt(extfx7v1),
+                    // "EXTFS_ES7_V2": parseInt(extfx7v2),
+                    // "EXTFS_ES8_SW": parseInt(extfx8sw),
+                    // "EXTFS_ES8_CC": parseInt(extfx8cc),
+                    // "EXTFS_ES8_V1": parseInt(extfx8v1),
+                    // "EXTFS_ES8_V2": parseInt(extfx8v2),
+                                            
+                    // "EXTFS_ES1_CC_ALT": parseInt(extfx1cc_alt),
+                    // "EXTFS_ES1_V1_ALT": parseInt(extfx1v1_alt),
+                    // "EXTFS_ES1_V2_ALT": parseInt(extfx1v2_alt),
+                    // "EXTFS_ES2_CC_ALT": parseInt(extfx2cc_alt),
+                    // "EXTFS_ES2_V1_ALT": parseInt(extfx2v1_alt),
+                    // "EXTFS_ES2_V2_ALT": parseInt(extfx2v2_alt),
+                    // "EXTFS_ES3_CC_ALT": parseInt(extfx3cc_alt),
+                    // "EXTFS_ES3_V1_ALT": parseInt(extfx3v1_alt),
+                    // "EXTFS_ES3_V2_ALT": parseInt(extfx3v2_alt),
+                    // "EXTFS_ES4_CC_ALT": parseInt(extfx4cc_alt),
+                    // "EXTFS_ES4_V1_ALT": parseInt(extfx4v1_alt),
+                    // "EXTFS_ES4_V2_ALT": parseInt(extfx4v2_alt),
+                    // "EXTFS_ES5_CC_ALT": parseInt(extfx5cc_alt),
+                    // "EXTFS_ES5_V1_ALT": parseInt(extfx5v1_alt),
+                    // "EXTFS_ES5_V2_ALT": parseInt(extfx5v2_alt),
+                    // "EXTFS_ES6_CC_ALT": parseInt(extfx6cc_alt),
+                    // "EXTFS_ES6_V1_ALT": parseInt(extfx6v1_alt),
+                    // "EXTFS_ES6_V2_ALT": parseInt(extfx6v2_alt),
+                    // "EXTFS_ES7_CC_ALT": parseInt(extfx7cc_alt),
+                    // "EXTFS_ES7_V1_ALT": parseInt(extfx7v1_alt),
+                    // "EXTFS_ES7_V2_ALT": parseInt(extfx7v2_alt),
+                    // "EXTFS_ES8_CC_ALT": parseInt(extfx8cc_alt),
+                    // "EXTFS_ES8_V1_ALT": parseInt(extfx8v1_alt),
+                    // "EXTFS_ES8_V2_ALT": parseInt(extfx8v2_alt),
+
+                    "INTFS_ES1_SW": parseInt(intfx1sw),
+                    "INTFS_ES1_CC": parseInt(intfx1cc),
+                    "INTFS_ES1_V1": parseInt(intfx1v1),
+                    "INTFS_ES1_V2": parseInt(intfx1v2),
+                    "INTFS_ES2_SW": parseInt(intfx2sw),
+                    "INTFS_ES2_CC": parseInt(intfx2cc),
+                    "INTFS_ES2_V1": parseInt(intfx2v1),
+                    "INTFS_ES2_V2": parseInt(intfx2v2),
+                    "INTFS_ES3_SW": parseInt(intfx3sw),
+                    "INTFS_ES3_CC": parseInt(intfx3cc),
+                    "INTFS_ES3_V1": parseInt(intfx3v1),
+                    "INTFS_ES3_V2": parseInt(intfx3v2),
+                    "INTFS_ES4_SW": parseInt(intfx4sw),
+                    "INTFS_ES4_CC": parseInt(intfx4cc),
+                    "INTFS_ES4_V1": parseInt(intfx4v1),
+                    "INTFS_ES4_V2": parseInt(intfx4v2),
+                };
+
+                for (var i=1; i<=8; i++) {
+                    let extfx1sw = document.getElementById(`extfx${i}sw`).value;  
+                    let extfx1cc = document.getElementById(`extfx${i}cc`).value;  
+                    let extfx1v1 = getExtFSValue(`${i}`, "1");
+                    let extfx1v2 = getExtFSValue(`${i}`, "2");
+                    let extfx1cc_alt = document.getElementById(`extfx${i}cc-alt`).value;  
+                    let extfx1v1_alt = getExtFSValue(`${i}`, "1", true);
+                    let extfx1v2_alt = getExtFSValue(`${i}`, "2", true);
+                    data[`EXTFS_ES${i}_SW`] = parseInt(extfx1sw);
+                    data[`EXTFS_ES${i}_CC`] = parseInt(extfx1cc);
+                    data[`EXTFS_ES${i}_V1`] = parseInt(extfx1v1);
+                    data[`EXTFS_ES${i}_V2`] = parseInt(extfx1v2);
+                    data[`EXTFS_ES${i}_CC_ALT`] = parseInt(extfx1cc_alt);
+                    data[`EXTFS_ES${i}_V1_ALT`] = parseInt(extfx1v1_alt);
+                    data[`EXTFS_ES${i}_V2_ALT`] = parseInt(extfx1v2_alt);
+                }
+
+                sendWS(data);  
       
                 setToast('Settings saved.<br>Rebooting now');
             }
@@ -2648,8 +2790,10 @@
         // External footswitch control
 
         function populateExternalFootswitches() {
-            for (i=1; i<=8; i++) {
-                var select = document.getElementById(`extfx${i}cc`);
+            for (i=1; i<=16; i++) {
+                let index = i > 8 ? i-8 : i;
+                let altPostfix = i > 8 ? "-alt" : "";
+                var select = document.getElementById(`extfx${index}cc${altPostfix}`);
                 var optgroup = null;
 
                 for (const [key, value] of midiControlChangeAssociations) {
@@ -2673,16 +2817,33 @@
             }
         }
 
-        function extFSChanged(fx) {
-            var controlChange = document.getElementById(`${fx}cc`);
-            var association = midiControlChangeAssociations.get(parseInt(controlChange.value));
+        function extFSChanged(fx, alt=false, modifyAlt=true) {
+            let altPostfix = alt ? "-alt" : "";
+            var controlChange = document.getElementById(`${fx}cc${altPostfix}`);
+            let associationKey = parseInt(controlChange.value);
+            var association = midiControlChangeAssociations.get(associationKey);
+            if (association == null) {
+                return;
+            }
 
-            var number1 = document.getElementById(`${fx}v1`);
-            var number2 = document.getElementById(`${fx}v2`);
-            var range1 = document.getElementById(`${fx}v1_r`);
-            var range2 = document.getElementById(`${fx}v2_r`);
-            var select1 = document.getElementById(`${fx}v1_s`);
-            var select2 = document.getElementById(`${fx}v2_s`);
+            if (modifyAlt == true) {
+                let altNewPostfix = !alt ? "-alt" : "";
+
+                if (associationKey == 123) {
+                    setParamValue(`${fx}cc${altNewPostfix}`, associationKey);
+                    extFSChanged(fx, !alt, false)
+                } else if (document.getElementById(`${fx}cc${altNewPostfix}`).value == 123) {
+                    setParamValue(`${fx}cc${altNewPostfix}`, null);
+                    extFSChanged(fx, !alt, false)
+                }
+            }
+
+            var number1 = document.getElementById(`${fx}v1${altPostfix}`);
+            var number2 = document.getElementById(`${fx}v2${altPostfix}`);
+            var range1 = document.getElementById(`${fx}v1_r${altPostfix}`);
+            var range2 = document.getElementById(`${fx}v2_r${altPostfix}`);
+            var select1 = document.getElementById(`${fx}v1_s${altPostfix}`);
+            var select2 = document.getElementById(`${fx}v2_s${altPostfix}`);
             
             switch (association.value.type) {
                 case "RANGE":
@@ -2731,20 +2892,25 @@
             }
         }
 
-        function setExtFSValue(objname, value) {
-            document.getElementById(objname).value = value;
-            document.getElementById(`${objname}_r`).value = value;
-            document.getElementById(`${objname}_s`).value = value;
+        function setExtFSValue(objname, value, alt=false) {
+            if (value == null) {
+                return;
+            }
+            let altPostfix = alt ? "-alt" : "";
+            document.getElementById(`${objname}${altPostfix}`).value = value;
+            document.getElementById(`${objname}_r${altPostfix}`).value = value;
+            document.getElementById(`${objname}_s${altPostfix}`).value = value;
         }
 
 
-        function getExtFSValue(fs, value) {
-            var extfxcc = document.getElementById(`extfx${fs}cc`).value;
+        function getExtFSValue(fs, value, alt=false) {
+            let altPostfix = alt ? "-alt" : "";
+            var extfxcc = document.getElementById(`extfx${fs}cc${altPostfix}`).value;
             var association = midiControlChangeAssociations.get(parseInt(extfxcc));
 
             switch (association.value.type) {
                 case "RANGE":
-                    return document.getElementById(`extfx${fs}v${value}`).value;
+                    return document.getElementById(`extfx${fs}v${value}${altPostfix}`).value;
                 case "TOGGLE":
                     switch (value) {
                         case "1":
@@ -2754,7 +2920,7 @@
                     }
                     break;
                 case "CHOICE":
-                    return document.getElementById(`extfx${fs}v${value}_s`).value;
+                    return document.getElementById(`extfx${fs}v${value}_s${altPostfix}`).value;
             }
         }
 
@@ -3810,6 +3976,28 @@
                         <select class="form-select select_style" id="extfx1v2_s" name="extfx1v2_s">
                         </select>
                     </div>
+                    <br>
+                    <div class="container">
+                        <label class="form-check-label" for="extfx1cc-alt">ALT Control Change Number</label>
+                        <select class="form-select select_style" id="extfx1cc-alt" name="extfx1cc-alt" onchange="extFSChanged('extfx1', true)">
+                        </select>
+                    </div>
+                    <br>
+                    <div class="container">
+                        <label class="form-check-label" for="extfx1v1-alt">Midi Value 1</label>
+                        <input type="number" id="extfx1v1-alt" name="extfx1v1-alt" class="form-control text_entry_style" maxlength="3" size="3" value="0" min="0" max="127" oninput="this.nextElementSibling.value = this.value">
+                        <input type="range" id="extfx1v1_r-alt" class="form-range" value="0" min="0" max="127" oninput="this.previousElementSibling.value = this.value">
+                        <select class="form-select select_style" id="extfx1v1_s-alt" name="extfx1v1_s-alt">
+                        </select>
+                    </div>
+                    <br>
+                    <div class="container">
+                        <label class="form-check-label" for="extfx1v2-alt">Midi Value 2</label>
+                        <input type="number" id="extfx1v2-alt" name="extfx1v2-alt" class="form-control text_entry_style" maxlength="3" size="3" value="127" min="0" max="127" oninput="this.nextElementSibling.value = this.value">
+                        <input type="range" id="extfx1v2_r-alt" class="form-range" value="127" min="0" max="127" oninput="this.previousElementSibling.value = this.value">
+                        <select class="form-select select_style" id="extfx1v2_s-alt" name="extfx1v2_s-alt">
+                        </select>
+                    </div>
                 </div>
                 <div id="FX2" class="fxtabcontent">
                     <div class="container">
@@ -3854,6 +4042,28 @@
                         <input type="number" id="extfx2v2" name="extfx2v2" class="form-control text_entry_style" maxlength="3" size="3" value="127" min="0" max="127" oninput="this.nextElementSibling.value = this.value">
                         <input type="range" id="extfx2v2_r" class="form-range" value="127" min="0" max="127" oninput="this.previousElementSibling.value = this.value">
                         <select class="form-select select_style" id="extfx2v2_s" name="extfx2v2_s">
+                        </select>
+                    </div>
+                    <br>
+                    <div class="container">
+                        <label class="form-check-label" for="extfx2cc-alt">ALT Control Change Number</label>
+                        <select class="form-select select_style" id="extfx2cc-alt" name="extfx2cc-alt" onchange="extFSChanged('extfx2', true)">
+                        </select>
+                    </div>
+                    <br>
+                    <div class="container">
+                        <label class="form-check-label" for="extfx2v1-alt">Midi Value 1</label>
+                        <input type="number" id="extfx2v1-alt" name="extfx2v1-alt" class="form-control text_entry_style" maxlength="3" size="3" value="0" min="0" max="127" oninput="this.nextElementSibling.value = this.value">
+                        <input type="range" id="extfx2v1_r-alt" class="form-range" value="0" min="0" max="127" oninput="this.previousElementSibling.value = this.value">
+                        <select class="form-select select_style" id="extfx2v1_s-alt" name="extfx2v1_s-alt">
+                        </select>
+                    </div>
+                    <br>
+                    <div class="container">
+                        <label class="form-check-label" for="extfx2v2-alt">Midi Value 2</label>
+                        <input type="number" id="extfx2v2-alt" name="extfx2v2-alt" class="form-control text_entry_style" maxlength="3" size="3" value="127" min="0" max="127" oninput="this.nextElementSibling.value = this.value">
+                        <input type="range" id="extfx2v2_r-alt" class="form-range" value="127" min="0" max="127" oninput="this.previousElementSibling.value = this.value">
+                        <select class="form-select select_style" id="extfx2v2_s-alt" name="extfx2v2_s-alt">
                         </select>
                     </div>
                 </div>
@@ -3902,6 +4112,28 @@
                         <select class="form-select select_style" id="extfx3v2_s" name="extfx3v2_s">
                         </select>
                     </div>
+                    <br>
+                    <div class="container">
+                        <label class="form-check-label" for="extfx3cc-alt">ALT Control Change Number</label>
+                        <select class="form-select select_style" id="extfx3cc-alt" name="extfx3cc-alt" onchange="extFSChanged('extfx3', true)">
+                        </select>
+                    </div>
+                    <br>
+                    <div class="container">
+                        <label class="form-check-label" for="extfx3v1-alt">Midi Value 1</label>
+                        <input type="number" id="extfx3v1-alt" name="extfx3v1-alt" class="form-control text_entry_style" maxlength="3" size="3" value="0" min="0" max="127" oninput="this.nextElementSibling.value = this.value">
+                        <input type="range" id="extfx3v1_r-alt" class="form-range" value="0" min="0" max="127" oninput="this.previousElementSibling.value = this.value">
+                        <select class="form-select select_style" id="extfx3v1_s-alt" name="extfx3v1_s-alt">
+                        </select>
+                    </div>
+                    <br>
+                    <div class="container">
+                        <label class="form-check-label" for="extfx3v2-alt">Midi Value 2</label>
+                        <input type="number" id="extfx3v2-alt" name="extfx3v2-alt" class="form-control text_entry_style" maxlength="3" size="3" value="127" min="0" max="127" oninput="this.nextElementSibling.value = this.value">
+                        <input type="range" id="extfx3v2_r-alt" class="form-range" value="127" min="0" max="127" oninput="this.previousElementSibling.value = this.value">
+                        <select class="form-select select_style" id="extfx3v2_s-alt" name="extfx3v2_s-alt">
+                        </select>
+                    </div>
                 </div>
                 <div id="FX4" class="fxtabcontent">
                     <div class="container">
@@ -3946,6 +4178,28 @@
                         <input type="number" id="extfx4v2" name="extfx4v2" class="form-control text_entry_style" maxlength="3" size="3" value="127" min="0" max="127" oninput="this.nextElementSibling.value = this.value">
                         <input type="range" id="extfx4v2_r" class="form-range" value="127" min="0" max="127" oninput="this.previousElementSibling.value = this.value">
                         <select class="form-select select_style" id="extfx4v2_s" name="extfx4v2_s">
+                        </select>
+                    </div>
+                    <br>
+                    <div class="container">
+                        <label class="form-check-label" for="extfx4cc-alt">ALT Control Change Number</label>
+                        <select class="form-select select_style" id="extfx4cc-alt" name="extfx4cc-alt" onchange="extFSChanged('extfx4', true)">
+                        </select>
+                    </div>
+                    <br>
+                    <div class="container">
+                        <label class="form-check-label" for="extfx4v1-alt">Midi Value 1</label>
+                        <input type="number" id="extfx4v1-alt" name="extfx4v1-alt" class="form-control text_entry_style" maxlength="3" size="3" value="0" min="0" max="127" oninput="this.nextElementSibling.value = this.value">
+                        <input type="range" id="extfx4v1_r-alt" class="form-range" value="0" min="0" max="127" oninput="this.previousElementSibling.value = this.value">
+                        <select class="form-select select_style" id="extfx4v1_s-alt" name="extfx4v1_s-alt">
+                        </select>
+                    </div>
+                    <br>
+                    <div class="container">
+                        <label class="form-check-label" for="extfx4v2-alt">Midi Value 2</label>
+                        <input type="number" id="extfx4v2-alt" name="extfx4v2-alt" class="form-control text_entry_style" maxlength="3" size="3" value="127" min="0" max="127" oninput="this.nextElementSibling.value = this.value">
+                        <input type="range" id="extfx4v2_r-alt" class="form-range" value="127" min="0" max="127" oninput="this.previousElementSibling.value = this.value">
+                        <select class="form-select select_style" id="extfx4v2_s-alt" name="extfx4v2_s-alt">
                         </select>
                     </div>
                 </div>
@@ -3994,6 +4248,28 @@
                         <select class="form-select select_style" id="extfx5v2_s" name="extfx5v2_s">
                         </select>
                     </div>
+                    <br>
+                    <div class="container">
+                        <label class="form-check-label" for="extfx5cc-alt">ALT Control Change Number</label>
+                        <select class="form-select select_style" id="extfx5cc-alt" name="extfx5cc-alt" onchange="extFSChanged('extfx5', true)">
+                        </select>
+                    </div>
+                    <br>
+                    <div class="container">
+                        <label class="form-check-label" for="extfx5v1-alt">Midi Value 1</label>
+                        <input type="number" id="extfx5v1-alt" name="extfx5v1-alt" class="form-control text_entry_style" maxlength="3" size="3" value="0" min="0" max="127" oninput="this.nextElementSibling.value = this.value">
+                        <input type="range" id="extfx5v1_r-alt" class="form-range" value="0" min="0" max="127" oninput="this.previousElementSibling.value = this.value">
+                        <select class="form-select select_style" id="extfx5v1_s-alt" name="extfx5v1_s-alt">
+                        </select>
+                    </div>
+                    <br>
+                    <div class="container">
+                        <label class="form-check-label" for="extfx5v2-alt">Midi Value 2</label>
+                        <input type="number" id="extfx5v2-alt" name="extfx5v2-alt" class="form-control text_entry_style" maxlength="3" size="3" value="127" min="0" max="127" oninput="this.nextElementSibling.value = this.value">
+                        <input type="range" id="extfx5v2_r-alt" class="form-range" value="127" min="0" max="127" oninput="this.previousElementSibling.value = this.value">
+                        <select class="form-select select_style" id="extfx5v2_s-alt" name="extfx5v2_s-alt">
+                        </select>
+                    </div>
                 </div>
                 <div id="FX6" class="fxtabcontent">
                     <div class="container">
@@ -4038,6 +4314,28 @@
                         <input type="number" id="extfx6v2" name="extfx6v2" class="form-control text_entry_style" maxlength="3" size="3" value="127" min="0" max="127" oninput="this.nextElementSibling.value = this.value">
                         <input type="range" id="extfx6v2_r" class="form-range" value="127" min="0" max="127" oninput="this.previousElementSibling.value = this.value">
                         <select class="form-select select_style" id="extfx6v2_s" name="extfx6v2_s">
+                        </select>
+                    </div>
+                    <br>
+                    <div class="container">
+                        <label class="form-check-label" for="extfx6cc-alt">ALT Control Change Number</label>
+                        <select class="form-select select_style" id="extfx6cc-alt" name="extfx6cc-alt" onchange="extFSChanged('extfx6', true)">
+                        </select>
+                    </div>
+                    <br>
+                    <div class="container">
+                        <label class="form-check-label" for="extfx6v1-alt">Midi Value 1</label>
+                        <input type="number" id="extfx6v1-alt" name="extfx6v1-alt" class="form-control text_entry_style" maxlength="3" size="3" value="0" min="0" max="127" oninput="this.nextElementSibling.value = this.value">
+                        <input type="range" id="extfx6v1_r-alt" class="form-range" value="0" min="0" max="127" oninput="this.previousElementSibling.value = this.value">
+                        <select class="form-select select_style" id="extfx6v1_s-alt" name="extfx6v1_s-alt">
+                        </select>
+                    </div>
+                    <br>
+                    <div class="container">
+                        <label class="form-check-label" for="extfx6v2-alt">Midi Value 2</label>
+                        <input type="number" id="extfx6v2-alt" name="extfx6v2-alt" class="form-control text_entry_style" maxlength="3" size="3" value="127" min="0" max="127" oninput="this.nextElementSibling.value = this.value">
+                        <input type="range" id="extfx6v2_r-alt" class="form-range" value="127" min="0" max="127" oninput="this.previousElementSibling.value = this.value">
+                        <select class="form-select select_style" id="extfx6v2_s-alt" name="extfx6v2_s-alt">
                         </select>
                     </div>
                 </div>
@@ -4086,6 +4384,28 @@
                         <select class="form-select select_style" id="extfx7v2_s" name="extfx7v2_s">
                         </select>
                     </div>
+                    <br>
+                    <div class="container">
+                        <label class="form-check-label" for="extfx7cc-alt">ALT Control Change Number</label>
+                        <select class="form-select select_style" id="extfx7cc-alt" name="extfx7cc-alt" onchange="extFSChanged('extfx7', true)">
+                        </select>
+                    </div>
+                    <br>
+                    <div class="container">
+                        <label class="form-check-label" for="extfx7v1-alt">Midi Value 1</label>
+                        <input type="number" id="extfx7v1-alt" name="extfx7v1-alt" class="form-control text_entry_style" maxlength="3" size="3" value="0" min="0" max="127" oninput="this.nextElementSibling.value = this.value">
+                        <input type="range" id="extfx7v1_r-alt" class="form-range" value="0" min="0" max="127" oninput="this.previousElementSibling.value = this.value">
+                        <select class="form-select select_style" id="extfx7v1_s-alt" name="extfx7v1_s-alt">
+                        </select>
+                    </div>
+                    <br>
+                    <div class="container">
+                        <label class="form-check-label" for="extfx7v2-alt">Midi Value 2</label>
+                        <input type="number" id="extfx7v2-alt" name="extfx7v2-alt" class="form-control text_entry_style" maxlength="3" size="3" value="127" min="0" max="127" oninput="this.nextElementSibling.value = this.value">
+                        <input type="range" id="extfx7v2_r-alt" class="form-range" value="127" min="0" max="127" oninput="this.previousElementSibling.value = this.value">
+                        <select class="form-select select_style" id="extfx7v2_s-alt" name="extfx7v2_s-alt">
+                        </select>
+                    </div>
                 </div>
                 <div id="FX8" class="fxtabcontent">
                     <div class="container">
@@ -4130,6 +4450,28 @@
                         <input type="number" id="extfx8v2" name="extfx1v2" class="form-control text_entry_style" maxlength="3" size="3" value="127" min="0" max="127" oninput="this.nextElementSibling.value = this.value">
                         <input type="range" id="extfx8v2_r" class="form-range" value="127" min="0" max="127" oninput="this.previousElementSibling.value = this.value">
                         <select class="form-select select_style" id="extfx8v2_s" name="extfx8v2_s">
+                        </select>
+                    </div>
+                    <br>
+                    <div class="container">
+                        <label class="form-check-label" for="extfx8cc-alt">ALT Control Change Number</label>
+                        <select class="form-select select_style" id="extfx8cc-alt" name="extfx8cc-alt" onchange="extFSChanged('extfx8', true)">
+                        </select>
+                    </div>
+                    <br>
+                    <div class="container">
+                        <label class="form-check-label" for="extfx8v1-alt">Midi Value 1</label>
+                        <input type="number" id="extfx8v1-alt" name="extfx8v1-alt" class="form-control text_entry_style" maxlength="3" size="3" value="0" min="0" max="127" oninput="this.nextElementSibling.value = this.value">
+                        <input type="range" id="extfx8v1_r-alt" class="form-range" value="0" min="0" max="127" oninput="this.previousElementSibling.value = this.value">
+                        <select class="form-select select_style" id="extfx8v1_s-alt" name="extfx8v1_s-alt">
+                        </select>
+                    </div>
+                    <br>
+                    <div class="container">
+                        <label class="form-check-label" for="extfx8v2-alt">Midi Value 2</label>
+                        <input type="number" id="extfx8v2-alt" name="extfx8v2-alt" class="form-control text_entry_style" maxlength="3" size="3" value="127" min="0" max="127" oninput="this.nextElementSibling.value = this.value">
+                        <input type="range" id="extfx8v2_r-alt" class="form-range" value="127" min="0" max="127" oninput="this.previousElementSibling.value = this.value">
+                        <select class="form-select select_style" id="extfx8v2_s-alt" name="extfx8v2_s-alt">
                         </select>
                     </div>
                 </div>

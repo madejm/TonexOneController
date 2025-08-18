@@ -42,9 +42,7 @@ lv_obj_t *ui_NextBank;
 void ui_event_PresetHeadingLabel( lv_event_t * e);
 lv_obj_t *ui_PresetHeadingLabel;
 lv_obj_t *ui_BankTitleLabel;
-lv_obj_t *ui_BankValueLabel;
 lv_obj_t *ui_BPMTitleLabel;
-lv_obj_t *ui_BPMValueLabel;
 void ui_event_PreviousButton( lv_event_t * e);
 lv_obj_t *ui_PreviousButton;
 void ui_event_IconEQ( lv_event_t * e);
@@ -351,9 +349,7 @@ if ( event_code == LV_EVENT_LONG_PRESSED) {
       _ui_flag_modify( ui_RightArrow, LV_OBJ_FLAG_HIDDEN, _UI_MODIFY_FLAG_REMOVE);
       _ui_flag_modify( ui_OKTick, LV_OBJ_FLAG_HIDDEN, _UI_MODIFY_FLAG_REMOVE);
       _ui_flag_modify( ui_BankTitleLabel, LV_OBJ_FLAG_HIDDEN, _UI_MODIFY_FLAG_ADD);
-      _ui_flag_modify( ui_BankValueLabel, LV_OBJ_FLAG_HIDDEN, _UI_MODIFY_FLAG_ADD);
       _ui_flag_modify( ui_BPMTitleLabel, LV_OBJ_FLAG_HIDDEN, _UI_MODIFY_FLAG_ADD);
-      _ui_flag_modify( ui_BPMValueLabel, LV_OBJ_FLAG_HIDDEN, _UI_MODIFY_FLAG_ADD);
       _ui_flag_modify( ui_BPMIndicator, LV_OBJ_FLAG_HIDDEN, _UI_MODIFY_FLAG_ADD);
 }
 }
@@ -511,9 +507,7 @@ if ( event_code == LV_EVENT_CLICKED) {
       _ui_flag_modify( ui_LeftArrow, LV_OBJ_FLAG_HIDDEN, _UI_MODIFY_FLAG_ADD);
       _ui_flag_modify( ui_RightArrow, LV_OBJ_FLAG_HIDDEN, _UI_MODIFY_FLAG_ADD);
       _ui_flag_modify( ui_BankTitleLabel, LV_OBJ_FLAG_HIDDEN, _UI_MODIFY_FLAG_REMOVE);
-      _ui_flag_modify( ui_BankValueLabel, LV_OBJ_FLAG_HIDDEN, _UI_MODIFY_FLAG_REMOVE);
       _ui_flag_modify( ui_BPMTitleLabel, LV_OBJ_FLAG_HIDDEN, _UI_MODIFY_FLAG_REMOVE);
-      _ui_flag_modify( ui_BPMValueLabel, LV_OBJ_FLAG_HIDDEN, _UI_MODIFY_FLAG_REMOVE);
       _ui_flag_modify( ui_BPMIndicator, LV_OBJ_FLAG_HIDDEN, _UI_MODIFY_FLAG_REMOVE);
 }
 }

@@ -69,6 +69,7 @@ enum CommandEvents
     EVENT_BANK_INDEX,
     EVENT_BANK_UP,
     EVENT_BANK_DOWN,
+    EVENT_SET_ALT_MODE,
     EVENT_SET_PRESET_NAME,
     EVENT_SET_PRESET_DETAILS,
     EVENT_SET_USB_STATUS,
@@ -195,6 +196,7 @@ typedef struct __attribute__ ((packed))
     // external footswitches
     uint8_t ExternalFootswitchPresetLayout;
     tExternalFootswitchEffectConfig ExternalFootswitchEffectConfig[MAX_EXTERNAL_EFFECT_FOOTSWITCHES];
+    tExternalFootswitchEffectConfig ExternalFootswitchAltEffectConfig[MAX_EXTERNAL_EFFECT_FOOTSWITCHES];
 
     // internal footswitches
     uint8_t InternalFootswitchPresetLayout;
@@ -204,6 +206,8 @@ typedef struct __attribute__ ((packed))
 typedef struct __attribute__ ((packed)) 
 { 
     // preset order mapping
+    // index of array is Footswitch index
+    // value is Tonex Preset Index
     uint8_t PresetOrder[MAX_SUPPORTED_PRESETS];
 } tPresetOrderMappingConfig;
 
@@ -232,9 +236,11 @@ typedef struct
 
 typedef struct 
 {
+    // Tonex Preset Index, has to be mapped to footswitch index from tPresetOrderMappingConfig
     uint32_t PresetIndex;                        // 0-based index
     uint32_t BankIndex;                        // 0-based index
     char PresetNames[MAX_SUPPORTED_PRESETS][MAX_PRESET_NAME_LENGTH];
+    // bool FSAltMode;
     uint32_t USBStatus;
     uint32_t BTStatus;
     uint32_t WiFiStatus;
@@ -257,6 +263,55 @@ static uint8_t LoadPresetUserText(uint16_t preset_index, char* text);
 static void DumpUserConfig(void);
 static uint8_t MigrateUserData(void);
 
+
+static uint8_t preset_order_mapping_index(int8_t presetIndex)
+{
+    for (uint8_t mappingIndex = 0; mappingIndex < usb_get_max_presets_for_connected_modeller(); mappingIndex++)
+    {
+        if (ControlData.ConfigData.PresetOrderMappingConfig.PresetOrder[mappingIndex] == presetIndex)
+        {
+            return mappingIndex;
+        }
+    }
+
+    return 0;
+}
+
+#if CONFIG_TONEX_CONTROLLER_HAS_DISPLAY
+void update_preset_buttons_selected()
+{
+    uint8_t mappedIndex = preset_order_mapping_index(ControlData.PresetIndex);
+    bool isInCurrentBank = (mappedIndex/4) == ControlData.BankIndex;
+    uint16_t selectedPresetButtonIndex = mappedIndex % 4;
+
+    // UI_SetPresetButtonsSelected(
+    //     !ControlData.FSAltMode && isInCurrentBank && selectedPresetButtonIndex == 0,
+    //     !ControlData.FSAltMode && isInCurrentBank && selectedPresetButtonIndex == 1,
+    //     !ControlData.FSAltMode && isInCurrentBank && selectedPresetButtonIndex == 2,
+    //     !ControlData.FSAltMode && isInCurrentBank && selectedPresetButtonIndex == 3
+    // );
+    UI_SetPresetButtonsSelected(
+        isInCurrentBank && selectedPresetButtonIndex == 0,
+        isInCurrentBank && selectedPresetButtonIndex == 1,
+        isInCurrentBank && selectedPresetButtonIndex == 2,
+        isInCurrentBank && selectedPresetButtonIndex == 3
+    );
+}
+
+void update_preset_buttons()
+{
+    UI_SetAmpSkinSlot(
+        // !ControlData.FSAltMode,
+        ControlData.ConfigData.SkinConfig.SkinIndex[preset_order_mapping_index(ControlData.BankIndex * 4)],
+        ControlData.ConfigData.SkinConfig.SkinIndex[preset_order_mapping_index(ControlData.BankIndex * 4 + 1)],
+        ControlData.ConfigData.SkinConfig.SkinIndex[preset_order_mapping_index(ControlData.BankIndex * 4 + 2)],
+        ControlData.ConfigData.SkinConfig.SkinIndex[preset_order_mapping_index(ControlData.BankIndex * 4 + 3)]
+    );
+
+    update_preset_buttons_selected();
+}
+#endif
+
 /****************************************************************************
 * NAME:        
 * DESCRIPTION: 
@@ -275,20 +330,31 @@ static uint8_t process_control_command(tControlMessage* message)
         {
             if (ControlData.USBStatus != 0)
             {
+                uint8_t mappedIndex = preset_order_mapping_index(ControlData.PresetIndex);
+
                 if (control_get_config_item_int(CONFIG_ITEM_LOOP_AROUND))
                 {
-                    uint8_t newIndex = (ControlData.PresetIndex > 0) ? (ControlData.PresetIndex - 1) : (usb_get_max_presets_for_connected_modeller() - 1);
+                    uint8_t newIndex = (mappedIndex) ? (mappedIndex - 1) : (usb_get_max_presets_for_connected_modeller() - 1);
                     uint8_t preset = ControlData.ConfigData.PresetOrderMappingConfig.PresetOrder[newIndex];
 
                     // send message to USB
                     usb_set_preset(preset);
+
+                    if ((newIndex/4) != ControlData.BankIndex) {
+                        footswitches_bank_down();
+                    }
                 }
-                else if (ControlData.PresetIndex > 0)
+                else if (mappedIndex > 0)
                 {
-                    uint8_t preset = ControlData.ConfigData.PresetOrderMappingConfig.PresetOrder[ControlData.PresetIndex - 1];
+                    uint8_t newIndex = mappedIndex - 1;
+                    uint8_t preset = ControlData.ConfigData.PresetOrderMappingConfig.PresetOrder[newIndex];
                     
                     // send message to USB
                     usb_set_preset(preset);
+
+                    if ((newIndex/4) != ControlData.BankIndex) {
+                        footswitches_bank_down();
+                    }
                 }
             }
         } break;
@@ -297,22 +363,40 @@ static uint8_t process_control_command(tControlMessage* message)
         {
             if (ControlData.USBStatus != 0)
             {
+                uint8_t mappedIndex = preset_order_mapping_index(ControlData.PresetIndex);
+
                 if (control_get_config_item_int(CONFIG_ITEM_LOOP_AROUND))
                 {
-                    uint8_t newIndex = (ControlData.PresetIndex < (usb_get_max_presets_for_connected_modeller() - 1)) ? (ControlData.PresetIndex + 1) : 0;
+                    uint8_t newIndex = (mappedIndex < (usb_get_max_presets_for_connected_modeller() - 1)) ? (mappedIndex + 1) : 0;
                     uint8_t preset = ControlData.ConfigData.PresetOrderMappingConfig.PresetOrder[newIndex];
                     
                     // send message to USB
                     usb_set_preset(preset);
+
+                    if ((newIndex/4) != ControlData.BankIndex) {
+                        footswitches_bank_up();
+                    }
                 }
-                else if (ControlData.PresetIndex < (usb_get_max_presets_for_connected_modeller() - 1))
+                else if (mappedIndex < (usb_get_max_presets_for_connected_modeller() - 1))
                 {
-                    uint8_t preset = ControlData.ConfigData.PresetOrderMappingConfig.PresetOrder[ControlData.PresetIndex + 1];
+                    uint8_t newIndex = mappedIndex + 1;
+                    uint8_t preset = ControlData.ConfigData.PresetOrderMappingConfig.PresetOrder[newIndex];
                     
                     // send message to USB
                     usb_set_preset(preset);
+
+                    if ((newIndex/4) != ControlData.BankIndex) {
+                        footswitches_bank_up();
+                    }
                 }
             }
+        } break;
+
+        case EVENT_SET_ALT_MODE:
+        {
+            // ControlData.FSAltMode = message->Value;
+            // UI_SetAltMode(ControlData.FSAltMode);
+            UI_SetAltMode(message->Value);
         } break;
 
         case EVENT_BANK_DOWN:
@@ -356,18 +440,7 @@ static uint8_t process_control_command(tControlMessage* message)
 
             UI_SetBankIndex(ControlData.BankIndex);
 
-            UI_SetAmpSkinSlot(ControlData.ConfigData.SkinConfig.SkinIndex[(ControlData.BankIndex * 4)], 0);
-            UI_SetAmpSkinSlot(ControlData.ConfigData.SkinConfig.SkinIndex[(ControlData.BankIndex * 4) + 1], 1);
-            UI_SetAmpSkinSlot(ControlData.ConfigData.SkinConfig.SkinIndex[(ControlData.BankIndex * 4) + 2], 2);
-            UI_SetAmpSkinSlot(ControlData.ConfigData.SkinConfig.SkinIndex[(ControlData.BankIndex * 4) + 3], 3);
-
-            bool isInCurrentBank = (ControlData.PresetIndex/4) == ControlData.BankIndex;
-            uint16_t selectedPresetButtonIndex = ControlData.PresetIndex % 4;
-
-            UI_SetPresetButtonSelected(0, isInCurrentBank && selectedPresetButtonIndex == 0);
-            UI_SetPresetButtonSelected(1, isInCurrentBank && selectedPresetButtonIndex == 1);
-            UI_SetPresetButtonSelected(2, isInCurrentBank && selectedPresetButtonIndex == 2);
-            UI_SetPresetButtonSelected(3, isInCurrentBank && selectedPresetButtonIndex == 3);
+            update_preset_buttons();
 #endif
         } break;
 
@@ -399,14 +472,7 @@ static uint8_t process_control_command(tControlMessage* message)
             LoadPresetUserText(message->Value, preset_user_text);
             UI_SetPresetDescription(preset_user_text);
 
-
-            bool isInCurrentBank = (ControlData.PresetIndex/4) == ControlData.BankIndex;
-            uint16_t selectedPresetButtonIndex = ControlData.PresetIndex % 4;
-
-            UI_SetPresetButtonSelected(0, isInCurrentBank && selectedPresetButtonIndex == 0);
-            UI_SetPresetButtonSelected(1, isInCurrentBank && selectedPresetButtonIndex == 1);
-            UI_SetPresetButtonSelected(2, isInCurrentBank && selectedPresetButtonIndex == 2);
-            UI_SetPresetButtonSelected(3, isInCurrentBank && selectedPresetButtonIndex == 3);
+            update_preset_buttons_selected();
 #endif
 
             // update web UI
@@ -574,197 +640,7 @@ static uint8_t process_control_command(tControlMessage* message)
                     ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchPresetLayout = (uint8_t)message->Value;
                 } break;
 
-                case CONFIG_ITEM_EXT_FOOTSW_EFFECT1_SW:
-                {
-                    ESP_LOGI(TAG, "Config set external footsw effect1 sw %d", (int)message->Value);
-                    ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchEffectConfig[0].Switch = (uint8_t)message->Value;
-                } break;
-
-                case CONFIG_ITEM_EXT_FOOTSW_EFFECT1_CC:
-                {
-                    ESP_LOGI(TAG, "Config set external footsw effect1 CC %d", (int)message->Value);
-                    ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchEffectConfig[0].CC = (uint8_t)message->Value;
-                } break;
-
-                case CONFIG_ITEM_EXT_FOOTSW_EFFECT1_VAL1:
-                {
-                    ESP_LOGI(TAG, "Config set external footsw effect1 Value_1 %d", (int)message->Value);
-                    ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchEffectConfig[0].Value_1 = (uint8_t)message->Value;
-                } break;
-
-                case CONFIG_ITEM_EXT_FOOTSW_EFFECT1_VAL2:
-                {
-                    ESP_LOGI(TAG, "Config set external footsw effect1 Value_2 %d", (int)message->Value);
-                    ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchEffectConfig[0].Value_2 = (uint8_t)message->Value;
-                } break;
-
-                case CONFIG_ITEM_EXT_FOOTSW_EFFECT2_SW:
-                {
-                    ESP_LOGI(TAG, "Config set external footsw effect2 sw %d", (int)message->Value);
-                    ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchEffectConfig[1].Switch = (uint8_t)message->Value;
-                } break;
-
-                case CONFIG_ITEM_EXT_FOOTSW_EFFECT2_CC:
-                {
-                    ESP_LOGI(TAG, "Config set external footsw effect2 CC %d", (int)message->Value);
-                    ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchEffectConfig[1].CC = (uint8_t)message->Value;
-                } break;
-
-                case CONFIG_ITEM_EXT_FOOTSW_EFFECT2_VAL1:
-                {
-                    ESP_LOGI(TAG, "Config set external footsw effect2 Value_1 %d", (int)message->Value);
-                    ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchEffectConfig[1].Value_1 = (uint8_t)message->Value;
-                } break;
-
-                case CONFIG_ITEM_EXT_FOOTSW_EFFECT2_VAL2:
-                {
-                    ESP_LOGI(TAG, "Config set external footsw effect2 Value_2 %d", (int)message->Value);
-                    ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchEffectConfig[1].Value_2 = (uint8_t)message->Value;
-                } break;
-
-                case CONFIG_ITEM_EXT_FOOTSW_EFFECT3_SW:
-                {
-                    ESP_LOGI(TAG, "Config set external footsw effect3 sw %d", (int)message->Value);
-                    ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchEffectConfig[2].Switch = (uint8_t)message->Value;
-                } break;
-
-                case CONFIG_ITEM_EXT_FOOTSW_EFFECT3_CC:
-                {
-                    ESP_LOGI(TAG, "Config set external footsw effect3 CC %d", (int)message->Value);
-                    ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchEffectConfig[2].CC = (uint8_t)message->Value;
-                } break;
-
-                case CONFIG_ITEM_EXT_FOOTSW_EFFECT3_VAL1:
-                {
-                    ESP_LOGI(TAG, "Config set external footsw effect3 Value_1 %d", (int)message->Value);
-                    ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchEffectConfig[2].Value_1 = (uint8_t)message->Value;
-                } break;
-
-                case CONFIG_ITEM_EXT_FOOTSW_EFFECT3_VAL2:
-                {
-                    ESP_LOGI(TAG, "Config set external footsw effect3 Value_2 %d", (int)message->Value);
-                    ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchEffectConfig[2].Value_2 = (uint8_t)message->Value;
-                } break;
-
-                case CONFIG_ITEM_EXT_FOOTSW_EFFECT4_SW:
-                {
-                    ESP_LOGI(TAG, "Config set external footsw effect4 sw %d", (int)message->Value);
-                    ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchEffectConfig[3].Switch = (uint8_t)message->Value;
-                } break;
-
-                case CONFIG_ITEM_EXT_FOOTSW_EFFECT4_CC:
-                {
-                    ESP_LOGI(TAG, "Config set external footsw effect4 CC %d", (int)message->Value);
-                    ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchEffectConfig[3].CC = (uint8_t)message->Value;
-                } break;
-
-                case CONFIG_ITEM_EXT_FOOTSW_EFFECT4_VAL1:
-                {
-                    ESP_LOGI(TAG, "Config set external footsw effect4 Value_1 %d", (int)message->Value);
-                    ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchEffectConfig[3].Value_1 = (uint8_t)message->Value;
-                } break;
-
-                case CONFIG_ITEM_EXT_FOOTSW_EFFECT4_VAL2:
-                {
-                    ESP_LOGI(TAG, "Config set external footsw effect4 Value_2 %d", (int)message->Value);
-                    ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchEffectConfig[3].Value_2 = (uint8_t)message->Value;
-                } break;
-
-                case CONFIG_ITEM_EXT_FOOTSW_EFFECT5_SW:
-                {
-                    ESP_LOGI(TAG, "Config set external footsw effect5 sw %d", (int)message->Value);
-                    ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchEffectConfig[4].Switch = (uint8_t)message->Value;
-                } break;
-
-                case CONFIG_ITEM_EXT_FOOTSW_EFFECT5_CC:
-                {
-                    ESP_LOGI(TAG, "Config set external footsw effect5 CC %d", (int)message->Value);
-                    ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchEffectConfig[4].CC = (uint8_t)message->Value;
-                } break;
-
-                case CONFIG_ITEM_EXT_FOOTSW_EFFECT5_VAL1:
-                {
-                    ESP_LOGI(TAG, "Config set external footsw effect5 Value_1 %d", (int)message->Value);
-                    ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchEffectConfig[4].Value_1 = (uint8_t)message->Value;
-                } break;
-
-                case CONFIG_ITEM_EXT_FOOTSW_EFFECT5_VAL2:
-                {
-                    ESP_LOGI(TAG, "Config set external footsw effect5 Value_2 %d", (int)message->Value);
-                    ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchEffectConfig[4].Value_2 = (uint8_t)message->Value;
-                } break;
-
-                case CONFIG_ITEM_EXT_FOOTSW_EFFECT6_SW:
-                {
-                    ESP_LOGI(TAG, "Config set external footsw effect6 sw %d", (int)message->Value);
-                    ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchEffectConfig[5].Switch = (uint8_t)message->Value;
-                } break;
-
-                case CONFIG_ITEM_EXT_FOOTSW_EFFECT6_CC:
-                {
-                    ESP_LOGI(TAG, "Config set external footsw effect6 CC %d", (int)message->Value);
-                    ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchEffectConfig[5].CC = (uint8_t)message->Value;
-                } break;
-
-                case CONFIG_ITEM_EXT_FOOTSW_EFFECT6_VAL1:
-                {
-                    ESP_LOGI(TAG, "Config set external footsw effect6 Value_1 %d", (int)message->Value);
-                    ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchEffectConfig[5].Value_1 = (uint8_t)message->Value;
-                } break;
-
-                case CONFIG_ITEM_EXT_FOOTSW_EFFECT6_VAL2:
-                {
-                    ESP_LOGI(TAG, "Config set external footsw effect6 Value_2 %d", (int)message->Value);
-                    ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchEffectConfig[5].Value_2 = (uint8_t)message->Value;
-                } break;
-
-                case CONFIG_ITEM_EXT_FOOTSW_EFFECT7_SW:
-                {
-                    ESP_LOGI(TAG, "Config set external footsw effect7 sw %d", (int)message->Value);
-                    ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchEffectConfig[6].Switch = (uint8_t)message->Value;
-                } break;
-
-                case CONFIG_ITEM_EXT_FOOTSW_EFFECT7_CC:
-                {
-                    ESP_LOGI(TAG, "Config set external footsw effect7 CC %d", (int)message->Value);
-                    ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchEffectConfig[6].CC = (uint8_t)message->Value;
-                } break;
-
-                case CONFIG_ITEM_EXT_FOOTSW_EFFECT7_VAL1:
-                {
-                    ESP_LOGI(TAG, "Config set external footsw effect7 Value_1 %d", (int)message->Value);
-                    ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchEffectConfig[6].Value_1 = (uint8_t)message->Value;
-                } break;
-
-                case CONFIG_ITEM_EXT_FOOTSW_EFFECT7_VAL2:
-                {
-                    ESP_LOGI(TAG, "Config set external footsw effect7 Value_2 %d", (int)message->Value);
-                    ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchEffectConfig[6].Value_2 = (uint8_t)message->Value;
-                } break;
-
-                case CONFIG_ITEM_EXT_FOOTSW_EFFECT8_SW:
-                {
-                    ESP_LOGI(TAG, "Config set external footsw effect8 sw %d", (int)message->Value);
-                    ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchEffectConfig[7].Switch = (uint8_t)message->Value;
-                } break;
-
-                case CONFIG_ITEM_EXT_FOOTSW_EFFECT8_CC:
-                {
-                    ESP_LOGI(TAG, "Config set external footsw effect8 CC %d", (int)message->Value);
-                    ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchEffectConfig[7].CC = (uint8_t)message->Value;
-                } break;
-
-                case CONFIG_ITEM_EXT_FOOTSW_EFFECT8_VAL1:
-                {
-                    ESP_LOGI(TAG, "Config set external footsw effect8 Value_1 %d", (int)message->Value);
-                    ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchEffectConfig[7].Value_1 = (uint8_t)message->Value;
-                } break;
-
-                case CONFIG_ITEM_EXT_FOOTSW_EFFECT8_VAL2:
-                {
-                    ESP_LOGI(TAG, "Config set external footsw effect8 Value_2 %d", (int)message->Value);
-                    ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchEffectConfig[7].Value_2 = (uint8_t)message->Value;
-                } break;
+                //
 
                 case CONFIG_ITEM_INT_FOOTSW_EFFECT1_SW:
                 {
@@ -860,6 +736,43 @@ static uint8_t process_control_command(tControlMessage* message)
                 {
                     ESP_LOGI(TAG, "Config set internal footsw effect4 Value_2 %d", (int)message->Value);
                     ControlData.ConfigData.FootSwitchConfig.InternalFootswitchEffectConfig[3].Value_2 = (uint8_t)message->Value;
+                } break;
+
+                default: {
+                    if (message->Item >= CONFIG_ITEM_EXT_FOOTSW_EFFECT1_SW && message->Item <= CONFIG_ITEM_EXT_FOOTSW_EFFECT8_VAL2) {
+                        for (uint32_t fs = 0; fs<8; fs++) {
+                            uint32_t newItemStart = CONFIG_ITEM_EXT_FOOTSW_EFFECT1_SW + fs * 4;
+
+                            if (message->Item == newItemStart) {
+                                ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchEffectConfig[fs].Switch = (uint8_t)message->Value;
+                                break;
+                            } else if (message->Item == newItemStart + 1) {
+                                ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchEffectConfig[fs].CC = (uint8_t)message->Value;
+                                break;
+                            } else if (message->Item == newItemStart + 2) {
+                                ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchEffectConfig[fs].Value_1 = (uint8_t)message->Value;
+                                break;
+                            } else if (message->Item == newItemStart + 3) {
+                                ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchEffectConfig[fs].Value_2 = (uint8_t)message->Value;
+                                break;
+                            }
+                        }
+                    } else if (message->Item >= CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT1_CC && message->Item <= CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT8_VAL2) {
+                        for (uint32_t fs = 0; fs<8; fs++) {
+                            uint32_t newItemStart = CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT1_CC + fs * 3;
+
+                            if (message->Item == newItemStart) {
+                                ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchAltEffectConfig[fs].CC = (uint8_t)message->Value;
+                                break;
+                            } else if (message->Item == newItemStart + 1) {
+                                ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchAltEffectConfig[fs].Value_1 = (uint8_t)message->Value;
+                                break;
+                            } else if (message->Item == newItemStart + 2) {
+                                ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchAltEffectConfig[fs].Value_2 = (uint8_t)message->Value;
+                                break;
+                            }
+                        }
+                    }
                 } break;
             }
         } break;
@@ -1070,6 +983,22 @@ void control_request_bank_down()
     ESP_LOGI(TAG, "control_request_bank_down");
 
     message.Event = EVENT_BANK_DOWN;
+
+    // send to queue
+    if (xQueueSend(control_input_queue, (void*)&message, 0) != pdPASS)
+    {
+        ESP_LOGE(TAG, "control_request_bank_index queue send failed!");            
+    }
+}
+
+void control_set_fs_alt_mode(bool altMode)
+{
+    tControlMessage message;
+
+    ESP_LOGI(TAG, "control_set_fs_alt_mode");
+
+    message.Event = EVENT_SET_ALT_MODE;
+    message.Value = altMode;
 
     // send to queue
     if (xQueueSend(control_input_queue, (void*)&message, 0) != pdPASS)
@@ -1433,166 +1362,8 @@ uint32_t control_get_config_item_int(uint32_t item)
         {
             value = ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchPresetLayout;
         } break;
-
-        case CONFIG_ITEM_EXT_FOOTSW_EFFECT1_SW:
-        {
-            value = ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchEffectConfig[0].Switch;
-        } break;
-
-        case CONFIG_ITEM_EXT_FOOTSW_EFFECT1_CC:
-        {
-            value = ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchEffectConfig[0].CC;
-        } break;
-
-        case CONFIG_ITEM_EXT_FOOTSW_EFFECT1_VAL1:
-        {
-            value = ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchEffectConfig[0].Value_1;
-        } break;
-
-        case CONFIG_ITEM_EXT_FOOTSW_EFFECT1_VAL2:
-        {
-            value = ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchEffectConfig[0].Value_2;
-        } break;
-
-        case CONFIG_ITEM_EXT_FOOTSW_EFFECT2_SW:
-        {
-            value = ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchEffectConfig[1].Switch;
-        } break;
-
-        case CONFIG_ITEM_EXT_FOOTSW_EFFECT2_CC:
-        {
-            value = ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchEffectConfig[1].CC;
-        } break;
-
-        case CONFIG_ITEM_EXT_FOOTSW_EFFECT2_VAL1:
-        {
-            value = ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchEffectConfig[1].Value_1;
-        } break;
-
-        case CONFIG_ITEM_EXT_FOOTSW_EFFECT2_VAL2:
-        {
-            value = ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchEffectConfig[1].Value_2;
-        } break;
-
-        case CONFIG_ITEM_EXT_FOOTSW_EFFECT3_SW:
-        {
-            value = ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchEffectConfig[2].Switch;
-        } break;
-
-        case CONFIG_ITEM_EXT_FOOTSW_EFFECT3_CC:
-        {
-            value = ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchEffectConfig[2].CC;
-        } break;
-
-        case CONFIG_ITEM_EXT_FOOTSW_EFFECT3_VAL1:
-        {
-            value = ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchEffectConfig[2].Value_1;
-        } break;
-
-        case CONFIG_ITEM_EXT_FOOTSW_EFFECT3_VAL2:
-        {
-            value = ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchEffectConfig[2].Value_2;
-        } break;
-
-        case CONFIG_ITEM_EXT_FOOTSW_EFFECT4_SW:
-        {
-            value = ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchEffectConfig[3].Switch;
-        } break;
-
-        case CONFIG_ITEM_EXT_FOOTSW_EFFECT4_CC:
-        {
-            value = ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchEffectConfig[3].CC;
-        } break;
-
-        case CONFIG_ITEM_EXT_FOOTSW_EFFECT4_VAL1:
-        {
-            value = ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchEffectConfig[3].Value_1;
-        } break;
-
-        case CONFIG_ITEM_EXT_FOOTSW_EFFECT4_VAL2:
-        {
-            value = ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchEffectConfig[3].Value_2;
-        } break;
-
-        case CONFIG_ITEM_EXT_FOOTSW_EFFECT5_SW:
-        {
-            value = ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchEffectConfig[4].Switch;
-        } break;
-
-        case CONFIG_ITEM_EXT_FOOTSW_EFFECT5_CC:
-        {
-            value = ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchEffectConfig[4].CC;
-        } break;
-
-        case CONFIG_ITEM_EXT_FOOTSW_EFFECT5_VAL1:
-        {
-            value = ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchEffectConfig[4].Value_1;
-        } break;
-
-        case CONFIG_ITEM_EXT_FOOTSW_EFFECT5_VAL2:
-        {
-            value = ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchEffectConfig[4].Value_2;
-        } break;
-
-        case CONFIG_ITEM_EXT_FOOTSW_EFFECT6_SW:
-        {
-            value = ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchEffectConfig[5].Switch;
-        } break;
-
-        case CONFIG_ITEM_EXT_FOOTSW_EFFECT6_CC:
-        {
-            value = ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchEffectConfig[5].CC;
-        } break;
-        
-        case CONFIG_ITEM_EXT_FOOTSW_EFFECT6_VAL1:
-        {
-            value = ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchEffectConfig[5].Value_1;
-        } break;
-
-        case CONFIG_ITEM_EXT_FOOTSW_EFFECT6_VAL2:
-        {
-            value = ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchEffectConfig[5].Value_2;
-        } break;
-
-        case CONFIG_ITEM_EXT_FOOTSW_EFFECT7_SW:
-        {
-            value = ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchEffectConfig[6].Switch;
-        } break;
-
-        case CONFIG_ITEM_EXT_FOOTSW_EFFECT7_CC:
-        {
-            value = ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchEffectConfig[6].CC;
-        } break;
-
-        case CONFIG_ITEM_EXT_FOOTSW_EFFECT7_VAL1:
-        {
-            value = ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchEffectConfig[6].Value_1;
-        } break;
-
-        case CONFIG_ITEM_EXT_FOOTSW_EFFECT7_VAL2:
-        {
-            value = ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchEffectConfig[6].Value_2;
-        } break;
-
-        case CONFIG_ITEM_EXT_FOOTSW_EFFECT8_SW:
-        {
-            value = ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchEffectConfig[7].Switch;
-        } break;
-
-        case CONFIG_ITEM_EXT_FOOTSW_EFFECT8_CC:
-        {
-            value = ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchEffectConfig[7].CC;
-        } break;
-
-        case CONFIG_ITEM_EXT_FOOTSW_EFFECT8_VAL1:
-        {
-            value = ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchEffectConfig[7].Value_1;
-        } break;
-
-        case CONFIG_ITEM_EXT_FOOTSW_EFFECT8_VAL2:
-        {
-            value = ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchEffectConfig[7].Value_2;
-        } break;
+ 
+        // 
 
         case CONFIG_ITEM_INT_FOOTSW_EFFECT1_SW:
         {
@@ -1676,7 +1447,42 @@ uint32_t control_get_config_item_int(uint32_t item)
 
         default:
         {
-            ESP_LOGE(TAG, "Unknown/Invalid int parameter item %d", (int)item);            
+            if (item >= CONFIG_ITEM_EXT_FOOTSW_EFFECT1_SW && item <= CONFIG_ITEM_EXT_FOOTSW_EFFECT8_VAL2) {
+                for (uint32_t fs=0; fs<8; fs++) {
+                    uint32_t newItemStart = CONFIG_ITEM_EXT_FOOTSW_EFFECT1_SW + fs * 4;
+
+                    if (item == newItemStart) {
+                        value = ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchEffectConfig[fs].Switch;
+                        break;
+                    } else if (item == newItemStart + 1) {
+                        value = ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchEffectConfig[fs].CC;
+                        break;
+                    } else if (item == newItemStart + 2) {
+                        value = ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchEffectConfig[fs].Value_1;
+                        break;
+                    } else if (item == newItemStart + 3) {
+                        value = ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchEffectConfig[fs].Value_2;
+                        break;
+                    }
+                }
+            } else if (item >= CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT1_CC && item <= CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT8_VAL2) {
+                for (uint32_t fs=0; fs<8; fs++) {
+                    uint32_t newItemStart = CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT1_CC + fs * 3;
+
+                    if (item == newItemStart) {
+                        value = ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchAltEffectConfig[fs].CC;
+                        break;
+                    } else if (item == newItemStart + 1) {
+                        value = ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchAltEffectConfig[fs].Value_1;
+                        break;
+                    } else if (item == newItemStart + 2) {
+                        value = ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchAltEffectConfig[fs].Value_2;
+                        break;
+                    }
+                }
+            } else {
+                ESP_LOGE(TAG, "Unknown/Invalid int parameter item %d", (int)item);            
+            }
         } break;
     }
 
@@ -1742,6 +1548,8 @@ void control_set_preset_order(uint8_t* order)
 #if CONFIG_TONEX_CONTROLLER_HAS_DISPLAY
     // update UI
     UI_SetPresetLabel(PresetIndexForOrderValue(ControlData.PresetIndex), ControlData.PresetNames[ControlData.PresetIndex]);
+
+    update_preset_buttons();
 #endif
 }
 
@@ -2444,12 +2252,14 @@ void control_set_default_config(void)
     ControlData.ConfigData.GeneralConfig.GeneralSavePresetToSlot = SAVE_PRESET_SLOT_C;
     ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchPresetLayout = FOOTSWITCH_LAYOUT_1X4;
     memset((void*)ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchEffectConfig, 0, sizeof(ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchEffectConfig));
+    memset((void*)ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchAltEffectConfig, 0, sizeof(ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchAltEffectConfig));
     memset((void*)ControlData.ConfigData.FootSwitchConfig.InternalFootswitchEffectConfig, 0, sizeof(ControlData.ConfigData.FootSwitchConfig.InternalFootswitchEffectConfig));
 
     // default to no switches configured
     for (uint8_t loop = 0; loop < MAX_EXTERNAL_EFFECT_FOOTSWITCHES; loop++)
     {
         ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchEffectConfig[loop].Switch = SWITCH_NOT_USED;
+        ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchAltEffectConfig[loop].Switch = SWITCH_NOT_USED;
     }
 
     // default to no switches configured
