@@ -658,8 +658,13 @@ static void footswitch_handle_effects(tFootswitchHandler* handler, tFootswitchEf
 
                             if (param != TONEX_UNKNOWN)
                             {
+                                if (param == TONEX_CONTROLLER_FOOTSWITCH_ALT_MODE)
+                                {
+                                    FootswitchControl.footswitch_alt_mode = !FootswitchControl.footswitch_alt_mode;
+                                    UI_SetAltMode(FootswitchControl.footswitch_alt_mode);
+                                }
                                 // get the current value of the parameter
-                                if (tonex_params_get_locked_access(&param_ptr) == ESP_OK)
+                                else if (tonex_params_get_locked_access(&param_ptr) == ESP_OK)
                                 {
                                     // is the parameter a boolean type?
                                     if (param_ptr[param].Type == TONEX_PARAM_TYPE_SWITCH)
@@ -676,16 +681,8 @@ static void footswitch_handle_effects(tFootswitchHandler* handler, tFootswitchEf
 
                                         tonex_params_release_locked_access();
 
-                                        if (param == TONEX_CONTROLLER_FOOTSWITCH_ALT_MODE)
-                                        {
-                                            FootswitchControl.footswitch_alt_mode = new_value == 1;
-                                            control_set_fs_alt_mode(FootswitchControl.footswitch_alt_mode);
-                                        }
-                                        else
-                                        {
-                                            usb_modify_parameter(param, new_value);
-                                            // midi_helper_adjust_param_via_midi(fx_handler[loop].config.CC, new_value); 
-                                        }
+                                        usb_modify_parameter(param, new_value);
+                                        // midi_helper_adjust_param_via_midi(fx_handler[loop].config.CC, new_value);
                                     }
                                     else if (param_ptr[param].Type == TONEX_PARAM_TYPE_SELECT)
                                     {
@@ -819,9 +816,9 @@ void footswitch_task(void *arg)
         FootswitchControl.ExternalFootswitchEffectHandler[configs].config.Value_2 = control_get_config_item_int(CONFIG_ITEM_EXT_FOOTSW_EFFECT1_VAL2 + (configs * 4));
         
         FootswitchControl.ExternalFootswitchAltEffectHandler[configs].config.Switch = control_get_config_item_int(CONFIG_ITEM_EXT_FOOTSW_EFFECT1_SW + (configs * 4));
-        FootswitchControl.ExternalFootswitchAltEffectHandler[configs].config.CC = control_get_config_item_int(CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT1_CC + (configs * 4));
-        FootswitchControl.ExternalFootswitchAltEffectHandler[configs].config.Value_1 = control_get_config_item_int(CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT1_VAL1 + (configs * 4));
-        FootswitchControl.ExternalFootswitchAltEffectHandler[configs].config.Value_2 = control_get_config_item_int(CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT1_VAL2 + (configs * 4));
+        FootswitchControl.ExternalFootswitchAltEffectHandler[configs].config.CC = control_get_config_item_int(CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT1_CC + (configs * 3));
+        FootswitchControl.ExternalFootswitchAltEffectHandler[configs].config.Value_1 = control_get_config_item_int(CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT1_VAL1 + (configs * 3));
+        FootswitchControl.ExternalFootswitchAltEffectHandler[configs].config.Value_2 = control_get_config_item_int(CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT1_VAL2 + (configs * 3));
     }
 
     // load config for internal effect buttons
@@ -949,14 +946,11 @@ void footswitch_task(void *arg)
             }
                     
             // handle effects switching
-            if (FootswitchControl.footswitch_alt_mode)
-            {
-                footswitch_handle_effects(&FootswitchControl.Handlers[FOOTSWITCH_HANDLER_EXTERNAL_EFFECTS], FootswitchControl.ExternalFootswitchAltEffectHandler, MAX_EXTERNAL_EFFECT_FOOTSWITCHES);
-            }
-            else
-            {
-                footswitch_handle_effects(&FootswitchControl.Handlers[FOOTSWITCH_HANDLER_EXTERNAL_EFFECTS], FootswitchControl.ExternalFootswitchEffectHandler, MAX_EXTERNAL_EFFECT_FOOTSWITCHES);
-            }
+            footswitch_handle_effects(
+                &FootswitchControl.Handlers[FOOTSWITCH_HANDLER_EXTERNAL_EFFECTS],
+                FootswitchControl.footswitch_alt_mode ? FootswitchControl.ExternalFootswitchAltEffectHandler : FootswitchControl.ExternalFootswitchEffectHandler,
+                MAX_EXTERNAL_EFFECT_FOOTSWITCHES
+            );
         }
 
 #if !CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43DEVONLY  
@@ -1019,7 +1013,7 @@ static uint8_t process_footswitch_command(tFootswitchMessage* message)
         case FOOTSWITCH_EVENT_SWITCH_ALT_MODE:
         {
             FootswitchControl.footswitch_alt_mode = !FootswitchControl.footswitch_alt_mode;
-            control_set_fs_alt_mode(FootswitchControl.footswitch_alt_mode);
+            UI_SetAltMode(FootswitchControl.footswitch_alt_mode);
             return 0;
         } break;
 

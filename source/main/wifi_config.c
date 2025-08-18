@@ -432,6 +432,11 @@ static void wifi_build_config_json(void)
     json_gen_obj_set_int(&pWebConfig->jstr, "EXTFS_ES8_V1", control_get_config_item_int(CONFIG_ITEM_EXT_FOOTSW_EFFECT8_VAL1));
     json_gen_obj_set_int(&pWebConfig->jstr, "EXTFS_ES8_V2", control_get_config_item_int(CONFIG_ITEM_EXT_FOOTSW_EFFECT8_VAL2));
 
+    json_gen_obj_set_int(&pWebConfig->jstr, "EXTFS_ES9_SW", control_get_config_item_int(CONFIG_ITEM_EXT_FOOTSW_EFFECT9_SW));
+    json_gen_obj_set_int(&pWebConfig->jstr, "EXTFS_ES9_CC", control_get_config_item_int(CONFIG_ITEM_EXT_FOOTSW_EFFECT9_CC));
+    json_gen_obj_set_int(&pWebConfig->jstr, "EXTFS_ES9_V1", control_get_config_item_int(CONFIG_ITEM_EXT_FOOTSW_EFFECT9_VAL1));
+    json_gen_obj_set_int(&pWebConfig->jstr, "EXTFS_ES9_V2", control_get_config_item_int(CONFIG_ITEM_EXT_FOOTSW_EFFECT9_VAL2));
+
 
     json_gen_obj_set_int(&pWebConfig->jstr, "EXTFS_ES1_CC_ALT", control_get_config_item_int(CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT1_CC));
     json_gen_obj_set_int(&pWebConfig->jstr, "EXTFS_ES1_V1_ALT", control_get_config_item_int(CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT1_VAL1));
@@ -464,6 +469,10 @@ static void wifi_build_config_json(void)
     json_gen_obj_set_int(&pWebConfig->jstr, "EXTFS_ES8_CC_ALT", control_get_config_item_int(CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT8_CC));
     json_gen_obj_set_int(&pWebConfig->jstr, "EXTFS_ES8_V1_ALT", control_get_config_item_int(CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT8_VAL1));
     json_gen_obj_set_int(&pWebConfig->jstr, "EXTFS_ES8_V2_ALT", control_get_config_item_int(CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT8_VAL2));
+
+    json_gen_obj_set_int(&pWebConfig->jstr, "EXTFS_E9_CC_ALT", control_get_config_item_int(CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT9_CC));
+    json_gen_obj_set_int(&pWebConfig->jstr, "EXTFS_E9_V1_ALT", control_get_config_item_int(CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT9_VAL1));
+    json_gen_obj_set_int(&pWebConfig->jstr, "EXTFS_E9_V2_ALT", control_get_config_item_int(CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT9_VAL2));
     
 
     json_gen_obj_set_int(&pWebConfig->jstr, "INTFS_ES1_SW", control_get_config_item_int(CONFIG_ITEM_INT_FOOTSW_EFFECT1_SW));
@@ -1086,6 +1095,26 @@ static esp_err_t ws_handler(httpd_req_t *req)
                             control_set_config_item_int(CONFIG_ITEM_EXT_FOOTSW_EFFECT8_VAL2, int_val);
                         }
 
+                        if (json_obj_get_int(&pWebConfig->jctx, "EXTFS_ES9_SW", &int_val) == OS_SUCCESS) 
+                        {
+                            control_set_config_item_int(CONFIG_ITEM_EXT_FOOTSW_EFFECT9_SW, int_val);
+                        }
+
+                        if (json_obj_get_int(&pWebConfig->jctx, "EXTFS_ES9_CC", &int_val) == OS_SUCCESS) 
+                        {
+                            control_set_config_item_int(CONFIG_ITEM_EXT_FOOTSW_EFFECT9_CC, int_val);
+                        }
+
+                        if (json_obj_get_int(&pWebConfig->jctx, "EXTFS_ES9_V1", &int_val) == OS_SUCCESS) 
+                        {
+                            control_set_config_item_int(CONFIG_ITEM_EXT_FOOTSW_EFFECT9_VAL1, int_val);
+                        }
+
+                        if (json_obj_get_int(&pWebConfig->jctx, "EXTFS_ES9_V2", &int_val) == OS_SUCCESS) 
+                        {
+                            control_set_config_item_int(CONFIG_ITEM_EXT_FOOTSW_EFFECT9_VAL2, int_val);
+                        }
+
 
 
                         // pause a little to allow control task a chance to process    
@@ -1213,6 +1242,21 @@ static esp_err_t ws_handler(httpd_req_t *req)
                         if (json_obj_get_int(&pWebConfig->jctx, "EXTFS_ES8_V2_ALT", &int_val) == OS_SUCCESS) 
                         {
                             control_set_config_item_int(CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT8_VAL2, int_val);
+                        }
+
+                        if (json_obj_get_int(&pWebConfig->jctx, "EXTFS_ES9_CC_ALT", &int_val) == OS_SUCCESS) 
+                        {
+                            control_set_config_item_int(CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT9_CC, int_val);
+                        }
+
+                        if (json_obj_get_int(&pWebConfig->jctx, "EXTFS_ES9_V1_ALT", &int_val) == OS_SUCCESS) 
+                        {
+                            control_set_config_item_int(CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT8_VAL1, int_val);
+                        }
+
+                        if (json_obj_get_int(&pWebConfig->jctx, "EXTFS_ES9_V2_ALT", &int_val) == OS_SUCCESS) 
+                        {
+                            control_set_config_item_int(CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT9_VAL2, int_val);
                         }
 
 

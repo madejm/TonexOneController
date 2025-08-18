@@ -183,10 +183,14 @@ static tTonexParameter TonexParameters[TONEX_CONTROLLER_LAST] =
     {5,      0,      10,   "MVOL", TONEX_PARAM_TYPE_RANGE},                 // TONEX_GLOBAL_MASTER_VOLUME
     
     // dummy end of globals marker
-    {0,      0,      0,    "GLOBAL_LAST", TONEX_PARAM_TYPE_RANGE},                // TONEX_GLOBAL_LAST,
+    {0,      0,      0,    "GLOBAL_LAST", TONEX_PARAM_TYPE_RANGE},           // TONEX_GLOBAL_LAST,
 
     //************* Config params *****************
-    {0,      0,      1,    "FS_ALT", TONEX_PARAM_TYPE_SWITCH},                 // TONEX_CONTROLLER_FOOTSWITCH_ALT_MODE
+    {0,      0,      1,    "FS_ALT", TONEX_PARAM_TYPE_SWITCH},                // TONEX_CONTROLLER_FOOTSWITCH_ALT_MODE
+    {0,      0,      1,    "FS_TAP_TEMPO", TONEX_PARAM_TYPE_RANGE},          // TONEX_CONTROLLER_TAP_TEMPO
+
+    // dummy end of config marker
+    // {0,      0,      0,    "CONTROL_LAST", TONEX_PARAM_TYPE_RANGE},       // TONEX_CONTROLLER_LAST,
 };
 
 static tTonexPresetColor TonexPresetColors[MAX_SUPPORTED_PRESETS];
@@ -222,14 +226,30 @@ const tTonexPresetColorMapping TonexColorMap[COLORS_COUNT] = {
     {0x000000, 0x595959}, // grey
 };
 
-esp_err_t tonex_params_get_ui_style(uint32_t param, uint32_t *color, char **name, bool isEnabled, char **value) {
+const char *Style_OnOff[2] = {
+    "OFF", "ON"
+};
+const char *Style_ReverbModels[6] = {
+    "SPRING 1", "SPRING 2", "SPRING 3", "SPRING 4", "ROOM", "PLATE"
+};
+const char *Style_ModModels[5] = {
+    "CHORUS", "TREMOLO", "PHASER", "FLANGER", "ROTARY"
+};
+const char *Style_DelayModels[2] = {
+    "DIGITAL", "TAPE"
+};
+
+esp_err_t tonex_params_get_ui_style(uint32_t param, uint8_t selectedValue, uint32_t *color, char const **name, char const **value) {
      if (param >= TONEX_PARAM_REVERB_POSITION && param <= TONEX_PARAM_REVERB_PLATE_MIX) {
         *color = 0x006ff3;
         *name = "REV";
 
         switch (param) {
+            case TONEX_PARAM_REVERB_ENABLE:
+                *value = selectedValue == 0 ? "OFF" : "ON";
+                break;
             case TONEX_PARAM_REVERB_MODEL:
-                *value = isEnabled ? "PLATE" : "SPRING 1";
+                *value = Style_ReverbModels[selectedValue];
                 break;
             default:
                 return ESP_FAIL;
@@ -240,7 +260,10 @@ esp_err_t tonex_params_get_ui_style(uint32_t param, uint32_t *color, char **name
 
         switch (param) {
             case TONEX_PARAM_MODULATION_ENABLE:
-                *value = isEnabled ? "ON" : "OFF";
+                *value = selectedValue == 0 ? "OFF" : "ON";
+                break;
+            case TONEX_PARAM_MODULATION_MODEL:
+                *value = Style_ModModels[selectedValue];
                 break;
             default:
                 return ESP_FAIL;
@@ -251,7 +274,10 @@ esp_err_t tonex_params_get_ui_style(uint32_t param, uint32_t *color, char **name
 
         switch (param) {
             case TONEX_PARAM_DELAY_ENABLE:
-                *value = isEnabled ? "ON" : "OFF";
+                *value = selectedValue == 0 ? "OFF" : "ON";
+                break;
+            case TONEX_PARAM_DELAY_MODEL:
+                *value = Style_DelayModels[selectedValue];
                 break;
             default:
                 return ESP_FAIL;
@@ -260,6 +286,10 @@ esp_err_t tonex_params_get_ui_style(uint32_t param, uint32_t *color, char **name
         *color = 0xD1A60C;
         
         switch (param) {
+            case TONEX_GLOBAL_BPM:
+                *name = "TAP BPM";
+                *value = NULL;
+                break;
             case TONEX_CONTROLLER_FOOTSWITCH_ALT_MODE:
                 *name = "ALT MODE";
                 *value = NULL;

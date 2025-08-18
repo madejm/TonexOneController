@@ -69,7 +69,7 @@ enum CommandEvents
     EVENT_BANK_INDEX,
     EVENT_BANK_UP,
     EVENT_BANK_DOWN,
-    EVENT_SET_ALT_MODE,
+    // EVENT_SET_ALT_MODE,
     EVENT_SET_PRESET_NAME,
     EVENT_SET_PRESET_DETAILS,
     EVENT_SET_USB_STATUS,
@@ -278,25 +278,25 @@ static uint8_t preset_order_mapping_index(int8_t presetIndex)
 }
 
 #if CONFIG_TONEX_CONTROLLER_HAS_DISPLAY
-void update_preset_buttons_selected()
-{
-    uint8_t mappedIndex = preset_order_mapping_index(ControlData.PresetIndex);
-    bool isInCurrentBank = (mappedIndex/4) == ControlData.BankIndex;
-    uint16_t selectedPresetButtonIndex = mappedIndex % 4;
+// void update_preset_buttons_selected()
+// {
+//     uint8_t mappedIndex = preset_order_mapping_index(ControlData.PresetIndex);
+//     bool isInCurrentBank = (mappedIndex/4) == ControlData.BankIndex;
+//     uint16_t selectedPresetButtonIndex = mappedIndex % 4;
 
-    // UI_SetPresetButtonsSelected(
-    //     !ControlData.FSAltMode && isInCurrentBank && selectedPresetButtonIndex == 0,
-    //     !ControlData.FSAltMode && isInCurrentBank && selectedPresetButtonIndex == 1,
-    //     !ControlData.FSAltMode && isInCurrentBank && selectedPresetButtonIndex == 2,
-    //     !ControlData.FSAltMode && isInCurrentBank && selectedPresetButtonIndex == 3
-    // );
-    UI_SetPresetButtonsSelected(
-        isInCurrentBank && selectedPresetButtonIndex == 0,
-        isInCurrentBank && selectedPresetButtonIndex == 1,
-        isInCurrentBank && selectedPresetButtonIndex == 2,
-        isInCurrentBank && selectedPresetButtonIndex == 3
-    );
-}
+//     // UI_SetPresetButtonsSelected(
+//     //     !ControlData.FSAltMode && isInCurrentBank && selectedPresetButtonIndex == 0,
+//     //     !ControlData.FSAltMode && isInCurrentBank && selectedPresetButtonIndex == 1,
+//     //     !ControlData.FSAltMode && isInCurrentBank && selectedPresetButtonIndex == 2,
+//     //     !ControlData.FSAltMode && isInCurrentBank && selectedPresetButtonIndex == 3
+//     // );
+//     UI_SetPresetButtonsSelected(
+//         isInCurrentBank && selectedPresetButtonIndex == 0,
+//         isInCurrentBank && selectedPresetButtonIndex == 1,
+//         isInCurrentBank && selectedPresetButtonIndex == 2,
+//         isInCurrentBank && selectedPresetButtonIndex == 3
+//     );
+// }
 
 void update_preset_buttons()
 {
@@ -308,7 +308,7 @@ void update_preset_buttons()
         ControlData.ConfigData.SkinConfig.SkinIndex[preset_order_mapping_index(ControlData.BankIndex * 4 + 3)]
     );
 
-    update_preset_buttons_selected();
+    // update_preset_buttons_selected();
 }
 #endif
 
@@ -392,12 +392,12 @@ static uint8_t process_control_command(tControlMessage* message)
             }
         } break;
 
-        case EVENT_SET_ALT_MODE:
-        {
-            // ControlData.FSAltMode = message->Value;
-            // UI_SetAltMode(ControlData.FSAltMode);
-            UI_SetAltMode(message->Value);
-        } break;
+        // case EVENT_SET_ALT_MODE:
+        // {
+        //     // ControlData.FSAltMode = message->Value;
+        //     // UI_SetAltMode(ControlData.FSAltMode);
+        //     UI_SetAltMode(message->Value);
+        // } break;
 
         case EVENT_BANK_DOWN:
         {
@@ -471,8 +471,6 @@ static uint8_t process_control_command(tControlMessage* message)
             // load user text and set it
             LoadPresetUserText(message->Value, preset_user_text);
             UI_SetPresetDescription(preset_user_text);
-
-            update_preset_buttons_selected();
 #endif
 
             // update web UI
@@ -739,8 +737,8 @@ static uint8_t process_control_command(tControlMessage* message)
                 } break;
 
                 default: {
-                    if (message->Item >= CONFIG_ITEM_EXT_FOOTSW_EFFECT1_SW && message->Item <= CONFIG_ITEM_EXT_FOOTSW_EFFECT8_VAL2) {
-                        for (uint32_t fs = 0; fs<8; fs++) {
+                    if (message->Item >= CONFIG_ITEM_EXT_FOOTSW_EFFECT1_SW && message->Item <= CONFIG_ITEM_EXT_FOOTSW_EFFECT9_VAL2) {
+                        for (uint32_t fs = 0; fs<MAX_EXTERNAL_EFFECT_FOOTSWITCHES; fs++) {
                             uint32_t newItemStart = CONFIG_ITEM_EXT_FOOTSW_EFFECT1_SW + fs * 4;
 
                             if (message->Item == newItemStart) {
@@ -757,8 +755,8 @@ static uint8_t process_control_command(tControlMessage* message)
                                 break;
                             }
                         }
-                    } else if (message->Item >= CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT1_CC && message->Item <= CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT8_VAL2) {
-                        for (uint32_t fs = 0; fs<8; fs++) {
+                    } else if (message->Item >= CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT1_CC && message->Item <= CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT9_VAL2) {
+                        for (uint32_t fs = 0; fs<MAX_EXTERNAL_EFFECT_FOOTSWITCHES; fs++) {
                             uint32_t newItemStart = CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT1_CC + fs * 3;
 
                             if (message->Item == newItemStart) {
@@ -991,21 +989,25 @@ void control_request_bank_down()
     }
 }
 
-void control_set_fs_alt_mode(bool altMode)
+void control_switch_fs_alt_mode()
 {
-    tControlMessage message;
-
-    ESP_LOGI(TAG, "control_set_fs_alt_mode");
-
-    message.Event = EVENT_SET_ALT_MODE;
-    message.Value = altMode;
-
-    // send to queue
-    if (xQueueSend(control_input_queue, (void*)&message, 0) != pdPASS)
-    {
-        ESP_LOGE(TAG, "control_request_bank_index queue send failed!");            
-    }
+    footswitches_switch_alt_mode();
 }
+// void control_set_fs_alt_mode(bool altMode)
+// {
+//     tControlMessage message;
+
+//     ESP_LOGI(TAG, "control_set_fs_alt_mode");
+
+//     message.Event = EVENT_SET_ALT_MODE;
+//     message.Value = altMode;
+
+//     // send to queue
+//     if (xQueueSend(control_input_queue, (void*)&message, 0) != pdPASS)
+//     {
+//         ESP_LOGE(TAG, "control_request_bank_index queue send failed!");            
+//     }
+// }
 
 /****************************************************************************
 * NAME:        
@@ -1447,8 +1449,8 @@ uint32_t control_get_config_item_int(uint32_t item)
 
         default:
         {
-            if (item >= CONFIG_ITEM_EXT_FOOTSW_EFFECT1_SW && item <= CONFIG_ITEM_EXT_FOOTSW_EFFECT8_VAL2) {
-                for (uint32_t fs=0; fs<8; fs++) {
+            if (item >= CONFIG_ITEM_EXT_FOOTSW_EFFECT1_SW && item <= CONFIG_ITEM_EXT_FOOTSW_EFFECT9_VAL2) {
+                for (uint32_t fs=0; fs<MAX_EXTERNAL_EFFECT_FOOTSWITCHES; fs++) {
                     uint32_t newItemStart = CONFIG_ITEM_EXT_FOOTSW_EFFECT1_SW + fs * 4;
 
                     if (item == newItemStart) {
@@ -1465,8 +1467,8 @@ uint32_t control_get_config_item_int(uint32_t item)
                         break;
                     }
                 }
-            } else if (item >= CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT1_CC && item <= CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT8_VAL2) {
-                for (uint32_t fs=0; fs<8; fs++) {
+            } else if (item >= CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT1_CC && item <= CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT9_VAL2) {
+                for (uint32_t fs=0; fs<MAX_EXTERNAL_EFFECT_FOOTSWITCHES; fs++) {
                     uint32_t newItemStart = CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT1_CC + fs * 3;
 
                     if (item == newItemStart) {

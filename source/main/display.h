@@ -51,7 +51,7 @@ void UI_SetBankIndex(uint16_t index);
 void UI_SetAmpSkin(uint16_t index);
 // void UI_SetAmpSkinSlot(bool visible, uint8_t skinIndex1, uint8_t skinIndex2, uint8_t skinIndex3, uint8_t skinIndex4);
 void UI_SetAmpSkinSlot(uint8_t skinIndex1, uint8_t skinIndex2, uint8_t skinIndex3, uint8_t skinIndex4);
-void UI_SetPresetButtonsSelected(bool selected1, bool selected2, bool selected3, bool selected4);
+// void UI_SetPresetButtonsSelected(bool selected1, bool selected2, bool selected3, bool selected4);
 // void UI_SetFSButton(uint32_t buttonIndex, uint32_t color, bool active, char *effect, char *value);
 void UI_SetAltMode(bool altMode);
 void UI_SetPresetDescription(char* text);

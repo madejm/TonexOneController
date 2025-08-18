@@ -137,6 +137,10 @@ enum ConfigItems
     CONFIG_ITEM_EXT_FOOTSW_EFFECT8_CC,
     CONFIG_ITEM_EXT_FOOTSW_EFFECT8_VAL1,
     CONFIG_ITEM_EXT_FOOTSW_EFFECT8_VAL2,
+    CONFIG_ITEM_EXT_FOOTSW_EFFECT9_SW,
+    CONFIG_ITEM_EXT_FOOTSW_EFFECT9_CC,
+    CONFIG_ITEM_EXT_FOOTSW_EFFECT9_VAL1,
+    CONFIG_ITEM_EXT_FOOTSW_EFFECT9_VAL2,
 
     CONFIG_ITEM_INT_FOOTSW_EFFECT1_SW,
     CONFIG_ITEM_INT_FOOTSW_EFFECT1_CC,
@@ -179,6 +183,9 @@ enum ConfigItems
     CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT8_CC,
     CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT8_VAL1,
     CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT8_VAL2,
+    CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT9_CC,
+    CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT9_VAL1,
+    CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT9_VAL2,
     
     // CONFIG_ITEM_INT_ALT_FOOTSW_EFFECT1_CC,
     // CONFIG_ITEM_INT_ALT_FOOTSW_EFFECT1_VAL1,
@@ -298,7 +305,7 @@ typedef struct __attribute__ ((packed))
 
 #define MAX_WIFI_SSID_PW                        65   
 #define MAX_MDNS_NAME                           32
-#define MAX_EXTERNAL_EFFECT_FOOTSWITCHES        8
+#define MAX_EXTERNAL_EFFECT_FOOTSWITCHES        9
 #define MAX_INTERNAL_EFFECT_FOOTSWITCHES        4
 #define SWITCH_NOT_USED                         0xFF
 #define MAX_SUPPORTED_PRESETS                   150
@@ -311,7 +318,7 @@ void control_request_preset_index(uint8_t index);
 void control_request_preset_in_bank_index(uint8_t index);
 void control_request_bank_up();
 void control_request_bank_down();
-void control_set_fs_alt_mode(bool);
+void control_switch_fs_alt_mode();
 void control_request_bank_index(uint8_t index);
 void control_set_usb_status(uint32_t status);
 void control_set_bt_status(uint32_t status);

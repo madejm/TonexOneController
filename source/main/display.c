@@ -116,7 +116,7 @@ enum UIAction
     UI_ACTION_SET_LABEL_TEXT,
     UI_ACTION_SET_ENTRY_TEXT,
     UI_ACTION_SET_AMP_SKIN_SLOT,
-    UI_ACTION_SET_PRESET_BUTTON_SELECTED,
+    // UI_ACTION_SET_PRESET_BUTTON_SELECTED,
     UI_ACTION_SET_ALT_BUTTON,
     // UI_ACTION_SET_FS_BUTTON,
     UI_ACTION_NONE = 0xFF
@@ -135,7 +135,10 @@ static QueueHandle_t ui_update_queue;
 static SemaphoreHandle_t I2CMutexHandle;
 static SemaphoreHandle_t lvgl_mux = NULL;
 static lv_disp_drv_t* disp_drv; 
+
 static bool ui_AltMode = false;
+static uint8_t ui_PresetIndex = 0;
+static uint8_t ui_BankIndex = 0;
                 
 #if CONFIG_TONEX_CONTROLLER_HAS_DISPLAY
 
@@ -298,7 +301,7 @@ void PreviousClicked(lv_event_t * e)
 *****************************************************************************/
 void FSButtonAction(uint32_t buttonIndex)
 {
-    for (uint32_t item = 0; item < 8; item ++)
+    for (uint32_t item = 0; item < MAX_EXTERNAL_EFFECT_FOOTSWITCHES; item ++)
     {
         if (control_get_config_item_int(CONFIG_ITEM_EXT_FOOTSW_EFFECT1_SW + item * 4) != buttonIndex) {
             continue;
@@ -1392,7 +1395,7 @@ void ParameterChanged(lv_event_t * e)
 }
 #endif  //CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI
 
-void setFSButton(uint32_t buttonIndex, uint32_t color, bool active, char *effect, char *value, bool visible) {
+void setFSButton(uint32_t buttonIndex, uint32_t color, bool active, const char *effect, const char *value, bool visible) {
     lv_obj_t * element_1;
 
     switch (buttonIndex) {
@@ -1465,11 +1468,11 @@ void updateFSButtons() {
         return;
     }
 
-    for (uint32_t buttonIndex = 0; buttonIndex <= 9; buttonIndex++)
+    for (uint32_t buttonIndex = 0; buttonIndex < MAX_EXTERNAL_EFFECT_FOOTSWITCHES; buttonIndex++)
     {
         bool didSet = false;
 
-        for (uint32_t item = 0; item < 8; item ++)
+        for (uint32_t item = 0; item < MAX_EXTERNAL_EFFECT_FOOTSWITCHES; item ++)
         {
             if (control_get_config_item_int(CONFIG_ITEM_EXT_FOOTSW_EFFECT1_SW + item * 4) != buttonIndex) {
                 continue;
@@ -1491,14 +1494,15 @@ void updateFSButtons() {
             tTonexParameter* param_entry = &param_ptr[param];
 
             uint32_t color;
-            char *name;
-            char *value;
+            const char *name;
+            const char *value;
 
             switch (param_entry->Type) {
                 case TONEX_PARAM_TYPE_SWITCH: {
-                    bool isEnabled = param_entry->Value == 1;
+                    uint8_t selectedValue = param_entry->Value;
+                    bool isEnabled = selectedValue == 1;
                     
-                    if (tonex_params_get_ui_style(param, &color, &name, isEnabled, &value) == ESP_OK) {
+                    if (tonex_params_get_ui_style(param, selectedValue, &color, &name, &value) == ESP_OK) {
                         setFSButton(buttonIndex, color, isEnabled, name, value, true);
                     } else {
                         setFSButton(buttonIndex, 0xFFFFFF, false, "", NULL, false);
@@ -1512,9 +1516,10 @@ void updateFSButtons() {
                         (CONFIG_ITEM_EXT_FOOTSW_EFFECT1_VAL2 + item * 4);
                         
                     uint32_t val2 = control_get_config_item_int(val2Index); // _VAL2
-                    bool isEnabled = param_entry->Value == (uint8_t)val2;
+                    uint8_t selectedValue = param_entry->Value;
+                    bool isEnabled = selectedValue == val2;
                     
-                    if (tonex_params_get_ui_style(param, &color, &name, isEnabled, &value) == ESP_OK) {
+                    if (tonex_params_get_ui_style(param, selectedValue, &color, &name, &value) == ESP_OK) {
                         setFSButton(buttonIndex, color, isEnabled, name, value, true);
                     } else {
                         setFSButton(buttonIndex, 0xFFFFFF, false, "", NULL, false);
@@ -1658,6 +1663,7 @@ void UI_SetPresetLabel(uint16_t index, char* name)
     // build command
     ui_update.ElementID = UI_ELEMENT_PRESET_NAME;
     ui_update.Action = UI_ACTION_SET_LABEL_TEXT;
+    ui_update.Value = index;
     sprintf(ui_update.Text, "%d: ", (int)index + usb_get_first_preset_index_for_connected_modeller());
     strncat(ui_update.Text, name, MAX_UI_TEXT - 1);
 
@@ -1730,20 +1736,20 @@ void UI_SetAmpSkinSlot(uint8_t skinIndex1, uint8_t skinIndex2, uint8_t skinIndex
     }
 }
 
-void UI_SetPresetButtonsSelected(bool selected1, bool selected2, bool selected3, bool selected4)
-{
-    tUIUpdate ui_update;
+// void UI_SetPresetButtonsSelected(bool selected1, bool selected2, bool selected3, bool selected4)
+// {
+//     tUIUpdate ui_update;
 
-    // build commands
-    ui_update.Action = UI_ACTION_SET_PRESET_BUTTON_SELECTED;
-    ui_update.Value = selected1 | selected2 << 1 | selected3 << 2 | selected4 << 3;
+//     // build commands
+//     ui_update.Action = UI_ACTION_SET_PRESET_BUTTON_SELECTED;
+//     ui_update.Value = selected1 | selected2 << 1 | selected3 << 2 | selected4 << 3;
 
-    // send to queue
-    if (xQueueSend(ui_update_queue, (void*)&ui_update, 0) != pdPASS)
-    {
-        ESP_LOGE(TAG, "UI Update queue send failed!");            
-    }
-}
+//     // send to queue
+//     if (xQueueSend(ui_update_queue, (void*)&ui_update, 0) != pdPASS)
+//     {
+//         ESP_LOGE(TAG, "UI Update queue send failed!");            
+//     }
+// }
 
 // void UI_SetFSButton(uint32_t buttonIndex, uint32_t color, bool active, char *effect, char *value)
 // {
@@ -2214,6 +2220,22 @@ void updateIconOrder()
         lv_obj_set_x(icon, offset);
     }
 }
+
+void update_selected_preset_button()
+{
+    bool isInCurrentBank = (ui_PresetIndex/4) == ui_BankIndex;
+    uint16_t selectedPresetButtonIndex = ui_PresetIndex % 4;
+    
+    bool selected1 = /*!ui_AltMode &&*/ isInCurrentBank && selectedPresetButtonIndex == 0;
+    bool selected2 = /*!ui_AltMode &&*/ isInCurrentBank && selectedPresetButtonIndex == 1;
+    bool selected3 = /*!ui_AltMode &&*/ isInCurrentBank && selectedPresetButtonIndex == 2;
+    bool selected4 = /*!ui_AltMode &&*/ isInCurrentBank && selectedPresetButtonIndex == 3;
+    
+    lv_obj_set_style_outline_width(ui_PresetButton1, (selected1 ? 4 : 0), LV_PART_MAIN| LV_STATE_DEFAULT);
+    lv_obj_set_style_outline_width(ui_PresetButton2, (selected2 ? 4 : 0), LV_PART_MAIN| LV_STATE_DEFAULT);
+    lv_obj_set_style_outline_width(ui_PresetButton3, (selected3 ? 4 : 0), LV_PART_MAIN| LV_STATE_DEFAULT);
+    lv_obj_set_style_outline_width(ui_PresetButton4, (selected4 ? 4 : 0), LV_PART_MAIN| LV_STATE_DEFAULT);
+}
 #endif
 
 /****************************************************************************
@@ -2248,6 +2270,8 @@ static uint8_t update_ui_element(tUIUpdate* update)
         case UI_ELEMENT_PRESET_NAME:
         {
             element_1 = ui_PresetHeadingLabel;
+            ui_PresetIndex = update->Value;
+            update_selected_preset_button();
         } break;
 
         case UI_ELEMENT_BANK_INDEX:
@@ -3668,6 +3692,8 @@ static uint8_t update_ui_element(tUIUpdate* update)
                 char buf[128];
                 sprintf(buf, "BANK\n%d", (int)round(update->Value) + 1);
                 lv_label_set_text(ui_BankTitleLabel, buf);
+                ui_BankIndex = update->Value;
+                update_selected_preset_button();
             }
 #endif            
         } break;
@@ -3686,20 +3712,20 @@ static uint8_t update_ui_element(tUIUpdate* update)
 #endif
         } break;
 
-        case UI_ACTION_SET_PRESET_BUTTON_SELECTED:
-        {
-#if CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI
-            bool selected1 = update->Value & 1;
-            bool selected2 = (update->Value >> 1) & 1;
-            bool selected3 = (update->Value >> 2) & 1;
-            bool selected4 = (update->Value >> 3) & 1;
+//         case UI_ACTION_SET_PRESET_BUTTON_SELECTED:
+//         {
+// #if CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI
+//             bool selected1 = update->Value & 1;
+//             bool selected2 = (update->Value >> 1) & 1;
+//             bool selected3 = (update->Value >> 2) & 1;
+//             bool selected4 = (update->Value >> 3) & 1;
             
-            lv_obj_set_style_outline_width(ui_PresetButton1, (selected1 ? 4 : 0), LV_PART_MAIN| LV_STATE_DEFAULT);
-            lv_obj_set_style_outline_width(ui_PresetButton2, (selected2 ? 4 : 0), LV_PART_MAIN| LV_STATE_DEFAULT);
-            lv_obj_set_style_outline_width(ui_PresetButton3, (selected3 ? 4 : 0), LV_PART_MAIN| LV_STATE_DEFAULT);
-            lv_obj_set_style_outline_width(ui_PresetButton4, (selected4 ? 4 : 0), LV_PART_MAIN| LV_STATE_DEFAULT);
-#endif   
-        } break;
+//             lv_obj_set_style_outline_width(ui_PresetButton1, (selected1 ? 4 : 0), LV_PART_MAIN| LV_STATE_DEFAULT);
+//             lv_obj_set_style_outline_width(ui_PresetButton2, (selected2 ? 4 : 0), LV_PART_MAIN| LV_STATE_DEFAULT);
+//             lv_obj_set_style_outline_width(ui_PresetButton3, (selected3 ? 4 : 0), LV_PART_MAIN| LV_STATE_DEFAULT);
+//             lv_obj_set_style_outline_width(ui_PresetButton4, (selected4 ? 4 : 0), LV_PART_MAIN| LV_STATE_DEFAULT);
+// #endif   
+//         } break;
 
         case UI_ACTION_SET_ALT_BUTTON:
         {

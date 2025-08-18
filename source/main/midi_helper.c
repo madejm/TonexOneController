@@ -1226,6 +1226,15 @@ esp_err_t midi_helper_adjust_param_via_midi(uint8_t change_num, uint8_t midi_val
             value = midi_helper_scale_midi_to_float(param, midi_value);
             value = tonex_params_clamp_value(param, value);
         } break;
+ 
+        case 126:
+        {
+            //change alt mode
+            // param = TONEX_CONTROLLER_FOOTSWITCH_ALT_MODE;
+            
+            // no param change needed
+            return ESP_OK;
+        } break;
 
         case 127: 
         {
@@ -1922,6 +1931,11 @@ uint16_t midi_helper_get_param_for_change_num(uint8_t change_num)
          case 119:
          {
              param = TONEX_GLOBAL_TUNING_REFERENCE;
+         } break;
+ 
+         case 126:
+         {
+             param = TONEX_CONTROLLER_FOOTSWITCH_ALT_MODE;
          } break;
 
          case 127:
