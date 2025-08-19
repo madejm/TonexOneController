@@ -66,9 +66,9 @@ enum CommandEvents
     EVENT_PRESET_UP,
     EVENT_PRESET_INDEX,
     EVENT_PRESET_IN_BANK_INDEX,
-    EVENT_BANK_INDEX,
     EVENT_BANK_UP,
     EVENT_BANK_DOWN,
+    EVENT_BANK_INDEX_SYNC,
     // EVENT_SET_ALT_MODE,
     EVENT_SET_PRESET_NAME,
     EVENT_SET_PRESET_DETAILS,
@@ -228,9 +228,11 @@ typedef struct
     tSkinConfig SkinConfig;
 } tConfigData;
 
+#define TAP_TEMPO_MAX_COUNT 6
+
 typedef struct
 {
-    uint32_t LastTime;
+    uint32_t Times[TAP_TEMPO_MAX_COUNT];
     float BPM;
 } tTapTempo;
 
@@ -298,10 +300,10 @@ static uint8_t preset_order_mapping_index(int8_t presetIndex)
 //     );
 // }
 
-void update_preset_buttons()
+void update_bank_ui()
 {
-    UI_SetAmpSkinSlot(
-        // !ControlData.FSAltMode,
+    UI_SetBankIndex(
+        ControlData.BankIndex,
         ControlData.ConfigData.SkinConfig.SkinIndex[preset_order_mapping_index(ControlData.BankIndex * 4)],
         ControlData.ConfigData.SkinConfig.SkinIndex[preset_order_mapping_index(ControlData.BankIndex * 4 + 1)],
         ControlData.ConfigData.SkinConfig.SkinIndex[preset_order_mapping_index(ControlData.BankIndex * 4 + 2)],
@@ -340,8 +342,9 @@ static uint8_t process_control_command(tControlMessage* message)
                     // send message to USB
                     usb_set_preset(preset);
 
-                    if ((newIndex/4) != ControlData.BankIndex) {
-                        footswitches_bank_down();
+                    uint8_t bank = newIndex/4;
+                    if (bank != ControlData.BankIndex) {
+                        footswitches_bank_set(bank);
                     }
                 }
                 else if (mappedIndex > 0)
@@ -352,8 +355,9 @@ static uint8_t process_control_command(tControlMessage* message)
                     // send message to USB
                     usb_set_preset(preset);
 
-                    if ((newIndex/4) != ControlData.BankIndex) {
-                        footswitches_bank_down();
+                    uint8_t bank = newIndex/4;
+                    if (bank != ControlData.BankIndex) {
+                        footswitches_bank_set(bank);
                     }
                 }
             }
@@ -373,8 +377,9 @@ static uint8_t process_control_command(tControlMessage* message)
                     // send message to USB
                     usb_set_preset(preset);
 
-                    if ((newIndex/4) != ControlData.BankIndex) {
-                        footswitches_bank_up();
+                    uint8_t bank = newIndex/4;
+                    if (bank != ControlData.BankIndex) {
+                        footswitches_bank_set(bank);
                     }
                 }
                 else if (mappedIndex < (usb_get_max_presets_for_connected_modeller() - 1))
@@ -385,8 +390,9 @@ static uint8_t process_control_command(tControlMessage* message)
                     // send message to USB
                     usb_set_preset(preset);
 
-                    if ((newIndex/4) != ControlData.BankIndex) {
-                        footswitches_bank_up();
+                    uint8_t bank = newIndex/4;
+                    if (bank != ControlData.BankIndex) {
+                        footswitches_bank_set(bank);
                     }
                 }
             }
@@ -432,15 +438,12 @@ static uint8_t process_control_command(tControlMessage* message)
             }
         } break;
 
-        case EVENT_BANK_INDEX:
+        case EVENT_BANK_INDEX_SYNC:
         {
 #if CONFIG_TONEX_CONTROLLER_HAS_DISPLAY
             // update UI
             ControlData.BankIndex = message->Value;
-
-            UI_SetBankIndex(ControlData.BankIndex);
-
-            update_preset_buttons();
+            update_bank_ui();
 #endif
         } break;
 
@@ -812,8 +815,7 @@ static uint8_t process_control_command(tControlMessage* message)
         case EVENT_TRIGGER_TAP_TEMPO:
         {
             uint32_t current_time = xTaskGetTickCount(); 
-            uint32_t delta = current_time - ControlData.TapTempo.LastTime;
-            float bpm;
+            uint32_t last_time_delta = current_time - ControlData.TapTempo.Times[0];
 
             // debug
             //ESP_LOGI(TAG, "Tap Tempo %d %d", (int)current_time, (int)delta);
@@ -821,13 +823,35 @@ static uint8_t process_control_command(tControlMessage* message)
             // BPM can range from 40 to 240 bpm: 1.5 second2 maximum to 250 msec minimum between beats
             
             // check time since last tap
-            if (delta > 1500)
+            if (last_time_delta > 1500)
             {
                 // less than 40 bpm, save time and wait for another trigger
-                ControlData.TapTempo.LastTime = current_time;
+                ControlData.TapTempo.Times[0] = current_time;
+
+                for (uint8_t i=1; i<TAP_TEMPO_MAX_COUNT; i++) {
+                    ControlData.TapTempo.Times[i] = 0;
+                }
             }
             else 
             {
+                for (int8_t i = TAP_TEMPO_MAX_COUNT - 1; i>0; i--) {
+                    ControlData.TapTempo.Times[i] = ControlData.TapTempo.Times[i-1];
+                }
+                ControlData.TapTempo.Times[0] = current_time;
+
+                uint32_t deltaCount = 0;
+                uint32_t deltaSum = 0;
+
+                for (uint8_t i=0; i<TAP_TEMPO_MAX_COUNT-1; i++) {
+                    if (ControlData.TapTempo.Times[i+1] == 0) {
+                        break;
+                    }
+                    deltaCount += 1;
+                    deltaSum += ControlData.TapTempo.Times[i] - ControlData.TapTempo.Times[i+1];
+                }
+
+                float delta = ((float)deltaSum)/((float)deltaCount);
+
                 if (delta < 250)
                 {
                     // clamp at maximum bpm
@@ -835,7 +859,7 @@ static uint8_t process_control_command(tControlMessage* message)
                 }
 
                 // calculate bpm (60,000 is 60 seconds in msec)
-                bpm = 60000.0f / (float)delta;
+                float bpm = 60000.0f / (float)delta;
 
                 ControlData.TapTempo.BPM = bpm;
 
@@ -843,9 +867,6 @@ static uint8_t process_control_command(tControlMessage* message)
 
                 // update pedal
                 usb_modify_parameter(TONEX_GLOBAL_BPM, ControlData.TapTempo.BPM);
-
-                // save time for next trigger
-                ControlData.TapTempo.LastTime = current_time;
             }
         } break;
     }
@@ -943,13 +964,13 @@ void control_request_preset_in_bank_index(uint8_t index)
 * RETURN:      
 * NOTES:       
 *****************************************************************************/
-void control_request_bank_index(uint8_t index)
+void control_sync_bank_index(uint8_t index)
 {
     tControlMessage message;
 
-    ESP_LOGI(TAG, "control_request_bank_index %d", index);
+    ESP_LOGI(TAG, "control_sync_bank_index %d", index);
 
-    message.Event = EVENT_BANK_INDEX;
+    message.Event = EVENT_BANK_INDEX_SYNC;
     message.Value = index;
 
     // send to queue
@@ -989,7 +1010,7 @@ void control_request_bank_down()
     }
 }
 
-void control_switch_fs_alt_mode()
+void control_request_fs_alt_mode()
 {
     footswitches_switch_alt_mode();
 }
@@ -1551,7 +1572,7 @@ void control_set_preset_order(uint8_t* order)
     // update UI
     UI_SetPresetLabel(PresetIndexForOrderValue(ControlData.PresetIndex), ControlData.PresetNames[ControlData.PresetIndex]);
 
-    update_preset_buttons();
+    update_bank_ui();
 #endif
 }
 

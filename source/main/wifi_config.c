@@ -470,9 +470,9 @@ static void wifi_build_config_json(void)
     json_gen_obj_set_int(&pWebConfig->jstr, "EXTFS_ES8_V1_ALT", control_get_config_item_int(CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT8_VAL1));
     json_gen_obj_set_int(&pWebConfig->jstr, "EXTFS_ES8_V2_ALT", control_get_config_item_int(CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT8_VAL2));
 
-    json_gen_obj_set_int(&pWebConfig->jstr, "EXTFS_E9_CC_ALT", control_get_config_item_int(CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT9_CC));
-    json_gen_obj_set_int(&pWebConfig->jstr, "EXTFS_E9_V1_ALT", control_get_config_item_int(CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT9_VAL1));
-    json_gen_obj_set_int(&pWebConfig->jstr, "EXTFS_E9_V2_ALT", control_get_config_item_int(CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT9_VAL2));
+    json_gen_obj_set_int(&pWebConfig->jstr, "EXTFS_ES9_CC_ALT", control_get_config_item_int(CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT9_CC));
+    json_gen_obj_set_int(&pWebConfig->jstr, "EXTFS_ES9_V1_ALT", control_get_config_item_int(CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT9_VAL1));
+    json_gen_obj_set_int(&pWebConfig->jstr, "EXTFS_ES9_V2_ALT", control_get_config_item_int(CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT9_VAL2));
     
 
     json_gen_obj_set_int(&pWebConfig->jstr, "INTFS_ES1_SW", control_get_config_item_int(CONFIG_ITEM_INT_FOOTSW_EFFECT1_SW));

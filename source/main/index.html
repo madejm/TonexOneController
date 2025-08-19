@@ -443,8 +443,8 @@
 
         const img_eq = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAC0AAAAtCAMAAAANxBKoAAAAAXNSR0IB2cksfwAAAAlwSFlzAAALEwAACxMBAJqcGAAAATJQTFRFAAAApJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WpJ6WyfBttQAAAGZ0Uk5TAP/vEt8iz97QC0AEtJX+xkU4BgrH54WAivHhrAnDGLGQ5onwN30Mq+ODiOAgAhDC3IL6xK70hteSAw/bcuRZ+QHpEdP4wI+9zi9/fNblpBS4nQ2MvkPijfbRVZ/1gYuihH7yTkQ8KSZlWgAAAdtJREFUeJzN1d0rQ2EcB/Dfr7VmYQqpaRkl06wJaVqSKCKakcKFUv4ryaULLiRvU/JW5GJKp6ElRkKRt2EvtvE8Z8/e7Nn23Ijfxfk95/Rp++53zrODIBcCRiBeiggoQolTZQiUQcZ+XasA/eI6tbJqdSzOu4guYKrAK6I1iEEVInoDIhpLkTTCb4Q0u6oV0+W+RwAdhjPoCnI3PAld+U5aPvoy6ETlTlIdnZQG3UzXXJMZ6rz5PK0L30UXdL6yNiDJXRLIc3G0yaUvlADMx3VHqUkMp1xdTyerLkYn003n9LND3CSm2Bc2Mt3sqbqkMyk94GoL7gNY0c90694Xvd6KO1xt/aBJ9G9OgSc2LUkObcnbIjN50DqTdlr7ZkJ3nIBxI6470W1AdDQm6+R9mVwmV8N9LcBuIIPuOZRbkyMc1b3LtPfd8nX/EuuL9GhbbHsuA9j+tC3wtHV/4I4MePBFuSafD73KrQjneNosDUvk1rYjzqb9CJ5mi5GYVtth5TmjHlsgD3DNlT2ms/2zmSVjhCZRhsX0zyTZ9cCZRGdSJqYVo+sA3ZF5v5Bmi44NIT0+T2YyqAKRJMVP2q5VsjeuLh4ENEzgDG3GlmkRnVa59CTglLD+yzfgP9DfayEUPR1QYysAAAAASUVORK5CYII=";
 
-        var gateway = `ws://tonex.local/ws`;
-        // var gateway = `ws://${window.location.hostname}/ws`;
+        // var gateway = `ws://tonex.local/ws`;
+        var gateway = `ws://${window.location.hostname}/ws`;
         var websocket;
         var pageTimer = 0;
         var SocketConnected = 0;   
@@ -609,7 +609,6 @@
 
         // controller internal
         const TONEX_CONTROLLER_FOOTSWITCH_ALT_MODE = 118;
-        const TONEX_CONTROLLER_TAP_TEMPO = 119;
         const TONEX_CONTROLLER_LAST = 120;           // last actual parameter
         
 
@@ -618,6 +617,8 @@
         const midiControlChangeAssociations = new Map();
 
         // MAIN
+        midiControlChangeAssociations.set(255, { param: "disabled", value: { type: "TOGGLE" } })
+
         midiControlChangeAssociations.set("MAIN", null);
         midiControlChangeAssociations.set(102, { param: "GAIN", value: { type: "RANGE" } })
         midiControlChangeAssociations.set(103, { param: "VOLUME", value: { type: "RANGE" } })
@@ -713,7 +714,26 @@
         // DELAY / DIGITAL
         midiControlChangeAssociations.set("DELAY / DIGITAL", null);
         midiControlChangeAssociations.set(4, { param: "DELAY DIGITAL SYNC", value: { type: "TOGGLE" } })
-        midiControlChangeAssociations.set(5, { param: "DELAY DIGITAL TIME (TIMESIGN)", value: { type: "RANGE" } })
+        midiControlChangeAssociations.set(5, { param: "DELAY DIGITAL TIME (TIMESIGN)", value: { type: "CHOICE", values: {
+            0: "1/32",
+            1: "1/32 D",
+            2: "1/32 T",
+            3: "1/16",
+            4: "1/16 D",
+            5: "1/16 T",
+            6: "1/8",
+            7: "1/8 D",
+            8: "1/8 T",
+            9: "1/4",
+            10: "1/4 D",
+            11: "1/4 T",
+            12: "1/2",
+            13: "1/2 D",
+            14: "1/2 T",
+            15: "1/1",
+            16: "1/1 D",
+            17: "1/1 T"
+         } } })
         midiControlChangeAssociations.set(6, { param: "DELAY DIGITAL FEEDBACK", value: { type: "RANGE" } })
         midiControlChangeAssociations.set(7, { param: "DELAY DIGITAL MODE", value: { type: "CHOICE", values: { 0: "NORMAL", 64: "PING.PONG" } } })
         midiControlChangeAssociations.set(8, { param: "DELAY DIGITAL MIX", value: { type: "RANGE" } })
@@ -721,7 +741,26 @@
         // DELAY / TAPE
         midiControlChangeAssociations.set("DELAY / TAPE", null);
         midiControlChangeAssociations.set(91, { param: "DELAY TAPE SYNC", value: { type: "TOGGLE" } })
-        midiControlChangeAssociations.set(92, { param: "DELAY TAPE TIME (TIMESIGN)", value: { type: "RANGE" } })
+        midiControlChangeAssociations.set(92, { param: "DELAY TAPE TIME (TIMESIGN)", value: { type: "CHOICE", values: {
+            0: "1/32",
+            1: "1/32 D",
+            2: "1/32 T",
+            3: "1/16",
+            4: "1/16 D",
+            5: "1/16 T",
+            6: "1/8",
+            7: "1/8 D",
+            8: "1/8 T",
+            9: "1/4",
+            10: "1/4 D",
+            11: "1/4 T",
+            12: "1/2",
+            13: "1/2 D",
+            14: "1/2 T",
+            15: "1/1",
+            16: "1/1 D",
+            17: "1/1 T"
+         } } })
         midiControlChangeAssociations.set(93, { param: "DELAY TAPE FEEDBACK", value: { type: "RANGE" } })
         midiControlChangeAssociations.set(94, { param: "DELAY TAPE MODE", value: { type: "CHOICE", values: { 0: "NORMAL", 64: "PING.PONG" } } })
         midiControlChangeAssociations.set(95, { param: "DELAY TAPE MIX", value: { type: "RANGE" } })
@@ -2051,12 +2090,12 @@
                     for (var i=1; i<=9; i++) {
                         configureParamSelect(`extfx${i}sw`, data[`EXTFS_ES${i}_SW`]);
                         setParamValue(`extfx${i}cc`, data[`EXTFS_ES${i}_CC`]);
-                        extFSChanged(`extfx${i}`);
+                        extFSChanged(`extfx${i}`, false, false);
                         setExtFSValue(`extfx${i}v1`, data[`EXTFS_ES${i}_V1`]);
                         setExtFSValue(`extfx${i}v2`, data[`EXTFS_ES${i}_V2`]);
                         
                         setParamValue(`extfx${i}cc-alt`, data[`EXTFS_ES${i}_CC_ALT`]);
-                        extFSChanged(`extfx${i}`, true);
+                        extFSChanged(`extfx${i}`, true, false);
                         setExtFSValue(`extfx${i}v1`, data[`EXTFS_ES${i}_V1_ALT`], true);
                         setExtFSValue(`extfx${i}v2`, data[`EXTFS_ES${i}_V2_ALT`], true);
                     }
@@ -2155,25 +2194,25 @@
 
                     configureParamSelect("intfx1sw", data['INTFS_ES1_SW']);
                     setParamValue("intfx1cc", data['INTFS_ES1_CC']);
-                    extFSChanged("intfx1");
+                    extFSChanged("intfx1", false, false);
                     setExtFSValue("intfx1v1", data['INTFS_ES1_V1']);
                     setExtFSValue("intfx1v2", data['INTFS_ES1_V2']);
 
                     configureParamSelect("intfx2sw", data['INTFS_ES2_SW']);
                     setParamValue("intfx2cc", data['INTFS_ES2_CC']);
-                    extFSChanged("intfx2");
+                    extFSChanged("intfx2", false, false);
                     setExtFSValue("intfx2v1", data['INTFS_ES2_V1']);
                     setExtFSValue("intfx2v2", data['INTFS_ES2_V2']);
 
                     configureParamSelect("intfx3sw", data['INTFS_ES3_SW']);
                     setParamValue("intfx3cc", data['INTFS_ES3_CC']);
-                    extFSChanged("intfx3");
+                    extFSChanged("intfx3", false, false);
                     setExtFSValue("intfx3v1", data['INTFS_ES3_V1']);
                     setExtFSValue("intfx3v2", data['INTFS_ES3_V2']);
 
                     configureParamSelect("intfx4sw", data['INTFS_ES4_SW']);
                     setParamValue("intfx4cc", data['INTFS_ES4_CC']);
-                    extFSChanged("intfx4");
+                    extFSChanged("intfx4", false, false);
                     setExtFSValue("intfx4v1", data['INTFS_ES4_V1']);
                     setExtFSValue("intfx4v2", data['INTFS_ES4_V2']);
 
@@ -2835,7 +2874,7 @@
                     setParamValue(`${fx}cc${altNewPostfix}`, associationKey);
                     extFSChanged(fx, !alt, false)
                 } else if (document.getElementById(`${fx}cc${altNewPostfix}`).value == 126) {
-                    setParamValue(`${fx}cc${altNewPostfix}`, null);
+                    setParamValue(`${fx}cc${altNewPostfix}`, midiControlChangeAssociations.get(255));
                     extFSChanged(fx, !alt, false)
                 }
             }
@@ -2908,6 +2947,9 @@
         function getExtFSValue(fs, value, alt=false) {
             let altPostfix = alt ? "-alt" : "";
             var extfxcc = document.getElementById(`extfx${fs}cc${altPostfix}`).value;
+            if (extfxcc == 255) {
+                extfxcc = 0;
+            }
             var association = midiControlChangeAssociations.get(parseInt(extfxcc));
 
             switch (association.value.type) {

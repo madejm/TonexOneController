@@ -69,6 +69,7 @@ enum FootswitchHandlers
 enum FootswitchEvents
 {
     FOOTSWITCH_EVENT_SWITCH_ALT_MODE,
+    FOOTSWITCH_EVENT_BANK_SET,
     FOOTSWITCH_EVENT_BANK_DOWN,
     FOOTSWITCH_EVENT_BANK_UP
 };
@@ -486,14 +487,14 @@ static void __attribute__((unused)) footswitch_handle_banked(tFootswitchHandler*
                         // bank down
                         handler->current_bank = newBank;
                         ESP_LOGI(TAG, "Footswitch banked down %d", handler->current_bank);
-                        control_request_bank_index(handler->current_bank);
+                        control_sync_bank_index(handler->current_bank);
                     }
                     else if (handler->current_bank > 0)
                     {
                         // bank down
                         handler->current_bank--;   
                         ESP_LOGI(TAG, "Footswitch banked down %d", handler->current_bank);
-                        control_request_bank_index(handler->current_bank);
+                        control_sync_bank_index(handler->current_bank);
                     }
 
                     handler->state = FOOTSWITCH_WAIT_RELEASE_1;
@@ -509,14 +510,14 @@ static void __attribute__((unused)) footswitch_handle_banked(tFootswitchHandler*
                         // bank up
                         handler->current_bank = newBank;
                         ESP_LOGI(TAG, "Footswitch banked up %d", handler->current_bank);
-                        control_request_bank_index(handler->current_bank);
+                        control_sync_bank_index(handler->current_bank);
                     }
                     else if ((handler->current_bank + 1) < banks_count)
                     {
                         // bank up
                         handler->current_bank++;
                         ESP_LOGI(TAG, "Footswitch banked up %d", handler->current_bank);
-                        control_request_bank_index(handler->current_bank);
+                        control_sync_bank_index(handler->current_bank);
                     }
 
                     handler->state = FOOTSWITCH_WAIT_RELEASE_1;
@@ -666,6 +667,18 @@ static void footswitch_handle_effects(tFootswitchHandler* handler, tFootswitchEf
                                 // get the current value of the parameter
                                 else if (tonex_params_get_locked_access(&param_ptr) == ESP_OK)
                                 {
+                                    uint8_t CC = fx_handler[loop].config.CC;
+                                    
+                                    if (param == TONEX_PARAM_DELAY_DIGITAL_TS && param_ptr[TONEX_PARAM_DELAY_MODEL].Value == 1) {
+                                        // tape delay is selected, change param to tape ts
+                                        param = TONEX_PARAM_DELAY_TAPE_TS;
+                                        CC = 92;
+                                    } else if (param == TONEX_PARAM_DELAY_TAPE_TS && param_ptr[TONEX_PARAM_DELAY_MODEL].Value == 0) {
+                                        // digital delay is selected, change param to digital ts
+                                        param = TONEX_PARAM_DELAY_DIGITAL_TS;
+                                        CC = 5;
+                                    }
+
                                     // is the parameter a boolean type?
                                     if (param_ptr[param].Type == TONEX_PARAM_TYPE_SWITCH)
                                     {
@@ -702,7 +715,7 @@ static void footswitch_handle_effects(tFootswitchHandler* handler, tFootswitchEf
                                             new_value = (float)fx_handler[loop].config.Value_1;
                                         }
 
-                                        midi_helper_adjust_param_via_midi(fx_handler[loop].config.CC, new_value);     
+                                        midi_helper_adjust_param_via_midi(CC, new_value);
                                     }
                                     else if (param_ptr[param].Type == TONEX_PARAM_TYPE_RANGE)
                                     {
@@ -732,7 +745,7 @@ static void footswitch_handle_effects(tFootswitchHandler* handler, tFootswitchEf
                                             new_value = fx_handler[loop].config.Value_1;
                                         }
 
-                                        midi_helper_adjust_param_via_midi(fx_handler[loop].config.CC, new_value);      
+                                        midi_helper_adjust_param_via_midi(CC, new_value);      
                                     } 
                                     else
                                     {
@@ -1017,55 +1030,63 @@ static uint8_t process_footswitch_command(tFootswitchMessage* message)
             return 0;
         } break;
 
+        case FOOTSWITCH_EVENT_BANK_SET:
+        {
+            uint8_t banks_count = get_banks_count((tFootswitchLayoutEntry*)&FootswitchLayouts[FootswitchControl.external_switch_mode]);
+
+            if (message->Value >= banks_count) {
+                return 1;
+            }
+            tFootswitchHandler *handler = &FootswitchControl.Handlers[FOOTSWITCH_HANDLER_EXTERNAL_PRESETS];
+            handler->current_bank = message->Value;
+            control_sync_bank_index(handler->current_bank);
+        } break;
+        
         case FOOTSWITCH_EVENT_BANK_UP:
         {
-                uint8_t banks_count = get_banks_count((tFootswitchLayoutEntry*)&FootswitchLayouts[FootswitchControl.external_switch_mode]);
+            uint8_t banks_count = get_banks_count((tFootswitchLayoutEntry*)&FootswitchLayouts[FootswitchControl.external_switch_mode]);
 
-                for (int16_t index = 0; index < FOOTSWITCH_HANDLER_MAX; index++) {
-                    tFootswitchHandler *handler = &FootswitchControl.Handlers[index];
+            tFootswitchHandler *handler = &FootswitchControl.Handlers[FOOTSWITCH_HANDLER_EXTERNAL_PRESETS];
 
-                    if (control_get_config_item_int(CONFIG_ITEM_LOOP_AROUND))
-                    {
-                        uint8_t newBank = ((handler->current_bank + 1) < banks_count) ? (handler->current_bank + 1) : 0;
-                        // bank up
-                        handler->current_bank = newBank;
-                        ESP_LOGI(TAG, "Footswitch banked up %d", handler->current_bank);
-                        control_request_bank_index(handler->current_bank);
-                    }
-                    else if ((handler->current_bank + 1) < banks_count)
-                    {
-                        // bank up
-                        handler->current_bank++;
-                        ESP_LOGI(TAG, "Footswitch banked up %d", handler->current_bank);
-                        control_request_bank_index(handler->current_bank);
-                    }
-                }
+            if (control_get_config_item_int(CONFIG_ITEM_LOOP_AROUND))
+            {
+                uint8_t newBank = ((handler->current_bank + 1) < banks_count) ? (handler->current_bank + 1) : 0;
+                // bank up
+                handler->current_bank = newBank;
+                ESP_LOGI(TAG, "Footswitch banked up %d", handler->current_bank);
+                control_sync_bank_index(handler->current_bank);
+            }
+            else if ((handler->current_bank + 1) < banks_count)
+            {
+                // bank up
+                handler->current_bank++;
+                ESP_LOGI(TAG, "Footswitch banked up %d", handler->current_bank);
+                control_sync_bank_index(handler->current_bank);
+            }
 
-                return 0;
+            return 0;
         } break;
 
         case FOOTSWITCH_EVENT_BANK_DOWN:
         {
             uint8_t banks_count = get_banks_count((tFootswitchLayoutEntry*)&FootswitchLayouts[FootswitchControl.external_switch_mode]);
 
-            for (int16_t index = 0; index < FOOTSWITCH_HANDLER_MAX; index++) {
-                tFootswitchHandler *handler = &FootswitchControl.Handlers[index];
-                
-                if (control_get_config_item_int(CONFIG_ITEM_LOOP_AROUND))
-                {
-                    uint8_t newBank = (handler->current_bank > 0) ? (handler->current_bank - 1) : (banks_count - 1);
-                    // bank down
-                    handler->current_bank = newBank;
-                    ESP_LOGI(TAG, "Footswitch banked down %d", handler->current_bank);
-                    control_request_bank_index(handler->current_bank);
-                }
-                else if (handler->current_bank > 0)
-                {
-                    // bank down
-                    handler->current_bank--;   
-                    ESP_LOGI(TAG, "Footswitch banked down %d", handler->current_bank);
-                    control_request_bank_index(handler->current_bank);
-                }
+            tFootswitchHandler *handler = &FootswitchControl.Handlers[FOOTSWITCH_HANDLER_EXTERNAL_PRESETS];
+            
+            if (control_get_config_item_int(CONFIG_ITEM_LOOP_AROUND))
+            {
+                uint8_t newBank = (handler->current_bank > 0) ? (handler->current_bank - 1) : (banks_count - 1);
+                // bank down
+                handler->current_bank = newBank;
+                ESP_LOGI(TAG, "Footswitch banked down %d", handler->current_bank);
+                control_sync_bank_index(handler->current_bank);
+            }
+            else if (handler->current_bank > 0)
+            {
+                // bank down
+                handler->current_bank--;   
+                ESP_LOGI(TAG, "Footswitch banked down %d", handler->current_bank);
+                control_sync_bank_index(handler->current_bank);
             }
 
             return 0;
@@ -1080,6 +1101,18 @@ void footswitches_switch_alt_mode()
     tFootswitchMessage message;
 
     message.Event = FOOTSWITCH_EVENT_SWITCH_ALT_MODE;
+
+    // send to queue
+    if (xQueueSend(footswitch_input_queue, (void*)&message, 0) != pdPASS)
+    {      
+    }
+}
+
+void footswitches_bank_set(uint8_t bankIndex) {
+    tFootswitchMessage message;
+
+    message.Event = FOOTSWITCH_EVENT_BANK_SET;
+    message.Value = bankIndex;
 
     // send to queue
     if (xQueueSend(footswitch_input_queue, (void*)&message, 0) != pdPASS)

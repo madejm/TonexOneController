@@ -318,8 +318,9 @@ void control_request_preset_index(uint8_t index);
 void control_request_preset_in_bank_index(uint8_t index);
 void control_request_bank_up();
 void control_request_bank_down();
-void control_switch_fs_alt_mode();
-void control_request_bank_index(uint8_t index);
+void control_request_fs_alt_mode();
+
+void control_sync_bank_index(uint8_t index);
 void control_set_usb_status(uint32_t status);
 void control_set_bt_status(uint32_t status);
 void control_set_wifi_status(uint32_t status);

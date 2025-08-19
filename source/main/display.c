@@ -115,7 +115,7 @@ enum UIAction
     UI_ACTION_SET_STATE,
     UI_ACTION_SET_LABEL_TEXT,
     UI_ACTION_SET_ENTRY_TEXT,
-    UI_ACTION_SET_AMP_SKIN_SLOT,
+    // UI_ACTION_SET_AMP_SKIN_SLOT,
     // UI_ACTION_SET_PRESET_BUTTON_SELECTED,
     UI_ACTION_SET_ALT_BUTTON,
     // UI_ACTION_SET_FS_BUTTON,
@@ -127,7 +127,7 @@ typedef struct
     uint8_t ElementID;
     uint8_t Action;
     uint32_t Value;
-    bool State;
+    uint16_t State;
     char Text[MAX_UI_TEXT];
 } tUIUpdate;
 
@@ -323,57 +323,103 @@ void FSButtonAction(uint32_t buttonIndex)
             return;
         }
 
+        if (param == TONEX_PARAM_DELAY_DIGITAL_TS && param_ptr[TONEX_PARAM_DELAY_MODEL].Value == 1) {
+            // tape delay is selected, change param to tape ts
+            param = TONEX_PARAM_DELAY_TAPE_TS;
+            cc = 92;
+        } else if (param == TONEX_PARAM_DELAY_TAPE_TS && param_ptr[TONEX_PARAM_DELAY_MODEL].Value == 0) {
+            // digital delay is selected, change param to digital ts
+            param = TONEX_PARAM_DELAY_DIGITAL_TS;
+            cc = 5;
+        }
+
         float new_value;
 
-        if (param_ptr[param].Type == TONEX_PARAM_TYPE_SWITCH) {
+        switch (param_ptr[param].Type) {
+            case TONEX_PARAM_TYPE_SWITCH: {
+                // toggle the current value
+                if (param_ptr[param].Value == 0)
+                {
+                    new_value = 1;
+                }
+                else
+                {
+                    new_value = 0;
+                }
 
-            // toggle the current value
-            if (param_ptr[param].Value == 0)
-            {
-                new_value = 1;
-            }
-            else
-            {
-                new_value = 0;
-            }
+                tonex_params_release_locked_access();
 
-            tonex_params_release_locked_access();
+                // midi_helper_adjust_param_via_midi(cc, new_value); 
+                usb_modify_parameter(param, new_value);
+            } break;
 
-            // midi_helper_adjust_param_via_midi(cc, new_value); 
-            usb_modify_parameter(param, new_value);
+            case TONEX_PARAM_TYPE_SELECT: {
+                // save current value before we release the locked access
+                // select params are really integers saved as floats
+                uint8_t current_select_val = (uint8_t)param_ptr[param].Value;
+
+                // release access now as midi helper needs the mutex
+                tonex_params_release_locked_access();
+                
+                uint32_t val1Index = ui_AltMode ?
+                    (CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT1_VAL1 + item * 3)
+                    :
+                    (CONFIG_ITEM_EXT_FOOTSW_EFFECT1_VAL1 + item * 4);
+                uint32_t val1 = control_get_config_item_int(val1Index); // _VAL1
+                uint32_t val2 = control_get_config_item_int(val1Index + 1); // _VAL2
+
+                if (current_select_val == val1)
+                {
+                    new_value = (float)val2;
+                }
+                else
+                {
+                    new_value = (float)val1;
+                }
+
+                midi_helper_adjust_param_via_midi(cc, new_value);
+            } break;
+
+            case TONEX_PARAM_TYPE_RANGE: {
+                float current_param_value = param_ptr[param].Value;
+
+                // release access now as midi helper needs the mutex
+                tonex_params_release_locked_access();
+
+                uint32_t val1Index = ui_AltMode ?
+                    (CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT1_VAL1 + item * 3)
+                    :
+                    (CONFIG_ITEM_EXT_FOOTSW_EFFECT1_VAL1 + item * 4);
+                uint32_t val1 = control_get_config_item_int(val1Index); // _VAL1
+                uint32_t val2 = control_get_config_item_int(val1Index + 1); // _VAL2
+
+                // flip between value 1 and value 2
+                // get value 1 (Midi 0..127) scaled back to a float to it can be compared with the current param value (a float)
+                float value_1 = midi_helper_scale_midi_to_float(param, val1);
+
+                // note here: scaling Midi to float may result in rounding errors. This check is to make sure
+                // we can find the current value without missing it due to slight difference
+                float param_diff = fabs(current_param_value - value_1);
+
+                // debug
+                //ESP_LOGI(TAG, "Footswitch FX Param difference %f", param_diff);    
+
+                if (param_diff < 0.1f)
+                {
+                    new_value = val2;
+                }
+                else
+                {
+                    new_value = val1;
+                }
+
+                midi_helper_adjust_param_via_midi(cc, new_value);
+            } break;
+
+            default:
+                tonex_params_release_locked_access();
+                break;
         }
-        else if (param_ptr[param].Type == TONEX_PARAM_TYPE_SELECT)
-        {
-            // save current value before we release the locked access
-            // select params are really integers saved as floats
-            uint8_t current_select_val = (uint8_t)param_ptr[param].Value;
-
-            // release access now as midi helper needs the mutex
-            tonex_params_release_locked_access();
-            
-            uint32_t val1Index = ui_AltMode ?
-                (CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT1_VAL1 + item * 3)
-                :
-                (CONFIG_ITEM_EXT_FOOTSW_EFFECT1_VAL1 + item * 4);
-            uint32_t val1 = control_get_config_item_int(val1Index); // _VAL1
-            uint32_t val2 = control_get_config_item_int(val1Index + 1); // _VAL2
-
-            if (current_select_val == val1)
-            {
-                new_value = (float)val2;
-            }
-            else
-            {
-                new_value = (float)val1;
-            }
-
-            midi_helper_adjust_param_via_midi(cc, new_value);     
-        }
-        else
-        {
-            tonex_params_release_locked_access();
-        }
-
         return;
     }
 }
@@ -426,25 +472,22 @@ void TapTempoAction(lv_event_t * e)
 {
     control_trigger_tap_tempo();
 }
-
+void FS4Action(lv_event_t * e)
+{
+    FSButtonAction(4);
+}
+void FS5Action(lv_event_t * e)
+{
+    FSButtonAction(5);
+}
 void FS6Action(lv_event_t * e)
 {
-    wifi_log_msg("UI FS6");
     FSButtonAction(6);
 }
-
 void FS7Action(lv_event_t * e)
 {
-    wifi_log_msg("UI FS7");
     FSButtonAction(7);
 }
-
-void FS9Action(lv_event_t * e)
-{
-    wifi_log_msg("UI FS9");
-    FSButtonAction(9);
-}
-
 void AltButtonAction(lv_event_t * e)
 {
     wifi_log_msg("UI ALT");
@@ -1411,14 +1454,17 @@ void setFSButton(uint32_t buttonIndex, uint32_t color, bool active, const char *
         case 3:
             element_1 = ui_PresetButton4;
             break;
+        case 4:
+            element_1 = ui_FS4Button;
+            break;
+        case 5:
+            element_1 = ui_FS5Button;
+            break;
         case 6:
             element_1 = ui_FS6Button;
             break;
         case 7:
             element_1 = ui_FS7Button;
-            break;
-        case 9:
-            element_1 = ui_FS9Button;
             break;
         default:
             return;
@@ -1430,8 +1476,11 @@ void setFSButton(uint32_t buttonIndex, uint32_t color, bool active, const char *
     sprintf(text, effect);
 
     if (value != NULL) {
-        strncat(text, ": ", MAX_UI_TEXT - 1);
+        strncat(text, ":\n", MAX_UI_TEXT - 1);
         strncat(text, value, MAX_UI_TEXT - 1);
+        lv_obj_set_style_pad_top(element_1, 7, LV_PART_MAIN| LV_STATE_DEFAULT);
+    } else {
+        lv_obj_set_style_pad_top(element_1, 20, LV_PART_MAIN| LV_STATE_DEFAULT);
     }
 
     lv_label_set_text(element_1, text);
@@ -1451,6 +1500,27 @@ void setFSButton(uint32_t buttonIndex, uint32_t color, bool active, const char *
 
     if (buttonIndex < 4) {
         lv_obj_set_style_outline_opa(element_1, (ui_AltMode ? 0 : 255), LV_PART_MAIN | LV_STATE_DEFAULT);
+
+        int16_t width = ui_AltMode ? 156 : 196;
+        int16_t x;
+
+        switch (buttonIndex) {
+            case 0:
+                x = ui_AltMode ? -318 : -297;
+                break;
+            case 1:
+                x = ui_AltMode ? -158 : -99;
+                break;
+            case 2:
+                x = ui_AltMode ? 0 : 99;
+                break;
+            case 3:
+                x = ui_AltMode ? 158 : 297;
+                break;
+        }
+        
+        lv_obj_set_width(element_1, width);
+        lv_obj_set_x(element_1, x);
     }
 
     if (visible || (buttonIndex < 4 && !ui_AltMode)) {
@@ -1461,12 +1531,6 @@ void setFSButton(uint32_t buttonIndex, uint32_t color, bool active, const char *
 }
 
 void updateFSButtons() {
-    tTonexParameter* param_ptr;
-
-    if (tonex_params_get_locked_access(&param_ptr) != ESP_OK) {
-        wifi_log_msg("updateFSButtons CANNOT LOCK");
-        return;
-    }
 
     for (uint32_t buttonIndex = 0; buttonIndex < MAX_EXTERNAL_EFFECT_FOOTSWITCHES; buttonIndex++)
     {
@@ -1487,26 +1551,34 @@ void updateFSButtons() {
             uint32_t param = midi_helper_get_param_for_change_num(cc);
 
             if (param == TONEX_UNKNOWN) {
-                setFSButton(buttonIndex, 0xFFFFFF, false, "", NULL, false);
+                setFSButton(buttonIndex, 0x808080, false, "", NULL, (ui_AltMode || buttonIndex > 5));
                 continue;
             }
 
-            tTonexParameter* param_entry = &param_ptr[param];
+            tTonexParameter *param_ptr;
+            
+            if (tonex_params_get_locked_access(&param_ptr) != ESP_OK) {
+                continue;
+                // return;
+            }
 
-            uint32_t color;
-            const char *name;
-            const char *value;
+            if (param == TONEX_PARAM_DELAY_DIGITAL_TS && param_ptr[TONEX_PARAM_DELAY_MODEL].Value == 1) {
+                // tape delay is selected, change param to tape ts
+                param = TONEX_PARAM_DELAY_TAPE_TS;
+            } else if (param == TONEX_PARAM_DELAY_TAPE_TS && param_ptr[TONEX_PARAM_DELAY_MODEL].Value == 0) {
+                // digital delay is selected, change param to digital ts
+                param = TONEX_PARAM_DELAY_DIGITAL_TS;
+            }
 
-            switch (param_entry->Type) {
+            tTonexParameter param_entry = param_ptr[param];
+
+            uint8_t selectedValue = 0;
+            bool isEnabled = false;
+
+            switch (param_entry.Type) {
                 case TONEX_PARAM_TYPE_SWITCH: {
-                    uint8_t selectedValue = param_entry->Value;
-                    bool isEnabled = selectedValue == 1;
-                    
-                    if (tonex_params_get_ui_style(param, selectedValue, &color, &name, &value) == ESP_OK) {
-                        setFSButton(buttonIndex, color, isEnabled, name, value, true);
-                    } else {
-                        setFSButton(buttonIndex, 0xFFFFFF, false, "", NULL, false);
-                    }
+                    selectedValue = param_entry.Value;
+                    isEnabled = selectedValue == 1;
                 } break;
 
                 case TONEX_PARAM_TYPE_SELECT: {
@@ -1516,28 +1588,45 @@ void updateFSButtons() {
                         (CONFIG_ITEM_EXT_FOOTSW_EFFECT1_VAL2 + item * 4);
                         
                     uint32_t val2 = control_get_config_item_int(val2Index); // _VAL2
-                    uint8_t selectedValue = param_entry->Value;
-                    bool isEnabled = selectedValue == val2;
-                    
-                    if (tonex_params_get_ui_style(param, selectedValue, &color, &name, &value) == ESP_OK) {
-                        setFSButton(buttonIndex, color, isEnabled, name, value, true);
-                    } else {
-                        setFSButton(buttonIndex, 0xFFFFFF, false, "", NULL, false);
-                    }
+
+                    selectedValue = param_entry.Value;
+                    isEnabled = selectedValue == val2;
                 } break;
 
                 case TONEX_PARAM_TYPE_RANGE: {
-                    setFSButton(buttonIndex, 0xFFFFFF, false, "", NULL, false);
+                    uint32_t val2Index = ui_AltMode ?
+                        (CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT1_VAL2 + item * 3)
+                        :
+                        (CONFIG_ITEM_EXT_FOOTSW_EFFECT1_VAL2 + item * 4);
+                        
+                    uint32_t val2 = control_get_config_item_int(val2Index); // _VAL2
+                    selectedValue = param_entry.Value;
+                    isEnabled = selectedValue == val2;
+
+                    if (param == TONEX_GLOBAL_BPM) {
+                        isEnabled = false;
+                    }
                 } break;
             }
+
+
+            uint32_t color;
+            const char *name;
+            const char *value;
+
+            tonex_params_get_ui_style(param, selectedValue, &color, &name, &value, param_ptr);
+            tonex_params_release_locked_access();
+
+            setFSButton(buttonIndex, color, isEnabled, name, value, true);
+
+            // done, break for loop and go to next buttonIndex
+            break;
         }
 
         if (!didSet) {
-            setFSButton(buttonIndex, 0xFFFFFF, false, "", NULL, false);
+            setFSButton(buttonIndex, 0x808080, false, "", NULL, (ui_AltMode || buttonIndex > 5));
         }
     }
-
-    tonex_params_release_locked_access();
 }
 
 /****************************************************************************
@@ -1681,14 +1770,15 @@ void UI_SetPresetLabel(uint16_t index, char* name)
 * RETURN:      
 * NOTES:       
 *****************************************************************************/
-void UI_SetBankIndex(uint16_t index)
+void UI_SetBankIndex(uint16_t index, uint8_t skinIndex1, uint8_t skinIndex2, uint8_t skinIndex3, uint8_t skinIndex4)
 {
     tUIUpdate ui_update;
 
     // build command
     ui_update.ElementID = UI_ELEMENT_BANK_INDEX;
     ui_update.Action = UI_ACTION_SET_STATE;
-    ui_update.Value = index;
+    ui_update.State = index;
+    ui_update.Value = skinIndex1 | ((uint32_t)skinIndex2) << 8 | ((uint32_t)skinIndex3) << 16 | ((uint32_t)skinIndex4) << 24;
 
     // send to queue
     if (xQueueSend(ui_update_queue, (void*)&ui_update, 0) != pdPASS)
@@ -1721,20 +1811,19 @@ void UI_SetAmpSkin(uint16_t index)
 }
 
 // void UI_SetAmpSkinSlot(bool visible, uint8_t skinIndex1, uint8_t skinIndex2, uint8_t skinIndex3, uint8_t skinIndex4)
-void UI_SetAmpSkinSlot(uint8_t skinIndex1, uint8_t skinIndex2, uint8_t skinIndex3, uint8_t skinIndex4)
-{
-    tUIUpdate ui_update;
+// void UI_SetAmpSkinSlot(uint8_t skinIndex1, uint8_t skinIndex2, uint8_t skinIndex3, uint8_t skinIndex4)
+// {
+//     tUIUpdate ui_update;
 
-    // build commands
-    ui_update.Action = UI_ACTION_SET_AMP_SKIN_SLOT;
-    ui_update.Value = skinIndex1 | ((uint32_t)skinIndex2) << 8 | ((uint32_t)skinIndex3) << 16 | ((uint32_t)skinIndex4) << 24;
+//     // build commands
+//     ui_update.Action = UI_ACTION_SET_AMP_SKIN_SLOT;
 
-    // send to queue
-    if (xQueueSend(ui_update_queue, (void*)&ui_update, 0) != pdPASS)
-    {
-        ESP_LOGE(TAG, "UI Update queue send failed!");            
-    }
-}
+//     // send to queue
+//     if (xQueueSend(ui_update_queue, (void*)&ui_update, 0) != pdPASS)
+//     {
+//         ESP_LOGE(TAG, "UI Update queue send failed!");            
+//     }
+// }
 
 // void UI_SetPresetButtonsSelected(bool selected1, bool selected2, bool selected3, bool selected4)
 // {
@@ -3690,27 +3779,28 @@ static uint8_t update_ui_element(tUIUpdate* update)
             {
                 // set Bank index
                 char buf[128];
-                sprintf(buf, "BANK\n%d", (int)round(update->Value) + 1);
+                sprintf(buf, "BANK\n%d", (int)round(update->State) + 1);
                 lv_label_set_text(ui_BankTitleLabel, buf);
-                ui_BankIndex = update->Value;
+                ui_BankIndex = update->State;
                 update_selected_preset_button();
+
+                uint8_t skinIndex1 = update->Value & 0xFF;
+                uint8_t skinIndex2 = (update->Value >> 8) & 0xFF;
+                uint8_t skinIndex3 = (update->Value >> 16) & 0xFF;
+                uint8_t skinIndex4 = (update->Value >> 24) & 0xFF;
+                lv_img_set_src(ui_SkinImage1, ui_get_skin_image(skinIndex1));
+                lv_img_set_src(ui_SkinImage2, ui_get_skin_image(skinIndex2));
+                lv_img_set_src(ui_SkinImage3, ui_get_skin_image(skinIndex3));
+                lv_img_set_src(ui_SkinImage4, ui_get_skin_image(skinIndex4));
             }
 #endif            
         } break;
 
-        case UI_ACTION_SET_AMP_SKIN_SLOT:
-        {
-#if CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI
-            uint8_t skinIndex1 = update->Value & 0xFF;
-            uint8_t skinIndex2 = (update->Value >> 8) & 0xFF;
-            uint8_t skinIndex3 = (update->Value >> 16) & 0xFF;
-            uint8_t skinIndex4 = (update->Value >> 24) & 0xFF;
-            lv_img_set_src(ui_SkinImage1, ui_get_skin_image(skinIndex1));
-            lv_img_set_src(ui_SkinImage2, ui_get_skin_image(skinIndex2));
-            lv_img_set_src(ui_SkinImage3, ui_get_skin_image(skinIndex3));
-            lv_img_set_src(ui_SkinImage4, ui_get_skin_image(skinIndex4));
-#endif
-        } break;
+//         case UI_ACTION_SET_AMP_SKIN_SLOT:
+//         {
+// #if CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI
+// #endif
+//         } break;
 
 //         case UI_ACTION_SET_PRESET_BUTTON_SELECTED:
 //         {

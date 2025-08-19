@@ -130,3 +130,15 @@ def FS9Action(event_struct):
 def TapTempoAction(event_struct):
     return
 
+
+def FS8Action(event_struct):
+    return
+
+
+def FS5Action(event_struct):
+    return
+
+
+def FS4Action(event_struct):
+    return
+

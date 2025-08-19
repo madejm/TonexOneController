@@ -187,7 +187,6 @@ static tTonexParameter TonexParameters[TONEX_CONTROLLER_LAST] =
 
     //************* Config params *****************
     {0,      0,      1,    "FS_ALT", TONEX_PARAM_TYPE_SWITCH},                // TONEX_CONTROLLER_FOOTSWITCH_ALT_MODE
-    {0,      0,      1,    "FS_TAP_TEMPO", TONEX_PARAM_TYPE_RANGE},          // TONEX_CONTROLLER_TAP_TEMPO
 
     // dummy end of config marker
     // {0,      0,      0,    "CONTROL_LAST", TONEX_PARAM_TYPE_RANGE},       // TONEX_CONTROLLER_LAST,
@@ -226,9 +225,6 @@ const tTonexPresetColorMapping TonexColorMap[COLORS_COUNT] = {
     {0x000000, 0x595959}, // grey
 };
 
-const char *Style_OnOff[2] = {
-    "OFF", "ON"
-};
 const char *Style_ReverbModels[6] = {
     "SPRING 1", "SPRING 2", "SPRING 3", "SPRING 4", "ROOM", "PLATE"
 };
@@ -238,51 +234,29 @@ const char *Style_ModModels[5] = {
 const char *Style_DelayModels[2] = {
     "DIGITAL", "TAPE"
 };
+const char *Style_DelayTimeSignatures[18] = {
+    "1/32",
+    "1/32 D",
+    "1/32 T",
+    "1/16",
+    "1/16 D",
+    "1/16 T",
+    "1/8",
+    "1/8 D",
+    "1/8 T",
+    "1/4",
+    "1/4 D",
+    "1/4 T",
+    "1/2",
+    "1/2 D",
+    "1/2 T",
+    "1/1",
+    "1/1 D",
+    "1/1 T"
+};
 
-esp_err_t tonex_params_get_ui_style(uint32_t param, uint8_t selectedValue, uint32_t *color, char const **name, char const **value) {
-     if (param >= TONEX_PARAM_REVERB_POSITION && param <= TONEX_PARAM_REVERB_PLATE_MIX) {
-        *color = 0x006ff3;
-        *name = "REV";
-
-        switch (param) {
-            case TONEX_PARAM_REVERB_ENABLE:
-                *value = selectedValue == 0 ? "OFF" : "ON";
-                break;
-            case TONEX_PARAM_REVERB_MODEL:
-                *value = Style_ReverbModels[selectedValue];
-                break;
-            default:
-                return ESP_FAIL;
-        }
-    } else if (param >= TONEX_PARAM_MODULATION_POST && param <= TONEX_PARAM_MODULATION_ROTARY_LEVEL) {
-        *color = 0xe3a929;
-        *name = "MOD";
-
-        switch (param) {
-            case TONEX_PARAM_MODULATION_ENABLE:
-                *value = selectedValue == 0 ? "OFF" : "ON";
-                break;
-            case TONEX_PARAM_MODULATION_MODEL:
-                *value = Style_ModModels[selectedValue];
-                break;
-            default:
-                return ESP_FAIL;
-        }
-    } else if (param >= TONEX_PARAM_DELAY_POST && param <= TONEX_PARAM_DELAY_TAPE_MIX) {
-        *color = 0x72ac3a;
-        *name = "DELAY";
-
-        switch (param) {
-            case TONEX_PARAM_DELAY_ENABLE:
-                *value = selectedValue == 0 ? "OFF" : "ON";
-                break;
-            case TONEX_PARAM_DELAY_MODEL:
-                *value = Style_DelayModels[selectedValue];
-                break;
-            default:
-                return ESP_FAIL;
-        }
-    } else if (param >= TONEX_GLOBAL_BPM && param <= TONEX_CONTROLLER_TAP_TEMPO) {
+void tonex_params_get_ui_style(uint32_t param, uint8_t selectedValue, uint32_t *color, char const **name, char const **value, const tTonexParameter *allParameters) {
+    if (param >= TONEX_GLOBAL_BPM) {
         *color = 0xD1A60C;
         
         switch (param) {
@@ -294,18 +268,98 @@ esp_err_t tonex_params_get_ui_style(uint32_t param, uint8_t selectedValue, uint3
                 *name = "ALT MODE";
                 *value = NULL;
                 break;
-            case TONEX_CONTROLLER_TAP_TEMPO:
-                *name = "TAP TEMPO";
+            default:
+                *name = "?";
                 *value = NULL;
                 break;
-            default:
-                return ESP_FAIL;
         }
-    } else {
-        return ESP_FAIL;
+    } else if (param >= TONEX_PARAM_DELAY_POST) {
+        *color = 0x72ac3a;
+        *name = "DELAY";
+
+        switch (param) {
+            case TONEX_PARAM_DELAY_ENABLE:
+                *value = selectedValue == 0 ? "OFF" : "ON";
+                break;
+            case TONEX_PARAM_DELAY_MODEL:
+                *value = Style_DelayModels[selectedValue];
+                break;
+            case TONEX_PARAM_DELAY_DIGITAL_TS:
+            case TONEX_PARAM_DELAY_TAPE_TS:
+                *value = Style_DelayTimeSignatures[selectedValue];
+                break;
+            default:
+                *value = "?";
+                break;
+        }
+    } else if (param >= TONEX_PARAM_MODULATION_POST) {
+        *color = 0xe3a929;
+        *name = "MOD";
+
+        switch (param) {
+            case TONEX_PARAM_MODULATION_ENABLE:
+                *name = Style_ModModels[(uint8_t)allParameters[TONEX_PARAM_MODULATION_MODEL].Value];
+                *value = selectedValue == 0 ? "OFF" : "ON";
+                break;
+            case TONEX_PARAM_MODULATION_MODEL:
+                *value = Style_ModModels[selectedValue];
+                break;
+            default:
+                *value = "?";
+                break;
+        }
+    } else if (param >= TONEX_PARAM_REVERB_POSITION) {
+        *color = 0x006ff3;
+        *name = "REVERB";
+
+        switch (param) {
+            case TONEX_PARAM_REVERB_ENABLE:
+                *value = selectedValue == 0 ? "OFF" : "ON";
+                break;
+            case TONEX_PARAM_REVERB_MODEL:
+                *value = Style_ReverbModels[selectedValue];
+                break;
+            default:
+                *value = "?";
+                break;
+        }
+    } else if (param >= TONEX_PARAM_CABINET_UNKNOWN) {
+        *color = 0xeb5e22;
+        *name = "CAB";
+        *value = "?";
+    } else if (param >= TONEX_PARAM_MODEL_AMP_ENABLE) {
+        *color = 0xe83f3b;
+        *name = "AMP";
+        *value = "?";
+    } else if (param >= TONEX_PARAM_EQ_POST) {
+        *color = 0xa49e96;
+        *name = "EQ";
+        *value = "?";
+    } else if (param >= TONEX_PARAM_COMP_POST) {
+        *color = 0xcc4891;
+        *name = "COMP";
+
+        switch (param) {
+            case TONEX_PARAM_COMP_ENABLE:
+                *value = selectedValue == 0 ? "OFF" : "ON";
+                break;
+            default:
+                *value = "?";
+                break;
+        }
+    } else { // param >= TONEX_PARAM_NOISE_GATE_POST
+        *color = 0x664ef9;
+        *name = "GATE";
+
+        switch (param) {
+            case TONEX_PARAM_NOISE_GATE_ENABLE:
+                *value = selectedValue == 0 ? "OFF" : "ON";
+                break;
+            default:
+                *value = "?";
+                break;
+        }
     }
-    
-    return ESP_OK;
 }
 
 /****************************************************************************

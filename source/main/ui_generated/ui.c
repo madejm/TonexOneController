@@ -27,12 +27,14 @@ void ui_event_PresetButton3( lv_event_t * e);
 lv_obj_t *ui_PresetButton3;
 void ui_event_PresetButton4( lv_event_t * e);
 lv_obj_t *ui_PresetButton4;
+void ui_event_FS4Button( lv_event_t * e);
+lv_obj_t *ui_FS4Button;
+void ui_event_FS5Button( lv_event_t * e);
+lv_obj_t *ui_FS5Button;
 void ui_event_FS6Button( lv_event_t * e);
 lv_obj_t *ui_FS6Button;
 void ui_event_FS7Button( lv_event_t * e);
 lv_obj_t *ui_FS7Button;
-void ui_event_FS9Button( lv_event_t * e);
-lv_obj_t *ui_FS9Button;
 void ui_event_AltButton( lv_event_t * e);
 lv_obj_t *ui_AltButton;
 void ui_event_PreviousBank( lv_event_t * e);
@@ -293,6 +295,22 @@ if ( event_code == LV_EVENT_CLICKED) {
 }
 }
 
+void ui_event_FS4Button( lv_event_t * e) {
+    lv_event_code_t event_code = lv_event_get_code(e);
+
+if ( event_code == LV_EVENT_CLICKED) {
+      FS4Action( e );
+}
+}
+
+void ui_event_FS5Button( lv_event_t * e) {
+    lv_event_code_t event_code = lv_event_get_code(e);
+
+if ( event_code == LV_EVENT_CLICKED) {
+      FS5Action( e );
+}
+}
+
 void ui_event_FS6Button( lv_event_t * e) {
     lv_event_code_t event_code = lv_event_get_code(e);
 
@@ -306,14 +324,6 @@ void ui_event_FS7Button( lv_event_t * e) {
 
 if ( event_code == LV_EVENT_CLICKED) {
       FS7Action( e );
-}
-}
-
-void ui_event_FS9Button( lv_event_t * e) {
-    lv_event_code_t event_code = lv_event_get_code(e);
-
-if ( event_code == LV_EVENT_CLICKED) {
-      FS9Action( e );
 }
 }
 

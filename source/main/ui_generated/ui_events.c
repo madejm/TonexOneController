@@ -174,3 +174,13 @@ void TapTempoAction(lv_event_t * e)
 {
 	// Your code here
 }
+
+void FS4Action(lv_event_t * e)
+{
+	// Your code here
+}
+
+void FS5Action(lv_event_t * e)
+{
+	// Your code here
+}

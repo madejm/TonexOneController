@@ -215,7 +215,6 @@ enum TonexParameters
     TONEX_GLOBAL_LAST,
 
     TONEX_CONTROLLER_FOOTSWITCH_ALT_MODE,
-    TONEX_CONTROLLER_TAP_TEMPO,
 
     // must be last actual controller parameter
     TONEX_CONTROLLER_LAST,
@@ -241,7 +240,7 @@ float tonex_params_clamp_value(uint16_t param_index, float value);
 esp_err_t tonex_params_colors_get_locked_access(tTonexPresetColor** color_ptr);
 esp_err_t tonex_params_colors_get_color(uint16_t preset_index, uint32_t* preset_color);
 
-esp_err_t tonex_params_get_ui_style(uint32_t param, uint8_t selectedValue, uint32_t *color, char const **name, char const **value);
+void tonex_params_get_ui_style(uint32_t param, uint8_t selectedValue, uint32_t *color, char const **name, char const **value, const tTonexParameter *allParameters);
 
 #ifdef __cplusplus
 } /*extern "C"*/
