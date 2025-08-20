@@ -101,7 +101,7 @@ lv_obj_set_height( ui_NoiseGateThresholdLabel, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_x( ui_NoiseGateThresholdLabel, -9 );
 lv_obj_set_y( ui_NoiseGateThresholdLabel, -90 );
 lv_obj_set_align( ui_NoiseGateThresholdLabel, LV_ALIGN_LEFT_MID );
-lv_label_set_text(ui_NoiseGateThresholdLabel,"Threshold");
+lv_label_set_text(ui_NoiseGateThresholdLabel,"Thresh");
 lv_obj_set_style_text_font(ui_NoiseGateThresholdLabel, &lv_font_montserrat_24, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 ui_NoiseGateThresholdSlider = lv_slider_create(ui_NoiseGateTab);
@@ -233,7 +233,7 @@ lv_obj_set_height( ui_CompressorThresholdLabel, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_x( ui_CompressorThresholdLabel, -9 );
 lv_obj_set_y( ui_CompressorThresholdLabel, -90 );
 lv_obj_set_align( ui_CompressorThresholdLabel, LV_ALIGN_LEFT_MID );
-lv_label_set_text(ui_CompressorThresholdLabel,"Threshold");
+lv_label_set_text(ui_CompressorThresholdLabel,"Thresh");
 lv_obj_set_style_text_font(ui_CompressorThresholdLabel, &lv_font_montserrat_24, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 ui_CompressorThresholdSlider = lv_slider_create(ui_CompressorTab);
@@ -430,7 +430,7 @@ lv_obj_set_height( ui_AmplifierPresenseLabel, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_x( ui_AmplifierPresenseLabel, -8 );
 lv_obj_set_y( ui_AmplifierPresenseLabel, 78 );
 lv_obj_set_align( ui_AmplifierPresenseLabel, LV_ALIGN_LEFT_MID );
-lv_label_set_text(ui_AmplifierPresenseLabel,"Presence");
+lv_label_set_text(ui_AmplifierPresenseLabel,"Presen");
 lv_obj_set_style_text_font(ui_AmplifierPresenseLabel, &lv_font_montserrat_24, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 ui_AmplifierPresenseSlider = lv_slider_create(ui_Amplifier);
@@ -1047,7 +1047,7 @@ lv_obj_set_height( ui_DelayFeedbackLabel, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_x( ui_DelayFeedbackLabel, -9 );
 lv_obj_set_y( ui_DelayFeedbackLabel, 78 );
 lv_obj_set_align( ui_DelayFeedbackLabel, LV_ALIGN_LEFT_MID );
-lv_label_set_text(ui_DelayFeedbackLabel,"Feedback");
+lv_label_set_text(ui_DelayFeedbackLabel,"Feedbk");
 lv_obj_set_style_text_font(ui_DelayFeedbackLabel, &lv_font_montserrat_24, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 ui_DelayFeedbackSlider = lv_slider_create(ui_Delay);
@@ -1239,7 +1239,7 @@ lv_obj_set_height( ui_ReverbPredelayLabel, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_x( ui_ReverbPredelayLabel, -9 );
 lv_obj_set_y( ui_ReverbPredelayLabel, 78 );
 lv_obj_set_align( ui_ReverbPredelayLabel, LV_ALIGN_LEFT_MID );
-lv_label_set_text(ui_ReverbPredelayLabel,"Pre-Delay");
+lv_label_set_text(ui_ReverbPredelayLabel,"Pre-Dly");
 lv_obj_set_style_text_font(ui_ReverbPredelayLabel, &lv_font_montserrat_24, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 ui_ReverbPredelaySlider = lv_slider_create(ui_ReverbPage);
@@ -1398,7 +1398,7 @@ lv_obj_set_height( ui_TuningReferenceLabel, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_x( ui_TuningReferenceLabel, -9 );
 lv_obj_set_y( ui_TuningReferenceLabel, 22 );
 lv_obj_set_align( ui_TuningReferenceLabel, LV_ALIGN_LEFT_MID );
-lv_label_set_text(ui_TuningReferenceLabel,"Tuning Ref");
+lv_label_set_text(ui_TuningReferenceLabel,"Tuning");
 lv_obj_set_style_text_font(ui_TuningReferenceLabel, &lv_font_montserrat_24, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 ui_TuningReferenceSlider = lv_slider_create(ui_Global);

@@ -265,52 +265,30 @@ static uint8_t LoadPresetUserText(uint16_t preset_index, char* text);
 static void DumpUserConfig(void);
 static uint8_t MigrateUserData(void);
 
-
-static uint8_t preset_order_mapping_index(int8_t presetIndex)
-{
-    for (uint8_t mappingIndex = 0; mappingIndex < usb_get_max_presets_for_connected_modeller(); mappingIndex++)
-    {
-        if (ControlData.ConfigData.PresetOrderMappingConfig.PresetOrder[mappingIndex] == presetIndex)
-        {
-            return mappingIndex;
-        }
-    }
-
-    return 0;
-}
-
 #if CONFIG_TONEX_CONTROLLER_HAS_DISPLAY
-// void update_preset_buttons_selected()
-// {
-//     uint8_t mappedIndex = preset_order_mapping_index(ControlData.PresetIndex);
-//     bool isInCurrentBank = (mappedIndex/4) == ControlData.BankIndex;
-//     uint16_t selectedPresetButtonIndex = mappedIndex % 4;
-
-//     // UI_SetPresetButtonsSelected(
-//     //     !ControlData.FSAltMode && isInCurrentBank && selectedPresetButtonIndex == 0,
-//     //     !ControlData.FSAltMode && isInCurrentBank && selectedPresetButtonIndex == 1,
-//     //     !ControlData.FSAltMode && isInCurrentBank && selectedPresetButtonIndex == 2,
-//     //     !ControlData.FSAltMode && isInCurrentBank && selectedPresetButtonIndex == 3
-//     // );
-//     UI_SetPresetButtonsSelected(
-//         isInCurrentBank && selectedPresetButtonIndex == 0,
-//         isInCurrentBank && selectedPresetButtonIndex == 1,
-//         isInCurrentBank && selectedPresetButtonIndex == 2,
-//         isInCurrentBank && selectedPresetButtonIndex == 3
-//     );
-// }
-
-void update_bank_ui()
+static void update_bank_ui()
 {
+    // uint8_t presetIndex1 = PresetIndexForOrderValue(ControlData.BankIndex * 4);
+    // uint8_t presetIndex2 = PresetIndexForOrderValue(ControlData.BankIndex * 4 + 1);
+    // uint8_t presetIndex3 = PresetIndexForOrderValue(ControlData.BankIndex * 4 + 2);
+    // uint8_t presetIndex4 = PresetIndexForOrderValue(ControlData.BankIndex * 4 + 3);
+    uint8_t presetIndex1 =ControlData.ConfigData.PresetOrderMappingConfig.PresetOrder[ControlData.BankIndex * 4];
+    uint8_t presetIndex2 =ControlData.ConfigData.PresetOrderMappingConfig.PresetOrder[ControlData.BankIndex * 4 + 1];
+    uint8_t presetIndex3 =ControlData.ConfigData.PresetOrderMappingConfig.PresetOrder[ControlData.BankIndex * 4 + 2];
+    uint8_t presetIndex4 =ControlData.ConfigData.PresetOrderMappingConfig.PresetOrder[ControlData.BankIndex * 4 + 3];
+
+    uint8_t skinIndex1 = ControlData.ConfigData.SkinConfig.SkinIndex[presetIndex1];
+    uint8_t skinIndex2 = ControlData.ConfigData.SkinConfig.SkinIndex[presetIndex2];
+    uint8_t skinIndex3 = ControlData.ConfigData.SkinConfig.SkinIndex[presetIndex3];
+    uint8_t skinIndex4 = ControlData.ConfigData.SkinConfig.SkinIndex[presetIndex4];
+    
     UI_SetBankIndex(
         ControlData.BankIndex,
-        ControlData.ConfigData.SkinConfig.SkinIndex[preset_order_mapping_index(ControlData.BankIndex * 4)],
-        ControlData.ConfigData.SkinConfig.SkinIndex[preset_order_mapping_index(ControlData.BankIndex * 4 + 1)],
-        ControlData.ConfigData.SkinConfig.SkinIndex[preset_order_mapping_index(ControlData.BankIndex * 4 + 2)],
-        ControlData.ConfigData.SkinConfig.SkinIndex[preset_order_mapping_index(ControlData.BankIndex * 4 + 3)]
+        skinIndex1,
+        skinIndex2,
+        skinIndex3,
+        skinIndex4
     );
-
-    // update_preset_buttons_selected();
 }
 #endif
 
@@ -332,7 +310,7 @@ static uint8_t process_control_command(tControlMessage* message)
         {
             if (ControlData.USBStatus != 0)
             {
-                uint8_t mappedIndex = preset_order_mapping_index(ControlData.PresetIndex);
+                uint8_t mappedIndex = PresetIndexForOrderValue(ControlData.PresetIndex);
 
                 if (control_get_config_item_int(CONFIG_ITEM_LOOP_AROUND))
                 {
@@ -367,7 +345,7 @@ static uint8_t process_control_command(tControlMessage* message)
         {
             if (ControlData.USBStatus != 0)
             {
-                uint8_t mappedIndex = preset_order_mapping_index(ControlData.PresetIndex);
+                uint8_t mappedIndex = PresetIndexForOrderValue(ControlData.PresetIndex);
 
                 if (control_get_config_item_int(CONFIG_ITEM_LOOP_AROUND))
                 {
@@ -465,15 +443,18 @@ static uint8_t process_control_command(tControlMessage* message)
           
 #if CONFIG_TONEX_CONTROLLER_HAS_DISPLAY
             // update UI
-            UI_SetPresetLabel(PresetIndexForOrderValue(message->Value), ControlData.PresetNames[message->Value]);
+            uint8_t orderPresetIndex = PresetIndexForOrderValue(message->Value);
+            UI_SetPresetLabel(orderPresetIndex, ControlData.PresetNames[message->Value]);
 
             UI_SetAmpSkin(ControlData.ConfigData.SkinConfig.SkinIndex[ControlData.PresetIndex]);
 
-            char preset_user_text[MAX_PRESET_USER_TEXT_LENGTH] = {0};
+            footswitches_bank_set(orderPresetIndex/4);
+
+            // char preset_user_text[MAX_PRESET_USER_TEXT_LENGTH] = {0};
             
-            // load user text and set it
-            LoadPresetUserText(message->Value, preset_user_text);
-            UI_SetPresetDescription(preset_user_text);
+            // // load user text and set it
+            // LoadPresetUserText(message->Value, preset_user_text);
+            // UI_SetPresetDescription(preset_user_text);
 #endif
 
             // update web UI
@@ -517,6 +498,7 @@ static uint8_t process_control_command(tControlMessage* message)
 #if CONFIG_TONEX_CONTROLLER_HAS_DISPLAY
             // update UI
             UI_SetAmpSkin(ControlData.ConfigData.SkinConfig.SkinIndex[ControlData.PresetIndex]);
+            update_bank_ui();
 #endif                 
         } break;
 
@@ -746,6 +728,7 @@ static uint8_t process_control_command(tControlMessage* message)
 
                             if (message->Item == newItemStart) {
                                 ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchEffectConfig[fs].Switch = (uint8_t)message->Value;
+                                ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchAltEffectConfig[fs].Switch = (uint8_t)message->Value;
                                 break;
                             } else if (message->Item == newItemStart + 1) {
                                 ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchEffectConfig[fs].CC = (uint8_t)message->Value;
@@ -1554,6 +1537,18 @@ void control_get_config_item_string(uint32_t item, char* name)
     }
 }
 
+void control_get_config_item_external_fs_config(uint8_t index, bool alt, tExternalFootswitchEffectConfig *config)
+{
+    if (alt)
+    {
+        *config = ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchAltEffectConfig[index];
+    }
+    else
+    {
+        *config = ControlData.ConfigData.FootSwitchConfig.ExternalFootswitchEffectConfig[index];
+    }
+}
+
 /****************************************************************************
 * NAME:        
 * DESCRIPTION: 
@@ -1570,9 +1565,10 @@ void control_set_preset_order(uint8_t* order)
 
 #if CONFIG_TONEX_CONTROLLER_HAS_DISPLAY
     // update UI
-    UI_SetPresetLabel(PresetIndexForOrderValue(ControlData.PresetIndex), ControlData.PresetNames[ControlData.PresetIndex]);
+    uint8_t orderPresetIndex = PresetIndexForOrderValue(ControlData.PresetIndex);
+    UI_SetPresetLabel(orderPresetIndex, ControlData.PresetNames[ControlData.PresetIndex]);
 
-    update_bank_ui();
+    footswitches_bank_set(orderPresetIndex/4);
 #endif
 }
 
@@ -1600,8 +1596,12 @@ void control_set_skin_next(void)
     if (ControlData.ConfigData.SkinConfig.SkinIndex[ControlData.PresetIndex] < (SKIN_MAX - 1))
     {
         ControlData.ConfigData.SkinConfig.SkinIndex[ControlData.PresetIndex]++;
-        control_set_amp_skin_index(ControlData.ConfigData.SkinConfig.SkinIndex[ControlData.PresetIndex]);
     }
+    else
+    {
+        ControlData.ConfigData.SkinConfig.SkinIndex[ControlData.PresetIndex] = 0;
+    }
+    control_set_amp_skin_index(ControlData.ConfigData.SkinConfig.SkinIndex[ControlData.PresetIndex]);
 }
 
 /****************************************************************************
@@ -1616,9 +1616,12 @@ void control_set_skin_previous(void)
     if (ControlData.ConfigData.SkinConfig.SkinIndex[ControlData.PresetIndex] > 0)
     {
         ControlData.ConfigData.SkinConfig.SkinIndex[ControlData.PresetIndex]--;
-    
-        control_set_amp_skin_index(ControlData.ConfigData.SkinConfig.SkinIndex[ControlData.PresetIndex]);
     }
+    else
+    {
+        ControlData.ConfigData.SkinConfig.SkinIndex[ControlData.PresetIndex] = (SKIN_MAX - 1);
+    }
+    control_set_amp_skin_index(ControlData.ConfigData.SkinConfig.SkinIndex[ControlData.PresetIndex]);
 }
 
 /****************************************************************************

@@ -1107,7 +1107,7 @@ static esp_err_t usb_tonex_one_process_single_message(uint8_t* data, uint16_t le
                     if (boot_init_needed)
                     {
                         // start getting preset names
-                        control_sync_bank_index(0);
+                        // control_sync_bank_index(0);
                         usb_tonex_one_request_preset_details(boot_preset_request, 0);
                         boot_init_needed = 0;
                     }

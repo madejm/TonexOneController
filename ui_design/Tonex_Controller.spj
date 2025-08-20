@@ -11244,7 +11244,7 @@
                       {
                         "nid": 1030,
                         "strtype": "LABEL/Text",
-                        "strval": "Threshold",
+                        "strval": "Thresh",
                         "InheritedType": 10
                       },
                       {
@@ -13596,7 +13596,7 @@
                       {
                         "nid": 1030,
                         "strtype": "LABEL/Text",
-                        "strval": "Threshold",
+                        "strval": "Thresh",
                         "InheritedType": 10
                       },
                       {
@@ -15017,8 +15017,7 @@
                     "InheritedType": 11
                   }
                 ],
-                "saved_objtypeKey": "TABPAGE",
-                "tree_closed": true
+                "saved_objtypeKey": "TABPAGE"
               },
               {
                 "guid": "GUID43107140-201179S766411",
@@ -16938,7 +16937,7 @@
                       {
                         "nid": 1030,
                         "strtype": "LABEL/Text",
-                        "strval": "Presence",
+                        "strval": "Presen",
                         "InheritedType": 10
                       },
                       {
@@ -17928,8 +17927,7 @@
                     "InheritedType": 11
                   }
                 ],
-                "saved_objtypeKey": "TABPAGE",
-                "tree_closed": true
+                "saved_objtypeKey": "TABPAGE"
               },
               {
                 "guid": "GUID81828498-518967S558963361",
@@ -27443,7 +27441,7 @@
                       {
                         "nid": 1030,
                         "strtype": "LABEL/Text",
-                        "strval": "Feedback",
+                        "strval": "Feedbk",
                         "InheritedType": 10
                       },
                       {
@@ -28429,8 +28427,7 @@
                     "InheritedType": 11
                   }
                 ],
-                "saved_objtypeKey": "TABPAGE",
-                "tree_closed": true
+                "saved_objtypeKey": "TABPAGE"
               },
               {
                 "guid": "GUID55944470-518969S2043361",
@@ -30750,7 +30747,7 @@
                       {
                         "nid": 1030,
                         "strtype": "LABEL/Text",
-                        "strval": "Pre-Delay",
+                        "strval": "Pre-Dly",
                         "InheritedType": 10
                       },
                       {
@@ -31736,8 +31733,7 @@
                     "InheritedType": 11
                   }
                 ],
-                "saved_objtypeKey": "TABPAGE",
-                "tree_closed": true
+                "saved_objtypeKey": "TABPAGE"
               },
               {
                 "guid": "GUID91007905-909062S802482",
@@ -33534,7 +33530,7 @@
                       {
                         "nid": 1030,
                         "strtype": "LABEL/Text",
-                        "strval": "Tuning Ref",
+                        "strval": "Tuning",
                         "InheritedType": 10
                       },
                       {
@@ -34524,8 +34520,7 @@
                     "InheritedType": 11
                   }
                 ],
-                "saved_objtypeKey": "TABPAGE",
-                "tree_closed": true
+                "saved_objtypeKey": "TABPAGE"
               }
             ],
             "dont_export": false,
@@ -35271,7 +35266,7 @@
     "uiExportFolderPath": "/Users/mejdej/Development/TonexOneController/source/main/ui_generated",
     "projectExportFolderPath": "/Users/mejdej/Development/TonexOneController/source/main/ui_generated",
     "custom_variable_prefix": "uic",
-    "backup_cnt": 695,
+    "backup_cnt": 699,
     "autosave_cnt": 0,
     "group_color_cnt": 0,
     "lvgl_version": "8.3.11",

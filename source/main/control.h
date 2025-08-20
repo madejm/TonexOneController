@@ -346,3 +346,4 @@ void control_set_config_item_object(uint32_t item, void* object);
 uint32_t control_get_config_item_int(uint32_t item);
 void control_get_config_item_string(uint32_t item, char* name);
 void control_get_config_item_object(uint32_t item, void* object);
+void control_get_config_item_external_fs_config(uint8_t index, bool alt, tExternalFootswitchEffectConfig *config);

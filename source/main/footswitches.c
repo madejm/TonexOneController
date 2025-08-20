@@ -45,6 +45,7 @@ limitations under the License.
 #include "midi_helper.h"
 #include "tonex_params.h"
 #include "display.h"
+#include "fx_handler_helper.h"
 
 #define FOOTSWITCH_TASK_STACK_SIZE          (3 * 1024)
 #define FOOTSWITCH_SAMPLE_COUNT             5       // 20 msec per sample
@@ -633,8 +634,8 @@ static void footswitch_handle_effects(tFootswitchHandler* handler, tFootswitchEf
     uint8_t loop; 
     uint8_t value;
     uint16_t param;
+    float current_value;
     float new_value;
-    tTonexParameter* param_ptr;
 
     // handle state
     switch (handler->state)
@@ -659,101 +660,19 @@ static void footswitch_handle_effects(tFootswitchHandler* handler, tFootswitchEf
 
                             if (param != TONEX_UNKNOWN)
                             {
+                                uint8_t CC;
+                                uint8_t type;
+
                                 if (param == TONEX_CONTROLLER_FOOTSWITCH_ALT_MODE)
                                 {
                                     FootswitchControl.footswitch_alt_mode = !FootswitchControl.footswitch_alt_mode;
                                     UI_SetAltMode(FootswitchControl.footswitch_alt_mode);
                                 }
-                                // get the current value of the parameter
-                                else if (tonex_params_get_locked_access(&param_ptr) == ESP_OK)
+                                else if (fx_handler_helper_get_values(&param, fx_handler[loop].config, &type, &current_value, &new_value, &CC) == ESP_OK)
                                 {
-                                    uint8_t CC = fx_handler[loop].config.CC;
-                                    
-                                    if (param == TONEX_PARAM_DELAY_DIGITAL_TS && param_ptr[TONEX_PARAM_DELAY_MODEL].Value == 1) {
-                                        // tape delay is selected, change param to tape ts
-                                        param = TONEX_PARAM_DELAY_TAPE_TS;
-                                        CC = 92;
-                                    } else if (param == TONEX_PARAM_DELAY_TAPE_TS && param_ptr[TONEX_PARAM_DELAY_MODEL].Value == 0) {
-                                        // digital delay is selected, change param to digital ts
-                                        param = TONEX_PARAM_DELAY_DIGITAL_TS;
-                                        CC = 5;
-                                    }
+                                    fx_handler_helper_update_parameter(param, type, new_value, CC);
 
-                                    // is the parameter a boolean type?
-                                    if (param_ptr[param].Type == TONEX_PARAM_TYPE_SWITCH)
-                                    {
-                                        // toggle the current value
-                                        if (param_ptr[param].Value == 0)
-                                        {
-                                            new_value = 1;
-                                        }
-                                        else
-                                        {
-                                            new_value = 0;
-                                        }
-
-                                        tonex_params_release_locked_access();
-
-                                        usb_modify_parameter(param, new_value);
-                                        // midi_helper_adjust_param_via_midi(fx_handler[loop].config.CC, new_value);
-                                    }
-                                    else if (param_ptr[param].Type == TONEX_PARAM_TYPE_SELECT)
-                                    {
-                                        // save current value before we release the locked access
-                                        // select params are really integers saved as floats
-                                        uint8_t current_select_val = (uint8_t)param_ptr[param].Value;
-
-                                        // release access now as midi helper needs the mutex
-                                        tonex_params_release_locked_access();
-
-                                        if (current_select_val == fx_handler[loop].config.Value_1)
-                                        {
-                                            new_value = (float)fx_handler[loop].config.Value_2;
-                                        }
-                                        else
-                                        {
-                                            new_value = (float)fx_handler[loop].config.Value_1;
-                                        }
-
-                                        midi_helper_adjust_param_via_midi(CC, new_value);
-                                    }
-                                    else if (param_ptr[param].Type == TONEX_PARAM_TYPE_RANGE)
-                                    {
-                                        // save current value before we release the locked access
-                                        float current_param_value = param_ptr[param].Value;
-
-                                        // release access now as midi helper needs the mutex
-                                        tonex_params_release_locked_access();
-
-                                        // flip between value 1 and value 2
-                                        // get value 1 (Midi 0..127) scaled back to a float to it can be compared with the current param value (a float)
-                                        float value_1 = midi_helper_scale_midi_to_float(param, fx_handler[loop].config.Value_1);
-
-                                        // note here: scaling Midi to float may result in rounding errors. This check is to make sure
-                                        // we can find the current value without missing it due to slight difference
-                                        float param_diff = fabs(current_param_value - value_1);
-
-                                        // debug
-                                        //ESP_LOGI(TAG, "Footswitch FX Param difference %f", param_diff);    
-
-                                        if (param_diff < 0.1f)
-                                        {
-                                            new_value = fx_handler[loop].config.Value_2;
-                                        }
-                                        else
-                                        {
-                                            new_value = fx_handler[loop].config.Value_1;
-                                        }
-
-                                        midi_helper_adjust_param_via_midi(CC, new_value);      
-                                    } 
-                                    else
-                                    {
-                                        ESP_LOGI(TAG, "Footswitch FX Unknown param type");
-                                        new_value = 0.0f;
-                                    }                                  
-
-                                    ESP_LOGI(TAG, "Footswitch FX Param %d changed to %d", (int)param, (int)new_value);                                                                       
+                                    ESP_LOGI(TAG, "Footswitch FX Param %d changed to %d", (int)param, (int)new_value);
                                 }
                             }
 

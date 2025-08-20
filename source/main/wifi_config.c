@@ -1251,7 +1251,7 @@ static esp_err_t ws_handler(httpd_req_t *req)
 
                         if (json_obj_get_int(&pWebConfig->jctx, "EXTFS_ES9_V1_ALT", &int_val) == OS_SUCCESS) 
                         {
-                            control_set_config_item_int(CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT8_VAL1, int_val);
+                            control_set_config_item_int(CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT9_VAL1, int_val);
                         }
 
                         if (json_obj_get_int(&pWebConfig->jctx, "EXTFS_ES9_V2_ALT", &int_val) == OS_SUCCESS) 
