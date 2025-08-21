@@ -19,6 +19,8 @@ limitations under the License.
 #ifndef _TONEX_PARAMS_H
 #define _TONEX_PARAMS_H
 
+#include "fx_handler_helper.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -240,7 +242,7 @@ float tonex_params_clamp_value(uint16_t param_index, float value);
 esp_err_t tonex_params_colors_get_locked_access(tTonexPresetColor** color_ptr);
 esp_err_t tonex_params_colors_get_color(uint16_t preset_index, uint32_t* preset_color);
 
-void tonex_params_get_ui_style(uint32_t param, uint8_t selectedValue, uint32_t *color, char const **name, char const **value, bool *isEnabled, const tTonexParameter *allParameters);
+void tonex_params_get_ui_style(uint32_t param, uint8_t paramValue, uint32_t *color, char const **name, char const **value, FxSelectedValueIndex_t *selectedValueIndex, const tTonexParameter *allParameters);
 
 #ifdef __cplusplus
 } /*extern "C"*/

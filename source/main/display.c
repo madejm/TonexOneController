@@ -364,15 +364,14 @@ void FSButtonAction(uint32_t buttonIndex)
         }
             
         uint8_t type;
-        float current_value;
-        float new_value;
+        FxSelectedValueIndex_t selectedValueIndex;
         uint8_t CC;
 
-        if (fx_handler_helper_get_values(&param, config, &type, &current_value, &new_value, &CC) != ESP_OK) {
+        if (fx_handler_helper_get_values(&param, config, &type, &selectedValueIndex, &CC) != ESP_OK) {
             return;
         }
         
-        fx_handler_helper_update_parameter(param, type, new_value, CC);
+        fx_handler_helper_update_parameter(param, config, type, selectedValueIndex, CC);
         return;
     }
 }
@@ -1391,7 +1390,7 @@ void ParameterChanged(lv_event_t * e)
 }
 #endif  //CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI
 
-static void setFSButton(uint32_t buttonIndex, uint32_t color, bool active, const char *effect, const char *value, bool visible) {
+static void setFSButton(uint32_t buttonIndex, uint32_t color, FxSelectedValueIndex_t selectedValueIndex, const char *effect, const char *value, bool visible) {
     lv_obj_t * element_1;
 
     switch (buttonIndex) {
@@ -1441,14 +1440,22 @@ static void setFSButton(uint32_t buttonIndex, uint32_t color, bool active, const
     lv_obj_set_style_bg_color(element_1, colorHex, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_color(element_1, colorHex, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    if (active) {
-        lv_obj_set_style_text_color(element_1, lv_color_hex(0x1F1F1F), LV_PART_MAIN | LV_STATE_DEFAULT);
-        lv_obj_set_style_bg_opa(element_1, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
-        lv_obj_set_style_border_opa(element_1, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-    } else {
-        lv_obj_set_style_text_color(element_1, colorHex, LV_PART_MAIN | LV_STATE_DEFAULT);
-        lv_obj_set_style_bg_opa(element_1, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-        lv_obj_set_style_border_opa(element_1, (visible ? 255 : 0), LV_PART_MAIN| LV_STATE_DEFAULT);
+    switch (selectedValueIndex) {
+        case FX_SELECTED_VALUE_NONE:
+            lv_obj_set_style_text_color(element_1, lv_color_hex(0x808080), LV_PART_MAIN | LV_STATE_DEFAULT);
+            lv_obj_set_style_bg_opa(element_1, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+            lv_obj_set_style_border_opa(element_1, (visible ? 255 : 0), LV_PART_MAIN| LV_STATE_DEFAULT);
+            break;
+        case FX_SELECTED_VALUE_1:
+            lv_obj_set_style_text_color(element_1, colorHex, LV_PART_MAIN | LV_STATE_DEFAULT);
+            lv_obj_set_style_bg_opa(element_1, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+            lv_obj_set_style_border_opa(element_1, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+            break;
+        case FX_SELECTED_VALUE_2:
+            lv_obj_set_style_text_color(element_1, lv_color_hex(0x1F1F1F), LV_PART_MAIN | LV_STATE_DEFAULT);
+            lv_obj_set_style_bg_opa(element_1, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+            lv_obj_set_style_border_opa(element_1, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+            break;
     }
 
     if (buttonIndex < 4) {
@@ -1507,11 +1514,10 @@ static void updateFSButtons() {
             }
             
             uint8_t type;
-            float selectedValue;
-            float newValue;
+            FxSelectedValueIndex_t selectedValueIndex;
             uint8_t CC;
 
-            if (fx_handler_helper_get_values(&param, config, &type, &selectedValue, &newValue, &CC) != ESP_OK) {
+            if (fx_handler_helper_get_values(&param, config, &type, &selectedValueIndex, &CC) != ESP_OK) {
                 break;
             }
 
@@ -1522,46 +1528,32 @@ static void updateFSButtons() {
             }
 
             tTonexParameter param_entry = param_ptr[param];
-            bool isEnabled = false;
+            float paramValue = param_entry.Value;
             uint32_t color;
             const char *name;
             const char *value;
 
             switch (type) {
                 case TONEX_PARAM_TYPE_SWITCH: {
-                    isEnabled = ((uint8_t)selectedValue) == 1;
                 } break;
 
                 case TONEX_PARAM_TYPE_SELECT: {
-                    isEnabled = selectedValue == config.Value_2;
                 } break;
 
                 case TONEX_PARAM_TYPE_RANGE: {
-                    float displayValue;
-
-                    if (newValue == config.Value_2) {
-                        isEnabled = true;
-                        displayValue = config.Value_2;
-                    } else {
-                        isEnabled = false;
-                        displayValue = config.Value_1;
-                    }
-                    
-                    float displayValueScaled = param_entry.Min + ((displayValue / 127.0f) * (param_entry.Max - param_entry.Min));
-                    
                     if ((param_entry.Max - param_entry.Min) > 10.0f) {
-                        sprintf(buffer, "%.0f", displayValueScaled);
+                        sprintf(buffer, "%.0f", paramValue);
                     } else {
-                        sprintf(buffer, "%.1f", displayValueScaled);
+                        sprintf(buffer, "%.1f", paramValue);
                     }
                     value = buffer;
                 } break;
             }
 
-            tonex_params_get_ui_style(param, selectedValue, &color, &name, &value, &isEnabled, param_ptr);
+            tonex_params_get_ui_style(param, paramValue, &color, &name, &value, &selectedValueIndex, param_ptr);
             tonex_params_release_locked_access();
 
-            setFSButton(buttonIndex, color, isEnabled, name, value, true);
+            setFSButton(buttonIndex, color, selectedValueIndex, name, value, true);
 
             // done, break for loop and go to next buttonIndex
             didSet = true;
@@ -1569,7 +1561,7 @@ static void updateFSButtons() {
         }
 
         if (!didSet) {
-            setFSButton(buttonIndex, 0x808080, false, "", NULL, (ui_AltMode || buttonIndex > 5));
+            setFSButton(buttonIndex, 0x808080, FX_SELECTED_VALUE_NONE, "", NULL, (ui_AltMode || buttonIndex > 5));
         }
     }
 }

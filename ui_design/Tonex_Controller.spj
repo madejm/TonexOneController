@@ -1494,7 +1494,7 @@
                           209,
                           166,
                           12,
-                          255
+                          0
                         ],
                         "InheritedType": 7
                       },
@@ -1511,7 +1511,7 @@
                           209,
                           166,
                           12,
-                          255
+                          0
                         ],
                         "InheritedType": 7
                       },
@@ -1800,7 +1800,7 @@
                           209,
                           166,
                           12,
-                          255
+                          0
                         ],
                         "InheritedType": 7
                       },
@@ -1817,7 +1817,7 @@
                           209,
                           166,
                           12,
-                          255
+                          0
                         ],
                         "InheritedType": 7
                       },
@@ -2106,7 +2106,7 @@
                           209,
                           166,
                           12,
-                          255
+                          0
                         ],
                         "InheritedType": 7
                       },
@@ -2123,7 +2123,7 @@
                           209,
                           166,
                           12,
-                          255
+                          0
                         ],
                         "InheritedType": 7
                       },
@@ -2412,7 +2412,7 @@
                           209,
                           166,
                           12,
-                          255
+                          0
                         ],
                         "InheritedType": 7
                       },
@@ -2429,7 +2429,7 @@
                           209,
                           166,
                           12,
-                          255
+                          0
                         ],
                         "InheritedType": 7
                       },
@@ -2594,9 +2594,14 @@
               },
               {
                 "nid": 90,
-                "flags": 1048576,
                 "strtype": "OBJECT/Flags",
                 "InheritedType": 1
+              },
+              {
+                "nid": 100,
+                "strtype": "OBJECT/Hidden",
+                "strval": "True",
+                "InheritedType": 2
               },
               {
                 "nid": 150,
@@ -2880,9 +2885,14 @@
               },
               {
                 "nid": 90,
-                "flags": 1048576,
                 "strtype": "OBJECT/Flags",
                 "InheritedType": 1
+              },
+              {
+                "nid": 100,
+                "strtype": "OBJECT/Hidden",
+                "strval": "True",
+                "InheritedType": 2
               },
               {
                 "nid": 150,
@@ -2940,7 +2950,7 @@
               {
                 "nid": 1030,
                 "strtype": "LABEL/Text",
-                "strval": "EFFECT:\\nON",
+                "strval": "",
                 "InheritedType": 10
               },
               {
@@ -3226,7 +3236,7 @@
               {
                 "nid": 1030,
                 "strtype": "LABEL/Text",
-                "strval": "TAP",
+                "strval": "",
                 "InheritedType": 10
               },
               {
@@ -3512,7 +3522,7 @@
               {
                 "nid": 1030,
                 "strtype": "LABEL/Text",
-                "strval": "EFFECT:\\nON",
+                "strval": "",
                 "InheritedType": 10
               },
               {
@@ -35266,7 +35276,7 @@
     "uiExportFolderPath": "/Users/mejdej/Development/TonexOneController/source/main/ui_generated",
     "projectExportFolderPath": "/Users/mejdej/Development/TonexOneController/source/main/ui_generated",
     "custom_variable_prefix": "uic",
-    "backup_cnt": 699,
+    "backup_cnt": 706,
     "autosave_cnt": 0,
     "group_color_cnt": 0,
     "lvgl_version": "8.3.11",

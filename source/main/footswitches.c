@@ -634,8 +634,7 @@ static void footswitch_handle_effects(tFootswitchHandler* handler, tFootswitchEf
     uint8_t loop; 
     uint8_t value;
     uint16_t param;
-    float current_value;
-    float new_value;
+    FxSelectedValueIndex_t selected_value_index;
 
     // handle state
     switch (handler->state)
@@ -668,11 +667,9 @@ static void footswitch_handle_effects(tFootswitchHandler* handler, tFootswitchEf
                                     FootswitchControl.footswitch_alt_mode = !FootswitchControl.footswitch_alt_mode;
                                     UI_SetAltMode(FootswitchControl.footswitch_alt_mode);
                                 }
-                                else if (fx_handler_helper_get_values(&param, fx_handler[loop].config, &type, &current_value, &new_value, &CC) == ESP_OK)
+                                else if (fx_handler_helper_get_values(&param, fx_handler[loop].config, &type, &selected_value_index, &CC) == ESP_OK)
                                 {
-                                    fx_handler_helper_update_parameter(param, type, new_value, CC);
-
-                                    ESP_LOGI(TAG, "Footswitch FX Param %d changed to %d", (int)param, (int)new_value);
+                                    fx_handler_helper_update_parameter(param, fx_handler[loop].config, type, selected_value_index, CC);
                                 }
                             }
 

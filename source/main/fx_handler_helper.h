@@ -8,8 +8,14 @@
 extern "C" {
 #endif
 
-esp_err_t fx_handler_helper_get_values(uint16_t *param, tExternalFootswitchEffectConfig config, uint8_t *type, float *current_value, float *new_value, uint8_t *CC);
-void fx_handler_helper_update_parameter(uint16_t param, uint8_t type, float new_value, uint8_t CC);
+typedef enum {
+    FX_SELECTED_VALUE_NONE,
+    FX_SELECTED_VALUE_1,
+    FX_SELECTED_VALUE_2
+} FxSelectedValueIndex_t;
+
+esp_err_t fx_handler_helper_get_values(uint16_t *param, tExternalFootswitchEffectConfig config, uint8_t *type, FxSelectedValueIndex_t *selected_value_index, uint8_t *CC);
+void fx_handler_helper_update_parameter(uint16_t param, tExternalFootswitchEffectConfig config, uint8_t type, FxSelectedValueIndex_t selected_value_index, uint8_t CC);
 
 #ifdef __cplusplus
 } /*extern "C"*/

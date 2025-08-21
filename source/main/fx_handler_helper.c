@@ -15,7 +15,7 @@
 
 static const char *TAG = "fx_handler_helper";
 
-esp_err_t fx_handler_helper_get_values(uint16_t *param, tExternalFootswitchEffectConfig config, uint8_t *type, float *current_value, float *new_value, uint8_t *CC)
+esp_err_t fx_handler_helper_get_values(uint16_t *param, tExternalFootswitchEffectConfig config, uint8_t *type, FxSelectedValueIndex_t *selected_value_index, uint8_t *CC)
 {
     tTonexParameter *param_ptr;
     
@@ -38,7 +38,6 @@ esp_err_t fx_handler_helper_get_values(uint16_t *param, tExternalFootswitchEffec
 
     tTonexParameter param_entry = param_ptr[*param];
     *type = param_entry.Type;
-    *current_value = param_entry.Value;
 
     // is the parameter a boolean type?
     switch (*type) {
@@ -46,11 +45,11 @@ esp_err_t fx_handler_helper_get_values(uint16_t *param, tExternalFootswitchEffec
             // toggle the current value
             if (param_entry.Value == 0)
             {
-                *new_value = 1;
+                *selected_value_index = FX_SELECTED_VALUE_1;
             }
             else
             {
-                *new_value = 0;
+                *selected_value_index = FX_SELECTED_VALUE_2;
             }
 
             tonex_params_release_locked_access();
@@ -67,11 +66,15 @@ esp_err_t fx_handler_helper_get_values(uint16_t *param, tExternalFootswitchEffec
 
             if (current_select_val == config.Value_1)
             {
-                *new_value = (float)config.Value_2;
+                *selected_value_index = FX_SELECTED_VALUE_1;
+            }
+            else if (current_select_val == config.Value_2)
+            {
+                *selected_value_index = FX_SELECTED_VALUE_2;
             }
             else
             {
-                *new_value = (float)config.Value_1;
+                *selected_value_index = FX_SELECTED_VALUE_NONE;
             }
             return ESP_OK;
         } break;
@@ -89,18 +92,28 @@ esp_err_t fx_handler_helper_get_values(uint16_t *param, tExternalFootswitchEffec
 
             // note here: scaling Midi to float may result in rounding errors. This check is to make sure
             // we can find the current value without missing it due to slight difference
-            float param_diff = fabs(current_param_value - value_1);
+            float val1_diff = fabs(current_param_value - value_1);
 
             // debug
             //ESP_LOGI(TAG, "Footswitch FX Param difference %f", param_diff);    
 
-            if (param_diff < 0.1f)
+            if (val1_diff < 0.1f)
             {
-                *new_value = config.Value_2;
+                *selected_value_index = FX_SELECTED_VALUE_1;
             }
             else
             {
-                *new_value = config.Value_1;
+                float value_2 = midi_helper_scale_midi_to_float(*param, config.Value_2);
+                float val2_diff = fabs(current_param_value - value_2);
+
+                if (val2_diff < 0.1f)
+                {
+                    *selected_value_index = FX_SELECTED_VALUE_2;
+                }
+                else
+                {
+                    *selected_value_index = FX_SELECTED_VALUE_NONE;
+                }
             }
             return ESP_OK;
         } break;
@@ -108,24 +121,46 @@ esp_err_t fx_handler_helper_get_values(uint16_t *param, tExternalFootswitchEffec
         default: {
             tonex_params_release_locked_access();
             ESP_LOGI(TAG, "Footswitch FX Unknown param type");
-            *new_value = 0.0f;
+            *selected_value_index = FX_SELECTED_VALUE_NONE;
             return ESP_FAIL;
         } break;
-    }                                  
-
-    return ESP_FAIL;                                                                
+    }
 }
 
-void fx_handler_helper_update_parameter(uint16_t param, uint8_t type, float new_value, uint8_t CC)
+void fx_handler_helper_update_parameter(uint16_t param, tExternalFootswitchEffectConfig config, uint8_t type, FxSelectedValueIndex_t selected_value_index, uint8_t CC)
 {
+    float new_value = 0;
+
     switch (type) {
         case TONEX_PARAM_TYPE_SWITCH: {
+            switch (selected_value_index) {
+                case FX_SELECTED_VALUE_NONE:
+                case FX_SELECTED_VALUE_2:
+                    new_value = 0;
+                    break;
+                case FX_SELECTED_VALUE_1:
+                    new_value = 1;
+                    break;
+            }
+
             usb_modify_parameter(param, new_value);
         } break;
 
         case TONEX_PARAM_TYPE_SELECT:
         case TONEX_PARAM_TYPE_RANGE: {
+            switch (selected_value_index) {
+                case FX_SELECTED_VALUE_NONE:
+                case FX_SELECTED_VALUE_2:
+                    new_value = config.Value_1;
+                    break;
+                case FX_SELECTED_VALUE_1:
+                    new_value = config.Value_2;
+                    break;
+            }
+
             midi_helper_adjust_param_via_midi(CC, new_value);
         } break;
     }
+
+    ESP_LOGI(TAG, "Footswitch FX Param %d changed to %d", (int)param, (int)new_value);
 }
