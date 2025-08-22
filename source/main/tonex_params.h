@@ -19,13 +19,18 @@ limitations under the License.
 #ifndef _TONEX_PARAMS_H
 #define _TONEX_PARAMS_H
 
-#include "fx_handler_helper.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 #define MAX_PARAM_NAME          12
+
+typedef enum
+{
+    TONEX_PARAM_TYPE_SWITCH,        // on/off
+    TONEX_PARAM_TYPE_SELECT,        // 0,1,2,3 etc
+    TONEX_PARAM_TYPE_RANGE          // floating point range
+} ParamType_t;
 
 typedef struct
 {
@@ -33,15 +38,14 @@ typedef struct
     float Min;
     float Max;
     char Name[MAX_PARAM_NAME];
-    uint8_t Type;
+    ParamType_t Type;
 } tTonexParameter;
 
-enum ParamTypes
-{
-    TONEX_PARAM_TYPE_SWITCH,        // on/off
-    TONEX_PARAM_TYPE_SELECT,        // 0,1,2,3 etc
-    TONEX_PARAM_TYPE_RANGE          // floating point range
-};
+typedef enum {
+    FX_SELECTED_VALUE_NONE,
+    FX_SELECTED_VALUE_1,
+    FX_SELECTED_VALUE_2
+} FxSelectedValueIndex_t;
 
 enum TonexReverbModels
 {
@@ -76,7 +80,7 @@ enum TonexCabinetTypes
 };
 
 // defined in the same order as they are sent by the Pedal
-enum TonexParameters
+typedef enum
 {
     // noise gate
     TONEX_PARAM_NOISE_GATE_POST,        // Pre/Post
@@ -220,7 +224,7 @@ enum TonexParameters
 
     // must be last actual controller parameter
     TONEX_CONTROLLER_LAST,
-};
+} TonexParameter_t;
 
 // special cases for handling effect switches that use Midi but don't change a parameter
 #define TONEX_UNKNOWN           0xFFFF
@@ -235,14 +239,14 @@ typedef struct
 esp_err_t tonex_params_init(void);
 esp_err_t tonex_params_get_locked_access(tTonexParameter** param_ptr);
 esp_err_t tonex_params_release_locked_access(void);
-esp_err_t tonex_params_get_min_max(uint16_t param_index, float* min, float* max);
+esp_err_t tonex_params_get_min_max(TonexParameter_t param_index, float* min, float* max);
 esp_err_t tonex_dump_parameters(void);
-float tonex_params_clamp_value(uint16_t param_index, float value);
+float tonex_params_clamp_value(TonexParameter_t param_index, float value);
 
 esp_err_t tonex_params_colors_get_locked_access(tTonexPresetColor** color_ptr);
 esp_err_t tonex_params_colors_get_color(uint16_t preset_index, uint32_t* preset_color);
 
-void tonex_params_get_ui_style(uint32_t param, uint8_t paramValue, uint32_t *color, char const **name, char const **value, FxSelectedValueIndex_t *selectedValueIndex, const tTonexParameter *allParameters);
+void tonex_params_get_ui_style(TonexParameter_t param, uint8_t paramValue, uint32_t *color, char const **name, char const **value, FxSelectedValueIndex_t *selectedValueIndex, const tTonexParameter *allParameters);
 
 #ifdef __cplusplus
 } /*extern "C"*/

@@ -633,7 +633,7 @@ static void footswitch_handle_effects(tFootswitchHandler* handler, tFootswitchEf
 {
     uint8_t loop; 
     uint8_t value;
-    uint16_t param;
+    TonexParameter_t param;
     FxSelectedValueIndex_t selected_value_index;
 
     // handle state
@@ -659,8 +659,8 @@ static void footswitch_handle_effects(tFootswitchHandler* handler, tFootswitchEf
 
                             if (param != TONEX_UNKNOWN)
                             {
-                                uint8_t CC;
-                                uint8_t type;
+                                MidiValue_t CC;
+                                ParamType_t type;
 
                                 if (param == TONEX_CONTROLLER_FOOTSWITCH_ALT_MODE)
                                 {

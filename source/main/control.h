@@ -295,10 +295,12 @@ enum IOExpanderPins
     IO_EXPANDER_PIN_16
 };
 
+typedef uint8_t MidiValue_t;
+
 typedef struct __attribute__ ((packed)) 
 {
     uint8_t Switch;
-    uint8_t CC;
+    MidiValue_t CC;
     uint8_t Value_1;
     uint8_t Value_2;
 } tExternalFootswitchEffectConfig;

@@ -15,7 +15,7 @@
 
 static const char *TAG = "fx_handler_helper";
 
-esp_err_t fx_handler_helper_get_values(uint16_t *param, tExternalFootswitchEffectConfig config, uint8_t *type, FxSelectedValueIndex_t *selected_value_index, uint8_t *CC)
+esp_err_t fx_handler_helper_get_values(TonexParameter_t *param, tExternalFootswitchEffectConfig config, ParamType_t *type, FxSelectedValueIndex_t *selected_value_index, MidiValue_t *CC)
 {
     tTonexParameter *param_ptr;
     
@@ -26,14 +26,39 @@ esp_err_t fx_handler_helper_get_values(uint16_t *param, tExternalFootswitchEffec
 
     *CC = config.CC;
     
-    if (*param == TONEX_PARAM_DELAY_DIGITAL_TS && param_ptr[TONEX_PARAM_DELAY_MODEL].Value == 1) {
-        // tape delay is selected, change param to tape ts
-        *param = TONEX_PARAM_DELAY_TAPE_TS;
-        *CC = 92;
-    } else if (*param == TONEX_PARAM_DELAY_TAPE_TS && param_ptr[TONEX_PARAM_DELAY_MODEL].Value == 0) {
-        // digital delay is selected, change param to digital ts
-        *param = TONEX_PARAM_DELAY_DIGITAL_TS;
-        *CC = 5;
+    if (param_ptr[TONEX_PARAM_DELAY_MODEL].Value == 0) {
+        // digital delay is selected
+        switch (*param) {
+            case TONEX_PARAM_DELAY_TAPE_TS:
+                // change param to digital ts
+                *param = TONEX_PARAM_DELAY_DIGITAL_TS;
+                *CC = 5;
+                break;
+            case TONEX_PARAM_DELAY_TAPE_TIME:
+                // change param to digital time
+                *param = TONEX_PARAM_DELAY_DIGITAL_TIME;
+                *CC = 5;
+                break;
+            default:
+                break;
+        }
+    }
+    else if (param_ptr[TONEX_PARAM_DELAY_MODEL].Value == 1) {
+        // tape delay is selected
+        switch (*param) {
+            case TONEX_PARAM_DELAY_DIGITAL_TS:
+                // change param to tape ts
+                *param = TONEX_PARAM_DELAY_TAPE_TS;
+                *CC = 92;
+                break;
+            case TONEX_PARAM_DELAY_DIGITAL_TIME:
+                // change param to tape time
+                *param = TONEX_PARAM_DELAY_TAPE_TIME;
+                *CC = 92;
+                break;
+            default:
+                break;
+        }
     }
 
     tTonexParameter param_entry = param_ptr[*param];
@@ -127,7 +152,7 @@ esp_err_t fx_handler_helper_get_values(uint16_t *param, tExternalFootswitchEffec
     }
 }
 
-void fx_handler_helper_update_parameter(uint16_t param, tExternalFootswitchEffectConfig config, uint8_t type, FxSelectedValueIndex_t selected_value_index, uint8_t CC)
+void fx_handler_helper_update_parameter(TonexParameter_t param, tExternalFootswitchEffectConfig config, ParamType_t type, FxSelectedValueIndex_t selected_value_index, MidiValue_t CC)
 {
     float new_value = 0;
 

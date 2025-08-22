@@ -357,13 +357,13 @@ void FSButtonAction(uint32_t buttonIndex)
             continue;
         }
 
-        uint16_t param = midi_helper_get_param_for_change_num(config.CC);
+        TonexParameter_t param = midi_helper_get_param_for_change_num(config.CC);
 
         if (param == TONEX_UNKNOWN) {
             return;
         }
             
-        uint8_t type;
+        ParamType_t type;
         FxSelectedValueIndex_t selectedValueIndex;
         uint8_t CC;
 
@@ -1507,15 +1507,15 @@ static void updateFSButtons() {
                 continue;
             }
 
-            uint16_t param = midi_helper_get_param_for_change_num(config.CC);
+            TonexParameter_t param = midi_helper_get_param_for_change_num(config.CC);
 
             if (param == TONEX_UNKNOWN) {
                 break;
             }
             
-            uint8_t type;
+            ParamType_t type;
             FxSelectedValueIndex_t selectedValueIndex;
-            uint8_t CC;
+            MidiValue_t CC;
 
             if (fx_handler_helper_get_values(&param, config, &type, &selectedValueIndex, &CC) != ESP_OK) {
                 break;
@@ -1760,75 +1760,6 @@ void UI_UpdateFSButtons()
         ESP_LOGE(TAG, "UI Update queue send failed!");            
     }
 }
-
-// void UI_SetAmpSkinSlot(bool visible, uint8_t skinIndex1, uint8_t skinIndex2, uint8_t skinIndex3, uint8_t skinIndex4)
-// void UI_SetAmpSkinSlot(uint8_t skinIndex1, uint8_t skinIndex2, uint8_t skinIndex3, uint8_t skinIndex4)
-// {
-//     tUIUpdate ui_update;
-
-//     // build commands
-//     ui_update.Action = UI_ACTION_SET_AMP_SKIN_SLOT;
-
-//     // send to queue
-//     if (xQueueSend(ui_update_queue, (void*)&ui_update, 0) != pdPASS)
-//     {
-//         ESP_LOGE(TAG, "UI Update queue send failed!");            
-//     }
-// }
-
-// void UI_SetPresetButtonsSelected(bool selected1, bool selected2, bool selected3, bool selected4)
-// {
-//     tUIUpdate ui_update;
-
-//     // build commands
-//     ui_update.Action = UI_ACTION_SET_PRESET_BUTTON_SELECTED;
-//     ui_update.Value = selected1 | selected2 << 1 | selected3 << 2 | selected4 << 3;
-
-//     // send to queue
-//     if (xQueueSend(ui_update_queue, (void*)&ui_update, 0) != pdPASS)
-//     {
-//         ESP_LOGE(TAG, "UI Update queue send failed!");            
-//     }
-// }
-
-// void UI_SetFSButton(uint32_t buttonIndex, uint32_t color, bool active, char *effect, char *value)
-// {
-//     tUIUpdate ui_update;
-    
-//     switch (buttonIndex) {
-//         case 6: {
-//             ui_update.ElementID = UI_ELEMENT_PRESET_FS6_BUTTON;
-//         } break;
-
-//         case 7: {
-//             ui_update.ElementID = UI_ELEMENT_PRESET_FS7_BUTTON;
-//         } break;
-
-//         case 9: {
-//             ui_update.ElementID = UI_ELEMENT_PRESET_FS9_BUTTON;
-//         } break;
-
-//         default: {
-//             return;
-//         } break;
-//     }
-//     ui_update.Action = UI_ACTION_SET_FS_BUTTON;
-//     ui_update.Value = color;
-//     ui_update.State = active;
-
-//     sprintf(ui_update.Text, effect);
-
-//     if (value != NULL) {
-//         strncat(ui_update.Text, ": ", MAX_UI_TEXT - 1);
-//         strncat(ui_update.Text, value, MAX_UI_TEXT - 1);
-//     }
-
-//     // send to queue
-//     if (xQueueSend(ui_update_queue, (void*)&ui_update, 0) != pdPASS)
-//     {
-//         ESP_LOGE(TAG, "UI Update queue send failed!");            
-//     }
-// }
 
 void UI_SetAltMode(bool altMode)
 {

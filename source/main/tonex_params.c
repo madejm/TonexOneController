@@ -255,7 +255,7 @@ const char *Style_DelayTimeSignatures[18] = {
     "1/1 T"
 };
 
-void tonex_params_get_ui_style(uint32_t param, uint8_t paramValue, uint32_t *color, char const **name, char const **value, FxSelectedValueIndex_t *selectedValueIndex, const tTonexParameter *allParameters) {
+void tonex_params_get_ui_style(TonexParameter_t param, uint8_t paramValue, uint32_t *color, char const **name, char const **value, FxSelectedValueIndex_t *selectedValueIndex, const tTonexParameter *allParameters) {
     if (param >= TONEX_GLOBAL_BPM) {
         *color = 0xD1A60C;
         
@@ -309,6 +309,10 @@ void tonex_params_get_ui_style(uint32_t param, uint8_t paramValue, uint32_t *col
             case TONEX_PARAM_DELAY_DIGITAL_TS:
             case TONEX_PARAM_DELAY_TAPE_TS:
                 *value = Style_DelayTimeSignatures[paramValue];
+                break;
+            case TONEX_PARAM_DELAY_DIGITAL_TIME:
+            case TONEX_PARAM_DELAY_TAPE_TIME:
+                *name = "DELAY TIME";
                 break;
             case TONEX_PARAM_DELAY_DIGITAL_MODE:
             case TONEX_PARAM_DELAY_TAPE_MODE:
@@ -524,7 +528,7 @@ esp_err_t tonex_params_release_locked_access(void)
 * RETURN:      
 * NOTES:       
 *****************************************************************************/
-esp_err_t tonex_params_get_min_max(uint16_t param_index, float* min, float* max)
+esp_err_t tonex_params_get_min_max(TonexParameter_t param_index, float* min, float* max)
 {
     if (param_index >= TONEX_GLOBAL_LAST)
     {
@@ -558,7 +562,7 @@ esp_err_t tonex_params_get_min_max(uint16_t param_index, float* min, float* max)
 * RETURN:      
 * NOTES:       
 *****************************************************************************/
-float tonex_params_clamp_value(uint16_t param_index, float value)
+float tonex_params_clamp_value(TonexParameter_t param_index, float value)
 {
     if (param_index >= TONEX_GLOBAL_LAST)
     {

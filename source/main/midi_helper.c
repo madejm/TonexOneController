@@ -53,7 +53,7 @@ static const char *TAG = "app_midi_helper";
 * RETURN:      
 * NOTES:       
 *****************************************************************************/
-float midi_helper_scale_midi_to_float(uint16_t param_index, uint8_t midi_value)
+float midi_helper_scale_midi_to_float(TonexParameter_t param_index, MidiValue_t midi_value)
 {
     float min;
     float max;
@@ -129,9 +129,9 @@ static uint8_t midi_helper_boolean_midi_toggle(uint16_t param, uint8_t midi_valu
 * RETURN:      
 * NOTES:       
 *****************************************************************************/
-esp_err_t midi_helper_adjust_param_via_midi(uint8_t change_num, uint8_t midi_value)
+esp_err_t midi_helper_adjust_param_via_midi(MidiValue_t change_num, uint8_t midi_value)
 {
-    uint16_t param;
+    TonexParameter_t param;
     float value;
     tTonexParameter* param_ptr;
 
@@ -1272,9 +1272,9 @@ esp_err_t midi_helper_adjust_param_via_midi(uint8_t change_num, uint8_t midi_val
 * RETURN:      
 * NOTES:       
 *****************************************************************************/
-uint16_t midi_helper_get_param_for_change_num(uint8_t change_num)
+TonexParameter_t midi_helper_get_param_for_change_num(MidiValue_t change_num)
 {
-    uint16_t param = TONEX_UNKNOWN;
+    TonexParameter_t param = TONEX_UNKNOWN;
     tTonexParameter* param_ptr;
 
     // Midi mapping done to match the big Tonex pedal
