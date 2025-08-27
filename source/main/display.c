@@ -1381,7 +1381,7 @@ void ParameterChanged(lv_event_t * e)
     }
     else if (obj == ui_VolumeSlider)
     {
-        usb_modify_parameter(TONEX_GLOBAL_MASTER_VOLUME, lv_slider_get_value(obj));    
+        usb_modify_parameter(TONEX_GLOBAL_MASTER_VOLUME, ((float)lv_slider_get_value(obj))/10.0f);    
     }
     else
     {
@@ -3573,9 +3573,9 @@ static uint8_t update_ui_element(tUIUpdate* update)
                         } break;
 
                         case TONEX_GLOBAL_MASTER_VOLUME:
-                        {                            
-                            lv_slider_set_range(ui_VolumeSlider, round(param_entry->Min), round(param_entry->Max));
-                            lv_slider_set_value(ui_VolumeSlider, round(param_entry->Value), LV_ANIM_OFF);
+                        {
+                            lv_slider_set_range(ui_VolumeSlider, round(param_entry->Min * 10.0f), round(param_entry->Max * 10.0f));
+                            lv_slider_set_value(ui_VolumeSlider, round(param_entry->Value * 10.0f), LV_ANIM_OFF);
                             modifyLabelWithParam(ui_VolumeLabel, param_entry);
                         } break;
                     } 

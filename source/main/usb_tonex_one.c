@@ -600,7 +600,6 @@ static bool usb_tonex_one_handle_rx(const uint8_t* data, size_t data_len, void* 
 static esp_err_t usb_tonex_one_modify_global(uint16_t global_val, float value)
 {
     esp_err_t res = ESP_FAIL;
-    float scaled_value;
 
     switch (global_val)
     {
@@ -650,11 +649,7 @@ static esp_err_t usb_tonex_one_modify_global(uint16_t global_val, float value)
         case TONEX_GLOBAL_MASTER_VOLUME:
         {                        
             // global volume is sent with a special command
-            // Big Tonex uses values -40 to +3, and One uses values from 0 to 10.
-            // So, scaling the One's values to match the big Tonex
-            scaled_value = ((value + 40.0f) / 43.0f) * 10.0f;
-
-            usb_tonex_one_send_master_volume(scaled_value);
+            usb_tonex_one_send_master_volume(value);
 
             // bit of a hack here. Return fail code, so caller can avoid sending the state data unneccessarily
             res = ESP_FAIL;
@@ -764,7 +759,6 @@ static TonexStatus usb_tonex_one_parse_param_changed(uint8_t* unframed, uint16_t
 {
     uint16_t param_index;
     float value;
-    float scaled_value;
     tTonexParameter* param_ptr = NULL;
     uint8_t param_start_marker[] = { 0xB9, 0x04, 0x03 };
     
@@ -791,20 +785,22 @@ static TonexStatus usb_tonex_one_parse_param_changed(uint8_t* unframed, uint16_t
 
             if (param_index == 0x00)
             {
-                // global volume
-                // Big Tonex uses values -40 to +3, and One uses values from 0 to 10.
-                // So, scaling the One's values to match the big Tonex
-                scaled_value = ((value / 10.0f) * 43.0f) - 40.0f;
-
+                TonexData->Message.Header.type = TYPE_PARAM_CHANGED;
+                
                 // save it
                 if (tonex_params_get_locked_access(&param_ptr) == ESP_OK)
                 {
-                    param_ptr[TONEX_GLOBAL_MASTER_VOLUME].Value = scaled_value;
+                    // global volume
+                    // Big Tonex uses values -40 to +3, and One uses values from 0 to 10.
+                    // Overriding default values
+                    param_ptr[TONEX_GLOBAL_MASTER_VOLUME].Min = 0;
+                    param_ptr[TONEX_GLOBAL_MASTER_VOLUME].Max = 10;
+                    param_ptr[TONEX_GLOBAL_MASTER_VOLUME].Value = value;
 
                     tonex_params_release_locked_access();
                 }
 
-                ESP_LOGI(TAG, "Got global volume: raw:%3.2f  scaled:%3.2f", value, scaled_value);
+                ESP_LOGI(TAG, "Got global volume: raw:%3.2f", value);
             }
         }
     }
@@ -1214,6 +1210,20 @@ static esp_err_t usb_tonex_one_process_single_message(uint8_t* data, uint16_t le
                 {
                     // ignore
                     ESP_LOGI(TAG, "Received Preset details full");
+                } break;
+
+                case TYPE_PARAM_CHANGED:
+                {
+                    // if we have messages waiting in the queue, it will trigger another
+                    // change that will overwrite this one. Skip the UI refresh to save time
+                    if (uxQueueMessagesWaiting(input_queue) == 0)
+                    {
+                        // signal to refresh param UI with Globals
+                        UI_RefreshParameterValues();
+
+                        // update web UI
+                        wifi_request_sync(WIFI_SYNC_TYPE_PARAMS, NULL, NULL);
+                    }
                 } break;
 
                 default:
