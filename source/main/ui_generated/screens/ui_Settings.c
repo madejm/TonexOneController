@@ -19,7 +19,7 @@ lv_obj_set_x( ui_SettingsTabview, 0 );
 lv_obj_set_y( ui_SettingsTabview, -23 );
 lv_obj_set_align( ui_SettingsTabview, LV_ALIGN_CENTER );
 lv_obj_clear_flag( ui_SettingsTabview, LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN );    /// Flags
-lv_obj_set_style_bg_color(ui_SettingsTabview, lv_color_hex(0x1F1F1F), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_bg_color(ui_SettingsTabview, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_bg_opa(ui_SettingsTabview, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_outline_color(ui_SettingsTabview, lv_color_hex(0x563F2A), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_outline_opa(ui_SettingsTabview, 255, LV_PART_MAIN| LV_STATE_DEFAULT);

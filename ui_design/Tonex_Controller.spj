@@ -3286,9 +3286,9 @@
                         "nid": 10520,
                         "strtype": "_style/Bg_Color",
                         "intarray": [
-                          31,
-                          31,
-                          31,
+                          0,
+                          0,
+                          0,
                           255
                         ],
                         "InheritedType": 7
@@ -3572,9 +3572,9 @@
                         "nid": 10520,
                         "strtype": "_style/Bg_Color",
                         "intarray": [
-                          31,
-                          31,
-                          31,
+                          0,
+                          0,
+                          0,
                           255
                         ],
                         "InheritedType": 7
@@ -10290,9 +10290,9 @@
                     "nid": -279197812,
                     "strtype": "_style/Bg_Color",
                     "intarray": [
-                      31,
-                      31,
-                      31,
+                      0,
+                      0,
+                      0,
                       255
                     ],
                     "InheritedType": 7
@@ -12675,7 +12675,8 @@
                     "InheritedType": 11
                   }
                 ],
-                "saved_objtypeKey": "TABPAGE"
+                "saved_objtypeKey": "TABPAGE",
+                "tree_closed": true
               },
               {
                 "guid": "GUID76113205-518965S323883361",
@@ -15027,7 +15028,8 @@
                     "InheritedType": 11
                   }
                 ],
-                "saved_objtypeKey": "TABPAGE"
+                "saved_objtypeKey": "TABPAGE",
+                "tree_closed": true
               },
               {
                 "guid": "GUID43107140-201179S766411",
@@ -17937,7 +17939,8 @@
                     "InheritedType": 11
                   }
                 ],
-                "saved_objtypeKey": "TABPAGE"
+                "saved_objtypeKey": "TABPAGE",
+                "tree_closed": true
               },
               {
                 "guid": "GUID81828498-518967S558963361",
@@ -28437,7 +28440,8 @@
                     "InheritedType": 11
                   }
                 ],
-                "saved_objtypeKey": "TABPAGE"
+                "saved_objtypeKey": "TABPAGE",
+                "tree_closed": true
               },
               {
                 "guid": "GUID55944470-518969S2043361",
@@ -31743,7 +31747,8 @@
                     "InheritedType": 11
                   }
                 ],
-                "saved_objtypeKey": "TABPAGE"
+                "saved_objtypeKey": "TABPAGE",
+                "tree_closed": true
               },
               {
                 "guid": "GUID91007905-909062S802482",
@@ -34530,7 +34535,8 @@
                     "InheritedType": 11
                   }
                 ],
-                "saved_objtypeKey": "TABPAGE"
+                "saved_objtypeKey": "TABPAGE",
+                "tree_closed": true
               }
             ],
             "dont_export": false,
@@ -34697,9 +34703,9 @@
                         "nid": 10520,
                         "strtype": "_style/Bg_Color",
                         "intarray": [
-                          31,
-                          31,
-                          31,
+                          0,
+                          0,
+                          0,
                           255
                         ],
                         "InheritedType": 7

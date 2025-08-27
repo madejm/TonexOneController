@@ -1452,7 +1452,7 @@ static void setFSButton(uint32_t buttonIndex, uint32_t color, FxSelectedValueInd
             lv_obj_set_style_border_opa(element_1, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
             break;
         case FX_SELECTED_VALUE_2:
-            lv_obj_set_style_text_color(element_1, lv_color_hex(0x1F1F1F), LV_PART_MAIN | LV_STATE_DEFAULT);
+            lv_obj_set_style_text_color(element_1, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
             lv_obj_set_style_bg_opa(element_1, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
             lv_obj_set_style_border_opa(element_1, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
             break;
@@ -3792,7 +3792,7 @@ static uint8_t update_ui_element(tUIUpdate* update)
             lv_obj_set_style_border_color(element_1, colorHex, LV_PART_MAIN | LV_STATE_DEFAULT);
 
             if (ui_AltMode) {
-                lv_obj_set_style_text_color(element_1, lv_color_hex(0x1F1F1F), LV_PART_MAIN | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_color(element_1, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
                 lv_obj_set_style_bg_opa(element_1, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
                 lv_obj_set_style_border_opa(element_1, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
             } else {
@@ -3834,7 +3834,7 @@ static uint8_t update_ui_element(tUIUpdate* update)
 //             lv_obj_set_style_border_color(element_1, lv_color_hex(update->Value), LV_PART_MAIN | LV_STATE_DEFAULT);
 
 //             if (update->State == true) {
-//                 lv_obj_set_style_text_color(element_1, lv_color_hex(0x1F1F1F), LV_PART_MAIN | LV_STATE_DEFAULT);
+//                 lv_obj_set_style_text_color(element_1, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
 //                 lv_obj_set_style_bg_opa(element_1, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 //                 lv_obj_set_style_border_opa(element_1, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 //             } else {
