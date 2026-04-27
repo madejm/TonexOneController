@@ -88,7 +88,11 @@ static const char *TAG = "platform_ws43b";
 
 #define DISPLAY_LCD_NUM_FB              2
 
+#if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+#define DRAW_BUFFER_SIZE                12
+#else
 #define DRAW_BUFFER_SIZE                6
+#endif
 
 #define BUF_SIZE                        (1024)
 #define I2C_MASTER_TIMEOUT_MS           1000
@@ -526,7 +530,11 @@ void platform_init(i2c_master_bus_handle_t bus_handle, SemaphoreHandle_t I2CMute
     disp_drv->flush_cb = display_lvgl_flush_cb;
     disp_drv->draw_buf = &disp_buf;
     disp_drv->user_data = panel_handle;
+#if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+    disp_drv->full_refresh = false;
+#else
     disp_drv->full_refresh = true;
+#endif
 
     lv_disp_t* __attribute__((unused)) disp = lv_disp_drv_register(disp_drv);
 

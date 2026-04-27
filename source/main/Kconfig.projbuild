@@ -68,6 +68,12 @@ menu "Tonex Controller Configuration"
         default "n"
         help
             Enable this option if the platform has a large display with full UI
+
+    config TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+       bool "Custom 43B UI"
+        default "n"
+        help
+            Enable this option if the 43B platform has custom UI
     
     config TONEX_CONTROLLER_GPIO_FOOTSWITCHES
        bool "Footswitches are directly connected to GPIO"

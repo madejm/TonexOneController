@@ -72,7 +72,10 @@ enum CommandEvents
     EVENT_PRESET_DOWN,
     EVENT_PRESET_UP,
     EVENT_PRESET_INDEX,
-    EVENT_BANK_INDEX,
+    EVENT_PRESET_IN_BANK_INDEX,
+    EVENT_BANK_UP,
+    EVENT_BANK_DOWN,
+    EVENT_BANK_INDEX_SYNC,
     EVENT_SET_PRESET_NAME,
     EVENT_SET_PRESET_DETAILS,
     EVENT_SET_USB_STATUS,
@@ -148,6 +151,8 @@ typedef struct __attribute__ ((packed))
     tExternalFootswitchEffectConfig InternalFootswitchEffectConfig[MAX_INTERNAL_EFFECT_FOOTSWITCHES];
 
     // preset order mapping
+    // index of array is Footswitch index
+    // value is Tonex Preset Index
     uint8_t PresetOrder[MAX_SUPPORTED_PRESETS];
 } tLegacyConfigData;
 
@@ -214,6 +219,8 @@ typedef struct __attribute__ ((packed))
 typedef struct __attribute__ ((packed)) 
 { 
     // preset order mapping
+    // index of array is Footswitch index
+    // value is Tonex Preset Index
     uint8_t PresetOrder[MAX_SUPPORTED_PRESETS];
 } tPresetOrderMappingConfig;
 
@@ -241,15 +248,19 @@ typedef struct
     tPCMapConfig PCMapConfig;
 } tConfigData;
 
+#define TAP_TEMPO_MAX_COUNT 6
+
 typedef struct
 {
-    uint32_t LastTime;
+    uint32_t Times[TAP_TEMPO_MAX_COUNT];
     float BPM;
 } tTapTempo;
 
 typedef struct 
 {
+    // Tonex Preset Index, has to be mapped to footswitch index from tPresetOrderMappingConfig
     uint32_t PresetIndex;                        // 0-based index
+    uint32_t BankIndex;                        // 0-based index
     char PresetNames[MAX_SUPPORTED_PRESETS][MAX_PRESET_NAME_LENGTH];
     uint32_t USBStatus;
     uint32_t BTStatus;
@@ -274,6 +285,36 @@ static void DumpUserConfig(void);
 static uint8_t MigrateUserData(void);
 static void UpdateFootswitchLeds(void);
 
+#if CONFIG_TONEX_CONTROLLER_HAS_DISPLAY
+/****************************************************************************
+* NAME:        
+* DESCRIPTION: 
+* PARAMETERS:  
+* RETURN:      
+* NOTES:       
+*****************************************************************************/
+static void update_bank_ui()
+{
+    uint8_t presetIndex1 = ControlData.ConfigData.PresetOrderMappingConfig.PresetOrder[ControlData.BankIndex * 4];
+    uint8_t presetIndex2 = ControlData.ConfigData.PresetOrderMappingConfig.PresetOrder[ControlData.BankIndex * 4 + 1];
+    uint8_t presetIndex3 = ControlData.ConfigData.PresetOrderMappingConfig.PresetOrder[ControlData.BankIndex * 4 + 2];
+    uint8_t presetIndex4 = ControlData.ConfigData.PresetOrderMappingConfig.PresetOrder[ControlData.BankIndex * 4 + 3];
+
+    uint8_t skinIndex1 = ControlData.ConfigData.SkinConfig.SkinIndex[presetIndex1];
+    uint8_t skinIndex2 = ControlData.ConfigData.SkinConfig.SkinIndex[presetIndex2];
+    uint8_t skinIndex3 = ControlData.ConfigData.SkinConfig.SkinIndex[presetIndex3];
+    uint8_t skinIndex4 = ControlData.ConfigData.SkinConfig.SkinIndex[presetIndex4];
+    
+    UI_SetBankIndex(
+        ControlData.BankIndex,
+        skinIndex1,
+        skinIndex2,
+        skinIndex3,
+        skinIndex4
+    );
+}
+#endif
+
 /****************************************************************************
 * NAME:        
 * DESCRIPTION: 
@@ -292,20 +333,33 @@ static uint8_t process_control_command(tControlMessage* message)
         {
             if (ControlData.USBStatus != 0)
             {
+                uint8_t mappedIndex = PresetIndexForOrderValue(ControlData.PresetIndex);
+
                 if (control_get_config_item_int(CONFIG_ITEM_LOOP_AROUND))
                 {
-                    uint8_t newIndex = (ControlData.PresetIndex > 0) ? (ControlData.PresetIndex - 1) : (usb_get_max_presets_for_connected_modeller() - 1);
+                    uint8_t newIndex = (mappedIndex) ? (mappedIndex - 1) : (usb_get_max_presets_for_connected_modeller() - 1);
                     uint8_t preset = ControlData.ConfigData.PresetOrderMappingConfig.PresetOrder[newIndex];
 
                     // send message to USB
                     usb_set_preset(preset);
+                    
+                    uint8_t bank = newIndex/4;
+                    if (bank != ControlData.BankIndex) {
+                        footswitches_bank_set(bank);
+                    }
                 }
-                else if (ControlData.PresetIndex > 0)
+                else if (mappedIndex > 0)
                 {
-                    uint8_t preset = ControlData.ConfigData.PresetOrderMappingConfig.PresetOrder[ControlData.PresetIndex - 1];
+                    uint8_t newIndex = mappedIndex - 1;
+                    uint8_t preset = ControlData.ConfigData.PresetOrderMappingConfig.PresetOrder[newIndex];
                     
                     // send message to USB
                     usb_set_preset(preset);
+
+                    uint8_t bank = newIndex/4;
+                    if (bank != ControlData.BankIndex) {
+                        footswitches_bank_set(bank);
+                    }
                 }
             }
         } break;
@@ -314,22 +368,45 @@ static uint8_t process_control_command(tControlMessage* message)
         {
             if (ControlData.USBStatus != 0)
             {
+                uint8_t mappedIndex = PresetIndexForOrderValue(ControlData.PresetIndex);
+
                 if (control_get_config_item_int(CONFIG_ITEM_LOOP_AROUND))
                 {
-                    uint8_t newIndex = (ControlData.PresetIndex < (usb_get_max_presets_for_connected_modeller() - 1)) ? (ControlData.PresetIndex + 1) : 0;
+                    uint8_t newIndex = (mappedIndex < (usb_get_max_presets_for_connected_modeller() - 1)) ? (mappedIndex + 1) : 0;
                     uint8_t preset = ControlData.ConfigData.PresetOrderMappingConfig.PresetOrder[newIndex];
                     
                     // send message to USB
                     usb_set_preset(preset);
+
+                    uint8_t bank = newIndex/4;
+                    if (bank != ControlData.BankIndex) {
+                        footswitches_bank_set(bank);
+                    }
                 }
-                else if (ControlData.PresetIndex < (usb_get_max_presets_for_connected_modeller() - 1))
+                else if (mappedIndex < (usb_get_max_presets_for_connected_modeller() - 1))
                 {
-                    uint8_t preset = ControlData.ConfigData.PresetOrderMappingConfig.PresetOrder[ControlData.PresetIndex + 1];
+                    uint8_t newIndex = mappedIndex + 1;
+                    uint8_t preset = ControlData.ConfigData.PresetOrderMappingConfig.PresetOrder[newIndex];
                     
                     // send message to USB
                     usb_set_preset(preset);
+
+                    uint8_t bank = newIndex/4;
+                    if (bank != ControlData.BankIndex) {
+                        footswitches_bank_set(bank);
+                    }
                 }
             }
+        } break;
+
+        case EVENT_BANK_DOWN:
+        {
+            footswitches_bank_down();
+        } break;
+
+        case EVENT_BANK_UP:
+        {
+            footswitches_bank_up();
         } break;
 
         case EVENT_PRESET_INDEX:
@@ -343,11 +420,24 @@ static uint8_t process_control_command(tControlMessage* message)
             }
         } break;
 
-        case EVENT_BANK_INDEX:
+        case EVENT_PRESET_IN_BANK_INDEX:
+        {
+            if (ControlData.USBStatus != 0)
+            {
+                uint8_t index = (ControlData.BankIndex * 4) + message->Value;
+                uint8_t preset = ControlData.ConfigData.PresetOrderMappingConfig.PresetOrder[index];
+
+                // send message to USB
+                usb_set_preset(preset);
+            }
+        } break;
+
+        case EVENT_BANK_INDEX_SYNC:
         {
 #if CONFIG_TONEX_CONTROLLER_HAS_DISPLAY
             // update UI
-            UI_SetBankIndex(message->Value);
+            ControlData.BankIndex = message->Value;
+            update_bank_ui();
 #endif
         } break;
 
@@ -373,15 +463,18 @@ static uint8_t process_control_command(tControlMessage* message)
           
 #if CONFIG_TONEX_CONTROLLER_HAS_DISPLAY
             // update UI
-            UI_SetPresetLabel(PresetIndexForOrderValue(message->Value), ControlData.PresetNames[message->Value]);
+            uint8_t orderPresetIndex = PresetIndexForOrderValue(message->Value);
+            UI_SetPresetLabel(orderPresetIndex, ControlData.PresetNames[message->Value]);
 
             UI_SetAmpSkin(ControlData.ConfigData.SkinConfig.SkinIndex[ControlData.PresetIndex]);
 
-            char preset_user_text[MAX_PRESET_USER_TEXT_LENGTH] = {0};
-            
-            // load user text and set it
-            LoadPresetUserText(message->Value, preset_user_text);
-            UI_SetPresetDescription(preset_user_text);
+            footswitches_bank_set(orderPresetIndex/4);
+
+            // char preset_user_text[MAX_PRESET_USER_TEXT_LENGTH] = {0};
+
+            // // load user text and set it
+            // LoadPresetUserText(message->Value, preset_user_text);
+            // UI_SetPresetDescription(preset_user_text);
 #endif
 
             // update web UI
@@ -425,6 +518,7 @@ static uint8_t process_control_command(tControlMessage* message)
 #if CONFIG_TONEX_CONTROLLER_HAS_DISPLAY
             // update UI
             UI_SetAmpSkin(ControlData.ConfigData.SkinConfig.SkinIndex[ControlData.PresetIndex]);
+            update_bank_ui();
 #endif                 
         } break;
 
@@ -1175,8 +1269,7 @@ static uint8_t process_control_command(tControlMessage* message)
         case EVENT_TRIGGER_TAP_TEMPO:
         {
             uint32_t current_time = xTaskGetTickCount(); 
-            uint32_t delta = current_time - ControlData.TapTempo.LastTime;
-            float bpm;
+            uint32_t last_time_delta = current_time - ControlData.TapTempo.Times[0];
 
             // debug
             //ESP_LOGI(TAG, "Tap Tempo %d %d", (int)current_time, (int)delta);
@@ -1184,13 +1277,35 @@ static uint8_t process_control_command(tControlMessage* message)
             // BPM can range from 40 to 240 bpm: 1.5 second2 maximum to 250 msec minimum between beats
             
             // check time since last tap
-            if (delta > 1500)
+            if (last_time_delta > 1500)
             {
                 // less than 40 bpm, save time and wait for another trigger
-                ControlData.TapTempo.LastTime = current_time;
+                ControlData.TapTempo.Times[0] = current_time;
+
+                for (uint8_t i=1; i<TAP_TEMPO_MAX_COUNT; i++) {
+                    ControlData.TapTempo.Times[i] = 0;
+                }
             }
             else 
             {
+                for (int8_t i = TAP_TEMPO_MAX_COUNT - 1; i>0; i--) {
+                    ControlData.TapTempo.Times[i] = ControlData.TapTempo.Times[i-1];
+                }
+                ControlData.TapTempo.Times[0] = current_time;
+
+                uint32_t deltaCount = 0;
+                uint32_t deltaSum = 0;
+
+                for (uint8_t i=0; i<TAP_TEMPO_MAX_COUNT-1; i++) {
+                    if (ControlData.TapTempo.Times[i+1] == 0) {
+                        break;
+                    }
+                    deltaCount += 1;
+                    deltaSum += ControlData.TapTempo.Times[i] - ControlData.TapTempo.Times[i+1];
+                }
+
+                float delta = ((float)deltaSum)/((float)deltaCount);
+
                 if (delta < 250)
                 {
                     // clamp at maximum bpm
@@ -1198,7 +1313,7 @@ static uint8_t process_control_command(tControlMessage* message)
                 }
 
                 // calculate bpm (60,000 is 60 seconds in msec)
-                bpm = 60000.0f / (float)delta;
+                float bpm = 60000.0f / (float)delta;
 
                 ControlData.TapTempo.BPM = bpm;
 
@@ -1219,9 +1334,6 @@ static uint8_t process_control_command(tControlMessage* message)
                         usb_modify_parameter(VALETON_GLOBAL_BPM, ControlData.TapTempo.BPM);
                     } break;
                 }
-
-                // save time for next trigger
-                ControlData.TapTempo.LastTime = current_time;
             }
         } break;
 
@@ -1308,17 +1420,84 @@ void control_request_preset_index(uint8_t index)
 * RETURN:      
 * NOTES:       
 *****************************************************************************/
+void control_request_preset_in_bank_index(uint8_t index)
+{
+    tControlMessage message;
+
+    ESP_LOGI(TAG, "control_request_preset_index %d", index);
+
+    message.Event = EVENT_PRESET_IN_BANK_INDEX;
+    message.Value = index;
+
+    // send to queue
+    if (xQueueSend(control_input_queue, (void*)&message, 0) != pdPASS)
+    {
+        ESP_LOGE(TAG, "control_request_preset_index queue send failed!");            
+    }
+}
+
+/****************************************************************************
+* NAME:        
+* DESCRIPTION: 
+* PARAMETERS:  
+* RETURN:      
+* NOTES:       
+*****************************************************************************/
 void control_request_bank_index(uint8_t index)
 {
     tControlMessage message;
 
     ESP_LOGI(TAG, "control_request_bank_index %d", index);
 
-    message.Event = EVENT_BANK_INDEX;
+    message.Event = EVENT_BANK_INDEX_SYNC;
     message.Value = index;
 
     // send to queue
     if (xQueueSend(control_input_queue, (void*)&message, pdMS_TO_TICKS(CONTROL_QUEUE_WRITE_TIMEOUT)) != pdPASS)
+    {
+        ESP_LOGE(TAG, "control_request_bank_index queue send failed!");            
+    }
+}
+
+/****************************************************************************
+* NAME:        
+* DESCRIPTION: 
+* PARAMETERS:  
+* RETURN:      
+* NOTES:       
+*****************************************************************************/
+void control_request_bank_up()
+{
+    tControlMessage message;
+
+    ESP_LOGI(TAG, "control_request_bank_up");
+
+    message.Event = EVENT_BANK_UP;
+
+    // send to queue
+    if (xQueueSend(control_input_queue, (void*)&message, 0) != pdPASS)
+    {
+        ESP_LOGE(TAG, "control_request_bank_index queue send failed!");            
+    }
+}
+
+/****************************************************************************
+* NAME:        
+* DESCRIPTION: 
+* PARAMETERS:  
+* RETURN:      
+* NOTES:       
+*****************************************************************************/
+void control_request_bank_down()
+{
+    tControlMessage message;
+
+    ESP_LOGI(TAG, "control_request_bank_down");
+
+    message.Event = EVENT_BANK_DOWN;
+
+    // send to queue
+    if (xQueueSend(control_input_queue, (void*)&message, 0) != pdPASS)
     {
         ESP_LOGE(TAG, "control_request_bank_index queue send failed!");            
     }
@@ -2365,7 +2544,10 @@ void control_set_preset_order(uint8_t* order)
 
 #if CONFIG_TONEX_CONTROLLER_HAS_DISPLAY
     // update UI
-    UI_SetPresetLabel(PresetIndexForOrderValue(ControlData.PresetIndex), ControlData.PresetNames[ControlData.PresetIndex]);
+    uint8_t orderPresetIndex = PresetIndexForOrderValue(ControlData.PresetIndex);
+    UI_SetPresetLabel(orderPresetIndex, ControlData.PresetNames[ControlData.PresetIndex]);
+
+    footswitches_bank_set(orderPresetIndex/4);
 #endif
 }
 
@@ -2420,8 +2602,12 @@ void control_set_skin_next(void)
     if (ControlData.ConfigData.SkinConfig.SkinIndex[ControlData.PresetIndex] < (SKIN_MAX - 1))
     {
         ControlData.ConfigData.SkinConfig.SkinIndex[ControlData.PresetIndex]++;
-        control_set_amp_skin_index(ControlData.ConfigData.SkinConfig.SkinIndex[ControlData.PresetIndex]);
     }
+    else
+    {
+        ControlData.ConfigData.SkinConfig.SkinIndex[ControlData.PresetIndex] = 0;
+    }
+    control_set_amp_skin_index(ControlData.ConfigData.SkinConfig.SkinIndex[ControlData.PresetIndex]);
 }
 
 /****************************************************************************
@@ -2436,9 +2622,12 @@ void control_set_skin_previous(void)
     if (ControlData.ConfigData.SkinConfig.SkinIndex[ControlData.PresetIndex] > 0)
     {
         ControlData.ConfigData.SkinConfig.SkinIndex[ControlData.PresetIndex]--;
-    
-        control_set_amp_skin_index(ControlData.ConfigData.SkinConfig.SkinIndex[ControlData.PresetIndex]);
     }
+    else
+    {
+        ControlData.ConfigData.SkinConfig.SkinIndex[ControlData.PresetIndex] = (SKIN_MAX - 1);
+    }
+    control_set_amp_skin_index(ControlData.ConfigData.SkinConfig.SkinIndex[ControlData.PresetIndex]);
 }
 
 /****************************************************************************

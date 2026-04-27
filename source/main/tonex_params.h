@@ -219,6 +219,8 @@ float tonex_params_clamp_value(TonexParameter_t param_index, float value);
 esp_err_t tonex_params_colors_get_locked_access(tTonexPresetColor** color_ptr);
 esp_err_t tonex_params_colors_get_color(uint16_t preset_index, uint32_t* preset_color);
 
+void tonex_params_get_ui_style(TonexParameter_t param, uint8_t paramValue, uint32_t *color, char const **name, char const **value, FxSelectedValueIndex_t *selectedValueIndex, const tModellerParameter *allParameters);
+
 #ifdef __cplusplus
 } /*extern "C"*/
 #endif

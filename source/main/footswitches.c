@@ -45,6 +45,7 @@ limitations under the License.
 #include "midi_helper.h"
 #include "tonex_params.h"
 #include "display.h"
+#include "fx_handler_helper.h"
 
 #define FOOTSWITCH_TASK_STACK_SIZE          (3 * 1024)
 #define FOOTSWITCH_SAMPLE_COUNT             5       // 20 msec per sample
@@ -68,7 +69,10 @@ enum FootswitchHandlers
 
 enum FootswitchEvents
 {
-    FOOTSWITCH_EVENT_SWITCH_ALT_MODE
+    FOOTSWITCH_EVENT_SWITCH_ALT_MODE,
+    FOOTSWITCH_EVENT_BANK_SET,
+    FOOTSWITCH_EVENT_BANK_DOWN,
+    FOOTSWITCH_EVENT_BANK_UP
 };
 
 typedef struct
@@ -629,9 +633,8 @@ static void footswitch_handle_effects(tFootswitchHandler* handler, tFootswitchEf
 {
     uint8_t loop; 
     uint8_t value;
-    uint16_t param;
-    float new_value;
-    tModellerParameter* param_ptr;
+    TonexParameter_t param;
+    FxSelectedValueIndex_t selected_value_index;
 
     // handle state
     switch (handler->state)
@@ -655,83 +658,18 @@ static void footswitch_handle_effects(tFootswitchHandler* handler, tFootswitchEf
                             ESP_LOGI(TAG, "Footswitch FX pressed. Index %d. Param %d", (int)loop, (int)param);
 
                             if (param != TONEX_UNKNOWN)
-                            {
-                                // get the current value of the parameter
-                                if (control_get_connected_modeller_params_locked_access(&param_ptr) == ESP_OK)
+                            {             
+                                MidiValue_t CC;
+                                ParamType_t type;
+
+                                if (param == TONEX_CONTROLLER_FOOTSWITCH_ALT_MODE)
                                 {
-                                    // is the parameter a boolean type?
-                                    if (param_ptr[param].Type == MODELLER_PARAM_TYPE_SWITCH)
-                                    {
-                                        // toggle the current value
-                                        if (param_ptr[param].Value == 0)
-                                        {
-                                            new_value = 1;
-                                        }
-                                        else
-                                        {
-                                            new_value = 0;
-                                        }
-
-                                        control_release_connected_modeller_params_locked_access();
-                                        usb_modify_parameter(param, new_value);
-                                    }
-                                    else if (param_ptr[param].Type == MODELLER_PARAM_TYPE_SELECT)
-                                    {
-                                        // save current value before we release the locked access
-                                        // select params are really integers saved as floats
-                                        uint8_t current_select_val = (uint8_t)param_ptr[param].Value;
-
-                                        // release access now as midi helper needs the mutex
-                                        control_release_connected_modeller_params_locked_access();
-
-                                        if (current_select_val == fx_handler[loop].config.Value_1)
-                                        {
-                                            new_value = (float)fx_handler[loop].config.Value_2;
-                                        }
-                                        else
-                                        {
-                                            new_value = (float)fx_handler[loop].config.Value_1;
-                                        }
-
-                                        midi_helper_adjust_param_via_midi(fx_handler[loop].config.CC, new_value);     
-                                    }
-                                    else if (param_ptr[param].Type == MODELLER_PARAM_TYPE_RANGE)
-                                    {
-                                        // save current value before we release the locked access
-                                        float current_param_value = param_ptr[param].Value;
-
-                                        // release access now as midi helper needs the mutex
-                                        control_release_connected_modeller_params_locked_access();
-
-                                        // flip between value 1 and value 2
-                                        // get value 1 (Midi 0..127) scaled back to a float to it can be compared with the current param value (a float)
-                                        float value_1 = midi_helper_scale_midi_to_float(param, fx_handler[loop].config.Value_1);
-
-                                        // note here: scaling Midi to float may result in rounding errors. This check is to make sure
-                                        // we can find the current value without missing it due to slight difference
-                                        float param_diff = fabs(current_param_value - value_1);
-
-                                        // debug
-                                        //ESP_LOGI(TAG, "Footswitch FX Param difference %f", param_diff);    
-
-                                        if (param_diff < 0.1f)
-                                        {
-                                            new_value = fx_handler[loop].config.Value_2;
-                                        }
-                                        else
-                                        {
-                                            new_value = fx_handler[loop].config.Value_1;
-                                        }
-
-                                        midi_helper_adjust_param_via_midi(fx_handler[loop].config.CC, new_value);      
-                                    } 
-                                    else
-                                    {
-                                        ESP_LOGI(TAG, "Footswitch FX Unknown param type");
-                                        new_value = 0.0f;
-                                    }                                  
-
-                                    ESP_LOGI(TAG, "Footswitch FX Param %d changed to %d", (int)param, (int)new_value);                                                                       
+                                    FootswitchControl.footswitch_alt_mode = !FootswitchControl.footswitch_alt_mode;
+                                    UI_SetAltMode(FootswitchControl.footswitch_alt_mode);
+                                }
+                                else if (fx_handler_helper_get_values(&param, fx_handler[loop].config, &type, &selected_value_index, &CC) == ESP_OK)
+                                {                                        
+                                    fx_handler_helper_update_parameter(param, fx_handler[loop].config, type, selected_value_index, CC);
                                 }
                             }
 
@@ -1006,9 +944,75 @@ static uint8_t process_footswitch_command(tFootswitchMessage* message)
         case FOOTSWITCH_EVENT_SWITCH_ALT_MODE:
         {
             FootswitchControl.footswitch_alt_mode = !FootswitchControl.footswitch_alt_mode;
+            UI_SetAltMode(FootswitchControl.footswitch_alt_mode);
+            return 0;
+        } break;
+
+        case FOOTSWITCH_EVENT_BANK_SET:
+        {
+            uint8_t banks_count = get_banks_count((tFootswitchLayoutEntry*)&FootswitchLayouts[FootswitchControl.external_switch_mode]);
+
+            if (message->Value >= banks_count) {
+                return 1;
+            }
+            tFootswitchHandler *handler = &FootswitchControl.Handlers[FOOTSWITCH_HANDLER_EXTERNAL_PRESETS];
+            handler->current_bank = message->Value;
+            control_request_bank_index(handler->current_bank);
+            
+            return 0;
+        } break;
+        
+        case FOOTSWITCH_EVENT_BANK_UP:
+        {
+            uint8_t banks_count = get_banks_count((tFootswitchLayoutEntry*)&FootswitchLayouts[FootswitchControl.external_switch_mode]);
+
+            tFootswitchHandler *handler = &FootswitchControl.Handlers[FOOTSWITCH_HANDLER_EXTERNAL_PRESETS];
+
+            if (control_get_config_item_int(CONFIG_ITEM_LOOP_AROUND))
+            {
+                uint8_t newBank = ((handler->current_bank + 1) < banks_count) ? (handler->current_bank + 1) : 0;
+                // bank up
+                handler->current_bank = newBank;
+                ESP_LOGI(TAG, "Footswitch banked up %d", handler->current_bank);
+                control_request_bank_index(handler->current_bank);
+            }
+            else if ((handler->current_bank + 1) < banks_count)
+            {
+                // bank up
+                handler->current_bank++;
+                ESP_LOGI(TAG, "Footswitch banked up %d", handler->current_bank);
+                control_request_bank_index(handler->current_bank);
+            }
+
+            return 0;
+        } break;
+
+        case FOOTSWITCH_EVENT_BANK_DOWN:
+        {
+            uint8_t banks_count = get_banks_count((tFootswitchLayoutEntry*)&FootswitchLayouts[FootswitchControl.external_switch_mode]);
+
+            tFootswitchHandler *handler = &FootswitchControl.Handlers[FOOTSWITCH_HANDLER_EXTERNAL_PRESETS];
+            
+            if (control_get_config_item_int(CONFIG_ITEM_LOOP_AROUND))
+            {
+                uint8_t newBank = (handler->current_bank > 0) ? (handler->current_bank - 1) : (banks_count - 1);
+                // bank down
+                handler->current_bank = newBank;
+                ESP_LOGI(TAG, "Footswitch banked down %d", handler->current_bank);
+                control_request_bank_index(handler->current_bank);
+            }
+            else if (handler->current_bank > 0)
+            {
+                // bank down
+                handler->current_bank--;   
+                ESP_LOGI(TAG, "Footswitch banked down %d", handler->current_bank);
+                control_request_bank_index(handler->current_bank);
+            }
+
             return 0;
         } break;
     }
+
     return 1;
 }
 
@@ -1017,6 +1021,40 @@ void footswitches_switch_alt_mode()
     tFootswitchMessage message;
 
     message.Event = FOOTSWITCH_EVENT_SWITCH_ALT_MODE;
+
+    // send to queue
+    if (xQueueSend(footswitch_input_queue, (void*)&message, 0) != pdPASS)
+    {      
+    }
+}
+
+void footswitches_bank_set(uint8_t bankIndex) {
+    tFootswitchMessage message;
+
+    message.Event = FOOTSWITCH_EVENT_BANK_SET;
+    message.Value = bankIndex;
+
+    // send to queue
+    if (xQueueSend(footswitch_input_queue, (void*)&message, 0) != pdPASS)
+    {      
+    }
+}
+
+void footswitches_bank_down() {
+    tFootswitchMessage message;
+
+    message.Event = FOOTSWITCH_EVENT_BANK_DOWN;
+
+    // send to queue
+    if (xQueueSend(footswitch_input_queue, (void*)&message, 0) != pdPASS)
+    {      
+    }
+}
+
+void footswitches_bank_up() {
+    tFootswitchMessage message;
+
+    message.Event = FOOTSWITCH_EVENT_BANK_UP;
 
     // send to queue
     if (xQueueSend(footswitch_input_queue, (void*)&message, 0) != pdPASS)

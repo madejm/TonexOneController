@@ -203,12 +203,12 @@ enum BluetoothModes
     BT_MODE_PERIPHERAL,
 };
 
-enum WiFiModes
+typedef enum: uint8_t
 {
     WIFI_MODE_ACCESS_POINT_TIMED,       // access point for 1 minute on boot
     WIFI_MODE_STATION,                  // station mode
     WIFI_MODE_ACCESS_POINT              // access point, no timeout
-};
+} WiFiMode;
 
 enum ScreenRotation
 {
@@ -228,13 +228,13 @@ enum SavePresetSlot
     SAVE_PRESET_SLOT_C
 };
 
-enum WiFiTxPower
+typedef enum: uint8_t
 {
     WIFI_TX_POWER_25,
     WIFI_TX_POWER_50,
     WIFI_TX_POWER_75,    
     WIFI_TX_POWER_100
-};
+} WiFiTxPower;
 
 enum ConfigTabs43BTonex
 {
@@ -366,6 +366,10 @@ typedef struct __attribute__ ((packed))
 void control_request_preset_up(void);
 void control_request_preset_down(void);
 void control_request_preset_index(uint8_t index);
+void control_request_preset_in_bank_index(uint8_t index);
+void control_request_bank_up();
+void control_request_bank_down();
+void control_request_fs_alt_mode();
 void control_request_bank_index(uint8_t index);
 void control_set_usb_status(uint32_t status);
 void control_set_bt_status(uint32_t status);

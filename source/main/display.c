@@ -79,6 +79,9 @@ limitations under the License.
 #include "tonex_params.h"
 #include "platform_common.h"
 #include "wifi_config.h"
+#include "midi_helper.h"
+#include "footswitches.h"
+#include "fx_handler_helper.h"
 
 static const char *TAG = "app_display";
 
@@ -108,6 +111,11 @@ enum UIElements
     UI_ELEMENT_PRESET_NAME,
     UI_ELEMENT_BANK_INDEX,
     UI_ELEMENT_AMP_SKIN,
+    UI_ELEMENT_ALT_BUTTON,
+    UI_ELEMENT_FS_BUTTONS,
+    // UI_ELEMENT_PRESET_FS6_BUTTON,
+    // UI_ELEMENT_PRESET_FS7_BUTTON,
+    // UI_ELEMENT_PRESET_FS9_BUTTON,
     UI_ELEMENT_PRESET_DESCRIPTION,
     UI_ELEMENT_PARAMETERS,
     UI_ELEMENT_TOAST,
@@ -119,6 +127,10 @@ enum UIAction
     UI_ACTION_SET_STATE,
     UI_ACTION_SET_LABEL_TEXT,
     UI_ACTION_SET_ENTRY_TEXT,
+    // UI_ACTION_SET_AMP_SKIN_SLOT,
+    // UI_ACTION_SET_PRESET_BUTTON_SELECTED,
+    UI_ACTION_SET_ALT_BUTTON,
+    // UI_ACTION_SET_FS_BUTTON,
     UI_ACTION_NONE = 0xFF
 };
 
@@ -127,6 +139,7 @@ typedef struct
     uint8_t ElementID;
     uint8_t Action;
     uint32_t Value;
+    uint16_t State;
     char Text[MAX_UI_TEXT];
 } tUIUpdate;
 
@@ -153,6 +166,10 @@ static SemaphoreHandle_t lvgl_mux = NULL;
 static lv_disp_drv_t* disp_drv; 
 static msgbox_data_t msgbox_data;
 
+static bool ui_AltMode = false;
+static uint8_t ui_PresetIndex = 0;
+static uint8_t ui_BankIndex = 0;
+
 #if CONFIG_TONEX_CONTROLLER_HAS_DISPLAY
 static void ui_show_toast(char* contents);
 
@@ -173,9 +190,17 @@ static int16_t preset_list_insert_index = -1;
 #define PRESET_LIST_PRESETS_PER_PAGE 10
 static uint8_t preset_list_page = 0;
 
+static lv_obj_t* controll_settings_edit_element = NULL;
+
 typedef enum
 {
     SKIN_SLOT_MAIN = 0,
+#if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+    SKIN_SLOT_PRESET_0,
+    SKIN_SLOT_PRESET_1,
+    SKIN_SLOT_PRESET_2,
+    SKIN_SLOT_PRESET_3,
+#endif //CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
     SKIN_SLOT_PRESET_LIST_0,
     SKIN_SLOT_PRESET_LIST_1,
     SKIN_SLOT_PRESET_LIST_2,
@@ -397,6 +422,107 @@ void action_next_clicked(lv_event_t * e)
     control_request_preset_up();        
 }
 
+#if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+/****************************************************************************
+* NAME:        
+* DESCRIPTION: 
+* PARAMETERS:  
+* RETURN:      
+* NOTES:       
+*****************************************************************************/
+void action_fs_button_clicked(uint32_t buttonIndex)
+{
+    for (uint32_t item = 0; item < MAX_EXTERNAL_EFFECT_FOOTSWITCHES; item ++)
+    {
+        tExternalFootswitchEffectConfig config;
+        
+        control_get_config_item_external_fs_config(item, ui_AltMode, &config);
+
+        if (config.Switch != buttonIndex) {
+            continue;
+        }
+
+        TonexParameter_t param = midi_helper_get_param_for_change_num(config.CC, config.Value_1, config.Value_2);
+
+        if (param == TONEX_UNKNOWN) {
+            return;
+        }
+            
+        ParamType_t type;
+        FxSelectedValueIndex_t selectedValueIndex;
+        uint8_t CC;
+
+        if (fx_handler_helper_get_values(&param, config, &type, &selectedValueIndex, &CC) != ESP_OK) {
+            return;
+        }
+        
+        fx_handler_helper_update_parameter(param, config, type, selectedValueIndex, CC);
+        return;
+    }
+}
+
+void action_preset1_clicked(lv_event_t * e) {
+    control_request_preset_in_bank_index(0);
+}
+void action_preset2_clicked(lv_event_t * e) {
+    control_request_preset_in_bank_index(1);
+}
+void action_preset3_clicked(lv_event_t * e) {
+    control_request_preset_in_bank_index(2);
+}
+void action_preset4_clicked(lv_event_t * e) {
+    control_request_preset_in_bank_index(3);
+}
+void action_previous_bank_clicked(lv_event_t * e)
+{
+    control_request_bank_down();
+}
+void action_next_bank_clicked(lv_event_t * e)
+{
+    control_request_bank_up();
+}
+void action_tap_tempo_clicked(lv_event_t * e)
+{
+    control_trigger_tap_tempo();
+}
+void action_fs0_clicked(lv_event_t * e)
+{
+    action_fs_button_clicked(0);
+}
+void action_fs1_clicked(lv_event_t * e)
+{
+    action_fs_button_clicked(1);
+}
+void action_fs2_clicked(lv_event_t * e)
+{
+    action_fs_button_clicked(2);
+}
+void action_fs3_clicked(lv_event_t * e)
+{
+    action_fs_button_clicked(3);
+}
+void action_fs4_clicked(lv_event_t * e)
+{
+    action_fs_button_clicked(4);
+}
+void action_fs5_clicked(lv_event_t * e)
+{
+    action_fs_button_clicked(5);
+}
+void action_fs6_clicked(lv_event_t * e)
+{
+    action_fs_button_clicked(6);
+}
+void action_fs7_clicked(lv_event_t * e)
+{
+    action_fs_button_clicked(7);
+}
+void action_alt_button_clicked(lv_event_t * e)
+{
+    footswitches_switch_alt_mode();
+}
+#endif //CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+
 #else   //CONFIG_TONEX_CONTROLLER_HAS_TOUCH
 
 // Dummy functions so that 1.69 and 1.69 Touch can share the same UI project
@@ -567,13 +693,13 @@ void action_enable_skin_edit(lv_event_t * e)
 
     lv_obj_clear_flag(objects.ui_left_arrow, LV_OBJ_FLAG_HIDDEN);
     lv_obj_clear_flag(objects.ui_right_arrow, LV_OBJ_FLAG_HIDDEN);
+#if !CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
     lv_obj_clear_state(objects.ui_preset_details_text_area, LV_STATE_DISABLED);
+#endif
     lv_obj_clear_flag(objects.ui_ok_tick, LV_OBJ_FLAG_HIDDEN);
-    lv_obj_add_flag(objects.ui_bank_title_label, LV_OBJ_FLAG_HIDDEN);
-    lv_obj_add_flag(objects.ui_bank_value_label, LV_OBJ_FLAG_HIDDEN);
-    lv_obj_add_flag(objects.ui_bpm_title_label, LV_OBJ_FLAG_HIDDEN);
-    lv_obj_add_flag(objects.ui_bpm_value_label, LV_OBJ_FLAG_HIDDEN);
-    lv_obj_add_flag(objects.ui_bpm_indicator, LV_OBJ_FLAG_HIDDEN);
+#if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+    lv_obj_add_flag(objects.ui_all_buttons, LV_OBJ_FLAG_HIDDEN);
+#endif
 }
 
 /****************************************************************************
@@ -591,14 +717,17 @@ void action_save_skin_edit(lv_event_t * e)
     control_save_user_data(0);
     
     lv_obj_add_flag(objects.ui_ok_tick, LV_OBJ_FLAG_HIDDEN);
+#if !CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
     lv_obj_add_flag(objects.ui_entry_keyboard, LV_OBJ_FLAG_HIDDEN);
+#endif
     lv_obj_add_flag(objects.ui_left_arrow, LV_OBJ_FLAG_HIDDEN);
     lv_obj_add_flag(objects.ui_right_arrow, LV_OBJ_FLAG_HIDDEN);
+#if !CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
     lv_obj_add_state(objects.ui_preset_details_text_area, LV_STATE_DISABLED);
-    lv_obj_clear_flag(objects.ui_bank_title_label, LV_OBJ_FLAG_HIDDEN);
-    lv_obj_clear_flag(objects.ui_bank_value_label, LV_OBJ_FLAG_HIDDEN);
-    lv_obj_clear_flag(objects.ui_bpm_title_label, LV_OBJ_FLAG_HIDDEN);
-    lv_obj_clear_flag(objects.ui_bpm_value_label, LV_OBJ_FLAG_HIDDEN);
+#endif
+#if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+    lv_obj_clear_flag(objects.ui_all_buttons, LV_OBJ_FLAG_HIDDEN);
+#endif
 
 #if (CONFIG_TONEX_CONTROLLER_SHOW_BPM_INDICATOR)
     if (control_get_config_item_int(CONFIG_ITEM_DISABLE_BPM_FLASHER) == 0)
@@ -617,13 +746,13 @@ void action_save_skin_edit(lv_event_t * e)
 *****************************************************************************/
 void action_preset_description_pressed(lv_event_t * e)
 {
-    lv_event_code_t event_code = lv_event_get_code(e);
+    // lv_event_code_t event_code = lv_event_get_code(e);
 
-    if(event_code == LV_EVENT_PRESSED) 
-    {
-        lv_keyboard_set_textarea(objects.ui_entry_keyboard,  objects.ui_preset_details_text_area);
-        lv_obj_clear_flag(objects.ui_entry_keyboard, LV_OBJ_FLAG_HIDDEN);
-    }
+    // if(event_code == LV_EVENT_PRESSED) 
+    // {
+        // lv_keyboard_set_textarea(objects.ui_entry_keyboard,  objects.ui_preset_details_text_area);
+    //     lv_obj_clear_flag(objects.ui_entry_keyboard, LV_OBJ_FLAG_HIDDEN);
+    // }
 }
 
 /****************************************************************************
@@ -675,6 +804,7 @@ void BTBondsClearRequest(lv_event_t * e)
 *****************************************************************************/
 void action_keyboard_ok(lv_event_t * e)
 {
+#if !CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
     lv_event_code_t event_code = lv_event_get_code(e);
 
     if(event_code == LV_EVENT_READY) 
@@ -687,7 +817,8 @@ void action_keyboard_ok(lv_event_t * e)
         ESP_LOGI(TAG, "action_keyboard_ok: %s", text);
 
         control_set_user_text(text);  
-    }    
+    }
+#endif
 }
 
 /****************************************************************************
@@ -1021,6 +1152,363 @@ void action_preset_list_keyboard_ok(lv_event_t * e)
         lv_obj_add_flag(objects.ui_preset_list_dialog, LV_OBJ_FLAG_HIDDEN);
     }
 }
+
+#if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+static void setFSButton(uint32_t buttonIndex, uint32_t color, FxSelectedValueIndex_t selectedValueIndex, const char *effect, const char *value, bool visible) {
+    lv_obj_t *button;
+    lv_obj_t *label;
+
+    switch (buttonIndex) {
+        case 0:
+            button = objects.ui_fs_button0;
+            label = objects.ui_fs_button0_label;
+            break;
+        case 1:
+            button = objects.ui_fs_button1;
+            label = objects.ui_fs_button1_label;
+            break;
+        case 2:
+            button = objects.ui_fs_button2;
+            label = objects.ui_fs_button2_label;
+            break;
+        case 3:
+            button = objects.ui_fs_button3;
+            label = objects.ui_fs_button3_label;
+            break;
+        case 4:
+            button = objects.ui_fs_button4;
+            label = objects.ui_fs_button4_label;
+            break;
+        case 5:
+            button = objects.ui_fs_button5;
+            label = objects.ui_fs_button5_label;
+            break;
+        case 6:
+            button = objects.ui_fs_button6;
+            label = objects.ui_fs_button6_label;
+            break;
+        case 7:
+            button = objects.ui_fs_button7;
+            label = objects.ui_fs_button7_label;
+            break;
+        default:
+            return;
+    }
+
+    lv_color_t colorHex = lv_color_hex(color);
+
+    char text[MAX_UI_TEXT];
+    sprintf(text, effect);
+
+    if (value != NULL) {
+        strncat(text, ":\n", MAX_UI_TEXT - 1);
+        strncat(text, value, MAX_UI_TEXT - 1);
+    //     lv_obj_set_style_pad_top(element_1, 7, LV_PART_MAIN| LV_STATE_DEFAULT);
+    // } else {
+    //     lv_obj_set_style_pad_top(element_1, 20, LV_PART_MAIN| LV_STATE_DEFAULT);
+    }
+
+    lv_label_set_text(label, text);
+
+    lv_obj_set_style_bg_color(button, colorHex, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_color(button, colorHex, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    switch (selectedValueIndex) {
+        case FX_SELECTED_VALUE_NONE:
+            lv_obj_set_style_text_color(label, lv_color_hex(0x808080), LV_PART_MAIN | LV_STATE_DEFAULT);
+            lv_obj_set_style_bg_opa(button, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+            lv_obj_set_style_border_opa(button, (visible ? 255 : 0), LV_PART_MAIN| LV_STATE_DEFAULT);
+            break;
+        case FX_SELECTED_VALUE_1:
+            lv_obj_set_style_text_color(label, colorHex, LV_PART_MAIN | LV_STATE_DEFAULT);
+            lv_obj_set_style_bg_opa(button, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+            lv_obj_set_style_border_opa(button, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+            break;
+        case FX_SELECTED_VALUE_2:
+            lv_obj_set_style_text_color(label, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
+            lv_obj_set_style_bg_opa(button, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+            lv_obj_set_style_border_opa(button, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+            break;
+    }
+
+    // if (buttonIndex < 4) {
+    //     lv_obj_set_style_outline_opa(element_1, (ui_AltMode ? 0 : 255), LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    //     int16_t width = ui_AltMode ? 156 : 196;
+    //     int16_t x;
+
+    //     switch (buttonIndex) {
+    //         case 0:
+    //             x = ui_AltMode ? -318 : -297;
+    //             break;
+    //         case 1:
+    //             x = ui_AltMode ? -158 : -99;
+    //             break;
+    //         case 2:
+    //             x = ui_AltMode ? 0 : 99;
+    //             break;
+    //         case 3:
+    //             x = ui_AltMode ? 158 : 297;
+    //             break;
+    //     }
+        
+    //     lv_obj_set_width(element_1, width);
+    //     lv_obj_set_x(element_1, x);
+    // }
+
+    // if (visible || (buttonIndex < 4 && !ui_AltMode)) {
+    if (visible) {
+        lv_obj_clear_flag(button, LV_OBJ_FLAG_HIDDEN);
+    } else {
+        lv_obj_add_flag(button, LV_OBJ_FLAG_HIDDEN);
+    }
+}
+
+static void updateFSButtons() {
+    char buffer[MAX_UI_TEXT];
+
+    for (uint32_t buttonIndex = 0; buttonIndex < MAX_EXTERNAL_EFFECT_FOOTSWITCHES; buttonIndex++)
+    {
+        bool didSet = false;
+
+        for (uint32_t item = 0; item < MAX_EXTERNAL_EFFECT_FOOTSWITCHES; item ++)
+        {
+            tExternalFootswitchEffectConfig config;
+            
+            control_get_config_item_external_fs_config(item, ui_AltMode, &config);
+
+            if (config.Switch != buttonIndex) {
+                continue;
+            }
+
+            TonexParameter_t param = midi_helper_get_param_for_change_num(config.CC, config.Value_1, config.Value_2);
+
+            if (param == TONEX_UNKNOWN) {
+                break;
+            }
+            
+            ParamType_t type;
+            FxSelectedValueIndex_t selectedValueIndex;
+            MidiValue_t CC;
+
+            if (fx_handler_helper_get_values(&param, config, &type, &selectedValueIndex, &CC) != ESP_OK) {
+                break;
+            }
+
+            tModellerParameter *param_ptr;
+
+            if (tonex_params_get_locked_access(&param_ptr) != ESP_OK) {
+                break;
+            }
+
+            tModellerParameter param_entry = param_ptr[param];
+            float paramValue = param_entry.Value;
+            uint32_t color;
+            const char *name;
+            const char *value;
+
+            switch (type) {
+                case MODELLER_PARAM_TYPE_SWITCH: {
+                } break;
+
+                case MODELLER_PARAM_TYPE_SELECT: {
+                } break;
+
+                case MODELLER_PARAM_TYPE_RANGE: {
+                    if ((param_entry.Max - param_entry.Min) > 10.0f) {
+                        sprintf(buffer, "%.0f", paramValue);
+                    } else {
+                        sprintf(buffer, "%.1f", paramValue);
+                    }
+                    value = buffer;
+                } break;
+            }
+
+            tonex_params_get_ui_style(param, paramValue, &color, &name, &value, &selectedValueIndex, param_ptr);
+            tonex_params_release_locked_access();
+
+            setFSButton(buttonIndex, color, selectedValueIndex, name, value, true);
+
+            // done, break for loop and go to next buttonIndex
+            didSet = true;
+            break;
+        }
+
+        if (!didSet) {
+            setFSButton(buttonIndex, 0x808080, FX_SELECTED_VALUE_NONE, "", NULL, (ui_AltMode || buttonIndex > 5));
+        }
+    }
+}
+
+/****************************************************************************
+* NAME:        
+* DESCRIPTION: 
+* PARAMETERS:  
+* RETURN:      
+* NOTES:       
+*****************************************************************************/
+void action_open_controller_page_clicked(lv_event_t * e)
+{
+    ESP_LOGI(TAG, "action_open_controller_page_clicked");
+
+    WiFiMode WiFiMode = control_get_config_item_int(CONFIG_ITEM_WIFI_MODE);
+    WiFiTxPower WifiTxPower = control_get_config_item_int(CONFIG_ITEM_WIFI_TX_POWER);
+
+    lv_dropdown_set_selected(objects.ui_wifi_mode_dropdown, WiFiMode);
+    lv_dropdown_set_selected(objects.ui_wifi_power_dropdown, WifiTxPower);
+
+    char WifiSSID[MAX_WIFI_SSID_PW];
+    char WifiPassword[MAX_WIFI_SSID_PW];
+    char MDNSName[MAX_MDNS_NAME];
+    
+    control_get_config_item_string(CONFIG_ITEM_WIFI_SSID, WifiSSID);
+    control_get_config_item_string(CONFIG_ITEM_WIFI_PASSWORD, WifiPassword);
+    control_get_config_item_string(CONFIG_ITEM_MDNS_NAME, MDNSName);
+
+    lv_textarea_set_text(objects.ui_wifi_ssid_textarea, WifiSSID);
+    lv_textarea_set_text(objects.ui_wifi_password_textarea, WifiPassword);
+    lv_textarea_set_text(objects.ui_mdns_name_textarea, MDNSName);
+
+    lv_scr_load_anim(objects.controller_settings, LV_SCR_LOAD_ANIM_FADE_IN, 0, 0, false);
+}
+
+/****************************************************************************
+* NAME:        
+* DESCRIPTION: 
+* PARAMETERS:  
+* RETURN:      
+* NOTES:       
+*****************************************************************************/
+void action_close_controller_page(lv_event_t * e)
+{
+    ESP_LOGI(TAG, "action_close_controller_page");
+
+    lv_scr_load_anim(objects.settings, LV_SCR_LOAD_ANIM_FADE_IN, 0, 0, false);
+}
+
+/****************************************************************************
+* NAME:        
+* DESCRIPTION: 
+* PARAMETERS:  
+* RETURN:      
+* NOTES:       
+*****************************************************************************/
+void action_save_wifi_settings(lv_event_t * e)
+{
+    ESP_LOGI(TAG, "WiFi Set");
+    
+    WiFiMode WiFiMode = lv_dropdown_get_selected(objects.ui_wifi_mode_dropdown); // WIFI_MODE_ACCESS_POINT_TIMED
+    WiFiTxPower WifiTxPower = lv_dropdown_get_selected(objects.ui_wifi_power_dropdown); // WIFI_TX_POWER_25
+
+    char *WifiSSID = (char*)lv_textarea_get_text(objects.ui_wifi_ssid_textarea);
+    char *WifiPassword = (char*)lv_textarea_get_text(objects.ui_wifi_password_textarea);
+    char *MDNSName = (char*)lv_textarea_get_text(objects.ui_mdns_name_textarea);
+
+    // char msg[33];
+    // sprintf(msg, "WIFI: %u, %u", WiFiMode, WifiTxPower);
+    // wifi_log_msg(msg);
+    // wifi_log_msg(WifiSSID);
+    // wifi_log_msg(WifiPassword);
+    // wifi_log_msg(MDNSName);
+
+    lv_scr_load_anim(objects.settings, LV_SCR_LOAD_ANIM_FADE_IN, 0, 0, false);
+
+    control_set_config_item_int(CONFIG_ITEM_WIFI_MODE, WiFiMode);
+    control_set_config_item_int(CONFIG_ITEM_WIFI_TX_POWER, WifiTxPower);
+    control_set_config_item_string(CONFIG_ITEM_WIFI_SSID, WifiSSID);
+    control_set_config_item_string(CONFIG_ITEM_WIFI_PASSWORD, WifiPassword);
+    control_set_config_item_string(CONFIG_ITEM_MDNS_NAME, MDNSName);
+
+    vTaskDelay(pdMS_TO_TICKS(250));
+
+    // save it and reboot after
+    control_save_user_data(1);
+}
+
+static void openControllerDialog()
+{
+    if (controll_settings_edit_element == NULL)
+    {
+        return;
+    }
+
+    const char* text = lv_textarea_get_text(controll_settings_edit_element);
+    lv_textarea_set_text(objects.ui_controller_dialog_entry, text);
+
+    lv_obj_clear_flag(objects.ui_controller_dialog, LV_OBJ_FLAG_HIDDEN);
+}
+
+/****************************************************************************
+* NAME:        
+* DESCRIPTION: 
+* PARAMETERS:  
+* RETURN:      
+* NOTES:       
+*****************************************************************************/
+void action_edit_wifi_ssid_clicked(lv_event_t * e)
+{
+    controll_settings_edit_element = objects.ui_wifi_ssid_textarea;
+    openControllerDialog();
+}
+
+/****************************************************************************
+* NAME:        
+* DESCRIPTION: 
+* PARAMETERS:  
+* RETURN:      
+* NOTES:       
+*****************************************************************************/
+void action_edit_wifi_password_clicked(lv_event_t * e)
+{
+    controll_settings_edit_element = objects.ui_wifi_password_textarea;
+    openControllerDialog();
+}
+
+/****************************************************************************
+* NAME:        
+* DESCRIPTION: 
+* PARAMETERS:  
+* RETURN:      
+* NOTES:       
+*****************************************************************************/
+void action_wifi_password_hidden_clicked(lv_event_t * e)
+{
+    lv_obj_t *checkbox = lv_event_get_target(e);
+    bool checked = lv_obj_has_state(checkbox, LV_STATE_CHECKED);
+    lv_textarea_set_password_mode(objects.ui_wifi_password_textarea, checked);
+}
+
+/****************************************************************************
+* NAME:        
+* DESCRIPTION: 
+* PARAMETERS:  
+* RETURN:      
+* NOTES:       
+*****************************************************************************/
+void action_edit_mdns_name_clicked(lv_event_t * e)
+{
+    controll_settings_edit_element = objects.ui_mdns_name_textarea;
+    openControllerDialog();
+}
+
+/****************************************************************************
+* NAME:        
+* DESCRIPTION: 
+* PARAMETERS:  
+* RETURN:      
+* NOTES:       
+*****************************************************************************/
+void action_controller_keyboard_ok(lv_event_t * e)
+{
+    if (controll_settings_edit_element != NULL)
+    {
+        const char* text = lv_textarea_get_text(objects.ui_controller_dialog_entry);
+        lv_textarea_set_text(controll_settings_edit_element, text);
+        controll_settings_edit_element = NULL;
+    }
+    lv_obj_add_flag(objects.ui_controller_dialog, LV_OBJ_FLAG_HIDDEN);
+}
+#endif  //CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
 #endif  //CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI
 
 /****************************************************************************
@@ -1146,6 +1634,7 @@ void UI_SetPresetLabel(uint16_t index, char* name)
     // build command
     ui_update.ElementID = UI_ELEMENT_PRESET_NAME;
     ui_update.Action = UI_ACTION_SET_LABEL_TEXT;
+    ui_update.Value = index;
     sprintf(ui_update.Text, "%d: ", (int)index + usb_get_first_preset_index_for_connected_modeller());
     strncat(ui_update.Text, name, MAX_UI_TEXT - 1);
 
@@ -1155,7 +1644,6 @@ void UI_SetPresetLabel(uint16_t index, char* name)
         ESP_LOGE(TAG, "UI Update queue send failed!");            
     }
 }
-
 
 /****************************************************************************
 * NAME:        
@@ -1187,14 +1675,15 @@ __attribute__((unused)) void UI_ShowToast(char* text)
 * RETURN:      
 * NOTES:       
 *****************************************************************************/
-void UI_SetBankIndex(uint16_t index)
+void UI_SetBankIndex(uint16_t index, uint8_t skinIndex1, uint8_t skinIndex2, uint8_t skinIndex3, uint8_t skinIndex4)
 {
     tUIUpdate ui_update;
 
     // build command
     ui_update.ElementID = UI_ELEMENT_BANK_INDEX;
     ui_update.Action = UI_ACTION_SET_STATE;
-    ui_update.Value = index;
+    ui_update.State = index;
+    ui_update.Value = skinIndex1 | ((uint32_t)skinIndex2) << 8 | ((uint32_t)skinIndex3) << 16 | ((uint32_t)skinIndex4) << 24;
 
     // send to queue
     if (xQueueSend(ui_update_queue, (void*)&ui_update, 0) != pdPASS)
@@ -1238,6 +1727,54 @@ void UI_UpdatePresetList()
     tUIUpdate ui_update;
     
     ui_update.ElementID = UI_ELEMENT_PRESET_LIST;
+
+    // send to queue
+    if (xQueueSend(ui_update_queue, (void*)&ui_update, 0) != pdPASS)
+    {
+        ESP_LOGE(TAG, "UI Update queue send failed!");            
+    }
+}
+
+/****************************************************************************
+* NAME:        
+* DESCRIPTION: 
+* PARAMETERS:  
+* RETURN:      
+* NOTES:       
+*****************************************************************************/
+void UI_UpdateFSButtons()
+{
+    tUIUpdate ui_update;
+
+    // build commands
+    ui_update.ElementID = UI_ELEMENT_FS_BUTTONS;
+
+    // send to queue
+    if (xQueueSend(ui_update_queue, (void*)&ui_update, 0) != pdPASS)
+    {
+        ESP_LOGE(TAG, "UI Update queue send failed!");            
+    }
+}
+
+/****************************************************************************
+* NAME:        
+* DESCRIPTION: 
+* PARAMETERS:  
+* RETURN:      
+* NOTES:       
+*****************************************************************************/
+void UI_SetAltMode(bool altMode)
+{
+    tUIUpdate ui_update;
+    
+    ui_update.ElementID = UI_ELEMENT_ALT_BUTTON;
+    ui_update.Action = UI_ACTION_SET_ALT_BUTTON;
+    ui_update.State = altMode;
+
+    char *value = altMode ? "ON" : "OFF";
+    sprintf(ui_update.Text, "ALT");
+    strncat(ui_update.Text, ": ", MAX_UI_TEXT - 1);
+    strncat(ui_update.Text, value, MAX_UI_TEXT - 1);
 
     // send to queue
     if (xQueueSend(ui_update_queue, (void*)&ui_update, 0) != pdPASS)
@@ -1419,7 +1956,45 @@ void updateIconOrder(void)
         } break;
     }
 }
-#endif
+
+#if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+/****************************************************************************
+* NAME:        
+* DESCRIPTION: 
+* PARAMETERS:  
+* RETURN:      
+* NOTES:       
+*****************************************************************************/
+void update_selected_preset_button()
+{
+    switch (usb_get_connected_modeller_type())
+    {
+        case AMP_MODELLER_TONEX_ONE:        // fallthrough
+        case AMP_MODELLER_TONEX:            // fallthrough
+        default:
+        {
+            // tonex_update_selected_preset_button();
+            bool isInCurrentBank = (ui_PresetIndex/4) == ui_BankIndex;
+            uint16_t selectedPresetButtonIndex = ui_PresetIndex % 4;
+            
+            bool selected1 = /*!ui_AltMode &&*/ isInCurrentBank && selectedPresetButtonIndex == 0;
+            bool selected2 = /*!ui_AltMode &&*/ isInCurrentBank && selectedPresetButtonIndex == 1;
+            bool selected3 = /*!ui_AltMode &&*/ isInCurrentBank && selectedPresetButtonIndex == 2;
+            bool selected4 = /*!ui_AltMode &&*/ isInCurrentBank && selectedPresetButtonIndex == 3;
+            
+            lv_obj_set_style_border_opa(objects.ui_preset_button1, (selected1 ? 255 : 0), LV_PART_MAIN | LV_STATE_DEFAULT);
+            lv_obj_set_style_border_opa(objects.ui_preset_button2, (selected2 ? 255 : 0), LV_PART_MAIN | LV_STATE_DEFAULT);
+            lv_obj_set_style_border_opa(objects.ui_preset_button3, (selected3 ? 255 : 0), LV_PART_MAIN | LV_STATE_DEFAULT);
+            lv_obj_set_style_border_opa(objects.ui_preset_button4, (selected4 ? 255 : 0), LV_PART_MAIN | LV_STATE_DEFAULT);
+        } break;
+
+        case AMP_MODELLER_VALETON_GP5:
+        {
+        } break;
+    }
+}
+#endif //CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+#endif //CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI
 
 /****************************************************************************
 * NAME:        
@@ -1453,7 +2028,7 @@ static  __attribute__((unused)) uint8_t update_ui_element(tUIUpdate* update)
                         lv_obj_clear_flag(objects.ui_bottom_panel_tonex, LV_OBJ_FLAG_HIDDEN);
                         lv_obj_add_flag(objects.ui_bottom_panel_valeton, LV_OBJ_FLAG_HIDDEN);
 
-                        lv_label_set_text(objects.ui_project_heading_label, "Tonex Controller"); 
+                        // lv_label_set_text(objects.ui_project_heading_label, "Tonex Controller"); 
 #else                    
                         // set effect letter to "C" (Compressor)
                         lv_label_set_text(objects.ui_cstatus, "C");
@@ -1467,7 +2042,7 @@ static  __attribute__((unused)) uint8_t update_ui_element(tUIUpdate* update)
                         lv_obj_add_flag(objects.ui_bottom_panel_tonex, LV_OBJ_FLAG_HIDDEN);
                         lv_obj_clear_flag(objects.ui_bottom_panel_valeton, LV_OBJ_FLAG_HIDDEN);
 
-                        lv_label_set_text(objects.ui_project_heading_label, "Valeton Controller"); 
+                        // lv_label_set_text(objects.ui_project_heading_label, "Valeton Controller"); 
 #else            
                         // set effect letter to "T" (Distortion)
                         lv_label_set_text(objects.ui_cstatus, "T");
@@ -1490,6 +2065,10 @@ static  __attribute__((unused)) uint8_t update_ui_element(tUIUpdate* update)
         case UI_ELEMENT_PRESET_NAME:
         {
             element_1 = objects.ui_preset_heading_label;
+            ui_PresetIndex = update->Value;
+#if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+            update_selected_preset_button();
+#endif //CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
         } break;
 
         case UI_ELEMENT_BANK_INDEX:
@@ -1506,10 +2085,46 @@ static  __attribute__((unused)) uint8_t update_ui_element(tUIUpdate* update)
 #endif            
         } break;
 
+        case UI_ELEMENT_ALT_BUTTON:
+        {
+#if CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI && CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+            element_1 = objects.ui_alt_button;
+#endif
+        } break;
+
+        case UI_ELEMENT_FS_BUTTONS:
+        {
+#if CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI && CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+            updateFSButtons();
+#endif
+        } break;
+
+//         case UI_ELEMENT_PRESET_FS6_BUTTON:
+//         {
+// #if CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI
+//             element_1 = ui_FS6Button;
+// #endif            
+//         } break;
+
+//         case UI_ELEMENT_PRESET_FS7_BUTTON:
+//         {
+// #if CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI
+//             element_1 = ui_FS7Button;
+// #endif            
+//         } break;
+
+//         case UI_ELEMENT_PRESET_FS9_BUTTON:
+//         {
+// #if CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI
+//             element_1 = ui_FS9Button;
+// #endif            
+//         } break;
+
         case UI_ELEMENT_PRESET_DESCRIPTION:
         {
-#if CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI
+#if CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI && !CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
             element_1 = objects.ui_preset_details_text_area;
+            return 0;
 #endif            
         } break;
 
@@ -1532,9 +2147,12 @@ static  __attribute__((unused)) uint8_t update_ui_element(tUIUpdate* update)
                 } break;
             }
 
-#if CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI            
+#if CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI
             updateIconOrder();
-#endif              
+#if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+            updateFSButtons();
+#endif //CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+#endif //CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI
         } break;
 
         case UI_ELEMENT_TOAST:
@@ -1621,11 +2239,108 @@ static  __attribute__((unused)) uint8_t update_ui_element(tUIUpdate* update)
             {
                 // set Bank index
                 char buf[128];
-                sprintf(buf, "%d", (int)round(update->Value) + 1);
+                sprintf(buf, "%d", (int)round(update->State) + 1);
                 lv_label_set_text(objects.ui_bank_value_label, buf);
+                ui_BankIndex = update->State;
+#if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+                update_selected_preset_button();
+
+                uint8_t skinIndex1 = update->Value & 0xFF;
+                uint8_t skinIndex2 = (update->Value >> 8) & 0xFF;
+                uint8_t skinIndex3 = (update->Value >> 16) & 0xFF;
+                uint8_t skinIndex4 = (update->Value >> 24) & 0xFF;
+
+                set_skin_image(objects.ui_preset_image1, skinIndex1, SKIN_SLOT_PRESET_0);
+                set_skin_image(objects.ui_preset_image2, skinIndex2, SKIN_SLOT_PRESET_1);
+                set_skin_image(objects.ui_preset_image3, skinIndex3, SKIN_SLOT_PRESET_2);
+                set_skin_image(objects.ui_preset_image4, skinIndex4, SKIN_SLOT_PRESET_3);
+#endif //CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM  
             }
-#endif            
+#endif //CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI  
         } break;
+
+//         case UI_ACTION_SET_AMP_SKIN_SLOT:
+//         {
+// #if CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI
+// #endif
+//         } break;
+
+//         case UI_ACTION_SET_PRESET_BUTTON_SELECTED:
+//         {
+// #if CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI
+//             bool selected1 = update->Value & 1;
+//             bool selected2 = (update->Value >> 1) & 1;
+//             bool selected3 = (update->Value >> 2) & 1;
+//             bool selected4 = (update->Value >> 3) & 1;
+            
+//             lv_obj_set_style_outline_width(ui_PresetButton1, (selected1 ? 4 : 0), LV_PART_MAIN| LV_STATE_DEFAULT);
+//             lv_obj_set_style_outline_width(ui_PresetButton2, (selected2 ? 4 : 0), LV_PART_MAIN| LV_STATE_DEFAULT);
+//             lv_obj_set_style_outline_width(ui_PresetButton3, (selected3 ? 4 : 0), LV_PART_MAIN| LV_STATE_DEFAULT);
+//             lv_obj_set_style_outline_width(ui_PresetButton4, (selected4 ? 4 : 0), LV_PART_MAIN| LV_STATE_DEFAULT);
+// #endif   
+//         } break;
+
+        case UI_ACTION_SET_ALT_BUTTON:
+        {
+#if CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI && CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+            ui_AltMode = update->State;
+
+            lv_color_t colorHex = lv_color_hex(0xFB9230);
+
+            lv_label_set_text(objects.ui_alt_button_label, update->Text);
+
+            lv_obj_set_style_bg_color(element_1, colorHex, LV_PART_MAIN | LV_STATE_DEFAULT);
+            lv_obj_set_style_border_color(element_1, colorHex, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+            if (ui_AltMode) {
+                lv_obj_set_style_text_color(objects.ui_alt_button_label, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
+                lv_obj_set_style_bg_opa(element_1, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+                lv_obj_set_style_border_opa(element_1, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+            } else {
+                lv_obj_set_style_text_color(objects.ui_alt_button_label, colorHex, LV_PART_MAIN | LV_STATE_DEFAULT);
+                lv_obj_set_style_bg_opa(element_1, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+                lv_obj_set_style_border_opa(element_1, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+            }
+
+            if (ui_AltMode) {
+                lv_obj_add_flag(objects.ui_previous_bank, LV_OBJ_FLAG_HIDDEN);
+                lv_obj_add_flag(objects.ui_next_bank, LV_OBJ_FLAG_HIDDEN);
+            } else {
+                lv_obj_clear_flag(objects.ui_previous_bank, LV_OBJ_FLAG_HIDDEN);
+                lv_obj_clear_flag(objects.ui_next_bank, LV_OBJ_FLAG_HIDDEN);
+            }
+
+            if (ui_AltMode) {
+                lv_obj_add_flag(objects.ui_preset_buttons, LV_OBJ_FLAG_HIDDEN);
+                lv_obj_clear_flag(objects.ui_fs_buttons_bottom, LV_OBJ_FLAG_HIDDEN);
+            } else {
+                lv_obj_clear_flag(objects.ui_preset_buttons, LV_OBJ_FLAG_HIDDEN);
+                lv_obj_add_flag(objects.ui_fs_buttons_bottom, LV_OBJ_FLAG_HIDDEN);
+            }
+
+            updateFSButtons();
+#endif   
+        } break;
+
+//         case UI_ACTION_SET_FS_BUTTON:
+//         {
+// #if CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI
+//             lv_label_set_text(element_1, update->Text);
+
+//             lv_obj_set_style_bg_color(element_1, lv_color_hex(update->Value), LV_PART_MAIN | LV_STATE_DEFAULT);
+//             lv_obj_set_style_border_color(element_1, lv_color_hex(update->Value), LV_PART_MAIN | LV_STATE_DEFAULT);
+
+//             if (update->State == true) {
+//                 lv_obj_set_style_text_color(element_1, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
+//                 lv_obj_set_style_bg_opa(element_1, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+//                 lv_obj_set_style_border_opa(element_1, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+//             } else {
+//                 lv_obj_set_style_text_color(element_1, lv_color_hex(update->Value), LV_PART_MAIN | LV_STATE_DEFAULT);
+//                 lv_obj_set_style_bg_opa(element_1, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+//                 lv_obj_set_style_border_opa(element_1, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+//             }
+// #endif   
+//         } break;
 
         case UI_ACTION_SET_LABEL_TEXT:
         {
