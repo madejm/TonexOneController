@@ -132,6 +132,10 @@ enum ConfigItems
     CONFIG_ITEM_EXT_FOOTSW_EFFECT8_CC,
     CONFIG_ITEM_EXT_FOOTSW_EFFECT8_VAL1,
     CONFIG_ITEM_EXT_FOOTSW_EFFECT8_VAL2,
+    CONFIG_ITEM_EXT_FOOTSW_EFFECT9_SW,
+    CONFIG_ITEM_EXT_FOOTSW_EFFECT9_CC,
+    CONFIG_ITEM_EXT_FOOTSW_EFFECT9_VAL1,
+    CONFIG_ITEM_EXT_FOOTSW_EFFECT9_VAL2,
     CONFIG_ITEM_INT_FOOTSW_EFFECT1_SW,
     CONFIG_ITEM_INT_FOOTSW_EFFECT1_CC,
     CONFIG_ITEM_INT_FOOTSW_EFFECT1_VAL1,
@@ -148,6 +152,45 @@ enum ConfigItems
     CONFIG_ITEM_INT_FOOTSW_EFFECT4_CC,
     CONFIG_ITEM_INT_FOOTSW_EFFECT4_VAL1,
     CONFIG_ITEM_INT_FOOTSW_EFFECT4_VAL2,
+    CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT1_CC,
+    CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT1_VAL1,
+    CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT1_VAL2,
+    CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT2_CC,
+    CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT2_VAL1,
+    CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT2_VAL2,
+    CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT3_CC,
+    CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT3_VAL1,
+    CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT3_VAL2,
+    CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT4_CC,
+    CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT4_VAL1,
+    CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT4_VAL2,
+    CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT5_CC,
+    CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT5_VAL1,
+    CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT5_VAL2,
+    CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT6_CC,
+    CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT6_VAL1,
+    CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT6_VAL2,
+    CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT7_CC,
+    CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT7_VAL1,
+    CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT7_VAL2,
+    CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT8_CC,
+    CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT8_VAL1,
+    CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT8_VAL2,
+    CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT9_CC,
+    CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT9_VAL1,
+    CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT9_VAL2,
+    CONFIG_ITEM_INT_ALT_FOOTSW_EFFECT1_CC,
+    CONFIG_ITEM_INT_ALT_FOOTSW_EFFECT1_VAL1,
+    CONFIG_ITEM_INT_ALT_FOOTSW_EFFECT1_VAL2,
+    CONFIG_ITEM_INT_ALT_FOOTSW_EFFECT2_CC,
+    CONFIG_ITEM_INT_ALT_FOOTSW_EFFECT2_VAL1,
+    CONFIG_ITEM_INT_ALT_FOOTSW_EFFECT2_VAL2,
+    CONFIG_ITEM_INT_ALT_FOOTSW_EFFECT3_CC,
+    CONFIG_ITEM_INT_ALT_FOOTSW_EFFECT3_VAL1,
+    CONFIG_ITEM_INT_ALT_FOOTSW_EFFECT3_VAL2,
+    CONFIG_ITEM_INT_ALT_FOOTSW_EFFECT4_CC,
+    CONFIG_ITEM_INT_ALT_FOOTSW_EFFECT4_VAL1,
+    CONFIG_ITEM_INT_ALT_FOOTSW_EFFECT4_VAL2,
     CONFIG_ITEM_ENABLE_HIGHER_TOUCH_SENS,
     CONFIG_ITEM_DISABLE_BPM_FLASHER,
     CONFIG_ITEM_BT_PERIPHERAL_NAME
@@ -262,17 +305,25 @@ enum IOExpanderPins
     IO_EXPANDER_PIN_16
 };
 
-enum ParamTypes
+typedef enum
 {
     MODELLER_PARAM_TYPE_SWITCH,        // on/off
     MODELLER_PARAM_TYPE_SELECT,        // 0,1,2,3 etc
     MODELLER_PARAM_TYPE_RANGE          // floating point range
-};
+} ParamType_t;
+
+typedef enum {
+    FX_SELECTED_VALUE_NONE,
+    FX_SELECTED_VALUE_1,
+    FX_SELECTED_VALUE_2
+} FxSelectedValueIndex_t;
 
 #define MAX_PARAM_NAME          12
 
 // special cases for handling effect switches that use Midi but don't change a parameter
 #define TONEX_UNKNOWN           0xFFFF
+
+typedef uint8_t MidiValue_t;
 
 typedef struct
 {
@@ -280,7 +331,7 @@ typedef struct
     float Min;
     float Max;
     char Name[MAX_PARAM_NAME];
-    uint8_t Type;
+    ParamType_t Type;
     uint8_t Data1;  // usage depends on connected modeller
     uint8_t Data2;  // usage depends on connected modeller
     uint8_t Data3;  // usage depends on connected modeller
@@ -289,7 +340,7 @@ typedef struct
 typedef struct __attribute__ ((packed)) 
 {
     uint8_t Switch;
-    uint8_t CC;
+    MidiValue_t CC;
     uint8_t Value_1;
     uint8_t Value_2;
 } tExternalFootswitchEffectConfig;
@@ -303,7 +354,7 @@ typedef struct __attribute__ ((packed))
 
 #define MAX_WIFI_SSID_PW                        65   
 #define MAX_MDNS_NAME                           32
-#define MAX_EXTERNAL_EFFECT_FOOTSWITCHES        8
+#define MAX_EXTERNAL_EFFECT_FOOTSWITCHES        9
 #define MAX_INTERNAL_EFFECT_FOOTSWITCHES        4
 #define SWITCH_NOT_USED                         0xFF
 #define MAX_SUPPORTED_PRESETS                   150
@@ -351,3 +402,5 @@ void control_set_config_item_object(uint32_t item, void* object);
 uint32_t control_get_config_item_int(uint32_t item);
 void control_get_config_item_string(uint32_t item, char* name);
 void control_get_config_item_object(uint32_t item, void* object);
+void control_get_config_item_internal_fs_config(uint8_t index, bool alt, tExternalFootswitchEffectConfig *config);
+void control_get_config_item_external_fs_config(uint8_t index, bool alt, tExternalFootswitchEffectConfig *config);

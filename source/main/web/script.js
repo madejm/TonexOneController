@@ -4,7 +4,7 @@ const AMP_MODELLER_TONEX = 2;
 const AMP_MODELLER_VALETON_GP5 = 3;
 
 const INT_FS_COUNT = 4;
-const EXT_FS_COUNT = 8;
+const EXT_FS_COUNT = 9;
 
 var gateway = `ws://${window.location.hostname}/ws`;
 var websocket;
@@ -184,6 +184,11 @@ const TONEX_GLOBAL_TEMPO_SOURCE = 113;
 const TONEX_GLOBAL_TUNING_REFERENCE = 114;
 const TONEX_GLOBAL_BYPASS = 115;
 const TONEX_GLOBAL_MASTER_VOLUME = 116;
+const TONEX_GLOBAL_LAST = 117;           // last actual parameter
+
+// controller internal
+const TONEX_CONTROLLER_FOOTSWITCH_ALT_MODE = 118;
+const TONEX_CONTROLLER_LAST = 119;           // last actual parameter
 
 // valeton params
 const ValetonParameters = {
@@ -708,6 +713,7 @@ tonexMidiControlChangeAssociations.set(117, { param: "CABSIM BYPASS", value: { t
 tonexMidiControlChangeAssociations.set(118, { param: "TEMPO SOURCE", value: { type: "TOGGLE" } })
 tonexMidiControlChangeAssociations.set(119, { param: "TUNING REFERENCE", value: { type: "RANGE" } })
 tonexMidiControlChangeAssociations.set(122, { param: "GLOBAL VOLUME", value: { type: "RANGE" } })
+tonexMidiControlChangeAssociations.set(126, { param: "ALT MODE", value: { type: "TOGGLE" } })
 tonexMidiControlChangeAssociations.set(127, { param: "SET PRESET", value: { type: "RANGE" } })
 
 
@@ -3706,8 +3712,8 @@ function processReturnCmd(data) {
             });
             
             // now we know modeller type, update footswitch stuff
-            populateExternalFootswitches();
-            populateInternalFootswitches();
+            populateFootswitches(true);
+            populateFootswitches(false);
                      
             break;
 
@@ -3758,20 +3764,30 @@ function processReturnCmd(data) {
             
             for (var i=1; i<=EXT_FS_COUNT; i++) {
                 configureParamSelect(`extfx${i}sw`, data[`EXTFS_ES${i}_SW`]);
-                setParamValue(`extfx${i}cc`, data[`EXTFS_ES${i}_CC`]);
-                fsChanged(true, i);
+                setParamValue(`extfx${i}cc`, data[`EXTFS_ES${i}_CC`] ?? 255);
+                fsChanged(true, i, false, false);
                 setFSValue(`extfx${i}v1`, data[`EXTFS_ES${i}_V1`]);
                 setFSValue(`extfx${i}v2`, data[`EXTFS_ES${i}_V2`]);
+
+                setParamValue(`extfx${i}cc-alt`, data[`EXTFS_ES${i}_CC_ALT`] ?? 255);
+                fsChanged(true, i, true, false);
+                setFSValue(`extfx${i}v1`, data[`EXTFS_ES${i}_V1_ALT`], true);
+                setFSValue(`extfx${i}v2`, data[`EXTFS_ES${i}_V2_ALT`], true);
             }
 
             configureParamSelect("intfslay", data['FOOTSW_MODE']);
 
             for (i=1; i<=INT_FS_COUNT; i++) {
                 configureParamSelect(`intfx${i}sw`, data[`INTFS_ES${i}_SW`]);
-                setParamValue(`intfx${i}cc`, data[`INTFS_ES${i}_CC`]);
-                fsChanged(false, i);
+                setParamValue(`intfx${i}cc`, data[`INTFS_ES${i}_CC`] ?? 255);
+                fsChanged(false, i, false, false);
                 setFSValue(`intfx${i}v1`, data[`INTFS_ES${i}_V1`]);
                 setFSValue(`intfx${i}v2`, data[`INTFS_ES${i}_V2`]);
+
+                setParamValue(`intfx${i}cc-alt`, data[`INTFS_ES${i}_CC_ALT`] ?? 255);
+                fsChanged(false, i, true, false);
+                setFSValue(`intfx${i}v1`, data[`INTFS_ES${i}_V1_ALT`], true);
+                setFSValue(`intfx${i}v2`, data[`INTFS_ES${i}_V2_ALT`], true);
             }
 
             // save these for later use (after we get the preset details)
@@ -4008,10 +4024,16 @@ function saveSettings() {
             let cc = getFSCC(true, i);
             let v1 = getFSValue(true, `${i}`, "1");
             let v2 = getFSValue(true, `${i}`, "2");
+            let cc_alt = getFSCC(true, i, true);
+            let v1_alt = getFSValue(true, `${i}`, "1", true);
+            let v2_alt = getFSValue(true, `${i}`, "2", true);
             data[`EXTFS_ES${i}_SW`] = parseInt(sw);
             data[`EXTFS_ES${i}_CC`] = parseInt(cc);
             data[`EXTFS_ES${i}_V1`] = parseInt(v1);
             data[`EXTFS_ES${i}_V2`] = parseInt(v2);
+            data[`EXTFS_ES${i}_CC_ALT`] = parseInt(cc_alt);
+            data[`EXTFS_ES${i}_V1_ALT`] = parseInt(v1_alt);
+            data[`EXTFS_ES${i}_V2_ALT`] = parseInt(v2_alt);
         }
 
         for (var i=1; i<=INT_FS_COUNT; i++) {
@@ -4019,10 +4041,16 @@ function saveSettings() {
             let cc = getFSCC(false, i);
             let v1 = getFSValue(false, `${i}`, "1");
             let v2 = getFSValue(false, `${i}`, "2");
+            let cc_alt = getFSCC(false, i, true);
+            let v1_alt = getFSValue(false, `${i}`, "1", true);
+            let v2_alt = getFSValue(false, `${i}`, "2", true);
             data[`INTFS_ES${i}_SW`] = parseInt(sw);
             data[`INTFS_ES${i}_CC`] = parseInt(cc);
             data[`INTFS_ES${i}_V1`] = parseInt(v1);
             data[`INTFS_ES${i}_V2`] = parseInt(v2);
+            data[`INTFS_ES${i}_CC_ALT`] = parseInt(cc_alt);
+            data[`INTFS_ES${i}_V1_ALT`] = parseInt(v1_alt);
+            data[`INTFS_ES${i}_V2_ALT`] = parseInt(v2_alt);
         }
 
         sendWS(data);
@@ -4333,8 +4361,7 @@ function modulationAnimate() {
     }, 100);
 }
 
-// External footswitch control
-function populateExternalFootswitches() {
+function populateFootswitches(ext) {
     var midi_map;
 
     switch (modellerType)
@@ -4352,8 +4379,13 @@ function populateExternalFootswitches() {
         } break;
     }
 
-    for (i=1; i<=EXT_FS_COUNT; i++) {
-        var select = document.getElementById(`extfx${i}cc`);
+    const pref = ext ? "ext" : "int";
+    const count = ext ? EXT_FS_COUNT : INT_FS_COUNT;
+
+    for (i=1; i<=2*count; i++) {
+        let index = i > count ? i-count : i;
+        let altPostfix = i > count ? "-alt" : "";
+        var select = document.getElementById(`${pref}fx${index}cc${altPostfix}`);
         var optgroup = null;
 
         for (const [key, value] of midi_map) {
@@ -4377,11 +4409,11 @@ function populateExternalFootswitches() {
     }
 }
 
-function isFSCCEnabled(ext, fs) {
+function isFSCCEnabled(ext, fs, alt) {
     if (fs == 255) {
         return false;
     }
-    if (fs < getNumberOfFootswitchesReservedForPresets(ext)) {
+    if (!alt && fs < getNumberOfFootswitchesReservedForPresets(ext)) {
         return false;
     }
     return true;
@@ -4436,7 +4468,7 @@ function fsLayoutChanged(ext) {
     updatePresetOrderBanks();
 }
 
-function fsChanged(ext, fx) {
+function fsChanged(ext, fx, alt=false, modifyAlt=true) {
     var midi_map;
 
     switch (modellerType)
@@ -4455,22 +4487,20 @@ function fsChanged(ext, fx) {
     }
 
     const pref = ext ? "ext" : "int";
+    const altPostfix = alt ? "-alt" : "";
     var footSwitch = document.getElementById(`${pref}fx${fx}sw`);
-    var controlChange = document.getElementById(`${pref}fx${fx}cc`);
+    var controlChange = document.getElementById(`${pref}fx${fx}cc${altPostfix}`);
     let associationKey = parseInt(controlChange.value);
     var association = midi_map.get(associationKey);
-    if (association == null) {
-        return;
-    }
 
-    var number1 = document.getElementById(`${pref}fx${fx}v1`);
-    var number2 = document.getElementById(`${pref}fx${fx}v2`);
-    var range1 = document.getElementById(`${pref}fx${fx}v1_r`);
-    var range2 = document.getElementById(`${pref}fx${fx}v2_r`);
-    var select1 = document.getElementById(`${pref}fx${fx}v1_s`);
-    var select2 = document.getElementById(`${pref}fx${fx}v2_s`);
+    var number1 = document.getElementById(`${pref}fx${fx}v1${altPostfix}`);
+    var number2 = document.getElementById(`${pref}fx${fx}v2${altPostfix}`);
+    var range1 = document.getElementById(`${pref}fx${fx}v1_r${altPostfix}`);
+    var range2 = document.getElementById(`${pref}fx${fx}v2_r${altPostfix}`);
+    var select1 = document.getElementById(`${pref}fx${fx}v1_s${altPostfix}`);
+    var select2 = document.getElementById(`${pref}fx${fx}v2_s${altPostfix}`);
 
-    const disabled = !isFSCCEnabled(ext, footSwitch.value);
+    const disabled = !isFSCCEnabled(ext, footSwitch.value, alt);
     controlChange.disabled = disabled;
     number1.disabled = disabled;
     number2.disabled = disabled;
@@ -4479,6 +4509,24 @@ function fsChanged(ext, fx) {
     select1.disabled = disabled;
     select2.disabled = disabled;
 
+    if (association == null) {
+        return;
+    }
+
+    if (modifyAlt == true) {
+        let altNewPostfix = !alt ? "-alt" : "";
+
+        if (associationKey == 255) {
+            fsChanged(ext, fx, !alt, false)
+        } else if (associationKey == 126) {
+            setParamValue(`${pref}fx${fx}cc${altNewPostfix}`, associationKey);
+            fsChanged(ext, fx, !alt, false)
+        } else if (document.getElementById(`${pref}fx${fx}cc${altNewPostfix}`).value == 126) {
+            setParamValue(`${pref}fx${fx}cc${altNewPostfix}`, midi_map.get(255));
+            fsChanged(ext, fx, !alt, false)
+        }
+    }
+    
     switch (association.value.type) {
         case "RANGE":
             number1.parentElement.style.display = "block";
@@ -4526,26 +4574,28 @@ function fsChanged(ext, fx) {
     }
 }
 
-function setFSValue(objname, value) {
+function setFSValue(objname, value, alt=false) {
     if (value == null) {
         return;
     }
-    document.getElementById(`${objname}`).value = value;
-    document.getElementById(`${objname}_r`).value = value;
-    document.getElementById(`${objname}_s`).value = value;
+    const altPostfix = alt ? "-alt" : "";
+    document.getElementById(`${objname}${altPostfix}`).value = value;
+    document.getElementById(`${objname}_r${altPostfix}`).value = value;
+    document.getElementById(`${objname}_s${altPostfix}`).value = value;
 }
 
-function getFSCC(ext, fs) {
+function getFSCC(ext, fs, alt=false) {
     const pref = ext ? "ext" : "int";
-    var cc = document.getElementById(`${pref}fx${fs}cc`).value;
+    const altPostfix = alt ? "-alt" : "";
+    var cc = document.getElementById(`${pref}fx${fs}cc${altPostfix}`).value;
 
-    if (!isFSCCEnabled(ext, fs)) {
+    if (!isFSCCEnabled(ext, fs, alt)) {
         return 255;
     }
     return cc;
 }
 
-function getFSValue(ext, fs, value) {
+function getFSValue(ext, fs, value, alt=false) {
     var midi_map;
 
     switch (modellerType)
@@ -4564,7 +4614,8 @@ function getFSValue(ext, fs, value) {
     }
 
     const pref = ext ? "ext" : "int";
-    var fxcc = document.getElementById(`${pref}fx${fs}cc`).value;
+    let altPostfix = alt ? "-alt" : "";
+    var fxcc = document.getElementById(`${pref}fx${fs}cc${altPostfix}`).value;
     if (fxcc == 255) {
         fxcc = 0;
     }
@@ -4572,7 +4623,7 @@ function getFSValue(ext, fs, value) {
 
     switch (association.value.type) {
         case "RANGE":
-            return document.getElementById(`${pref}fx${fs}v${value}`).value;
+            return document.getElementById(`${pref}fx${fs}v${value}${altPostfix}`).value;
         case "TOGGLE":
             switch (value) {
                 case "1":
@@ -4582,50 +4633,7 @@ function getFSValue(ext, fs, value) {
             }
             break;
         case "CHOICE":
-            return document.getElementById(`${pref}fx${fs}v${value}_s`).value;
-    }
-}
-
-function populateInternalFootswitches() {
-    var midi_map;
-
-    switch (modellerType)
-    {
-        case AMP_MODELLER_TONEX_ONE:
-        case AMP_MODELLER_TONEX:
-        default:
-        {    
-            midi_map = tonexMidiControlChangeAssociations;
-        } break;
-
-        case AMP_MODELLER_VALETON_GP5:
-        {
-            midi_map = valetonMidiControlChangeAssociations;
-        } break;
-    }
-
-    for (i=1; i<=INT_FS_COUNT; i++) {
-        var select = document.getElementById(`intfx${i}cc`);
-        var optgroup = null;
-
-        for (const [key, value] of midi_map) {
-            if (typeof key === "string") {
-                optgroup = document.createElement("optgroup");
-                optgroup.label = key;
-
-                select.appendChild(optgroup);
-            } else {
-                var option = document.createElement("option");
-                option.value = key;
-                option.text = value.param;
-
-                if (optgroup != null) {
-                    optgroup.appendChild(option);
-                } else {
-                    select.appendChild(option);
-                }
-            }
-        }
+            return document.getElementById(`${pref}fx${fs}v${value}_s${altPostfix}`).value;
     }
 }
 

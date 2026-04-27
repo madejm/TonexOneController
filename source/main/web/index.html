@@ -1535,6 +1535,28 @@
                             <select class="form-select select_style" id="intfx1v2_s" name="intfx1v2_s">
                             </select>
                         </div>
+                        <br>
+                        <div class="container">
+                            <label class="form-check-label" for="intfx1cc-alt">ALT Control Change Number</label>
+                            <select class="form-select select_style" id="intfx1cc-alt" name="intfx1cc-alt" onchange="fsChanged(false, 1, true)">
+                            </select>
+                        </div>
+                        <br>
+                        <div class="container">
+                            <label class="form-check-label" for="intfx1v1-alt">Midi Value 1</label>
+                            <input type="number" id="intfx1v1-alt" name="intfx1v1-alt" class="form-control text_entry_style" maxlength="3" size="3" value="0" min="0" max="127" oninput="this.nextElementSibling.value = this.value">
+                            <input type="range" id="intfx1v1_r-alt" class="form-range" value="0" min="0" max="127" oninput="this.previousElementSibling.value = this.value">
+                            <select class="form-select select_style" id="intfx1v1_s-alt" name="intfx1v1_s-alt">
+                            </select>
+                        </div>
+                        <br>
+                        <div class="container">
+                            <label class="form-check-label" for="intfx1v2-alt">Midi Value 2</label>
+                            <input type="number" id="intfx1v2-alt" name="intfx1v2-alt" class="form-control text_entry_style" maxlength="3" size="3" value="127" min="0" max="127" oninput="this.nextElementSibling.value = this.value">
+                            <input type="range" id="intfx1v2_r-alt" class="form-range" value="127" min="0" max="127" oninput="this.previousElementSibling.value = this.value">
+                            <select class="form-select select_style" id="intfx1v2_s-alt" name="intfx1v2_s-alt">
+                            </select>
+                        </div>
                     </div>
                     <div id="IFX2" class="ifxtabcontent">
                         <div class="container">
@@ -1567,6 +1589,28 @@
                             <input type="number" id="intfx2v2" name="intfx2v2" class="form-control text_entry_style" maxlength="3" size="3" value="127" min="0" max="127" oninput="this.nextElementSibling.value = this.value">
                             <input type="range" id="intfx2v2_r" class="form-range" value="127" min="0" max="127" oninput="this.previousElementSibling.value = this.value">
                             <select class="form-select select_style" id="intfx2v2_s" name="intfx2v2_s">
+                            </select>
+                        </div>
+                        <br>
+                        <div class="container">
+                            <label class="form-check-label" for="intfx2cc-alt">ALT Control Change Number</label>
+                            <select class="form-select select_style" id="intfx2cc-alt" name="intfx2cc-alt" onchange="fsChanged(false, 2, true)">
+                            </select>
+                        </div>
+                        <br>
+                        <div class="container">
+                            <label class="form-check-label" for="intfx2v1-alt">Midi Value 1</label>
+                            <input type="number" id="intfx2v1-alt" name="intfx2v1-alt" class="form-control text_entry_style" maxlength="3" size="3" value="0" min="0" max="127" oninput="this.nextElementSibling.value = this.value">
+                            <input type="range" id="intfx2v1_r-alt" class="form-range" value="0" min="0" max="127" oninput="this.previousElementSibling.value = this.value">
+                            <select class="form-select select_style" id="intfx2v1_s-alt" name="intfx2v1_s-alt">
+                            </select>
+                        </div>
+                        <br>
+                        <div class="container">
+                            <label class="form-check-label" for="intfx2v2-alt">Midi Value 2</label>
+                            <input type="number" id="intfx2v2-alt" name="intfx2v2-alt" class="form-control text_entry_style" maxlength="3" size="3" value="127" min="0" max="127" oninput="this.nextElementSibling.value = this.value">
+                            <input type="range" id="intfx2v2_r-alt" class="form-range" value="127" min="0" max="127" oninput="this.previousElementSibling.value = this.value">
+                            <select class="form-select select_style" id="intfx2v2_s-alt" name="intfx2v2_s-alt">
                             </select>
                         </div>
                     </div>
@@ -1603,6 +1647,28 @@
                             <select class="form-select select_style" id="intfx3v2_s" name="intfx3v2_s">
                             </select>
                         </div>
+                        <br>
+                        <div class="container">
+                            <label class="form-check-label" for="intfx3cc-alt">ALT Control Change Number</label>
+                            <select class="form-select select_style" id="intfx3cc-alt" name="intfx3cc-alt" onchange="fsChanged(false, 3, true)">
+                            </select>
+                        </div>
+                        <br>
+                        <div class="container">
+                            <label class="form-check-label" for="intfx3v1-alt">Midi Value 1</label>
+                            <input type="number" id="intfx3v1-alt" name="intfx3v1-alt" class="form-control text_entry_style" maxlength="3" size="3" value="0" min="0" max="127" oninput="this.nextElementSibling.value = this.value">
+                            <input type="range" id="intfx3v1_r-alt" class="form-range" value="0" min="0" max="127" oninput="this.previousElementSibling.value = this.value">
+                            <select class="form-select select_style" id="intfx3v1_s-alt" name="intfx3v1_s-alt">
+                            </select>
+                        </div>
+                        <br>
+                        <div class="container">
+                            <label class="form-check-label" for="intfx3v2-alt">Midi Value 2</label>
+                            <input type="number" id="intfx3v2-alt" name="intfx3v2-alt" class="form-control text_entry_style" maxlength="3" size="3" value="127" min="0" max="127" oninput="this.nextElementSibling.value = this.value">
+                            <input type="range" id="intfx3v2_r-alt" class="form-range" value="127" min="0" max="127" oninput="this.previousElementSibling.value = this.value">
+                            <select class="form-select select_style" id="intfx3v2_s-alt" name="intfx3v2_s-alt">
+                            </select>
+                        </div>
                     </div>
                     <div id="IFX4" class="ifxtabcontent">
                         <div class="container">
@@ -1635,6 +1701,28 @@
                             <input type="number" id="intfx4v2" name="intfx4v2" class="form-control text_entry_style" maxlength="3" size="3" value="127" min="0" max="127" oninput="this.nextElementSibling.value = this.value">
                             <input type="range" id="intfx4v2_r" class="form-range" value="127" min="0" max="127" oninput="this.previousElementSibling.value = this.value">
                             <select class="form-select select_style" id="intfx4v2_s" name="intfx4v2_s">
+                            </select>
+                        </div>
+                        <br>
+                        <div class="container">
+                            <label class="form-check-label" for="intfx4cc-alt">ALT Control Change Number</label>
+                            <select class="form-select select_style" id="intfx4cc-alt" name="intfx4cc-alt" onchange="fsChanged(false, 4, true)">
+                            </select>
+                        </div>
+                        <br>
+                        <div class="container">
+                            <label class="form-check-label" for="intfx4v1-alt">Midi Value 1</label>
+                            <input type="number" id="intfx4v1-alt" name="intfx4v1-alt" class="form-control text_entry_style" maxlength="3" size="3" value="0" min="0" max="127" oninput="this.nextElementSibling.value = this.value">
+                            <input type="range" id="intfx4v1_r-alt" class="form-range" value="0" min="0" max="127" oninput="this.previousElementSibling.value = this.value">
+                            <select class="form-select select_style" id="intfx4v1_s-alt" name="intfx4v1_s-alt">
+                            </select>
+                        </div>
+                        <br>
+                        <div class="container">
+                            <label class="form-check-label" for="intfx4v2-alt">Midi Value 2</label>
+                            <input type="number" id="intfx4v2-alt" name="intfx4v2-alt" class="form-control text_entry_style" maxlength="3" size="3" value="127" min="0" max="127" oninput="this.nextElementSibling.value = this.value">
+                            <input type="range" id="intfx4v2_r-alt" class="form-range" value="127" min="0" max="127" oninput="this.previousElementSibling.value = this.value">
+                            <select class="form-select select_style" id="intfx4v2_s-alt" name="intfx4v2_s-alt">
                             </select>
                         </div>
                     </div>
@@ -1829,6 +1917,7 @@
                         <button class="fxtablink" onclick="openFX(event, 'FX6')">FX6</button>
                         <button class="fxtablink" onclick="openFX(event, 'FX7')">FX7</button>
                         <button class="fxtablink" onclick="openFX(event, 'FX8')">FX8</button>
+                        <button class="fxtablink" onclick="openFX(event, 'FX9')">FX9</button>
                     </div>
                     <br> 
                     <div id="FX1" class="fxtabcontent">
@@ -1874,6 +1963,28 @@
                             <input type="number" id="extfx1v2" name="extfx1v2" class="form-control text_entry_style" maxlength="3" size="3" value="127" min="0" max="127" oninput="this.nextElementSibling.value = this.value">
                             <input type="range" id="extfx1v2_r" class="form-range" value="127" min="0" max="127" oninput="this.previousElementSibling.value = this.value">
                             <select class="form-select select_style" id="extfx1v2_s" name="extfx1v2_s">
+                            </select>
+                        </div>
+                        <br>
+                        <div class="container">
+                            <label class="form-check-label" for="extfx1cc-alt">ALT Control Change Number</label>
+                            <select class="form-select select_style" id="extfx1cc-alt" name="extfx1cc-alt" onchange="fsChanged(true, 1, true)">
+                            </select>
+                        </div>
+                        <br>
+                        <div class="container">
+                            <label class="form-check-label" for="extfx1v1-alt">Midi Value 1</label>
+                            <input type="number" id="extfx1v1-alt" name="extfx1v1-alt" class="form-control text_entry_style" maxlength="3" size="3" value="0" min="0" max="127" oninput="this.nextElementSibling.value = this.value">
+                            <input type="range" id="extfx1v1_r-alt" class="form-range" value="0" min="0" max="127" oninput="this.previousElementSibling.value = this.value">
+                            <select class="form-select select_style" id="extfx1v1_s-alt" name="extfx1v1_s-alt">
+                            </select>
+                        </div>
+                        <br>
+                        <div class="container">
+                            <label class="form-check-label" for="extfx1v2-alt">Midi Value 2</label>
+                            <input type="number" id="extfx1v2-alt" name="extfx1v2-alt" class="form-control text_entry_style" maxlength="3" size="3" value="127" min="0" max="127" oninput="this.nextElementSibling.value = this.value">
+                            <input type="range" id="extfx1v2_r-alt" class="form-range" value="127" min="0" max="127" oninput="this.previousElementSibling.value = this.value">
+                            <select class="form-select select_style" id="extfx1v2_s-alt" name="extfx1v2_s-alt">
                             </select>
                         </div>
                     </div>
@@ -1922,6 +2033,28 @@
                             <select class="form-select select_style" id="extfx2v2_s" name="extfx2v2_s">
                             </select>
                         </div>
+                        <br>
+                        <div class="container">
+                            <label class="form-check-label" for="extfx2cc-alt">ALT Control Change Number</label>
+                            <select class="form-select select_style" id="extfx2cc-alt" name="extfx2cc-alt" onchange="fsChanged(true, 2, true)">
+                            </select>
+                        </div>
+                        <br>
+                        <div class="container">
+                            <label class="form-check-label" for="extfx2v1-alt">Midi Value 1</label>
+                            <input type="number" id="extfx2v1-alt" name="extfx2v1-alt" class="form-control text_entry_style" maxlength="3" size="3" value="0" min="0" max="127" oninput="this.nextElementSibling.value = this.value">
+                            <input type="range" id="extfx2v1_r-alt" class="form-range" value="0" min="0" max="127" oninput="this.previousElementSibling.value = this.value">
+                            <select class="form-select select_style" id="extfx2v1_s-alt" name="extfx2v1_s-alt">
+                            </select>
+                        </div>
+                        <br>
+                        <div class="container">
+                            <label class="form-check-label" for="extfx2v2-alt">Midi Value 2</label>
+                            <input type="number" id="extfx2v2-alt" name="extfx2v2-alt" class="form-control text_entry_style" maxlength="3" size="3" value="127" min="0" max="127" oninput="this.nextElementSibling.value = this.value">
+                            <input type="range" id="extfx2v2_r-alt" class="form-range" value="127" min="0" max="127" oninput="this.previousElementSibling.value = this.value">
+                            <select class="form-select select_style" id="extfx2v2_s-alt" name="extfx2v2_s-alt">
+                            </select>
+                        </div>
                     </div>
                     <div id="FX3" class="fxtabcontent">
                         <div class="container">
@@ -1966,6 +2099,28 @@
                             <input type="number" id="extfx3v2" name="extfx3v2" class="form-control text_entry_style" maxlength="3" size="3" value="127" min="0" max="127" oninput="this.nextElementSibling.value = this.value">
                             <input type="range" id="extfx3v2_r" class="form-range" value="127" min="0" max="127" oninput="this.previousElementSibling.value = this.value">
                             <select class="form-select select_style" id="extfx3v2_s" name="extfx3v2_s">
+                            </select>
+                        </div>
+                        <br>
+                        <div class="container">
+                            <label class="form-check-label" for="extfx3cc-alt">ALT Control Change Number</label>
+                            <select class="form-select select_style" id="extfx3cc-alt" name="extfx3cc-alt" onchange="fsChanged(true, 3, true)">
+                            </select>
+                        </div>
+                        <br>
+                        <div class="container">
+                            <label class="form-check-label" for="extfx3v1-alt">Midi Value 1</label>
+                            <input type="number" id="extfx3v1-alt" name="extfx3v1-alt" class="form-control text_entry_style" maxlength="3" size="3" value="0" min="0" max="127" oninput="this.nextElementSibling.value = this.value">
+                            <input type="range" id="extfx3v1_r-alt" class="form-range" value="0" min="0" max="127" oninput="this.previousElementSibling.value = this.value">
+                            <select class="form-select select_style" id="extfx3v1_s-alt" name="extfx3v1_s-alt">
+                            </select>
+                        </div>
+                        <br>
+                        <div class="container">
+                            <label class="form-check-label" for="extfx3v2-alt">Midi Value 2</label>
+                            <input type="number" id="extfx3v2-alt" name="extfx3v2-alt" class="form-control text_entry_style" maxlength="3" size="3" value="127" min="0" max="127" oninput="this.nextElementSibling.value = this.value">
+                            <input type="range" id="extfx3v2_r-alt" class="form-range" value="127" min="0" max="127" oninput="this.previousElementSibling.value = this.value">
+                            <select class="form-select select_style" id="extfx3v2_s-alt" name="extfx3v2_s-alt">
                             </select>
                         </div>
                     </div>
@@ -2014,6 +2169,28 @@
                             <select class="form-select select_style" id="extfx4v2_s" name="extfx4v2_s">
                             </select>
                         </div>
+                        <br>
+                        <div class="container">
+                            <label class="form-check-label" for="extfx4cc-alt">ALT Control Change Number</label>
+                            <select class="form-select select_style" id="extfx4cc-alt" name="extfx4cc-alt" onchange="fsChanged(true, 4, true)">
+                            </select>
+                        </div>
+                        <br>
+                        <div class="container">
+                            <label class="form-check-label" for="extfx4v1-alt">Midi Value 1</label>
+                            <input type="number" id="extfx4v1-alt" name="extfx4v1-alt" class="form-control text_entry_style" maxlength="3" size="3" value="0" min="0" max="127" oninput="this.nextElementSibling.value = this.value">
+                            <input type="range" id="extfx4v1_r-alt" class="form-range" value="0" min="0" max="127" oninput="this.previousElementSibling.value = this.value">
+                            <select class="form-select select_style" id="extfx4v1_s-alt" name="extfx4v1_s-alt">
+                            </select>
+                        </div>
+                        <br>
+                        <div class="container">
+                            <label class="form-check-label" for="extfx4v2-alt">Midi Value 2</label>
+                            <input type="number" id="extfx4v2-alt" name="extfx4v2-alt" class="form-control text_entry_style" maxlength="3" size="3" value="127" min="0" max="127" oninput="this.nextElementSibling.value = this.value">
+                            <input type="range" id="extfx4v2_r-alt" class="form-range" value="127" min="0" max="127" oninput="this.previousElementSibling.value = this.value">
+                            <select class="form-select select_style" id="extfx4v2_s-alt" name="extfx4v2_s-alt">
+                            </select>
+                        </div>
                     </div>
                     <div id="FX5" class="fxtabcontent">
                         <div class="container">
@@ -2058,6 +2235,28 @@
                             <input type="number" id="extfx5v2" name="extfx5v2" class="form-control text_entry_style" maxlength="3" size="3" value="127" min="0" max="127" oninput="this.nextElementSibling.value = this.value">
                             <input type="range" id="extfx5v2_r" class="form-range" value="127" min="0" max="127" oninput="this.previousElementSibling.value = this.value">
                             <select class="form-select select_style" id="extfx5v2_s" name="extfx5v2_s">
+                            </select>
+                        </div>
+                        <br>
+                        <div class="container">
+                            <label class="form-check-label" for="extfx5cc-alt">ALT Control Change Number</label>
+                            <select class="form-select select_style" id="extfx5cc-alt" name="extfx5cc-alt" onchange="fsChanged(true, 5, true)">
+                            </select>
+                        </div>
+                        <br>
+                        <div class="container">
+                            <label class="form-check-label" for="extfx5v1-alt">Midi Value 1</label>
+                            <input type="number" id="extfx5v1-alt" name="extfx5v1-alt" class="form-control text_entry_style" maxlength="3" size="3" value="0" min="0" max="127" oninput="this.nextElementSibling.value = this.value">
+                            <input type="range" id="extfx5v1_r-alt" class="form-range" value="0" min="0" max="127" oninput="this.previousElementSibling.value = this.value">
+                            <select class="form-select select_style" id="extfx5v1_s-alt" name="extfx5v1_s-alt">
+                            </select>
+                        </div>
+                        <br>
+                        <div class="container">
+                            <label class="form-check-label" for="extfx5v2-alt">Midi Value 2</label>
+                            <input type="number" id="extfx5v2-alt" name="extfx5v2-alt" class="form-control text_entry_style" maxlength="3" size="3" value="127" min="0" max="127" oninput="this.nextElementSibling.value = this.value">
+                            <input type="range" id="extfx5v2_r-alt" class="form-range" value="127" min="0" max="127" oninput="this.previousElementSibling.value = this.value">
+                            <select class="form-select select_style" id="extfx5v2_s-alt" name="extfx5v2_s-alt">
                             </select>
                         </div>
                     </div>
@@ -2106,6 +2305,28 @@
                             <select class="form-select select_style" id="extfx6v2_s" name="extfx6v2_s">
                             </select>
                         </div>
+                        <br>
+                        <div class="container">
+                            <label class="form-check-label" for="extfx6cc-alt">ALT Control Change Number</label>
+                            <select class="form-select select_style" id="extfx6cc-alt" name="extfx6cc-alt" onchange="fsChanged(true, 6, true)">
+                            </select>
+                        </div>
+                        <br>
+                        <div class="container">
+                            <label class="form-check-label" for="extfx6v1-alt">Midi Value 1</label>
+                            <input type="number" id="extfx6v1-alt" name="extfx6v1-alt" class="form-control text_entry_style" maxlength="3" size="3" value="0" min="0" max="127" oninput="this.nextElementSibling.value = this.value">
+                            <input type="range" id="extfx6v1_r-alt" class="form-range" value="0" min="0" max="127" oninput="this.previousElementSibling.value = this.value">
+                            <select class="form-select select_style" id="extfx6v1_s-alt" name="extfx6v1_s-alt">
+                            </select>
+                        </div>
+                        <br>
+                        <div class="container">
+                            <label class="form-check-label" for="extfx6v2-alt">Midi Value 2</label>
+                            <input type="number" id="extfx6v2-alt" name="extfx6v2-alt" class="form-control text_entry_style" maxlength="3" size="3" value="127" min="0" max="127" oninput="this.nextElementSibling.value = this.value">
+                            <input type="range" id="extfx6v2_r-alt" class="form-range" value="127" min="0" max="127" oninput="this.previousElementSibling.value = this.value">
+                            <select class="form-select select_style" id="extfx6v2_s-alt" name="extfx6v2_s-alt">
+                            </select>
+                        </div>
                     </div>
                     <div id="FX7" class="fxtabcontent">
                         <div class="container">
@@ -2152,6 +2373,28 @@
                             <select class="form-select select_style" id="extfx7v2_s" name="extfx7v2_s">
                             </select>
                         </div>
+                        <br>
+                        <div class="container">
+                            <label class="form-check-label" for="extfx7cc-alt">ALT Control Change Number</label>
+                            <select class="form-select select_style" id="extfx7cc-alt" name="extfx7cc-alt" onchange="fsChanged(true, 7, true)">
+                            </select>
+                        </div>
+                        <br>
+                        <div class="container">
+                            <label class="form-check-label" for="extfx7v1-alt">Midi Value 1</label>
+                            <input type="number" id="extfx7v1-alt" name="extfx7v1-alt" class="form-control text_entry_style" maxlength="3" size="3" value="0" min="0" max="127" oninput="this.nextElementSibling.value = this.value">
+                            <input type="range" id="extfx7v1_r-alt" class="form-range" value="0" min="0" max="127" oninput="this.previousElementSibling.value = this.value">
+                            <select class="form-select select_style" id="extfx7v1_s-alt" name="extfx7v1_s-alt">
+                            </select>
+                        </div>
+                        <br>
+                        <div class="container">
+                            <label class="form-check-label" for="extfx7v2-alt">Midi Value 2</label>
+                            <input type="number" id="extfx7v2-alt" name="extfx7v2-alt" class="form-control text_entry_style" maxlength="3" size="3" value="127" min="0" max="127" oninput="this.nextElementSibling.value = this.value">
+                            <input type="range" id="extfx7v2_r-alt" class="form-range" value="127" min="0" max="127" oninput="this.previousElementSibling.value = this.value">
+                            <select class="form-select select_style" id="extfx7v2_s-alt" name="extfx7v2_s-alt">
+                            </select>
+                        </div>
                     </div>
                     <div id="FX8" class="fxtabcontent">
                         <div class="container">
@@ -2196,6 +2439,96 @@
                             <input type="number" id="extfx8v2" name="extfx1v2" class="form-control text_entry_style" maxlength="3" size="3" value="127" min="0" max="127" oninput="this.nextElementSibling.value = this.value">
                             <input type="range" id="extfx8v2_r" class="form-range" value="127" min="0" max="127" oninput="this.previousElementSibling.value = this.value">
                             <select class="form-select select_style" id="extfx8v2_s" name="extfx8v2_s">
+                            </select>
+                        </div>
+                        <br>
+                        <div class="container">
+                            <label class="form-check-label" for="extfx8cc-alt">ALT Control Change Number</label>
+                            <select class="form-select select_style" id="extfx8cc-alt" name="extfx8cc-alt" onchange="fsChanged(true, 8, true)">
+                            </select>
+                        </div>
+                        <br>
+                        <div class="container">
+                            <label class="form-check-label" for="extfx8v1-alt">Midi Value 1</label>
+                            <input type="number" id="extfx8v1-alt" name="extfx8v1-alt" class="form-control text_entry_style" maxlength="3" size="3" value="0" min="0" max="127" oninput="this.nextElementSibling.value = this.value">
+                            <input type="range" id="extfx8v1_r-alt" class="form-range" value="0" min="0" max="127" oninput="this.previousElementSibling.value = this.value">
+                            <select class="form-select select_style" id="extfx8v1_s-alt" name="extfx8v1_s-alt">
+                            </select>
+                        </div>
+                        <br>
+                        <div class="container">
+                            <label class="form-check-label" for="extfx8v2-alt">Midi Value 2</label>
+                            <input type="number" id="extfx8v2-alt" name="extfx8v2-alt" class="form-control text_entry_style" maxlength="3" size="3" value="127" min="0" max="127" oninput="this.nextElementSibling.value = this.value">
+                            <input type="range" id="extfx8v2_r-alt" class="form-range" value="127" min="0" max="127" oninput="this.previousElementSibling.value = this.value">
+                            <select class="form-select select_style" id="extfx8v2_s-alt" name="extfx8v2_s-alt">
+                            </select>
+                        </div>
+                    </div>
+                    <div id="FX9" class="fxtabcontent">
+                        <div class="container">
+                            <label class="form-check-label" for="extfx9sw">Foot Switch Number</label>
+                            <select class="form-select select_style" id="extfx9sw" onchange="fsChanged(true, 9)">
+                                <option value="255" class="style6" Selected>Disabled</option>
+                                <option value="0" class="style6">1</option>
+                                <option value="1" class="style6">2</option>     
+                                <option value="2" class="style6">3</option>     
+                                <option value="3" class="style6">4</option>     
+                                <option value="4" class="style6">5</option>     
+                                <option value="5" class="style6">6</option>     
+                                <option value="6" class="style6">7</option>     
+                                <option value="7" class="style6">8</option>  
+                                <option value="8" class="style6">9</option>
+                                <option value="9" class="style6">10</option>     
+                                <option value="10" class="style6">11</option>     
+                                <option value="11" class="style6">12</option>     
+                                <option value="12" class="style6">13</option>     
+                                <option value="13" class="style6">14</option>     
+                                <option value="14" class="style6">15</option>     
+                                <option value="15" class="style6">16</option>        
+                            </select>                           
+                        </div> 
+                        <br>                 
+                        <div class="container">
+                            <label class="form-check-label" for="extfx9cc">Control Change Number</label>
+                            <select class="form-select select_style" id="extfx9cc" name="extfx9cc" onchange="fsChanged(true, 9)">
+                            </select> 
+                        </div>
+                        <br>
+                        <div class="container">
+                            <label class="form-check-label" for="extfx9v1">Midi Value 1</label>
+                            <input type="number" id="extfx9v1" name="extfx9v1" class="form-control text_entry_style" maxlength="3" size="3" value="0" min="0" max="127" oninput="this.nextElementSibling.value = this.value">
+                            <input type="range" id="extfx9v1_r" class="form-range" value="0" min="0" max="127" oninput="this.previousElementSibling.value = this.value">
+                            <select class="form-select select_style" id="extfx9v1_s" name="extfx9v1_s">
+                            </select>
+                        </div>
+                        <br>
+                        <div class="container">
+                            <label class="form-check-label" for="extfx9v2">Midi Value 2</label>
+                            <input type="number" id="extfx9v2" name="extfx1v2" class="form-control text_entry_style" maxlength="3" size="3" value="127" min="0" max="127" oninput="this.nextElementSibling.value = this.value">
+                            <input type="range" id="extfx9v2_r" class="form-range" value="127" min="0" max="127" oninput="this.previousElementSibling.value = this.value">
+                            <select class="form-select select_style" id="extfx9v2_s" name="extfx9v2_s">
+                            </select>
+                        </div>
+                        <br>
+                        <div class="container">
+                            <label class="form-check-label" for="extfx9cc-alt">ALT Control Change Number</label>
+                            <select class="form-select select_style" id="extfx9cc-alt" name="extfx9cc-alt" onchange="fsChanged(true, 9, true)">
+                            </select>
+                        </div>
+                        <br>
+                        <div class="container">
+                            <label class="form-check-label" for="extfx9v1-alt">Midi Value 1</label>
+                            <input type="number" id="extfx9v1-alt" name="extfx9v1-alt" class="form-control text_entry_style" maxlength="3" size="3" value="0" min="0" max="127" oninput="this.nextElementSibling.value = this.value">
+                            <input type="range" id="extfx9v1_r-alt" class="form-range" value="0" min="0" max="127" oninput="this.previousElementSibling.value = this.value">
+                            <select class="form-select select_style" id="extfx9v1_s-alt" name="extfx9v1_s-alt">
+                            </select>
+                        </div>
+                        <br>
+                        <div class="container">
+                            <label class="form-check-label" for="extfx9v2-alt">Midi Value 2</label>
+                            <input type="number" id="extfx9v2-alt" name="extfx9v2-alt" class="form-control text_entry_style" maxlength="3" size="3" value="127" min="0" max="127" oninput="this.nextElementSibling.value = this.value">
+                            <input type="range" id="extfx9v2_r-alt" class="form-range" value="127" min="0" max="127" oninput="this.previousElementSibling.value = this.value">
+                            <select class="form-select select_style" id="extfx9v2_s-alt" name="extfx9v2_s-alt">
                             </select>
                         </div>
                     </div>

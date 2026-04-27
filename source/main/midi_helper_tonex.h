@@ -17,5 +17,5 @@ limitations under the License.
 
 #pragma once
 
-esp_err_t midi_helper_tonex_adjust_param_via_midi(uint8_t change_num, uint8_t midi_value);
-uint16_t midi_helper_tonex_get_param_for_change_num(uint8_t change_num, uint8_t midi_value_1, uint8_t midi_value_2);
+esp_err_t midi_helper_tonex_adjust_param_via_midi(MidiValue_t change_num, uint8_t midi_value);
+TonexParameter_t midi_helper_tonex_get_param_for_change_num(MidiValue_t change_num, uint8_t midi_value_1, uint8_t midi_value_2);

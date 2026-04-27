@@ -41,7 +41,7 @@ static const char *TAG = "app_ToneParams";
 static SemaphoreHandle_t ParamMutex;
 
 // "value" below is just a default, is overridden by the preset on load
-static tModellerParameter TonexParameters[TONEX_GLOBAL_LAST] = 
+static tModellerParameter TonexParameters[TONEX_CONTROLLER_LAST] = 
 {
     //value, Min,    Max,  Name         Type                      Data1,2,3
     {0,      0,      1,    "NG POST", MODELLER_PARAM_TYPE_SWITCH, 0, 0, 0},            // TONEX_PARAM_NOISE_GATE_POST   
@@ -181,6 +181,15 @@ static tModellerParameter TonexParameters[TONEX_GLOBAL_LAST] =
     {440,    415,    465,  "TUNEREF", MODELLER_PARAM_TYPE_RANGE, 0, 0, 0},              // TONEX_GLOBAL_TUNING_REFERENCE
     {0,      0,      1,    "BYPASS",  MODELLER_PARAM_TYPE_SWITCH, 0, 0, 0},             // TONEX_GLOBAL_BYPASS
     {0,     -40,     3,    "MVOL", MODELLER_PARAM_TYPE_RANGE, 0, 0, 0},                 // TONEX_GLOBAL_MASTER_VOLUME
+
+    // dummy end of globals marker
+    {0,      0,      0,    "GLOBAL_LAST", MODELLER_PARAM_TYPE_RANGE, 0, 0, 0},           // TONEX_GLOBAL_LAST,
+
+    //************* Config params *****************
+    {0,      0,      1,    "FS_ALT", MODELLER_PARAM_TYPE_SWITCH, 0, 0, 0},                // TONEX_CONTROLLER_FOOTSWITCH_ALT_MODE
+
+    // dummy end of config marker
+    // {0,      0,      0,    "CONTROL_LAST", MODELLER_PARAM_TYPE_RANGE, 0, 0, 0},       // TONEX_CONTROLLER_LAST,
 };
 
 static tTonexPresetColor TonexPresetColors[MAX_SUPPORTED_PRESETS];
@@ -261,7 +270,7 @@ esp_err_t tonex_params_release_locked_access(void)
 * RETURN:      
 * NOTES:       
 *****************************************************************************/
-esp_err_t tonex_params_get_min_max(uint16_t param_index, float* min, float* max)
+esp_err_t tonex_params_get_min_max(TonexParameter_t param_index, float* min, float* max)
 {
     if (param_index >= TONEX_GLOBAL_LAST)
     {
@@ -295,7 +304,7 @@ esp_err_t tonex_params_get_min_max(uint16_t param_index, float* min, float* max)
 * RETURN:      
 * NOTES:       
 *****************************************************************************/
-float tonex_params_clamp_value(uint16_t param_index, float value)
+float tonex_params_clamp_value(TonexParameter_t param_index, float value)
 {
     if (param_index >= TONEX_GLOBAL_LAST)
     {

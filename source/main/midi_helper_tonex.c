@@ -87,9 +87,9 @@ static uint8_t midi_helper_tonex_boolean_midi_toggle(uint16_t param, uint8_t mid
 * RETURN:      
 * NOTES:       
 *****************************************************************************/
-esp_err_t midi_helper_tonex_adjust_param_via_midi(uint8_t change_num, uint8_t midi_value)
+esp_err_t midi_helper_tonex_adjust_param_via_midi(MidiValue_t change_num, uint8_t midi_value)
 {
-    uint16_t param;
+    TonexParameter_t param;
     float value;
     tModellerParameter* param_ptr;
 
@@ -1223,6 +1223,12 @@ esp_err_t midi_helper_tonex_adjust_param_via_midi(uint8_t change_num, uint8_t mi
             value = midi_helper_scale_midi_to_float(param, midi_value);
             value = tonex_params_clamp_value(param, value);
         } break;
+ 
+        case 126:
+        {
+            // no param change needed
+            return ESP_OK;
+        } break;
 
         case 127: 
         {
@@ -1260,9 +1266,9 @@ esp_err_t midi_helper_tonex_adjust_param_via_midi(uint8_t change_num, uint8_t mi
 * RETURN:      
 * NOTES:       
 *****************************************************************************/
-uint16_t midi_helper_tonex_get_param_for_change_num(uint8_t change_num, uint8_t midi_value_1, uint8_t midi_value_2)
+TonexParameter_t midi_helper_tonex_get_param_for_change_num(MidiValue_t change_num, uint8_t midi_value_1, uint8_t midi_value_2)
 {
-    uint16_t param = TONEX_UNKNOWN;
+    TonexParameter_t param = TONEX_UNKNOWN;
     tModellerParameter* param_ptr;
 
     // Midi mapping done to match the big Tonex pedal
@@ -1934,6 +1940,11 @@ uint16_t midi_helper_tonex_get_param_for_change_num(uint8_t change_num, uint8_t 
         case 122:
         {            
             param = TONEX_GLOBAL_MASTER_VOLUME;
+        } break;
+
+        case 126:
+        {            
+            param = TONEX_CONTROLLER_FOOTSWITCH_ALT_MODE;
         } break;
 
         case 127:

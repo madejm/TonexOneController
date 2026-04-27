@@ -978,7 +978,7 @@ uint8_t tonex_update_ui_parameters(void)
     __attribute__((unused)) char value_string[20];
 
 #if CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI          
-    for (uint16_t param = 0; param < TONEX_GLOBAL_LAST; param++)
+    for (uint16_t param = 0; param < TONEX_CONTROLLER_LAST; param++)
     {                     
         if (tonex_params_get_locked_access(&param_ptr) == ESP_OK)
         {

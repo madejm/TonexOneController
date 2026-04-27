@@ -87,7 +87,7 @@ static uint8_t midi_helper_valeton_boolean_midi_toggle(uint16_t param, uint8_t m
 * RETURN:      
 * NOTES:       
 *****************************************************************************/
-esp_err_t midi_helper_valeton_adjust_param_via_midi(uint8_t change_num, uint8_t midi_value)
+esp_err_t midi_helper_valeton_adjust_param_via_midi(MidiValue_t change_num, uint8_t midi_value)
 {
     uint16_t param = 0;
     float value = 0.0f;
@@ -1138,9 +1138,9 @@ esp_err_t midi_helper_valeton_adjust_param_via_midi(uint8_t change_num, uint8_t 
 * RETURN:      
 * NOTES:       
 *****************************************************************************/
-uint16_t midi_helper_valeton_get_param_for_change_num(uint8_t change_num, uint8_t midi_value_1, uint8_t midi_value_2)
+TonexParameter_t midi_helper_valeton_get_param_for_change_num(MidiValue_t change_num, uint8_t midi_value_1, uint8_t midi_value_2)
 {
-    uint16_t param = TONEX_UNKNOWN;
+    TonexParameter_t param = TONEX_UNKNOWN;
 
     switch (change_num)
     {

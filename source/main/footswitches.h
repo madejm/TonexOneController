@@ -24,6 +24,7 @@ extern "C" {
 
 void footswitches_init(i2c_master_bus_handle_t bus_handle, SemaphoreHandle_t I2CMutex);
 void footswitches_handle(void);
+void footswitches_switch_alt_mode();
 
 #ifdef __cplusplus
 } /*extern "C"*/

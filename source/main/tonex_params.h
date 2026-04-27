@@ -56,7 +56,7 @@ enum TonexCabinetTypes
 };
 
 // defined in the same order as they are sent by the Pedal
-enum TonexParameters
+typedef enum
 {
     // noise gate
     TONEX_PARAM_NOISE_GATE_POST,        // Pre/Post
@@ -194,8 +194,13 @@ enum TonexParameters
     TONEX_GLOBAL_MASTER_VOLUME, 
 
     // must be last actual global
-    TONEX_GLOBAL_LAST
-};
+    TONEX_GLOBAL_LAST,
+
+    TONEX_CONTROLLER_FOOTSWITCH_ALT_MODE,
+
+    // must be last actual controller parameter
+    TONEX_CONTROLLER_LAST,
+} TonexParameter_t;
 
 typedef struct
 {
@@ -207,9 +212,9 @@ typedef struct
 esp_err_t tonex_params_init(void);
 esp_err_t tonex_params_get_locked_access(tModellerParameter** param_ptr);
 esp_err_t tonex_params_release_locked_access(void);
-esp_err_t tonex_params_get_min_max(uint16_t param_index, float* min, float* max);
+esp_err_t tonex_params_get_min_max(TonexParameter_t param_index, float* min, float* max);
 esp_err_t tonex_dump_parameters(void);
-float tonex_params_clamp_value(uint16_t param_index, float value);
+float tonex_params_clamp_value(TonexParameter_t param_index, float value);
 
 esp_err_t tonex_params_colors_get_locked_access(tTonexPresetColor** color_ptr);
 esp_err_t tonex_params_colors_get_color(uint16_t preset_index, uint32_t* preset_color);
