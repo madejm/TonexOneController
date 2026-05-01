@@ -1291,7 +1291,19 @@ void control_update_footswitch_leds(void)
 uint32_t control_get_current_preset_index(void)
 {
     return ControlData.ConfigData.PresetOrderMappingConfig.PresetOrder[ControlData.PresetIndex];
-}  
+}
+
+/****************************************************************************
+* NAME:        
+* DESCRIPTION: 
+* PARAMETERS:  
+* RETURN:      
+* NOTES:       
+*****************************************************************************/
+uint8_t control_get_current_preset_mapped_index(void)
+{
+    return PresetIndexForOrderValue(ControlData.PresetIndex);
+}
 
 /****************************************************************************
 * NAME:        
@@ -1303,6 +1315,20 @@ uint32_t control_get_current_preset_index(void)
 void control_get_current_preset_name(char* dest)
 {
     memcpy((void*)dest, (void*)ControlData.PresetNames[control_get_current_preset_index()], MAX_PRESET_NAME_LENGTH);
+    dest[MAX_PRESET_NAME_LENGTH - 1] = 0;
+}
+
+/****************************************************************************
+* NAME:        
+* DESCRIPTION: 
+* PARAMETERS:  
+* RETURN:      
+* NOTES:       
+*****************************************************************************/
+void control_get_preset_name(uint8_t index, char* dest)
+{
+    uint8_t presetIndex = ControlData.ConfigData.PresetOrderMappingConfig.PresetOrder[index];
+    memcpy((void*)dest, (void*)ControlData.PresetNames[presetIndex], MAX_PRESET_NAME_LENGTH);
     dest[MAX_PRESET_NAME_LENGTH - 1] = 0;
 }
 
@@ -1858,6 +1884,19 @@ void control_set_skin_previous(void)
     
         control_set_amp_skin_index(ControlData.ConfigData.SkinConfig.SkinIndex[ControlData.PresetIndex]);
     }
+}
+
+/****************************************************************************
+* NAME:        
+* DESCRIPTION: 
+* PARAMETERS:  
+* RETURN:      
+* NOTES:       
+*****************************************************************************/
+uint8_t control_get_skin_index(uint8_t index)
+{
+    uint8_t presetIndex = ControlData.ConfigData.PresetOrderMappingConfig.PresetOrder[index];
+    return ControlData.ConfigData.SkinConfig.SkinIndex[presetIndex];
 }
 
 /****************************************************************************
