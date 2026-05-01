@@ -78,6 +78,7 @@ limitations under the License.
 #include "LP5562.h"
 #include "tonex_params.h"
 #include "platform_common.h"
+#include "wifi_config.h"
 
 static const char *TAG = "app_display";
 
@@ -110,6 +111,7 @@ enum UIElements
     UI_ELEMENT_PRESET_DESCRIPTION,
     UI_ELEMENT_PARAMETERS,
     UI_ELEMENT_TOAST,
+    UI_ELEMENT_PRESET_LIST,
 };
 
 enum UIAction
@@ -159,12 +161,52 @@ static uint8_t __attribute__((unused)) touch_data_ready_to_read = 0;
 #endif
 
 #if CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI
-static uint16_t current_skin_image = 0xFFFF;
+typedef enum
+{
+    PRESET_LIST_INSERT_MODE_INSERT,
+    PRESET_LIST_INSERT_MODE_SWAP
+} PresetListInsertMode_t;
+
+static PresetListInsertMode_t preset_list_insert_mode = PRESET_LIST_INSERT_MODE_INSERT;
+static int16_t preset_list_insert_index = -1;
+
+#define PRESET_LIST_PRESETS_PER_PAGE 10
+static uint8_t preset_list_page = 0;
+
+typedef enum
+{
+    SKIN_SLOT_MAIN = 0,
+    SKIN_SLOT_PRESET_LIST_0,
+    SKIN_SLOT_PRESET_LIST_1,
+    SKIN_SLOT_PRESET_LIST_2,
+    SKIN_SLOT_PRESET_LIST_3,
+    SKIN_SLOT_PRESET_LIST_4,
+    SKIN_SLOT_PRESET_LIST_5,
+    SKIN_SLOT_PRESET_LIST_6,
+    SKIN_SLOT_PRESET_LIST_7,
+    SKIN_SLOT_PRESET_LIST_8,
+    SKIN_SLOT_PRESET_LIST_9,
+    
+    SKIN_SLOT_MAX
+} SkinSlotIndex_t;
+
+#define INVALID_SKIN_INDEX 0xFFFF
+
+static void set_skin_image(lv_obj_t* obj, uint8_t index, SkinSlotIndex_t slot);
+
+typedef struct
+{
+    uint16_t displayed_index;
+    lv_img_dsc_t dsc;
+} SkinSlot_t;
+
+static SkinSlot_t skin_slots[SKIN_SLOT_MAX];
+
 static tSkinTOC SkinTOC[MAX_SKIN_IMAGES];
+static const esp_partition_t* skin_partition;
+
 static const void* skin_data_map_ptr;
 static esp_partition_mmap_handle_t skin_data_map_handle = 0;
-static const esp_partition_t* skin_partition;
-static lv_img_dsc_t skin_img_dsc;
 #endif    
 
 /****************************************************************************
@@ -704,6 +746,281 @@ void action_parameter_changed(lv_event_t * e)
         } break;
     }
 }
+
+static void updatePresetListSelection()
+{
+    uint8_t pageStart = preset_list_page * PRESET_LIST_PRESETS_PER_PAGE;
+    uint8_t selectedPreset = control_get_current_preset_mapped_index();
+    lv_obj_set_style_outline_opa(objects.ui_preset_list_button_0, (selectedPreset == (pageStart + 0) ? 255 : 0), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_outline_opa(objects.ui_preset_list_button_1, (selectedPreset == (pageStart + 1) ? 255 : 0), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_outline_opa(objects.ui_preset_list_button_2, (selectedPreset == (pageStart + 2) ? 255 : 0), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_outline_opa(objects.ui_preset_list_button_3, (selectedPreset == (pageStart + 3) ? 255 : 0), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_outline_opa(objects.ui_preset_list_button_4, (selectedPreset == (pageStart + 4) ? 255 : 0), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_outline_opa(objects.ui_preset_list_button_5, (selectedPreset == (pageStart + 5) ? 255 : 0), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_outline_opa(objects.ui_preset_list_button_6, (selectedPreset == (pageStart + 6) ? 255 : 0), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_outline_opa(objects.ui_preset_list_button_7, (selectedPreset == (pageStart + 7) ? 255 : 0), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_outline_opa(objects.ui_preset_list_button_8, (selectedPreset == (pageStart + 8) ? 255 : 0), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_outline_opa(objects.ui_preset_list_button_9, (selectedPreset == (pageStart + 9) ? 255 : 0), LV_PART_MAIN | LV_STATE_DEFAULT);
+}
+
+static inline void lv_label_set_preset_name(lv_obj_t* label, uint8_t index)
+{
+    char name[MAX_PRESET_NAME_LENGTH];
+    char text[MAX_PRESET_NAME_LENGTH + 8];
+    control_get_preset_name(index, name);
+    snprintf(text, sizeof(text), "%u: %s", index + usb_get_first_preset_index_for_connected_modeller(), name);
+    lv_label_set_text(label, text);
+}
+
+static void updatePresetListNames()
+{
+    uint8_t pageStart = preset_list_page * PRESET_LIST_PRESETS_PER_PAGE;
+
+    lv_label_set_preset_name(objects.ui_preset_list_label_0, pageStart + 0);
+    lv_label_set_preset_name(objects.ui_preset_list_label_1, pageStart + 1);
+    lv_label_set_preset_name(objects.ui_preset_list_label_2, pageStart + 2);
+    lv_label_set_preset_name(objects.ui_preset_list_label_3, pageStart + 3);
+    lv_label_set_preset_name(objects.ui_preset_list_label_4, pageStart + 4);
+    lv_label_set_preset_name(objects.ui_preset_list_label_5, pageStart + 5);
+    lv_label_set_preset_name(objects.ui_preset_list_label_6, pageStart + 6);
+    lv_label_set_preset_name(objects.ui_preset_list_label_7, pageStart + 7);
+    lv_label_set_preset_name(objects.ui_preset_list_label_8, pageStart + 8);
+    lv_label_set_preset_name(objects.ui_preset_list_label_9, pageStart + 9);
+
+    set_skin_image(objects.ui_preset_list_image_0, control_get_skin_index(pageStart + 0), SKIN_SLOT_PRESET_LIST_0);
+    set_skin_image(objects.ui_preset_list_image_1, control_get_skin_index(pageStart + 1), SKIN_SLOT_PRESET_LIST_1);
+    set_skin_image(objects.ui_preset_list_image_2, control_get_skin_index(pageStart + 2), SKIN_SLOT_PRESET_LIST_2);
+    set_skin_image(objects.ui_preset_list_image_3, control_get_skin_index(pageStart + 3), SKIN_SLOT_PRESET_LIST_3);
+    set_skin_image(objects.ui_preset_list_image_4, control_get_skin_index(pageStart + 4), SKIN_SLOT_PRESET_LIST_4);
+    set_skin_image(objects.ui_preset_list_image_5, control_get_skin_index(pageStart + 5), SKIN_SLOT_PRESET_LIST_5);
+    set_skin_image(objects.ui_preset_list_image_6, control_get_skin_index(pageStart + 6), SKIN_SLOT_PRESET_LIST_6);
+    set_skin_image(objects.ui_preset_list_image_7, control_get_skin_index(pageStart + 7), SKIN_SLOT_PRESET_LIST_7);
+    set_skin_image(objects.ui_preset_list_image_8, control_get_skin_index(pageStart + 8), SKIN_SLOT_PRESET_LIST_8);
+    set_skin_image(objects.ui_preset_list_image_9, control_get_skin_index(pageStart + 9), SKIN_SLOT_PRESET_LIST_9);
+}
+
+/****************************************************************************
+* NAME:        
+* DESCRIPTION: 
+* PARAMETERS:  
+* RETURN:      
+* NOTES:       
+*****************************************************************************/
+void action_open_presets_page(lv_event_t * e)
+{
+    ESP_LOGI(TAG, "action_open_presets_page");
+
+    updatePresetListSelection();
+    updatePresetListNames();
+    lv_scr_load_anim(objects.presets, LV_SCR_LOAD_ANIM_FADE_IN, 0, 0, false);
+}
+
+/****************************************************************************
+* NAME:        
+* DESCRIPTION: 
+* PARAMETERS:  
+* RETURN:      
+* NOTES:       
+*****************************************************************************/
+void action_close_presets_page(lv_event_t * e)
+{
+    ESP_LOGI(TAG, "action_close_presets_page");
+
+    lv_scr_load_anim(objects.screen1, LV_SCR_LOAD_ANIM_FADE_IN, 0, 0, false);
+}
+
+/****************************************************************************
+* NAME:        
+* DESCRIPTION: 
+* PARAMETERS:  
+* RETURN:      
+* NOTES:       
+*****************************************************************************/
+void action_preset_list_select(lv_event_t * e)
+{
+    ESP_LOGI(TAG, "action_preset_list_select");
+
+    uint8_t button_index = (uint8_t)(intptr_t)lv_event_get_user_data(e);
+    uint8_t preset_index = button_index + preset_list_page * PRESET_LIST_PRESETS_PER_PAGE;
+    lv_scr_load_anim(objects.screen1, LV_SCR_LOAD_ANIM_FADE_IN, 0, 0, false);
+    control_request_preset_index(preset_index);
+}
+
+/****************************************************************************
+* NAME:        
+* DESCRIPTION: 
+* PARAMETERS:  
+* RETURN:      
+* NOTES:       
+*****************************************************************************/
+void action_preset_list_previous(lv_event_t * e)
+{
+    ESP_LOGI(TAG, "action_preset_list_previous");
+
+    if (preset_list_page == 0) {
+        preset_list_page = usb_get_max_presets_for_connected_modeller() / PRESET_LIST_PRESETS_PER_PAGE - 1;
+    } else {
+        preset_list_page -= 1;
+    }
+    updatePresetListSelection();
+    updatePresetListNames();
+}
+
+/****************************************************************************
+* NAME:        
+* DESCRIPTION: 
+* PARAMETERS:  
+* RETURN:      
+* NOTES:       
+*****************************************************************************/
+void action_preset_list_next(lv_event_t * e)
+{
+    ESP_LOGI(TAG, "action_preset_list_next");
+
+    if (preset_list_page == (usb_get_max_presets_for_connected_modeller() / PRESET_LIST_PRESETS_PER_PAGE - 1)) {
+        preset_list_page = 0;
+    } else {
+        preset_list_page += 1;
+    }
+    updatePresetListSelection();
+    updatePresetListNames();
+}
+
+/****************************************************************************
+* NAME:        
+* DESCRIPTION: 
+* PARAMETERS:  
+* RETURN:      
+* NOTES:       
+*****************************************************************************/
+void action_preset_list_options(lv_event_t * e)
+{
+    ESP_LOGI(TAG, "action_preset_list_options");
+
+    uint8_t buttonIndex = (intptr_t)lv_event_get_user_data(e);
+    preset_list_insert_index = preset_list_page * PRESET_LIST_PRESETS_PER_PAGE + buttonIndex;
+
+    lv_textarea_set_text(objects.ui_preset_list_dialog_number_entry, "");
+    
+    lv_label_set_preset_name(objects.ui_preset_list_dialog_name, preset_list_insert_index);
+
+    lv_obj_clear_flag(objects.ui_preset_list_dialog, LV_OBJ_FLAG_HIDDEN);
+}
+
+/****************************************************************************
+* NAME:        
+* DESCRIPTION: 
+* PARAMETERS:  
+* RETURN:      
+* NOTES:       
+*****************************************************************************/
+void action_preset_list_insert_clicked(lv_event_t * e)
+{
+    ESP_LOGI(TAG, "action_preset_list_insert_clicked");
+
+    if (lv_obj_has_state(objects.ui_preset_list_dialog_button_insert, LV_STATE_CHECKED)) {
+        preset_list_insert_mode = PRESET_LIST_INSERT_MODE_SWAP;
+        lv_obj_add_state(objects.ui_preset_list_dialog_button_swap, LV_STATE_CHECKED);
+    } else {
+        preset_list_insert_mode = PRESET_LIST_INSERT_MODE_INSERT;
+        lv_obj_clear_state(objects.ui_preset_list_dialog_button_swap, LV_STATE_CHECKED);
+    }
+}
+
+/****************************************************************************
+* NAME:        
+* DESCRIPTION: 
+* PARAMETERS:  
+* RETURN:      
+* NOTES:       
+*****************************************************************************/
+void action_preset_list_swap_clicked(lv_event_t * e)
+{
+    ESP_LOGI(TAG, "action_preset_list_swap_clicked");
+
+    if (lv_obj_has_state(objects.ui_preset_list_dialog_button_swap, LV_STATE_CHECKED)) {
+        preset_list_insert_mode = PRESET_LIST_INSERT_MODE_INSERT;
+        lv_obj_add_state(objects.ui_preset_list_dialog_button_insert, LV_STATE_CHECKED);
+    } else {
+        preset_list_insert_mode = PRESET_LIST_INSERT_MODE_SWAP;
+        lv_obj_clear_state(objects.ui_preset_list_dialog_button_insert, LV_STATE_CHECKED);
+    }
+}
+
+/****************************************************************************
+* NAME:        
+* DESCRIPTION: 
+* PARAMETERS:  
+* RETURN:      
+* NOTES:       
+*****************************************************************************/
+void action_preset_list_keyboard_ok(lv_event_t * e)
+{
+    lv_event_code_t event_code = lv_event_get_code(e);
+
+    if (event_code == LV_EVENT_READY) 
+    {
+        ESP_LOGI(TAG, "action_preset_list_keyboard_ok");
+   
+        if (preset_list_insert_index > -1)
+        {
+            char* text = (char*)lv_textarea_get_text(objects.ui_preset_list_dialog_number_entry);
+            int value = atoi(text);
+            uint8_t presetsCount = usb_get_max_presets_for_connected_modeller();
+
+            if (value > 0 && value <= presetsCount)
+            {
+                uint8_t newPresetSlot = value - 1;
+                uint8_t newPresetOrder[MAX_SUPPORTED_PRESETS];
+                memcpy(newPresetOrder, control_get_preset_order(), MAX_SUPPORTED_PRESETS);
+                
+                switch (preset_list_insert_mode)
+                {
+                    case PRESET_LIST_INSERT_MODE_INSERT:
+                    {
+                        uint8_t movedValue = newPresetOrder[preset_list_insert_index];
+
+                        if (preset_list_insert_index < newPresetSlot)
+                        {
+                            // Shift left
+                            for (uint8_t i = preset_list_insert_index; i < newPresetSlot; i++)
+                            {
+                                newPresetOrder[i] = newPresetOrder[i + 1];
+                            }
+                        }
+                        else if (preset_list_insert_index > newPresetSlot)
+                        {
+                            // Shift right
+                            for (uint8_t i = preset_list_insert_index; i > newPresetSlot; i--)
+                            {
+                                newPresetOrder[i] = newPresetOrder[i - 1];
+                            }
+                        }
+                        newPresetOrder[newPresetSlot] = movedValue;
+                    } break;
+
+                    case PRESET_LIST_INSERT_MODE_SWAP:
+                    {
+                        uint8_t temp = newPresetOrder[preset_list_insert_index];
+                        newPresetOrder[preset_list_insert_index] = newPresetOrder[newPresetSlot];
+                        newPresetOrder[newPresetSlot] = temp;
+                    } break;
+
+                    default:
+                        break;
+                }
+
+                control_set_preset_order(newPresetOrder);
+                control_save_user_data(0);
+                wifi_request_sync(WIFI_SYNC_TYPE_CONFIG, NULL, NULL);
+                updatePresetListSelection();
+                updatePresetListNames();
+            }
+            preset_list_insert_index = -1;
+        }
+        lv_obj_add_flag(objects.ui_preset_list_dialog, LV_OBJ_FLAG_HIDDEN);
+    }
+}
 #endif  //CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI
 
 /****************************************************************************
@@ -916,6 +1233,26 @@ void UI_SetAmpSkin(uint16_t index)
 * RETURN:      
 * NOTES:       
 *****************************************************************************/
+void UI_UpdatePresetList()
+{
+    tUIUpdate ui_update;
+    
+    ui_update.ElementID = UI_ELEMENT_PRESET_LIST;
+
+    // send to queue
+    if (xQueueSend(ui_update_queue, (void*)&ui_update, 0) != pdPASS)
+    {
+        ESP_LOGE(TAG, "UI Update queue send failed!");            
+    }
+}
+
+/****************************************************************************
+* NAME:        
+* DESCRIPTION: 
+* PARAMETERS:  
+* RETURN:      
+* NOTES:       
+*****************************************************************************/
 void UI_SetPresetDescription(char* text)
 {
     tUIUpdate ui_update;
@@ -991,6 +1328,28 @@ static void ui_load_skin_toc(void)
     //{
     //    ESP_LOGI(TAG, "TOC: %d, %d %d", (int)index, (int)SkinTOC[index].offset, (int)SkinTOC[index].length);
     //}
+
+    err = esp_partition_mmap(
+        skin_partition,
+        0,
+        skin_partition->size,
+        ESP_PARTITION_MMAP_DATA,
+        &skin_data_map_ptr,
+        &skin_data_map_handle
+    );
+
+    if (err != ESP_OK)
+    {
+        ESP_LOGE(TAG, "Global mmap failed: %s", esp_err_to_name(err));
+        return;
+    }
+
+    ESP_LOGI(TAG, "Skin partition mapped globally");
+
+    for (int i = 0; i < SKIN_SLOT_MAX; i++)
+    {
+        skin_slots[i].displayed_index = INVALID_SKIN_INDEX;
+    }
 }
 
 /****************************************************************************
@@ -1000,53 +1359,37 @@ static void ui_load_skin_toc(void)
 * RETURN:      
 * NOTES:       
 *****************************************************************************/
-static uint32_t ui_get_skin_image(uint16_t index)
+static void set_skin_image(lv_obj_t* obj, uint8_t index, SkinSlotIndex_t slot)
 {
-    if (index > MAX_SKIN_IMAGES)
+    if (index >= MAX_SKIN_IMAGES)
     {
-        ESP_LOGW(TAG, "Invalid skin image index: %d", (int)index);
-        return 0;
+        ESP_LOGW(TAG, "Invalid skin index: %d", index);
+        return;
     }
 
-    if (SkinTOC[index].length == 0)
+    if (SkinTOC[index].length == 0 || skin_partition == NULL)
     {
-        // no data for this skin index
-        ESP_LOGW(TAG, "No skin data for index: %d", (int)index);
-        return 0;
+        ESP_LOGW(TAG, "No data for skin index: %d", index);
+        return;
     }
 
-    if (skin_partition == NULL) 
-    {
-        // no skin partition
-        ESP_LOGW(TAG, "No skin data partition");
-        return 0;
-    }
+    SkinSlot_t* s = &skin_slots[slot];
 
-    // unmap any mapped data
-    if (skin_data_map_handle != 0)
-    {
-        esp_partition_munmap(skin_data_map_handle);
-        skin_data_map_handle = 0;
-    }
+    // Skip if already displayed
+    if (s->displayed_index == index)
+        return;
 
-    // map the skin partition chunk into memory
-    esp_err_t err = esp_partition_mmap(skin_partition, SkinTOC[index].offset, SkinTOC[index].length, ESP_PARTITION_MMAP_DATA, &skin_data_map_ptr, &skin_data_map_handle);
+    const uint8_t* base = (const uint8_t*)skin_data_map_ptr;
+    const uint8_t* data_ptr = base + SkinTOC[index].offset;
 
-    if (err != ESP_OK) 
-    {
-        ESP_LOGE(TAG, "Failed to read partition: %s", esp_err_to_name(err));
-        return 0;
-    }
-    else
-    {
-        ESP_LOGI(TAG, "Skin partition data mapped to %X length %d", (int)skin_data_map_ptr, SkinTOC[index].length);
-    }
+    memcpy(&s->dsc.header, data_ptr, sizeof(lv_img_header_t));
 
-    // debug code
-    //ESP_LOGI(TAG, "Skin data:");
-    //ESP_LOG_BUFFER_HEX(TAG, (uint8_t*)skin_data_map_ptr, 32);
+    s->dsc.data_size = SkinTOC[index].length - sizeof(lv_img_header_t);
 
-    return SkinTOC[index].length;
+    s->dsc.data = data_ptr + sizeof(lv_img_header_t);
+    lv_img_set_src(obj, &s->dsc);
+
+    s->displayed_index = index; 
 }
 
 #endif 
@@ -1199,6 +1542,14 @@ static  __attribute__((unused)) uint8_t update_ui_element(tUIUpdate* update)
             ui_show_toast(update->Text);
         } break;
 
+        case UI_ELEMENT_PRESET_LIST:
+        {
+            if (lv_scr_act() == objects.presets) {
+                updatePresetListSelection();
+                updatePresetListNames();
+            }
+        } break;
+
         default:
         {
             ESP_LOGE(TAG, "Unknown display elment %d", update->ElementID);     
@@ -1264,32 +1615,7 @@ static  __attribute__((unused)) uint8_t update_ui_element(tUIUpdate* update)
 #if CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI
             else if (element_1 == objects.ui_skin_image)
             {
-                // is the skin image different from what we have loaded?
-                if (update->Value != current_skin_image)
-                {
-                    current_skin_image = update->Value;
-
-                    // map skin image data into skin_data_map_ptr
-                    uint32_t skin_len = ui_get_skin_image(update->Value);
-                    
-                    if (skin_len > 0)
-                    {
-                        // build the image descriptor
-                        // Copy the 4-byte header
-                        memcpy((void*)&skin_img_dsc.header, (void*)skin_data_map_ptr, sizeof(lv_img_header_t));  
-
-                        // debug code
-                        //ESP_LOGI(TAG, "Skin CF:%d Width:%d Height:%d", (int)skin_img_dsc.header.cf, (int)skin_img_dsc.header.w, (int)skin_img_dsc.header.h);
-
-                        // set the size
-                        skin_img_dsc.data_size = skin_len - sizeof(lv_img_header_t);
-
-                        // set the data
-                        skin_img_dsc.data = (const uint8_t*)((uint8_t*)skin_data_map_ptr + sizeof(lv_img_header_t));
-                        
-                        lv_img_set_src(objects.ui_skin_image, &skin_img_dsc);
-                    }
-                }
+                set_skin_image(objects.ui_skin_image, update->Value, SKIN_SLOT_MAIN);
             }
             else if (element_1 == objects.ui_bank_value_label)
             {
@@ -1305,6 +1631,10 @@ static  __attribute__((unused)) uint8_t update_ui_element(tUIUpdate* update)
         {
 #if CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI
             lv_label_set_text(element_1, update->Text);
+
+            if (lv_scr_act() == objects.presets) {
+                updatePresetListSelection();
+            }
 #elif CONFIG_TONEX_CONTROLLER_DISPLAY_SMALL
             if (element_1 == objects.ui_preset_heading_label)
             {

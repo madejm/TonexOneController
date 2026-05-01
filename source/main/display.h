@@ -50,6 +50,7 @@ void UI_SetWiFiStatus(uint8_t state);
 void UI_SetPresetLabel(uint16_t index, char* name);
 void UI_SetBankIndex(uint16_t index);
 void UI_SetAmpSkin(uint16_t index);
+void UI_UpdatePresetList();
 void UI_SetPresetDescription(char* text);
 void UI_RefreshParameterValues(void);
 void UI_ShowToast(char* text);

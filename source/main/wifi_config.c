@@ -92,17 +92,17 @@ static void wifi_build_params_json(void);
 static void wifi_build_config_json(void);
 static void wifi_build_preset_json(void);
 
-enum WiFivents
+typedef enum: uint8_t
 {
     EVENT_SYNC_PARAMS,
     EVENT_SYNC_PRESET_NAME,
     EVENT_SYNC_PRESET,
     EVENT_SYNC_CONFIG
-};
+} WiFiEvent;
 
 typedef struct
 {
-    uint8_t Event;
+    WiFiEvent Event;
     uint32_t Value;
     char Text[MAX_TEXT_LENGTH];
 } tWiFiMessage;
@@ -271,7 +271,7 @@ static uint8_t process_wifi_command(tWiFiMessage* message)
 * RETURN:      
 * NOTES:       
 *****************************************************************************/
-void wifi_request_sync(uint8_t type, void* arg1, void* arg2)
+void wifi_request_sync(WiFiSyncType type, void* arg1, void* arg2)
 {
     tWiFiMessage message;
 
@@ -1366,6 +1366,7 @@ static esp_err_t ws_handler(httpd_req_t *req)
                                 }
                                 control_set_preset_order(preset_order);
                                 control_save_user_data(0);
+                                UI_UpdatePresetList();
                             }
                         }
                     } 
