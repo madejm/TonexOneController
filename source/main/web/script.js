@@ -3,6 +3,9 @@ const AMP_MODELLER_TONEX_ONE = 1;
 const AMP_MODELLER_TONEX = 2;
 const AMP_MODELLER_VALETON_GP5 = 3;
 
+const INT_FS_COUNT = 4;
+const EXT_FS_COUNT = 8;
+
 var gateway = `ws://${window.location.hostname}/ws`;
 var websocket;
 var pageTimer = 0;
@@ -491,6 +494,8 @@ const ValetonEffectAmp = {
 // External Footswitch midi associations - Tonex
 const tonexMidiControlChangeAssociations = new Map();
 
+tonexMidiControlChangeAssociations.set(255, { param: "disabled", value: { type: "TOGGLE" } })
+
 // MAIN
 tonexMidiControlChangeAssociations.set("MAIN", null);
 tonexMidiControlChangeAssociations.set(102, { param: "GAIN", value: { type: "RANGE" } })
@@ -587,7 +592,26 @@ tonexMidiControlChangeAssociations.set(1, { param: "DELAY POSITION", value: { ty
 // DELAY / DIGITAL
 tonexMidiControlChangeAssociations.set("DELAY / DIGITAL", null);
 tonexMidiControlChangeAssociations.set(4, { param: "DELAY DIGITAL SYNC", value: { type: "TOGGLE" } })
-tonexMidiControlChangeAssociations.set(5, { param: "DELAY DIGITAL TIME (TIMESIGN)", value: { type: "RANGE" } })
+tonexMidiControlChangeAssociations.set(5, { param: "DELAY DIGITAL TIME (TIMESIGN)", value: { type: "CHOICE", values: {
+    0: "1/32",
+    1: "1/32 D",
+    2: "1/32 T",
+    3: "1/16",
+    4: "1/16 D",
+    5: "1/16 T",
+    6: "1/8",
+    7: "1/8 D",
+    8: "1/8 T",
+    9: "1/4",
+    10: "1/4 D",
+    11: "1/4 T",
+    12: "1/2",
+    13: "1/2 D",
+    14: "1/2 T",
+    15: "1/1",
+    16: "1/1 D",
+    17: "1/1 T"
+} } })
 tonexMidiControlChangeAssociations.set(6, { param: "DELAY DIGITAL FEEDBACK", value: { type: "RANGE" } })
 tonexMidiControlChangeAssociations.set(7, { param: "DELAY DIGITAL MODE", value: { type: "CHOICE", values: { 0: "NORMAL", 64: "PING.PONG" } } })
 tonexMidiControlChangeAssociations.set(8, { param: "DELAY DIGITAL MIX", value: { type: "RANGE" } })
@@ -595,7 +619,26 @@ tonexMidiControlChangeAssociations.set(8, { param: "DELAY DIGITAL MIX", value: {
 // DELAY / TAPE
 tonexMidiControlChangeAssociations.set("DELAY / TAPE", null);
 tonexMidiControlChangeAssociations.set(91, { param: "DELAY TAPE SYNC", value: { type: "TOGGLE" } })
-tonexMidiControlChangeAssociations.set(92, { param: "DELAY TAPE TIME (TIMESIGN)", value: { type: "RANGE" } })
+tonexMidiControlChangeAssociations.set(92, { param: "DELAY TAPE TIME (TIMESIGN)", value: { type: "CHOICE", values: {
+    0: "1/32",
+    1: "1/32 D",
+    2: "1/32 T",
+    3: "1/16",
+    4: "1/16 D",
+    5: "1/16 T",
+    6: "1/8",
+    7: "1/8 D",
+    8: "1/8 T",
+    9: "1/4",
+    10: "1/4 D",
+    11: "1/4 T",
+    12: "1/2",
+    13: "1/2 D",
+    14: "1/2 T",
+    15: "1/1",
+    16: "1/1 D",
+    17: "1/1 T"
+} } })
 tonexMidiControlChangeAssociations.set(93, { param: "DELAY TAPE FEEDBACK", value: { type: "RANGE" } })
 tonexMidiControlChangeAssociations.set(94, { param: "DELAY TAPE MODE", value: { type: "CHOICE", values: { 0: "NORMAL", 64: "PING.PONG" } } })
 tonexMidiControlChangeAssociations.set(95, { param: "DELAY TAPE MIX", value: { type: "RANGE" } })
@@ -671,6 +714,8 @@ tonexMidiControlChangeAssociations.set(127, { param: "SET PRESET", value: { type
 
 // External Footswitch midi associations - GP5
 const valetonMidiControlChangeAssociations = new Map();
+
+valetonMidiControlChangeAssociations.set(255, { param: "disabled", value: { type: "TOGGLE" } })
 
 // General
 valetonMidiControlChangeAssociations.set("GENERAL", null);
@@ -888,29 +933,8 @@ const DEVICE_MENUS = {
 
 
 function onload(event) {
-    document.querySelectorAll('.menu-link').forEach(link => {
-        link.addEventListener('click', function(e) {
-            e.preventDefault();  // prevent # jump
-
-            const target = this.getAttribute('data-target');
-            const section = document.getElementById(target);
-
-            // Hide all
-            document.querySelectorAll('.content-section').forEach(sec => {
-                sec.classList.remove('active');
-            });
-
-            // Show clicked one
-            if (section) section.classList.add('active');
-
-            // Close mobile menu
-            const navbar = document.querySelector('.navbar-collapse');
-            if (navbar.classList.contains('show')) {
-                bootstrap.Collapse.getInstance(navbar)?.hide();
-            }
-        });
-    });
-
+    updateMenuEventListeners();
+    
     document.getElementById("defaultFX").click();
     document.getElementById("defaultIFX").click();
 
@@ -944,6 +968,32 @@ function onload(event) {
             userIsDragging = null; 
             //console.log("Slider stopped");
         }, 250);
+    });
+}
+
+function updateMenuEventListeners() {
+    document.querySelectorAll('.menu-link').forEach(link => {
+        // link.removeEventListener('click');
+        link.addEventListener('click', function(e) {
+            e.preventDefault();  // prevent # jump
+
+            const target = this.getAttribute('data-target');
+            const section = document.getElementById(target);
+
+            // Hide all
+            document.querySelectorAll('.content-section').forEach(sec => {
+                sec.classList.remove('active');
+            });
+
+            // Show clicked one
+            if (section) section.classList.add('active');
+
+            // Close mobile menu
+            const navbar = document.querySelector('.navbar-collapse');
+            if (navbar.classList.contains('show')) {
+                bootstrap.Collapse.getInstance(navbar)?.hide();
+            }
+        });
     });
 }
 
@@ -1084,90 +1134,90 @@ function setEffectIcons() {
             var rvbPost = document.getElementById("rv_post");
 
             const container = document.querySelector('.fx_icon_container');
-            const images = Array.from(container.querySelectorAll('img'));
+            const anchors = Array.from(container.querySelectorAll('a'));
             var newOrderIds = [];
             var index = 0;
 
             if (!gatePost.checked)
             {
-                newOrderIds[index] = 'fx_image_gate';
+                newOrderIds[index] = 'fx_a_gate';
                 index++;
             }
             
             if (!compPost.checked)
             {
-                newOrderIds[index] = 'fx_image_comp';
+                newOrderIds[index] = 'fx_a_comp';
                 index++;
             }
             
             if (!modPost.checked)
             {
-                newOrderIds[index] = 'fx_image_mod';
+                newOrderIds[index] = 'fx_a_mod';
                 index++;
             }
             
             if (!delayPost.checked)
             {
-                newOrderIds[index] = 'fx_image_dly';
+                newOrderIds[index] = 'fx_a_dly';
                 index++;
             }
 
             if (!eqPost.checked)
             {
-                newOrderIds[index] = 'fx_image_eq';
+                newOrderIds[index] = 'fx_a_eq';
                 index++;
             }
 
-            newOrderIds[index] = 'fx_image_amp';
+            newOrderIds[index] = 'fx_a_amp';
             index++;
-            newOrderIds[index] = 'fx_image_cab';
+            newOrderIds[index] = 'fx_a_cab';
             index++;
 
             if (eqPost.checked)
             {
-                newOrderIds[index] = 'fx_image_eq';
+                newOrderIds[index] = 'fx_a_eq';
                 index++;
             }
 
             if (gatePost.checked)
             {
-                newOrderIds[index] = 'fx_image_gate';
+                newOrderIds[index] = 'fx_a_gate';
                 index++;
             }
             
             if (compPost.checked)
             {
-                newOrderIds[index] = 'fx_image_comp';
+                newOrderIds[index] = 'fx_a_comp';
                 index++;
             }
             
             if (!rvbPost.checked)
             {
-                newOrderIds[index] = 'fx_image_rvb';
+                newOrderIds[index] = 'fx_a_rvb';
                 index++;
             }
 
             if (modPost.checked)
             {
-                newOrderIds[index] = 'fx_image_mod';
+                newOrderIds[index] = 'fx_a_mod';
                 index++;
             }
             
             if (delayPost.checked)
             {
-                newOrderIds[index] = 'fx_image_dly';
+                newOrderIds[index] = 'fx_a_dly';
                 index++;
             }
 
             if (rvbPost.checked)
             {
-                newOrderIds[index] = 'fx_image_rvb';
+                newOrderIds[index] = 'fx_a_rvb';
                 index++;
             }
 
-            const orderedImages = newOrderIds.map(id => images.find(img => img.id === id));
+            const orderedImages = newOrderIds.map(id => anchors.find(a => a.id === id));
             container.innerHTML = ''; // Clear the container
-            orderedImages.forEach(img => container.appendChild(img));
+            orderedImages.forEach(a => container.appendChild(a));
         } break;
 
         case AMP_MODELLER_VALETON_GP5:
@@ -3705,80 +3755,24 @@ function processReturnCmd(data) {
             configureParamSwitch("disablebpm", data['DISABLE_BPM']);
             
             configureParamSelect("extfslay", data['EXTFS_PS_LAYOUT']);
-                                
-            configureParamSelect("extfx1sw", data['EXTFS_ES1_SW']);
-            setParamValue("extfx1cc", data['EXTFS_ES1_CC']);
-            extFSChanged("extfx1");
-            setExtFSValue("extfx1v1", data['EXTFS_ES1_V1']);
-            setExtFSValue("extfx1v2", data['EXTFS_ES1_V2']);
-
-            configureParamSelect("extfx2sw", data['EXTFS_ES2_SW']);
-            setParamValue("extfx2cc", data['EXTFS_ES2_CC']);
-            extFSChanged("extfx2");
-            setExtFSValue("extfx2v1", data['EXTFS_ES2_V1']);
-            setExtFSValue("extfx2v2", data['EXTFS_ES2_V2']);
-
-            configureParamSelect("extfx3sw", data['EXTFS_ES3_SW']);
-            setParamValue("extfx3cc", data['EXTFS_ES3_CC']);
-            extFSChanged("extfx3");
-            setExtFSValue("extfx3v1", data['EXTFS_ES3_V1']);
-            setExtFSValue("extfx3v2", data['EXTFS_ES3_V2']);
-
-            configureParamSelect("extfx4sw", data['EXTFS_ES4_SW']);
-            setParamValue("extfx4cc", data['EXTFS_ES4_CC']);
-            extFSChanged("extfx4");
-            setExtFSValue("extfx4v1", data['EXTFS_ES4_V1']);
-            setExtFSValue("extfx4v2", data['EXTFS_ES4_V2']);
-
-            configureParamSelect("extfx5sw", data['EXTFS_ES5_SW']);
-            setParamValue("extfx5cc", data['EXTFS_ES5_CC']);
-            extFSChanged("extfx5");
-            setExtFSValue("extfx5v1", data['EXTFS_ES5_V1']);
-            setExtFSValue("extfx5v2", data['EXTFS_ES5_V2']);
-
-            configureParamSelect("extfx6sw", data['EXTFS_ES6_SW']);                    
-            setParamValue("extfx6cc", data['EXTFS_ES6_CC']);
-            extFSChanged("extfx6");
-            setExtFSValue("extfx6v1", data['EXTFS_ES6_V1']);
-            setExtFSValue("extfx6v2", data['EXTFS_ES6_V2']);
-
-            configureParamSelect("extfx7sw", data['EXTFS_ES7_SW']);
-            setParamValue("extfx7cc", data['EXTFS_ES7_CC']);
-            extFSChanged("extfx7");
-            setExtFSValue("extfx7v1", data['EXTFS_ES7_V1']);
-            setExtFSValue("extfx7v2", data['EXTFS_ES7_V2']);
-
-            configureParamSelect("extfx8sw", data['EXTFS_ES8_SW']);
-            setParamValue("extfx8cc", data['EXTFS_ES8_CC']);
-            extFSChanged("extfx8");
-            setExtFSValue("extfx8v1", data['EXTFS_ES8_V1']);
-            setExtFSValue("extfx8v2", data['EXTFS_ES8_V2']);
+            
+            for (var i=1; i<=EXT_FS_COUNT; i++) {
+                configureParamSelect(`extfx${i}sw`, data[`EXTFS_ES${i}_SW`]);
+                setParamValue(`extfx${i}cc`, data[`EXTFS_ES${i}_CC`]);
+                fsChanged(true, i);
+                setFSValue(`extfx${i}v1`, data[`EXTFS_ES${i}_V1`]);
+                setFSValue(`extfx${i}v2`, data[`EXTFS_ES${i}_V2`]);
+            }
 
             configureParamSelect("intfslay", data['FOOTSW_MODE']);
 
-            configureParamSelect("intfx1sw", data['INTFS_ES1_SW']);
-            setParamValue("intfx1cc", data['INTFS_ES1_CC']);
-            extFSChanged("intfx1");
-            setExtFSValue("intfx1v1", data['INTFS_ES1_V1']);
-            setExtFSValue("intfx1v2", data['INTFS_ES1_V2']);
-
-            configureParamSelect("intfx2sw", data['INTFS_ES2_SW']);
-            setParamValue("intfx2cc", data['INTFS_ES2_CC']);
-            extFSChanged("intfx2");
-            setExtFSValue("intfx2v1", data['INTFS_ES2_V1']);
-            setExtFSValue("intfx2v2", data['INTFS_ES2_V2']);
-
-            configureParamSelect("intfx3sw", data['INTFS_ES3_SW']);
-            setParamValue("intfx3cc", data['INTFS_ES3_CC']);
-            extFSChanged("intfx3");
-            setExtFSValue("intfx3v1", data['INTFS_ES3_V1']);
-            setExtFSValue("intfx3v2", data['INTFS_ES3_V2']);
-
-            configureParamSelect("intfx4sw", data['INTFS_ES4_SW']);
-            setParamValue("intfx4cc", data['INTFS_ES4_CC']);
-            extFSChanged("intfx4");
-            setExtFSValue("intfx4v1", data['INTFS_ES4_V1']);
-            setExtFSValue("intfx4v2", data['INTFS_ES4_V2']);
+            for (i=1; i<=INT_FS_COUNT; i++) {
+                configureParamSelect(`intfx${i}sw`, data[`INTFS_ES${i}_SW`]);
+                setParamValue(`intfx${i}cc`, data[`INTFS_ES${i}_CC`]);
+                fsChanged(false, i);
+                setFSValue(`intfx${i}v1`, data[`INTFS_ES${i}_V1`]);
+                setFSValue(`intfx${i}v2`, data[`INTFS_ES${i}_V2`]);
+            }
 
             // save these for later use (after we get the preset details)
             preset_order_cfg = data['PRESET_ORDER'];
@@ -3786,6 +3780,7 @@ function processReturnCmd(data) {
             
             // create Midi PC map
             buildPCMap(data['PC_MAP']);
+            setPresetOrder(preset_order_cfg, preset_color_cfg);
             break;   
         
         case 'GETPRESET':
@@ -3988,70 +3983,9 @@ function saveSettings() {
 
         var extfslay = document.getElementById("extfslay").value;  
 
-        var extfx1sw = document.getElementById("extfx1sw").value;  
-        var extfx1cc = document.getElementById("extfx1cc").value;  
-        var extfx1v1 = getExtFSValue("1", "1");
-        var extfx1v2 = getExtFSValue("1", "2");
-
-        var extfx2sw = document.getElementById("extfx2sw").value;  
-        var extfx2cc = document.getElementById("extfx2cc").value;  
-        var extfx2v1 = getExtFSValue("2", "1");
-        var extfx2v2 = getExtFSValue("2", "2");
-
-        var extfx3sw = document.getElementById("extfx3sw").value;  
-        var extfx3cc = document.getElementById("extfx3cc").value;  
-        var extfx3v1 = getExtFSValue("3", "1");
-        var extfx3v2 = getExtFSValue("3", "2");
-
-        var extfx4sw = document.getElementById("extfx4sw").value;  
-        var extfx4cc = document.getElementById("extfx4cc").value;  
-        var extfx4v1 = getExtFSValue("4", "1");
-        var extfx4v2 = getExtFSValue("4", "2");
-
-        var extfx5sw = document.getElementById("extfx5sw").value;  
-        var extfx5cc = document.getElementById("extfx5cc").value;  
-        var extfx5v1 = getExtFSValue("5", "1");
-        var extfx5v2 = getExtFSValue("5", "2");
-
-        var extfx6sw = document.getElementById("extfx6sw").value;  
-        var extfx6cc = document.getElementById("extfx6cc").value;  
-        var extfx6v1 = getExtFSValue("6", "1");
-        var extfx6v2 = getExtFSValue("6", "2");
-        
-        var extfx7sw = document.getElementById("extfx7sw").value;  
-        var extfx7cc = document.getElementById("extfx7cc").value;  
-        var extfx7v1 = getExtFSValue("7", "1");
-        var extfx7v2 = getExtFSValue("7", "2");
-        
-        var extfx8sw = document.getElementById("extfx8sw").value;  
-        var extfx8cc = document.getElementById("extfx8cc").value;  
-        var extfx8v1 = getExtFSValue("8", "1");
-        var extfx8v2 = getExtFSValue("8", "2");
-
-
-        var intfx1sw = document.getElementById("intfx1sw").value;  
-        var intfx1cc = document.getElementById("intfx1cc").value;  
-        var intfx1v1 = getIntFSValue("1", "1");
-        var intfx1v2 = getIntFSValue("1", "2");
-
-        var intfx2sw = document.getElementById("intfx2sw").value;  
-        var intfx2cc = document.getElementById("intfx2cc").value;  
-        var intfx2v1 = getIntFSValue("2", "1");
-        var intfx2v2 = getIntFSValue("2", "2");
-
-        var intfx3sw = document.getElementById("intfx3sw").value;  
-        var intfx3cc = document.getElementById("intfx3cc").value;  
-        var intfx3v1 = getIntFSValue("3", "1");
-        var intfx3v2 = getIntFSValue("3", "2");
-
-        var intfx4sw = document.getElementById("intfx4sw").value;  
-        var intfx4cc = document.getElementById("intfx4cc").value;  
-        var intfx4v1 = getIntFSValue("4", "1"); 
-        var intfx4v2 = getIntFSValue("4", "2");
-
-        sendWS({"CMD": "SETCONFIG", 
+        var data = {"CMD": "SETCONFIG", 
                 "BT_MODE": parseInt(btmode),
-                "BT_CHOC_EN": mvavechocen, 
+                "BT_CHOC_EN": mvavechocen,
                 "BT_MD1_EN": xvivemd1en,
                 "BT_CUST_EN": custombteen,
                 "BT_CUST_NAME": custombt,
@@ -4065,58 +3999,33 @@ function saveSettings() {
                 "SCREEN_ROT": parseInt(screenrot),
                 "PRESET_SLOT": parseInt(presetslot),
                 "HIGH_TCH_SNS": parseInt(hitchsense),
-                "DISABLE_BPM": parseInt(disablebpm),                
-                "EXTFS_PS_LAYOUT": parseInt(extfslay),                        
-                "EXTFS_ES1_SW": parseInt(extfx1sw),
-                "EXTFS_ES1_CC": parseInt(extfx1cc),
-                "EXTFS_ES1_V1": parseInt(extfx1v1),
-                "EXTFS_ES1_V2": parseInt(extfx1v2),
-                "EXTFS_ES2_SW": parseInt(extfx2sw),
-                "EXTFS_ES2_CC": parseInt(extfx2cc),
-                "EXTFS_ES2_V1": parseInt(extfx2v1),
-                "EXTFS_ES2_V2": parseInt(extfx2v2),
-                "EXTFS_ES3_SW": parseInt(extfx3sw),
-                "EXTFS_ES3_CC": parseInt(extfx3cc),
-                "EXTFS_ES3_V1": parseInt(extfx3v1),
-                "EXTFS_ES3_V2": parseInt(extfx3v2),
-                "EXTFS_ES4_SW": parseInt(extfx4sw),
-                "EXTFS_ES4_CC": parseInt(extfx4cc),
-                "EXTFS_ES4_V1": parseInt(extfx4v1),
-                "EXTFS_ES4_V2": parseInt(extfx4v2),
-                "EXTFS_ES5_SW": parseInt(extfx5sw),
-                "EXTFS_ES5_CC": parseInt(extfx5cc),
-                "EXTFS_ES5_V1": parseInt(extfx5v1),
-                "EXTFS_ES5_V2": parseInt(extfx5v2),
-                "EXTFS_ES6_SW": parseInt(extfx6sw),
-                "EXTFS_ES6_CC": parseInt(extfx6cc),
-                "EXTFS_ES6_V1": parseInt(extfx6v1),
-                "EXTFS_ES6_V2": parseInt(extfx6v2),
-                "EXTFS_ES7_SW": parseInt(extfx7sw),
-                "EXTFS_ES7_CC": parseInt(extfx7cc),
-                "EXTFS_ES7_V1": parseInt(extfx7v1),
-                "EXTFS_ES7_V2": parseInt(extfx7v2),
-                "EXTFS_ES8_SW": parseInt(extfx8sw),
-                "EXTFS_ES8_CC": parseInt(extfx8cc),
-                "EXTFS_ES8_V1": parseInt(extfx8v1),
-                "EXTFS_ES8_V2": parseInt(extfx8v2),
-                "INTFS_ES1_SW": parseInt(intfx1sw),
-                "INTFS_ES1_CC": parseInt(intfx1cc),
-                "INTFS_ES1_V1": parseInt(intfx1v1),
-                "INTFS_ES1_V2": parseInt(intfx1v2),
-                "INTFS_ES2_SW": parseInt(intfx2sw),
-                "INTFS_ES2_CC": parseInt(intfx2cc),
-                "INTFS_ES2_V1": parseInt(intfx2v1),
-                "INTFS_ES2_V2": parseInt(intfx2v2),
-                "INTFS_ES3_SW": parseInt(intfx3sw),
-                "INTFS_ES3_CC": parseInt(intfx3cc),
-                "INTFS_ES3_V1": parseInt(intfx3v1),
-                "INTFS_ES3_V2": parseInt(intfx3v2),
-                "INTFS_ES4_SW": parseInt(intfx4sw),
-                "INTFS_ES4_CC": parseInt(intfx4cc),
-                "INTFS_ES4_V1": parseInt(intfx4v1),
-                "INTFS_ES4_V2": parseInt(intfx4v2),
-            });  
+                "DISABLE_BPM": parseInt(disablebpm),
+                "EXTFS_PS_LAYOUT": parseInt(extfslay),
+            };
 
+        for (var i=1; i<=EXT_FS_COUNT; i++) {
+            let sw = document.getElementById(`extfx${i}sw`).value;
+            let cc = getFSCC(true, i);
+            let v1 = getFSValue(true, `${i}`, "1");
+            let v2 = getFSValue(true, `${i}`, "2");
+            data[`EXTFS_ES${i}_SW`] = parseInt(sw);
+            data[`EXTFS_ES${i}_CC`] = parseInt(cc);
+            data[`EXTFS_ES${i}_V1`] = parseInt(v1);
+            data[`EXTFS_ES${i}_V2`] = parseInt(v2);
+        }
+
+        for (var i=1; i<=INT_FS_COUNT; i++) {
+            let sw = document.getElementById(`intfx${i}sw`).value;
+            let cc = getFSCC(false, i);
+            let v1 = getFSValue(false, `${i}`, "1");
+            let v2 = getFSValue(false, `${i}`, "2");
+            data[`INTFS_ES${i}_SW`] = parseInt(sw);
+            data[`INTFS_ES${i}_CC`] = parseInt(cc);
+            data[`INTFS_ES${i}_V1`] = parseInt(v1);
+            data[`INTFS_ES${i}_V2`] = parseInt(v2);
+        }
+
+        sendWS(data);
         setToast('Settings saved.<br>Rebooting now');
     }
 }
@@ -4146,7 +4055,7 @@ function SaveWifi() {
 function onPresetChange() {
     if (SocketConnected === 1) {
         // get values
-        var preset_index = document.getElementById("set_preset").value;
+        var preset_index = document.getElementById("set_preset").selectedIndex;
         console.log('Preset change: ');
         console.log(preset_index);
         
@@ -4443,7 +4352,7 @@ function populateExternalFootswitches() {
         } break;
     }
 
-    for (i=1; i<=8; i++) {
+    for (i=1; i<=EXT_FS_COUNT; i++) {
         var select = document.getElementById(`extfx${i}cc`);
         var optgroup = null;
 
@@ -4468,7 +4377,66 @@ function populateExternalFootswitches() {
     }
 }
 
-function extFSChanged(fx) {
+function isFSCCEnabled(ext, fs) {
+    if (fs == 255) {
+        return false;
+    }
+    if (fs < getNumberOfFootswitchesReservedForPresets(ext)) {
+        return false;
+    }
+    return true;
+}
+
+function getNumberOfFootswitchesReservedForPresets(ext) {
+    var lay;
+
+    if (ext) {
+        lay = document.getElementById("extfslay").value;
+    } else {
+        lay = document.getElementById("intfslay").value;
+    }
+
+    switch (parseInt(lay)) {
+        case 0:
+            return 2;
+        case 1:
+            return 3;
+        case 2:
+        case 15:
+            return 4;
+        case 3:
+        case 4:
+            return 5;
+        case 5:
+        case 6:
+        case 9:
+            return 6;
+        case 7:
+        case 8:
+            return 7;
+        case 10:
+            return 8;
+        case 11:
+        case 12:
+            return 10;
+        case 13:
+        case 14:
+            return 12;
+        default:
+            return 0;
+    }
+}
+
+function fsLayoutChanged(ext) {
+    const count = ext ? EXT_FS_COUNT : INT_FS_COUNT;
+
+    for (i=1; i<=count; i++) {
+        fsChanged(ext, i);
+    }
+    updatePresetOrderBanks();
+}
+
+function fsChanged(ext, fx) {
     var midi_map;
 
     switch (modellerType)
@@ -4486,16 +4454,31 @@ function extFSChanged(fx) {
         } break;
     }
 
-    var controlChange = document.getElementById(`${fx}cc`);
-    var association = midi_map.get(parseInt(controlChange.value));
+    const pref = ext ? "ext" : "int";
+    var footSwitch = document.getElementById(`${pref}fx${fx}sw`);
+    var controlChange = document.getElementById(`${pref}fx${fx}cc`);
+    let associationKey = parseInt(controlChange.value);
+    var association = midi_map.get(associationKey);
+    if (association == null) {
+        return;
+    }
 
-    var number1 = document.getElementById(`${fx}v1`);
-    var number2 = document.getElementById(`${fx}v2`);
-    var range1 = document.getElementById(`${fx}v1_r`);
-    var range2 = document.getElementById(`${fx}v2_r`);
-    var select1 = document.getElementById(`${fx}v1_s`);
-    var select2 = document.getElementById(`${fx}v2_s`);
-    
+    var number1 = document.getElementById(`${pref}fx${fx}v1`);
+    var number2 = document.getElementById(`${pref}fx${fx}v2`);
+    var range1 = document.getElementById(`${pref}fx${fx}v1_r`);
+    var range2 = document.getElementById(`${pref}fx${fx}v2_r`);
+    var select1 = document.getElementById(`${pref}fx${fx}v1_s`);
+    var select2 = document.getElementById(`${pref}fx${fx}v2_s`);
+
+    const disabled = !isFSCCEnabled(ext, footSwitch.value);
+    controlChange.disabled = disabled;
+    number1.disabled = disabled;
+    number2.disabled = disabled;
+    range1.disabled = disabled;
+    range2.disabled = disabled;
+    select1.disabled = disabled;
+    select2.disabled = disabled;
+
     switch (association.value.type) {
         case "RANGE":
             number1.parentElement.style.display = "block";
@@ -4543,14 +4526,26 @@ function extFSChanged(fx) {
     }
 }
 
-function setExtFSValue(objname, value) {
-    document.getElementById(objname).value = value;
+function setFSValue(objname, value) {
+    if (value == null) {
+        return;
+    }
+    document.getElementById(`${objname}`).value = value;
     document.getElementById(`${objname}_r`).value = value;
     document.getElementById(`${objname}_s`).value = value;
 }
 
+function getFSCC(ext, fs) {
+    const pref = ext ? "ext" : "int";
+    var cc = document.getElementById(`${pref}fx${fs}cc`).value;
 
-function getExtFSValue(fs, value) {
+    if (!isFSCCEnabled(ext, fs)) {
+        return 255;
+    }
+    return cc;
+}
+
+function getFSValue(ext, fs, value) {
     var midi_map;
 
     switch (modellerType)
@@ -4568,12 +4563,16 @@ function getExtFSValue(fs, value) {
         } break;
     }
 
-    var extfxcc = document.getElementById(`extfx${fs}cc`).value;
-    var association = midi_map.get(parseInt(extfxcc));
+    const pref = ext ? "ext" : "int";
+    var fxcc = document.getElementById(`${pref}fx${fs}cc`).value;
+    if (fxcc == 255) {
+        fxcc = 0;
+    }
+    var association = midi_map.get(parseInt(fxcc));
 
     switch (association.value.type) {
         case "RANGE":
-            return document.getElementById(`extfx${fs}v${value}`).value;
+            return document.getElementById(`${pref}fx${fs}v${value}`).value;
         case "TOGGLE":
             switch (value) {
                 case "1":
@@ -4583,7 +4582,7 @@ function getExtFSValue(fs, value) {
             }
             break;
         case "CHOICE":
-            return document.getElementById(`extfx${fs}v${value}_s`).value;
+            return document.getElementById(`${pref}fx${fs}v${value}_s`).value;
     }
 }
 
@@ -4605,7 +4604,7 @@ function populateInternalFootswitches() {
         } break;
     }
 
-    for (i=1; i<=4; i++) {
+    for (i=1; i<=INT_FS_COUNT; i++) {
         var select = document.getElementById(`intfx${i}cc`);
         var optgroup = null;
 
@@ -4630,48 +4629,29 @@ function populateInternalFootswitches() {
     }
 }
 
-function getIntFSValue(fs, value) {
-    var midi_map;
-
-    switch (modellerType)
-    {
-        case AMP_MODELLER_TONEX_ONE:
-        case AMP_MODELLER_TONEX:
-        default:
-        {    
-            midi_map = tonexMidiControlChangeAssociations;
-        } break;
-
-        case AMP_MODELLER_VALETON_GP5:
-        {
-            midi_map = valetonMidiControlChangeAssociations;
-        } break;
-    }
-
-    var intfxcc = document.getElementById(`intfx${fs}cc`).value;
-    var association = midi_map.get(parseInt(intfxcc));
-
-    switch (association.value.type) {
-        case "RANGE":
-            return document.getElementById(`intfx${fs}v${value}`).value;
-        case "TOGGLE":
-            switch (value) {
-                case "1":
-                    return 0;
-                case "2":
-                    return 1;
-            }
-            break;
-        case "CHOICE":
-            return document.getElementById(`intfx${fs}v${value}_s`).value;
-    }
-}
-
 function setPresetOrder(presetOrder, presetColors) {
+    // update preset list
+    var preset_list = document.getElementById("set_preset");
+    const selected_value = preset_list.value;
+    const orderMap = new Map(presetOrder.map((val, i) => [val.toString(), i]));
+    const presetListOptions = Array.from(preset_list.options);
+
+    presetListOptions.sort((a, b) => {
+        return orderMap.get(a.value) - orderMap.get(b.value);
+    });
+    
+    preset_list.replaceChildren(...presetListOptions);
+    preset_list.value = selected_value;
+
+    // update preset map
     var names = [];
     
     for (i = 0; i < maxPresets; i++) {
         var element = document.querySelector('[id^="preset-order-"][order_value="' + i + '"]');
+        if (element == null) {
+            // preset list is not initialized yet
+            return;
+        }
         names.push(presetOrderElementName(element).innerHTML);
     }
 
@@ -4868,6 +4848,7 @@ function updateEffectsChainIcons() {
 
     // Clear existing content
     container.innerHTML = '';
+    let icons;
 
     switch (modellerType)
     {
@@ -4875,36 +4856,45 @@ function updateEffectsChainIcons() {
         case AMP_MODELLER_TONEX:
         default:
         {    
-            const icons = [
-                'gate', 'eq', 'amp', 'cab',
-                'comp', 'mod', 'dly', 'rvb'
+            icons = [
+                ['gate', 'NoiseGate'],
+                ['eq', 'Equalisation'],
+                ['amp', 'Amplifier'],
+                ['cab', 'Cabinet'],
+                ['comp', 'Compressor'],
+                ['mod', 'Modulation'],
+                ['dly', 'Delay'],
+                ['rvb', 'Reverb'],
             ];
-            icons.forEach(name => {
-                const img = document.createElement('img');
-                img.id = `fx_image_${name}`;
-                container.appendChild(img);
-            });
         } break;
 
         case AMP_MODELLER_VALETON_GP5: 
         {
-            const icons = [
-                'nr', 
-                'pre',
-                'dst',
-                'amp',  
-                'cab', 
-                'eq',
-                'mod',
-                'dly',
-                'rvb', 
-                'ns',  
+            icons = [
+                ['nr', 'ValNR'],
+                ['pre', 'ValPre'],
+                ['dst', 'ValDst'],
+                ['amp', 'ValAmp'],
+                ['cab', 'ValCab'],
+                ['eq', 'ValEQ'],
+                ['mod', 'ValMod'],
+                ['dly', 'ValDly'],
+                ['rvb', 'ValRvb'],
+                ['ns', 'ValNS'],
             ];
-            icons.forEach(name => {
-                const img = document.createElement('img');
-                img.id = `fx_image_${name}`;
-                container.appendChild(img);
-            });
         } break;
     }
+
+    icons.forEach(icon => {
+        const img = document.createElement('img');
+        img.id = `fx_image_${icon[0]}`;
+        var anchor = document.createElement('a');
+        anchor.classList = "menu-link";
+        anchor.id = `fx_a_${icon[0]}`;
+        anchor.setAttribute('data-target', icon[1]);
+        anchor.href = '#';
+        anchor.appendChild(img);
+        container.appendChild(anchor);
+    });
+    updateMenuEventListeners();
 }

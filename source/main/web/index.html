@@ -20,10 +20,11 @@
         <div class="container-fluid d-flex flex-column flex-md-row align-items-center align-items-md-start justify-content-between">
 
             <!-- Title -->
-            <div class="navbar-brand text-orange m-0 text-center text-md-start order-1"
-                style="font-size: 2.1rem; font-weight: 450; line-height: 1.2;">
+            <a class="navbar-brand menu-link text-orange m-0 text-center text-md-start order-1"
+                style="font-size: 2.1rem; font-weight: 450; line-height: 1.2;"
+                data-target="Home" href="#">
             Tonex/GP5 Controller
-            </div>
+            </a>
 
            <!-- Preset selector – full-width on phone, capped on large screens -->
             <div class="order-2 order-md-2 mt-2 mt-md-0 px-3 px-md-0">
@@ -52,14 +53,14 @@
         <div id="Home" class="content-section active">
             <div class="col py-3 text-white">
                 <div class="fx_icon_container">
-                    <img id="fx_image_gate">
-                    <img id="fx_image_eq">
-                    <img id="fx_image_amp">
-                    <img id="fx_image_cab">
-                    <img id="fx_image_comp">
-                    <img id="fx_image_mod">
-                    <img id="fx_image_dly">
-                    <img id="fx_image_rvb">
+                    <a class="menu-link" id="fx_a_gate" href="#"><img id="fx_image_gate"></a>
+                    <a class="menu-link" id="fx_a_eq" href="#"><img id="fx_image_eq"></a>
+                    <a class="menu-link" id="fx_a_amp" href="#"><img id="fx_image_amp"></a>
+                    <a class="menu-link" id="fx_a_cab" href="#"><img id="fx_image_cab"></a>
+                    <a class="menu-link" id="fx_a_comp" href="#"><img id="fx_image_comp"></a>
+                    <a class="menu-link" id="fx_a_mod" href="#"><img id="fx_image_mod"></a>
+                    <a class="menu-link" id="fx_a_dly" href="#"><img id="fx_image_dly"></a>
+                    <a class="menu-link" id="fx_a_rvb" href="#"><img id="fx_image_rvb"></a>
                 </div> 
                 <br>
                 <div class="container" style="text-align: center;">
@@ -1435,7 +1436,56 @@
                 <p class="lead">                         
                     <div class="container">
                         <label class="form-check-label" for="intfslay">Preset Switch Layout</label>
-                        <select class="form-select select_style" id="intfslay" onchange="updatePresetOrderBanks()">
+                        <a class="btn btn-link" data-bs-toggle="collapse" href="#collapseInternalFSLayouts" role="button" aria-expanded="false" aria-controls="collapseInternalFSLayouts" style="padding: 0; vertical-align: bottom;">Info</a>
+                         <div class="collapse" id="collapseInternalFSLayouts">
+                            <table class="table table-sm table-dark table-striped-columns">
+                                <thead>
+                                    <tr>
+                                    <th scope="col">Name</th>
+                                    <th scope="col">Switches</th>
+                                    <th scope="col">Arrangement</th>
+                                    <th scope="col">Preset selection</th>
+                                    <th scope="col">Bank up</th>
+                                    <th scope="col">Bank down</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>1x2</td>
+                                        <td>2</td>
+                                        <td>1 row of 2</td>
+                                        <td>1 (down)<br/>2 (up)</td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                    <tr>
+                                        <td>1x3</td>
+                                        <td>3</td>
+                                        <td>1 row of 3</td>
+                                        <td>1 to 3</td>
+                                        <td>2 + 3</td>
+                                        <td>1 + 2</td>
+                                    </tr>
+                                    <tr>
+                                        <td>1x4</td>
+                                        <td>4</td>
+                                        <td>1 row of 4</td>
+                                        <td>1 to 4</td>
+                                        <td>3 + 4</td>
+                                        <td>1 + 2</td>
+                                    </tr>
+                                    <tr>
+                                        <td>1x4 Binary</td>
+                                        <td>4</td>
+                                        <td></td>
+                                        <td>Binary</td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <select class="form-select select_style" id="intfslay" onchange="fsLayoutChanged(false)">
                             <option value="255" class="style6">Disabled</option>
                             <option value="0" class="style6">1x2 Next/Previous</option>
                             <option value="1" class="style6">1x3</option>
@@ -1455,7 +1505,7 @@
                     <div id="IFX1" class="ifxtabcontent">
                         <div class="container">
                             <label class="form-check-label" for="intfx1sw">Foot Switch Number</label>
-                            <select class="form-select select_style" id="intfx1sw">
+                            <select class="form-select select_style" id="intfx1sw" onchange="fsChanged(false, 1)">
                                 <option value="255" class="style6" Selected>Disabled</option>
                                 <option value="0" class="style6">1</option>
                                 <option value="1" class="style6">2</option>     
@@ -1466,7 +1516,7 @@
                         <br>                 
                         <div class="container">
                             <label class="form-check-label" for="intfx1cc">Control Change Number</label>
-                            <select class="form-select select_style" id="intfx1cc" name="intfx1cc" onchange="extFSChanged('intfx1')">
+                            <select class="form-select select_style" id="intfx1cc" name="intfx1cc" onchange="fsChanged(false, 1)">
                             </select> 
                         </div>
                         <br>
@@ -1489,7 +1539,7 @@
                     <div id="IFX2" class="ifxtabcontent">
                         <div class="container">
                             <label class="form-check-label" for="intfx2sw">Foot Switch Number</label>
-                            <select class="form-select select_style" id="intfx2sw">
+                            <select class="form-select select_style" id="intfx2sw" onchange="fsChanged(false, 2)">
                                 <option value="255" class="style6" Selected>Disabled</option>
                                 <option value="0" class="style6">1</option>
                                 <option value="1" class="style6">2</option>     
@@ -1500,7 +1550,7 @@
                         <br>                 
                         <div class="container">
                             <label class="form-check-label" for="intfx2cc">Control Change Number</label>
-                            <select class="form-select select_style" id="intfx2cc" name="intfx2cc" onchange="extFSChanged('intfx2')">
+                            <select class="form-select select_style" id="intfx2cc" name="intfx2cc" onchange="fsChanged(false, 2)">
                             </select> 
                         </div>
                         <br>
@@ -1523,7 +1573,7 @@
                     <div id="IFX3" class="ifxtabcontent">
                         <div class="container">
                             <label class="form-check-label" for="intfx3sw">Foot Switch Number</label>
-                            <select class="form-select select_style" id="intfx3sw">
+                            <select class="form-select select_style" id="intfx3sw" onchange="fsChanged(false, 3)">
                                 <option value="255" class="style6" Selected>Disabled</option>
                                 <option value="0" class="style6">1</option>
                                 <option value="1" class="style6">2</option>     
@@ -1534,7 +1584,7 @@
                         <br>                 
                         <div class="container">
                             <label class="form-check-label" for="intfx3cc">Control Change Number</label>
-                            <select class="form-select select_style" id="intfx3cc" name="intfx3cc" onchange="extFSChanged('intfx3')">
+                            <select class="form-select select_style" id="intfx3cc" name="intfx3cc" onchange="fsChanged(false, 3)">
                             </select> 
                         </div>
                         <br>
@@ -1557,7 +1607,7 @@
                     <div id="IFX4" class="ifxtabcontent">
                         <div class="container">
                             <label class="form-check-label" for="intfx4sw">Foot Switch Number</label>
-                            <select class="form-select select_style" id="intfx4sw">
+                            <select class="form-select select_style" id="intfx4sw" onchange="fsChanged(false, 4)">
                                 <option value="255" class="style6" Selected>Disabled</option>
                                 <option value="0" class="style6">1</option>
                                 <option value="1" class="style6">2</option>     
@@ -1568,7 +1618,7 @@
                         <br>                 
                         <div class="container">
                             <label class="form-check-label" for="intfx4cc">Control Change Number</label>
-                            <select class="form-select select_style" id="intfx4cc" name="intfx4cc" onchange="extFSChanged('intfx4')">
+                            <select class="form-select select_style" id="intfx4cc" name="intfx4cc" onchange="fsChanged(false, 4)">
                             </select> 
                         </div>
                         <br>
@@ -1603,7 +1653,152 @@
                 <p class="lead">     
                     <div class="container">
                         <label class="form-check-label" for="extfslay">Preset Switch Layout</label>
-                        <select class="form-select select_style" id="extfslay" onchange="updatePresetOrderBanks()">
+                        <a class="btn btn-link" data-bs-toggle="collapse" href="#collapseExternalFSLayouts" role="button" aria-expanded="false" aria-controls="collapseExternalFSLayouts" style="padding: 0; vertical-align: bottom;">Info</a>
+                        <div class="collapse" id="collapseExternalFSLayouts">
+                            <table class="table table-sm table-dark table-striped-columns">
+                                <thead>
+                                    <tr>
+                                    <th scope="col">Name</th>
+                                    <th scope="col">Switches</th>
+                                    <th scope="col">Arrangement</th>
+                                    <th scope="col">Preset selection</th>
+                                    <th scope="col">Bank up</th>
+                                    <th scope="col">Bank down</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>1x2</td>
+                                        <td>2</td>
+                                        <td>1 row of 2</td>
+                                        <td>1 (down)<br/>2 (up)</td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                    <tr>
+                                        <td>1x3</td>
+                                        <td>3</td>
+                                        <td>1 row of 3</td>
+                                        <td>1 to 3</td>
+                                        <td>2 + 3</td>
+                                        <td>1 + 2</td>
+                                    </tr>
+                                    <tr>
+                                        <td>1x4</td>
+                                        <td>4</td>
+                                        <td>1 row of 4</td>
+                                        <td>1 to 4</td>
+                                        <td>3 + 4</td>
+                                        <td>1 + 2</td>
+                                    </tr>
+                                    <tr>
+                                        <td>1x5A</td>
+                                        <td>5</td>
+                                        <td>1 row of 5</td>
+                                        <td>1 to 5</td>
+                                        <td>4 + 5</td>
+                                        <td>1 + 2</td>
+                                    </tr>
+                                    <tr>
+                                        <td>1x5B</td>
+                                        <td>5</td>
+                                        <td>1 row of 5</td>
+                                        <td>1 to 3</td>
+                                        <td>5</td>
+                                        <td>4</td>
+                                    </tr>
+                                    <tr>
+                                        <td>1x6A</td>
+                                        <td>6</td>
+                                        <td>1 row of 6</td>
+                                        <td>1 to 6</td>
+                                        <td>5 + 6</td>
+                                        <td>1 + 2</td>
+                                    </tr>
+                                    <tr>
+                                        <td>1x6B</td>
+                                        <td>6</td>
+                                        <td>1 row of 6</td>
+                                        <td>1 to 4</td>
+                                        <td>6</td>
+                                        <td>5</td>
+                                    </tr>
+                                    <tr>
+                                        <td>1x7A</td>
+                                        <td>7</td>
+                                        <td>1 row of 7</td>
+                                        <td>1 to 7</td>
+                                        <td>6 + 7</td>
+                                        <td>1 + 2</td>
+                                    </tr>
+                                    <tr>
+                                        <td>1x7B</td>
+                                        <td>7</td>
+                                        <td>1 row of 7</td>
+                                        <td>1 to 5</td>
+                                        <td>7</td>
+                                        <td>6</td>
+                                    </tr>
+                                    <tr>
+                                        <td>2x3</td>
+                                        <td>6</td>
+                                        <td>2 rows of 3</td>
+                                        <td>1 to 6</td>
+                                        <td>2 + 3</td>
+                                        <td>1 + 2</td>
+                                    </tr>
+                                    <tr>
+                                        <td>2x4</td>
+                                        <td>8</td>
+                                        <td>2 rows of 4</td>
+                                        <td>1 to 8</td>
+                                        <td>3 + 4</td>
+                                        <td>1 + 2</td>
+                                    </tr>
+                                    <tr>
+                                        <td>2x5A</td>
+                                        <td>10</td>
+                                        <td>2 rows of 5</td>
+                                        <td>1 to 10</td>
+                                        <td>4 + 5</td>
+                                        <td>1 + 2</td>
+                                    </tr>
+                                    <tr>
+                                        <td>2x5B</td>
+                                        <td>10</td>
+                                        <td>2 rows of 5</td>
+                                        <td>1 to 8</td>
+                                        <td>10</td>
+                                        <td>9</td>
+                                    </tr>
+                                    <tr>
+                                        <td>2x6A</td>
+                                        <td>12</td>
+                                        <td>2 rows of 6</td>
+                                        <td>1 to 12</td>
+                                        <td>5 + 6</td>
+                                        <td>1 + 2</td>
+                                    </tr>
+                                    <tr>
+                                        <td>2x6B</td>
+                                        <td>12</td>
+                                        <td>2 rows of 6</td>
+                                        <td>1 to 10</td>
+                                        <td>12</td>
+                                        <td>11</td>
+                                    </tr>
+                                    <tr>
+                                        <td>1x4 Binary</td>
+                                        <td>4</td>
+                                        <td></td>
+                                        <td>Binary</td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <select class="form-select select_style" id="extfslay" onchange="fsLayoutChanged(true)">
                             <option value="255" class="style6">Disabled</option>
                             <option value="0" class="style6">1x2 Next/Previous</option>
                             <option value="1" class="style6">1x3</option>
@@ -1621,7 +1816,7 @@
                             <option value="13" class="style6">2x6A</option>     
                             <option value="14" class="style6">2x6B</option>     
                             <option value="15" class="style6">1x4 Binary</option>     
-                        </select>                           
+                        </select>
                     </div>
                     <br> 
                     <br> 
@@ -1639,7 +1834,7 @@
                     <div id="FX1" class="fxtabcontent">
                         <div class="container">
                             <label class="form-check-label" for="extfx1sw">Foot Switch Number</label>
-                            <select class="form-select select_style" id="extfx1sw">
+                            <select class="form-select select_style" id="extfx1sw" onchange="fsChanged(true, 1)">
                                 <option value="255" class="style6" Selected>Disabled</option>
                                 <option value="0" class="style6">1</option>
                                 <option value="1" class="style6">2</option>     
@@ -1662,7 +1857,7 @@
                         <br>
                         <div class="container">
                             <label class="form-check-label" for="extfx1cc">Control Change Number</label>
-                            <select class="form-select select_style" id="extfx1cc" name="extfx1cc" onchange="extFSChanged('extfx1')">
+                            <select class="form-select select_style" id="extfx1cc" name="extfx1cc" onchange="fsChanged(true, 1)">
                             </select>
                         </div>
                         <br>
@@ -1685,7 +1880,7 @@
                     <div id="FX2" class="fxtabcontent">
                         <div class="container">
                             <label class="form-check-label" for="extfx2sw">Foot Switch Number</label>
-                            <select class="form-select select_style" id="extfx2sw">
+                            <select class="form-select select_style" id="extfx2sw" onchange="fsChanged(true, 2)">
                                 <option value="255" class="style6" Selected>Disabled</option>
                                 <option value="0" class="style6">1</option>
                                 <option value="1" class="style6">2</option>     
@@ -1708,7 +1903,7 @@
                         <br>
                         <div class="container">
                             <label class="form-check-label" for="extfx2cc">Control Change Number</label>
-                            <select class="form-select select_style" id="extfx2cc" name="extfx2cc" onchange="extFSChanged('extfx2')">
+                            <select class="form-select select_style" id="extfx2cc" name="extfx2cc" onchange="fsChanged(true, 2)">
                             </select>
                         </div>
                         <br>
@@ -1731,7 +1926,7 @@
                     <div id="FX3" class="fxtabcontent">
                         <div class="container">
                             <label class="form-check-label" for="extfx3sw">Foot Switch Number</label>
-                            <select class="form-select select_style" id="extfx3sw">
+                            <select class="form-select select_style" id="extfx3sw" onchange="fsChanged(true, 3)">
                                 <option value="255" class="style6" Selected>Disabled</option>
                                 <option value="0" class="style6">1</option>
                                 <option value="1" class="style6">2</option>     
@@ -1754,7 +1949,7 @@
                         <br>
                         <div class="container">
                             <label class="form-check-label" for="extfx3cc">Control Change Number</label>
-                            <select class="form-select select_style" id="extfx3cc" name="extfx3cc" onchange="extFSChanged('extfx3')">
+                            <select class="form-select select_style" id="extfx3cc" name="extfx3cc" onchange="fsChanged(true, 3)">
                             </select>
                         </div>
                         <br>
@@ -1777,7 +1972,7 @@
                     <div id="FX4" class="fxtabcontent">
                         <div class="container">
                             <label class="form-check-label" for="extfx4sw">Foot Switch Number</label>
-                            <select class="form-select select_style" id="extfx4sw">
+                            <select class="form-select select_style" id="extfx4sw" onchange="fsChanged(true, 4)">
                                 <option value="255" class="style6" Selected>Disabled</option>
                                 <option value="0" class="style6">1</option>
                                 <option value="1" class="style6">2</option>     
@@ -1800,7 +1995,7 @@
                         <br>
                         <div class="container">
                             <label class="form-check-label" for="extfx4cc">Control Change Number</label>
-                            <select class="form-select select_style" id="extfx4cc" name="extfx4cc" onchange="extFSChanged('extfx4')">
+                            <select class="form-select select_style" id="extfx4cc" name="extfx4cc" onchange="fsChanged(true, 4)">
                             </select>
                         </div>
                         <br>
@@ -1823,7 +2018,7 @@
                     <div id="FX5" class="fxtabcontent">
                         <div class="container">
                             <label class="form-check-label" for="extfx5sw">Foot Switch Number</label>
-                            <select class="form-select select_style" id="extfx5sw">
+                            <select class="form-select select_style" id="extfx5sw" onchange="fsChanged(true, 5)">
                                 <option value="255" class="style6" Selected>Disabled</option>
                                 <option value="0" class="style6">1</option>
                                 <option value="1" class="style6">2</option>     
@@ -1846,7 +2041,7 @@
                         <br>
                         <div class="container">
                             <label class="form-check-label" for="extfx5cc">Control Change Number</label>
-                            <select class="form-select select_style" id="extfx5cc" name="extfx5cc" onchange="extFSChanged('extfx5')">
+                            <select class="form-select select_style" id="extfx5cc" name="extfx5cc" onchange="fsChanged(true, 5)">
                             </select>
                         </div>
                         <br>
@@ -1869,7 +2064,7 @@
                     <div id="FX6" class="fxtabcontent">
                         <div class="container">
                             <label class="form-check-label" for="extfx6sw">Foot Switch Number</label>
-                            <select class="form-select select_style" id="extfx6sw">
+                            <select class="form-select select_style" id="extfx6sw" onchange="fsChanged(true, 6)">
                                 <option value="255" class="style6" Selected>Disabled</option>
                                 <option value="0" class="style6">1</option>
                                 <option value="1" class="style6">2</option>     
@@ -1892,7 +2087,7 @@
                         <br>                 
                         <div class="container">
                             <label class="form-check-label" for="extfx6cc">Control Change Number</label>
-                            <select class="form-select select_style" id="extfx6cc" name="extfx6cc" onchange="extFSChanged('extfx6')">
+                            <select class="form-select select_style" id="extfx6cc" name="extfx6cc" onchange="fsChanged(true, 6)">
                             </select> 
                         </div>
                         <br>
@@ -1915,7 +2110,7 @@
                     <div id="FX7" class="fxtabcontent">
                         <div class="container">
                             <label class="form-check-label" for="extfx7sw">Foot Switch Number</label>
-                            <select class="form-select select_style" id="extfx7sw">
+                            <select class="form-select select_style" id="extfx7sw" onchange="fsChanged(true, 7)">
                                 <option value="255" class="style6" Selected>Disabled</option>
                                 <option value="0" class="style6">1</option>
                                 <option value="1" class="style6">2</option>     
@@ -1938,7 +2133,7 @@
                         <br>                 
                         <div class="container">
                             <label class="form-check-label" for="extfx7cc">Control Change Number</label>
-                            <select class="form-select select_style" id="extfx7cc" name="extfx7cc" onchange="extFSChanged('extfx7')">
+                            <select class="form-select select_style" id="extfx7cc" name="extfx7cc" onchange="fsChanged(true, 7)">
                             </select> 
                         </div>
                         <br>
@@ -1961,7 +2156,7 @@
                     <div id="FX8" class="fxtabcontent">
                         <div class="container">
                             <label class="form-check-label" for="extfx8sw">Foot Switch Number</label>
-                            <select class="form-select select_style" id="extfx8sw">
+                            <select class="form-select select_style" id="extfx8sw" onchange="fsChanged(true, 8)">
                                 <option value="255" class="style6" Selected>Disabled</option>
                                 <option value="0" class="style6">1</option>
                                 <option value="1" class="style6">2</option>     
@@ -1984,7 +2179,7 @@
                         <br>                 
                         <div class="container">
                             <label class="form-check-label" for="extfx8cc">Control Change Number</label>
-                            <select class="form-select select_style" id="extfx8cc" name="extfx8cc" onchange="extFSChanged('extfx8')">
+                            <select class="form-select select_style" id="extfx8cc" name="extfx8cc" onchange="fsChanged(true, 8)">
                             </select> 
                         </div>
                         <br>
