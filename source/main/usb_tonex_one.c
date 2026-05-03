@@ -766,19 +766,34 @@ static TonexStatus usb_tonex_one_parse_param_changed(uint8_t* unframed, uint16_t
     uint16_t param_index;
     float value;
     tModellerParameter* param_ptr = NULL;
-    uint8_t param_start_marker[] = { 0xB9, 0x04, 0x03 };
-    
-    // try to locate the start of the parameter index
-    uint8_t* temp_ptr = memmem((void*)&unframed[index], length, (void*)param_start_marker, sizeof(param_start_marker));
+    uint8_t param_start_marker[] = { 0xB9, 0x04 };
+    uint32_t sync_param_index = TONEX_CONTROLLER_LAST;
+
+    if (index >= length)
+    {
+        ESP_LOGW(TAG, "Param changed missing body");
+        return STATUS_OK;
+    }
+
+    // try to locate the start of the parameter body
+    uint8_t* temp_ptr = memmem((void*)&unframed[index], length - index, (void*)param_start_marker, sizeof(param_start_marker));
     if (temp_ptr != NULL)
     {
         // skip the start marker
         temp_ptr += sizeof(param_start_marker);
-        
+
+        if ((temp_ptr + 8) > (unframed + length))
+        {
+            ESP_LOGW(TAG, "Param changed message too short");
+            return STATUS_OK;
+        }
+
+        // next byte is the scope: 0x02 preset, 0x03 global
+        uint8_t param_scope = *temp_ptr++;
+
         // next 2 bytes are the param index
-        param_index = *temp_ptr++;
-        param_index |= (*temp_ptr << 8);
-        temp_ptr++;
+        param_index = ((uint16_t)temp_ptr[0] << 8) | temp_ptr[1];
+        temp_ptr += 2;
 
         // next should be float start marker
         if (*temp_ptr == 0x88)
@@ -789,25 +804,78 @@ static TonexStatus usb_tonex_one_parse_param_changed(uint8_t* unframed, uint16_t
             // get the value
             memcpy((void*)&value, (void*)temp_ptr, sizeof(float));
 
-            if (param_index == 0x00)
+            switch (param_scope)
             {
-                TonexData->Message.Header.type = TYPE_PARAM_CHANGED;
-
-                // save it
-                if (tonex_params_get_locked_access(&param_ptr) == ESP_OK)
+                case 0x02:
                 {
-                    // global volume
-                    // Big Tonex uses values -40 to +3, and One uses values from 0 to 10.
-                    // Overriding default values
-                    param_ptr[TONEX_GLOBAL_MASTER_VOLUME].Min = 0;
-                    param_ptr[TONEX_GLOBAL_MASTER_VOLUME].Max = 10;
-                    param_ptr[TONEX_GLOBAL_MASTER_VOLUME].Value = value;
+                    if (param_index < TONEX_PARAM_LAST)
+                    {
+                        TonexData->Message.Header.type = TYPE_PARAM_CHANGED;
 
-                    tonex_params_release_locked_access();
-                }
+                        if (tonex_params_get_locked_access(&param_ptr) == ESP_OK)
+                        {
+                            param_ptr[param_index].Value = value;
+                            tonex_params_release_locked_access();
 
-                ESP_LOGI(TAG, "Got global volume: raw:%3.2f", value);
+                            sync_param_index = param_index;
+                            ESP_LOGI(TAG, "Got preset param: %d raw:%3.2f", (int)param_index, value);
+                        }
+                    }
+                    else
+                    {
+                        ESP_LOGW(TAG, "Unsupported preset param index: %d", (int)param_index);
+                    }
+                } break;
+
+                case 0x03:
+                {
+                    if (param_index == 0x00)
+                    {
+                        TonexData->Message.Header.type = TYPE_PARAM_CHANGED;
+
+                        // save it
+                        if (tonex_params_get_locked_access(&param_ptr) == ESP_OK)
+                        {
+                            // global volume
+                            // Big Tonex uses values -40 to +3, and One uses values from 0 to 10.
+                            // Overriding default values
+                            param_ptr[TONEX_GLOBAL_MASTER_VOLUME].Min = 0;
+                            param_ptr[TONEX_GLOBAL_MASTER_VOLUME].Max = 10;
+                            param_ptr[TONEX_GLOBAL_MASTER_VOLUME].Value = value;
+
+                            tonex_params_release_locked_access();
+
+                            sync_param_index = TONEX_GLOBAL_MASTER_VOLUME;
+                            ESP_LOGI(TAG, "Got global volume: raw:%3.2f", value);
+                        }
+                    }
+                    else
+                    {
+                        ESP_LOGW(TAG, "Unsupported global param index: %d", (int)param_index);
+                    }
+                } break;
+
+                default:
+                {
+                    ESP_LOGW(TAG, "Unsupported param scope: 0x%02X index: %d", (int)param_scope, (int)param_index);
+                } break;
             }
+
+            if (sync_param_index < TONEX_CONTROLLER_LAST)
+            {
+                // signal to refresh param UI
+                UI_RefreshParameterValues();
+
+                // update web UI
+                wifi_request_sync(WIFI_SYNC_TYPE_SINGLE_PARAM, &sync_param_index, &value);
+
+                // refresh the footswitch leds
+                control_update_footswitch_leds();
+            }
+        }
+        else
+        {
+            ESP_LOGW(TAG, "Param changed unexpected value marker: %d", (int)*temp_ptr);
         }
     }
 
@@ -1225,16 +1293,7 @@ static esp_err_t usb_tonex_one_process_single_message(uint8_t* data, uint16_t le
 
                 case TYPE_PARAM_CHANGED:
                 {
-                    // if we have messages waiting in the queue, it will trigger another
-                    // change that will overwrite this one. Skip the UI refresh to save time
-                    if (uxQueueMessagesWaiting(input_queue) == 0)
-                    {
-                        // signal to refresh param UI with Globals
-                        UI_RefreshParameterValues();
-
-                        // update web UI
-                        wifi_request_sync(WIFI_SYNC_TYPE_PARAMS, NULL, NULL);
-                    }
+                    // handled by usb_tonex_one_parse_param_changed()
                 } break;
 
                 default:

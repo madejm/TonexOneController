@@ -651,8 +651,9 @@ static TonexStatus usb_tonex_parse_param_changed(uint8_t* unframed, uint16_t len
                 UI_RefreshParameterValues();
 
                 // update web UI
-                wifi_request_sync(WIFI_SYNC_TYPE_PARAMS, NULL, NULL);
-                                         
+                uint32_t sync_param_index = param_index;
+                wifi_request_sync(WIFI_SYNC_TYPE_SINGLE_PARAM, &sync_param_index, &temp_val);
+
                 // refresh the footswitch leds
                 control_update_footswitch_leds();
             }

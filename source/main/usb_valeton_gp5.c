@@ -1317,19 +1317,21 @@ static uint8_t usb_valeton_gp5_process_single_sysex(const uint8_t* buffer, uint3
             uint8_t block;
             uint8_t __attribute__((unused)) pedal;
             uint8_t param;
+            uint32_t sync_param_index = VALETON_PARAM_LAST;
 
             if (valeton_params_get_locked_access(&param_ptr) == ESP_OK)
             {
-                for (uint32_t param_index = 0; param_index < VALETON_PARAM_LAST; param_index++)
+                for (uint32_t candidate_index = 0; candidate_index < VALETON_PARAM_LAST; candidate_index++)
                 {
-                    block = param_ptr[param_index].Data1;
-                    pedal = param_ptr[param_index].Data2;
-                    param = param_ptr[param_index].Data3;
+                    block = param_ptr[candidate_index].Data1;
+                    pedal = param_ptr[candidate_index].Data2;
+                    param = param_ptr[candidate_index].Data3;
 
                     if ((effect_block == block) && (param_index == param))
                     {
                         // found it, update local copy
-                        param_ptr[param_index].Value = value_f;
+                        param_ptr[candidate_index].Value = value_f;
+                        sync_param_index = candidate_index;
                         break;
                     }
                 }
@@ -1337,7 +1339,20 @@ static uint8_t usb_valeton_gp5_process_single_sysex(const uint8_t* buffer, uint3
                 valeton_params_release_locked_access();
             }
 
-            usb_valeton_gp5_request_ui_update();
+            if (sync_param_index < VALETON_PARAM_LAST)
+            {
+                // if we have messages waiting in the queue, a later param update will refresh the UI.
+                if (uxQueueMessagesWaiting(input_queue) == 0)
+                {
+                    UI_RefreshParameterValues();
+                    wifi_request_sync(WIFI_SYNC_TYPE_SINGLE_PARAM, &sync_param_index, &value_f);
+                    control_update_footswitch_leds();
+                }
+            }
+            else
+            {
+                usb_valeton_gp5_request_ui_update();
+            }
         } break;
 
         case 0x49:

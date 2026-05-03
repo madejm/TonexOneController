@@ -19,12 +19,15 @@ limitations under the License.
 #ifndef _MIDI_H
 #define _MIDI_H
 
+#include <stdbool.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 void midi_init(void);
 void midi_delete_bluetooth_bonds(void);
+bool midi_send_ble_json(const char *payload);
 
 #ifdef __cplusplus
 } /*extern "C"*/

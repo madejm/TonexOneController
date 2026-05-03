@@ -16,7 +16,9 @@ limitations under the License.
 */
 
 
+#include <stdio.h>
 #include <inttypes.h>
+#include <stdbool.h>
 #include <string.h>
 #include <stdlib.h>
 #include "sdkconfig.h"
@@ -46,6 +48,7 @@ limitations under the License.
 #include <esp_http_server.h>
 #include "control.h"
 #include "wifi_config.h"
+#include "midi_control.h"
 #include "usb_comms.h"
 #include "task_priorities.h"
 #include "tonex_params.h"
@@ -70,7 +73,6 @@ limitations under the License.
 #define LOCATER_PORT            12106
 #define LOCATER_TIMER_MSEC      3000        // ticks
 #define WIFI_QUEUE_WRITE_TIMEOUT 1000       // msec   
-
 #ifndef CONFIG_HTTPD_MAX_CLIENTS
 #define CONFIG_HTTPD_MAX_CLIENTS 16
 #endif
@@ -83,21 +85,39 @@ static httpd_handle_t http_server = NULL;
 static httpd_config_t http_config = HTTPD_DEFAULT_CONFIG();
 static EventGroupHandle_t s_wifi_event_group;
 static QueueHandle_t wifi_input_queue;
+static volatile bool wifi_json_ready = false;
 static uint8_t presetIndexes[MAX_SUPPORTED_PRESETS];
+
+typedef esp_err_t (*wifi_json_sender_t)(void *ctx, const char *payload);
 
 static esp_err_t ws_handler(httpd_req_t *req);
 static esp_err_t embedded_files_handler(httpd_req_t *req);
 static void wifi_kill_all(void);
-static void wifi_build_params_json(void);
+static void wifi_build_params_json(bool all);
+// static void wifi_build_params_json(bool all, bool compact_values);
+static void wifi_build_compact_params_json(void);
+static int wifi_scale_compact_param_value(float value);
+static void wifi_build_single_param_json(uint32_t param_index, float value);
 static void wifi_build_config_json(void);
 static void wifi_build_preset_json(void);
+static void wifi_build_log_json(void);
+static void wifi_build_modeller_data_json(void);
+static void wifi_build_is_sync_complete_json(void);
+static void wifi_build_preset_names_json(uint8_t* presetIndexes, uint8_t indexCount);
+static void wifi_send_ble_json(const char* payload);
+static void wifi_process_ble_json_command(const char* payload);
+static esp_err_t wifi_send_ws_json(void *ctx, const char *payload);
+static esp_err_t wifi_send_ble_json_response(void *ctx, const char *payload);
+static void wifi_process_json_command(const char *payload, wifi_json_sender_t send_response, void *send_ctx, const char *source);
 
 typedef enum: uint8_t
 {
     EVENT_SYNC_PARAMS,
+    EVENT_SYNC_SINGLE_PARAM,
     EVENT_SYNC_PRESET_NAME,
     EVENT_SYNC_PRESET,
-    EVENT_SYNC_CONFIG
+    EVENT_SYNC_CONFIG,
+    EVENT_SYNC_LOG
 } WiFiEvent;
 
 typedef struct
@@ -126,6 +146,7 @@ typedef struct
     char wifi_ssid[MAX_WIFI_SSID_PW];
     char wifi_password[MAX_WIFI_SSID_PW];
     char TempBuffer[MAX_TEMP_BUFFER];
+    char Log [64];
 } tWebConfigData;
 
 typedef struct 
@@ -163,6 +184,101 @@ static esp_err_t stop_webserver(void);
 static void wifi_init_sta(void);
 static tWebConfigData* pWebConfig;
 static tLocaterData LocaterData;
+
+typedef enum {
+    HARDWARE_PLATFORM_WS_ZERO,
+    HARDWARE_PLATFORM_WS_169,
+    HARDWARE_PLATFORM_WS_169_LANDSCAPE,
+    HARDWARE_PLATFORM_WS_169_TOUCH,
+    HARDWARE_PLATFORM_WS_169_TOUCH_LANDSCAPE,
+    HARDWARE_PLATFORM_WS_19_TOUCH,
+    HARDWARE_PLATFORM_WS_35B,
+    HARDWARE_PLATFORM_WS_43_DEV,
+    HARDWARE_PLATFORM_WS_43B,
+    
+    HARDWARE_PLATFORM_DEVKIT_C_N8R2,
+    HARDWARE_PLATFORM_DEVKIT_C_N16R8,
+    HARDWARE_PLATFORM_M5_ATOM3R,
+    HARDWARE_PLATFORM_LILYGO_T_S3,
+    HARDWARE_PLATFORM_JC3248W535,
+
+    HARDWARE_PLATFORM_POLAR_PICO,       // sdkconfig.piratezero     WS_ZERO
+    HARDWARE_PLATFORM_POLAR_MINI,       // sdkconfig.pirate169      WS_169
+    HARDWARE_PLATFORM_POLAR_MINI_V2,    // sdkconfig.pirateminiv2   WS_169
+    HARDWARE_PLATFORM_POLAR_PRO,        // sdkconfig.piratepro      WS_169 + 4 footswitches
+    HARDWARE_PLATFORM_POLAR_PLUS,       // sdkconfig.pirate169land  WS_169_LANDSCAPE
+    HARDWARE_PLATFORM_POLAR_PLUS_V2,    // sdkconfig.pirateplusv2   WS_169_LANDSCAPE
+    HARDWARE_PLATFORM_POLAR_MAX_V2,     // sdkconfig.piratemax35    WS_35B
+    HARDWARE_PLATFORM_POLAR_MAX,        // sdkconfig.pirate43B      WS_43B
+
+    HARDWARE_PLATFORM_UNKNOWN
+} HardwarePlatform_t;
+
+#if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_ZERO
+    #if CONFIG_TONEX_CONTROLLER_DEFAULT_MIDI_ENABLE
+    #define HARDWARE_PLATFORM HARDWARE_PLATFORM_POLAR_PICO
+    #else
+    #define HARDWARE_PLATFORM HARDWARE_PLATFORM_WS_ZERO
+    #endif
+#elif CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_DEVKITC
+    #if CONFIG_SPIRAM_MODE_QUAD
+        #define HARDWARE_PLATFORM HARDWARE_PLATFORM_DEVKIT_C_N8R2
+    #else
+        #define HARDWARE_PLATFORM HARDWARE_PLATFORM_DEVKIT_C_N16R8
+    #endif
+#elif CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_M5ATOMS3R
+    #define HARDWARE_PLATFORM HARDWARE_PLATFORM_M5_ATOM3R
+#elif CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_LILYGO_TDISPLAY_S3
+    #define HARDWARE_PLATFORM HARDWARE_PLATFORM_LILYGO_T_S3
+#elif CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_JC3248W535
+    #define HARDWARE_PLATFORM HARDWARE_PLATFORM_JC3248W535
+#elif CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_169
+    #if CONFIG_TONEX_CONTROLLER_WAVESHARE_169_LANDSCAPE
+        #if CONFIG_TONEX_CONTROLLER_GPIO_FOOTSWITCHES
+            #if CONFIG_TONEX_CONTROLLER_LED_SK6812
+                #define HARDWARE_PLATFORM HARDWARE_PLATFORM_POLAR_PLUS_V2
+            #elif
+                #define HARDWARE_PLATFORM HARDWARE_PLATFORM_POLAR_PLUS
+            #endif
+        #else
+            #define HARDWARE_PLATFORM HARDWARE_PLATFORM_WS_169_LANDSCAPE
+        #endif
+    #else
+        #if CONFIG_TONEX_CONTROLLER_DEFAULT_MIDI_ENABLE
+            #if CONFIG_SPIRAM_MODE_QUAD
+            #define HARDWARE_PLATFORM HARDWARE_PLATFORM_POLAR_MINI_V2
+            #else
+            #define HARDWARE_PLATFORM HARDWARE_PLATFORM_POLAR_MINI
+            #endif
+        #else
+            #define HARDWARE_PLATFORM HARDWARE_PLATFORM_WS_169
+        #endif
+    #endif
+#elif CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_169TOUCH
+    #if CONFIG_TONEX_CONTROLLER_WAVESHARE_169_LANDSCAPE
+        #define HARDWARE_PLATFORM HARDWARE_PLATFORM_WS_169_TOUCH_LANDSCAPE
+    #else
+        #define HARDWARE_PLATFORM HARDWARE_PLATFORM_WS_169_TOUCH
+    #endif
+#elif CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_19TOUCH
+    #define HARDWARE_PLATFORM HARDWARE_PLATFORM_WS_19_TOUCH
+#elif CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_35B
+    #define HARDWARE_PLATFORM HARDWARE_PLATFORM_WS_35B
+#elif CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43DEVONLY
+    #define HARDWARE_PLATFORM HARDWARE_PLATFORM_WS_43_DEV
+#elif CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B
+    #if CONFIG_TONEX_CONTROLLER_DEFAULT_MIDI_ENABLE
+    #define HARDWARE_PLATFORM HARDWARE_PLATFORM_POLAR_MAX
+    #else
+    #define HARDWARE_PLATFORM HARDWARE_PLATFORM_WS_43B
+    #endif
+#elif CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_PIRATE_MIDI_POLAR_PRO
+    #define HARDWARE_PLATFORM HARDWARE_PLATFORM_POLAR_PRO
+#elif CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_PIRATE_MIDI_POLAR_MAX_V2
+    #define HARDWARE_PLATFORM HARDWARE_PLATFORM_POLAR_MAX_V2
+#else
+    #define HARDWARE_PLATFORM HARDWARE_PLATFORM_UNKNOWN
+#endif
 
 /****************************************************************************
 * NAME:        wifi_send_ws_async
@@ -220,8 +336,57 @@ static void wifi_send_ws_async(const char* payload)
     }
 }
 
+static void wifi_send_ble_json(const char* payload)
+{
+    if (!payload) 
+    {
+        return;
+    }
+
+    size_t payload_len = strlen(payload);
+    char *payload_copy = heap_caps_malloc(payload_len + 1, MALLOC_CAP_SPIRAM);
+    if (payload_copy == NULL)
+    {
+        payload_copy = malloc(payload_len + 1);
+    }
+    if (payload_copy == NULL)
+    {
+        ESP_LOGW(TAG, "BLE JSON payload copy allocation failed");
+        return;
+    }
+
+    memcpy(payload_copy, payload, payload_len + 1);
+
+    if (!midi_send_ble_json(payload_copy))
+    {
+        ESP_LOGD(TAG, "BLE JSON send not available or failed");
+    }
+
+    free(payload_copy);
+}
+
+void wifi_handle_ble_json(const char* payload)
+{
+    if (!payload) 
+    {
+        return;
+    }
+
+    if (!wifi_config_ready())
+    {
+        ESP_LOGW(TAG, "BLE JSON received before WiFi JSON handler ready");
+        return;
+    }
+
+    ESP_LOGI(TAG, "Received BLE JSON payload: %s", payload);
+    wifi_process_ble_json_command(payload);
+}
+
+static void wifi_process_ble_json_command(const char* payload)
+{
+    wifi_process_json_command(payload, wifi_send_ble_json_response, NULL, "BLE");
+}
 /****************************************************************************
-* NAME:        
 * DESCRIPTION: 
 * PARAMETERS:  
 * RETURN:      
@@ -236,8 +401,21 @@ static uint8_t process_wifi_command(tWiFiMessage* message)
     {
         case EVENT_SYNC_PARAMS:
         {
-            wifi_build_params_json();
+            // wifi_build_params_json(false, false);
+            wifi_build_params_json(false);
             wifi_send_ws_async(pWebConfig->TempBuffer);
+
+            // wifi_build_params_json(false, true);
+            wifi_build_compact_params_json();
+            wifi_send_ble_json(pWebConfig->TempBuffer);
+        } break;
+
+        case EVENT_SYNC_SINGLE_PARAM:
+        {
+            float value = strtof(message->Text, NULL);
+            wifi_build_single_param_json(message->Value, value);
+            wifi_send_ws_async(pWebConfig->TempBuffer);
+            wifi_send_ble_json(pWebConfig->TempBuffer);
         } break;
 
         case EVENT_SYNC_PRESET_NAME:
@@ -252,16 +430,30 @@ static uint8_t process_wifi_command(tWiFiMessage* message)
             pWebConfig->PresetIndex = message->Value;
             wifi_build_preset_json();
             wifi_send_ws_async(pWebConfig->TempBuffer);
+            wifi_send_ble_json(pWebConfig->TempBuffer);
         } break;
 
         case EVENT_SYNC_CONFIG:
         {
             wifi_build_config_json();
             wifi_send_ws_async(pWebConfig->TempBuffer);
+            wifi_send_ble_json(pWebConfig->TempBuffer);
         } break;    
+
+        case EVENT_SYNC_LOG:
+        {
+            memcpy((void*)pWebConfig->Log, (void*)message->Text, MAX_TEXT_LENGTH - 1);
+            wifi_build_log_json();
+            wifi_send_ws_async(pWebConfig->TempBuffer);
+        } break;
     }
 
     return 1;
+}
+
+void wifi_log_msg(char* arg1)
+{
+    wifi_request_sync(WIFI_SYNC_TYPE_LOG, arg1, 0);
 }
 
 /****************************************************************************
@@ -273,16 +465,52 @@ static uint8_t process_wifi_command(tWiFiMessage* message)
 *****************************************************************************/
 void wifi_request_sync(WiFiSyncType type, void* arg1, void* arg2)
 {
-    tWiFiMessage message;
+    tWiFiMessage message = { 0 };
+    static bool last_single_param_valid = false;
+    static uint32_t last_single_param_index = 0;
+    static float last_single_param_value = 0;
 
     ESP_LOGI(TAG, "wifi_request_sync");            
 
+    if (wifi_input_queue == NULL)
+    {
+        ESP_LOGW(TAG, "wifi_request_sync before WiFi queue ready");
+        return;
+    }
+
     switch (type)
     {
-        case  WIFI_SYNC_TYPE_PARAMS:
-        default:
+        case WIFI_SYNC_TYPE_PARAMS:
         {
             message.Event = EVENT_SYNC_PARAMS;
+        } break;
+
+        case WIFI_SYNC_TYPE_SINGLE_PARAM:
+        {
+            if ((arg1 != NULL) && (arg2 != NULL))
+            {
+                float value = *(float*)arg2;
+
+                if (last_single_param_valid &&
+                    (last_single_param_index == *(uint32_t*)arg1) &&
+                    (last_single_param_value == value))
+                {
+                    ESP_LOGD(TAG, "Skipping duplicate single param sync: %" PRIu32, *(uint32_t*)arg1);
+                    return;
+                }
+
+                message.Event = EVENT_SYNC_SINGLE_PARAM;
+                message.Value = *(uint32_t*)arg1;
+                snprintf(message.Text, sizeof(message.Text), "%f", value);
+
+                last_single_param_valid = true;
+                last_single_param_index = message.Value;
+                last_single_param_value = value;
+            }
+            else
+            {
+                message.Event = EVENT_SYNC_PARAMS;
+            }
         } break;
 
         case WIFI_SYNC_TYPE_PRESET_NAME:
@@ -308,6 +536,12 @@ void wifi_request_sync(WiFiSyncType type, void* arg1, void* arg2)
         case WIFI_SYNC_TYPE_CONFIG:
         {
             message.Event = EVENT_SYNC_CONFIG;
+        } break;
+
+        case WIFI_SYNC_TYPE_LOG:
+        {
+            message.Event = EVENT_SYNC_LOG;
+            sprintf(message.Text, arg1);
         } break;
     }
 
@@ -346,6 +580,456 @@ static esp_err_t build_send_ws_response_packet(httpd_req_t *req, char* payload)
     return ret;
 }
 
+static esp_err_t wifi_send_ws_json(void *ctx, const char *payload)
+{
+    return build_send_ws_response_packet((httpd_req_t*)ctx, (char*)payload);
+}
+
+static esp_err_t wifi_send_ble_json_response(void *ctx, const char *payload)
+{
+    (void)ctx;
+    wifi_send_ble_json(payload);
+    return ESP_OK;
+}
+
+static void wifi_send_current_preset_names_json(wifi_json_sender_t send_response, void *send_ctx)
+{
+    uint8_t max_presets = usb_get_max_presets_for_connected_modeller();
+
+    for (uint8_t loop = 0; loop < max_presets; loop++)
+    {
+        presetIndexes[loop] = loop;
+    }
+
+    wifi_build_preset_names_json(presetIndexes, max_presets);
+    send_response(send_ctx, pWebConfig->TempBuffer);
+}
+
+static void wifi_process_json_command(const char *payload, wifi_json_sender_t send_response, void *send_ctx, const char *source)
+{
+    char str_val[64];
+    char cmd[64];
+    int int_val;
+
+    if (json_parse_start(&pWebConfig->jctx, payload, strlen(payload)) != OS_SUCCESS)
+    {
+        ESP_LOGW(TAG, "%s JSON parse failed", source);
+        return;
+    }
+
+    if (json_obj_get_string(&pWebConfig->jctx, "CMD", cmd, sizeof(cmd)) != OS_SUCCESS)
+    {
+        ESP_LOGW(TAG, "%s JSON missing CMD field", source);
+        json_parse_end(&pWebConfig->jctx);
+        return;
+    }
+
+    if (strcmp(cmd, "GETPARAMS") == 0)
+    {
+        bool all = false;
+
+        json_obj_get_bool(&pWebConfig->jctx, "ALL", &all);
+
+        ESP_LOGI(TAG, "Param request");
+        if (!all && (strcmp(source, "BLE") == 0)) {
+            wifi_build_compact_params_json();
+        } else {
+            wifi_build_params_json(all);
+        }
+        // wifi_build_params_json(all, !all && (strcmp(source, "BLE") == 0));
+        send_response(send_ctx, pWebConfig->TempBuffer);
+    }
+    else if (strcmp(cmd, "GETCONFIG") == 0)
+    {
+        ESP_LOGI(TAG, "Config request");
+        wifi_build_config_json();
+        send_response(send_ctx, pWebConfig->TempBuffer);
+    }
+    else if (strcmp(cmd, "GETPRESET") == 0)
+    {
+        ESP_LOGI(TAG, "Preset request");
+        wifi_build_preset_json();
+        send_response(send_ctx, pWebConfig->TempBuffer);
+    }
+    else if (strcmp(cmd, "GETMODELLERDATA") == 0)
+    {
+        ESP_LOGI(TAG, "Modeller data request");
+        wifi_build_modeller_data_json();
+        send_response(send_ctx, pWebConfig->TempBuffer);
+    }
+    else if (strcmp(cmd, "GETSYNCCOMPLETE") == 0)
+    {
+        ESP_LOGI(TAG, "is Sync request");
+        wifi_build_is_sync_complete_json();
+        send_response(send_ctx, pWebConfig->TempBuffer);
+    }
+    else if (strcmp(cmd, "GETPRESETNAMES") == 0)
+    {
+        ESP_LOGI(TAG, "Preset names request");
+        wifi_send_current_preset_names_json(send_response, send_ctx);
+    }
+    else if (strcmp(cmd, "SETCONFIG") == 0)
+    {
+        ESP_LOGI(TAG, "Config Set");
+
+        if (json_obj_get_int(&pWebConfig->jctx, "S_MIDI_EN", &int_val) == OS_SUCCESS)
+        {
+            control_set_config_item_int(CONFIG_ITEM_MIDI_ENABLE, int_val);
+        }
+
+        if (json_obj_get_int(&pWebConfig->jctx, "S_MIDI_CH", &int_val) == OS_SUCCESS)
+        {
+            control_set_config_item_int(CONFIG_ITEM_MIDI_CHANNEL, int_val);
+        }
+
+        if (json_obj_get_int(&pWebConfig->jctx, "TOGGLE_BYPASS", &int_val) == OS_SUCCESS)
+        {
+            control_set_config_item_int(CONFIG_ITEM_TOGGLE_BYPASS, int_val);
+        }
+
+        if (json_obj_get_int(&pWebConfig->jctx, "LOOP_AROUND", &int_val) == OS_SUCCESS)
+        {
+            control_set_config_item_int(CONFIG_ITEM_LOOP_AROUND, int_val);
+        }
+
+        if (json_obj_get_int(&pWebConfig->jctx, "BT_MODE", &int_val) == OS_SUCCESS)
+        {
+            control_set_config_item_int(CONFIG_ITEM_BT_MODE, int_val);
+        }
+
+        if (json_obj_get_int(&pWebConfig->jctx, "BT_CHOC_EN", &int_val) == OS_SUCCESS)
+        {
+            control_set_config_item_int(CONFIG_ITEM_MV_CHOC_ENABLE, int_val);
+        }
+
+        if (json_obj_get_int(&pWebConfig->jctx, "BT_MD1_EN", &int_val) == OS_SUCCESS)
+        {
+            control_set_config_item_int(CONFIG_ITEM_XV_MD1_ENABLE, int_val);
+        }
+
+        if (json_obj_get_int(&pWebConfig->jctx, "BT_CUST_EN", &int_val) == OS_SUCCESS)
+        {
+            control_set_config_item_int(CONFIG_ITEM_CUSTOM_BT_ENABLE, int_val);
+        }
+
+        if (json_obj_get_string(&pWebConfig->jctx, "BT_CUST_NAME", str_val, sizeof(str_val)) == OS_SUCCESS)
+        {
+            control_set_config_item_string(CONFIG_ITEM_BT_CUSTOM_NAME, str_val);
+        }
+
+        if (json_obj_get_string(&pWebConfig->jctx, "BT_PERIPH_NAME", str_val, sizeof(str_val)) == OS_SUCCESS)
+        {
+            control_set_config_item_string(CONFIG_ITEM_BT_PERIPHERAL_NAME, str_val);
+        }
+
+        if (json_obj_get_int(&pWebConfig->jctx, "BT_MIDI_CC", &int_val) == OS_SUCCESS)
+        {
+            control_set_config_item_int(CONFIG_ITEM_ENABLE_BT_MIDI_CC, int_val);
+        }
+
+        if (json_obj_get_int(&pWebConfig->jctx, "FOOTSW_MODE", &int_val) == OS_SUCCESS)
+        {
+            control_set_config_item_int(CONFIG_ITEM_FOOTSWITCH_MODE, int_val);
+        }
+
+        if (json_obj_get_int(&pWebConfig->jctx, "SCREEN_ROT", &int_val) == OS_SUCCESS)
+        {
+            control_set_config_item_int(CONFIG_ITEM_SCREEN_ROTATION, int_val);
+        }
+
+        if (json_obj_get_int(&pWebConfig->jctx, "PRESET_SLOT", &int_val) == OS_SUCCESS)
+        {
+            control_set_config_item_int(CONFIG_ITEM_SAVE_PRESET_TO_SLOT, int_val);
+        }
+
+        if (json_obj_get_int(&pWebConfig->jctx, "HIGH_TCH_SNS", &int_val) == OS_SUCCESS)
+        {
+            control_set_config_item_int(CONFIG_ITEM_ENABLE_HIGHER_TOUCH_SENS, int_val);
+        }
+
+        if (json_obj_get_int(&pWebConfig->jctx, "DISABLE_BPM", &int_val) == OS_SUCCESS)
+        {
+            control_set_config_item_int(CONFIG_ITEM_DISABLE_BPM_FLASHER, int_val);
+        }
+
+        if (json_obj_get_int(&pWebConfig->jctx, "EXTFS_PS_LAYOUT", &int_val) == OS_SUCCESS)
+        {
+            control_set_config_item_int(CONFIG_ITEM_EXT_FOOTSW_PRESET_LAYOUT, int_val);
+        }
+
+        for (uint8_t i = 0; i < MAX_EXTERNAL_EFFECT_FOOTSWITCHES; i++)
+        {
+            uint16_t configItem = CONFIG_ITEM_EXT_FOOTSW_EFFECT1_SW + (i * 4);
+
+            sprintf(str_val, "EXTFS_ES%u_SW", i + 1);
+            if (json_obj_get_int(&pWebConfig->jctx, str_val, &int_val) == OS_SUCCESS)
+            {
+                control_set_config_item_int(configItem, int_val);
+            }
+
+            sprintf(str_val, "EXTFS_ES%u_CC", i + 1);
+            if (json_obj_get_int(&pWebConfig->jctx, str_val, &int_val) == OS_SUCCESS)
+            {
+                control_set_config_item_int(configItem + 1, int_val);
+            }
+
+            sprintf(str_val, "EXTFS_ES%u_V1", i + 1);
+            if (json_obj_get_int(&pWebConfig->jctx, str_val, &int_val) == OS_SUCCESS)
+            {
+                control_set_config_item_int(configItem + 2, int_val);
+            }
+
+            sprintf(str_val, "EXTFS_ES%u_V2", i + 1);
+            if (json_obj_get_int(&pWebConfig->jctx, str_val, &int_val) == OS_SUCCESS)
+            {
+                control_set_config_item_int(configItem + 3, int_val);
+            }
+        }
+
+        for (uint8_t i = 0; i < MAX_EXTERNAL_EFFECT_FOOTSWITCHES; i++)
+        {
+            uint16_t configItem = CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT1_CC + (i * 3);
+
+            sprintf(str_val, "EXTFS_ES%u_CC_ALT", i + 1);
+            if (json_obj_get_int(&pWebConfig->jctx, str_val, &int_val) == OS_SUCCESS)
+            {
+                control_set_config_item_int(configItem, int_val);
+            }
+
+            sprintf(str_val, "EXTFS_ES%u_V1_ALT", i + 1);
+            if (json_obj_get_int(&pWebConfig->jctx, str_val, &int_val) == OS_SUCCESS)
+            {
+                control_set_config_item_int(configItem + 1, int_val);
+            }
+
+            sprintf(str_val, "EXTFS_ES%u_V2_ALT", i + 1);
+            if (json_obj_get_int(&pWebConfig->jctx, str_val, &int_val) == OS_SUCCESS)
+            {
+                control_set_config_item_int(configItem + 2, int_val);
+            }
+        }
+
+        vTaskDelay(pdMS_TO_TICKS(250));
+
+        for (uint8_t i = 0; i < MAX_INTERNAL_EFFECT_FOOTSWITCHES; i++)
+        {
+            uint16_t configItem = CONFIG_ITEM_INT_FOOTSW_EFFECT1_SW + (i * 4);
+
+            sprintf(str_val, "INTFS_ES%u_SW", i + 1);
+            if (json_obj_get_int(&pWebConfig->jctx, str_val, &int_val) == OS_SUCCESS)
+            {
+                control_set_config_item_int(configItem, int_val);
+            }
+
+            sprintf(str_val, "INTFS_ES%u_CC", i + 1);
+            if (json_obj_get_int(&pWebConfig->jctx, str_val, &int_val) == OS_SUCCESS)
+            {
+                control_set_config_item_int(configItem + 1, int_val);
+            }
+
+            sprintf(str_val, "INTFS_ES%u_V1", i + 1);
+            if (json_obj_get_int(&pWebConfig->jctx, str_val, &int_val) == OS_SUCCESS)
+            {
+                control_set_config_item_int(configItem + 2, int_val);
+            }
+
+            sprintf(str_val, "INTFS_ES%u_V2", i + 1);
+            if (json_obj_get_int(&pWebConfig->jctx, str_val, &int_val) == OS_SUCCESS)
+            {
+                control_set_config_item_int(configItem + 3, int_val);
+            }
+        }
+
+        for (uint8_t i = 0; i < MAX_INTERNAL_EFFECT_FOOTSWITCHES; i++)
+        {
+            uint16_t configItem = CONFIG_ITEM_INT_ALT_FOOTSW_EFFECT1_CC + (i * 3);
+
+            sprintf(str_val, "INTFS_ES%u_CC_ALT", i + 1);
+            if (json_obj_get_int(&pWebConfig->jctx, str_val, &int_val) == OS_SUCCESS)
+            {
+                control_set_config_item_int(configItem, int_val);
+            }
+
+            sprintf(str_val, "INTFS_ES%u_V1_ALT", i + 1);
+            if (json_obj_get_int(&pWebConfig->jctx, str_val, &int_val) == OS_SUCCESS)
+            {
+                control_set_config_item_int(configItem + 1, int_val);
+            }
+
+            sprintf(str_val, "INTFS_ES%u_V2_ALT", i + 1);
+            if (json_obj_get_int(&pWebConfig->jctx, str_val, &int_val) == OS_SUCCESS)
+            {
+                control_set_config_item_int(configItem + 2, int_val);
+            }
+        }
+
+        vTaskDelay(pdMS_TO_TICKS(250));
+        control_save_user_data(1);
+    }
+    else if (strcmp(cmd, "SETWIFI") == 0)
+    {
+        ESP_LOGI(TAG, "WiFi Set");
+
+        if (json_obj_get_int(&pWebConfig->jctx, "WIFI_MODE", &int_val) == OS_SUCCESS)
+        {
+            control_set_config_item_int(CONFIG_ITEM_WIFI_MODE, int_val);
+        }
+
+        if (json_obj_get_string(&pWebConfig->jctx, "WIFI_SSID", str_val, sizeof(str_val)) == OS_SUCCESS)
+        {
+            control_set_config_item_string(CONFIG_ITEM_WIFI_SSID, str_val);
+        }
+
+        if (json_obj_get_string(&pWebConfig->jctx, "WIFI_PW", str_val, sizeof(str_val)) == OS_SUCCESS)
+        {
+            control_set_config_item_string(CONFIG_ITEM_WIFI_PASSWORD, str_val);
+        }
+
+        if (json_obj_get_int(&pWebConfig->jctx, "WIFI_POWER", &int_val) == OS_SUCCESS)
+        {
+            control_set_config_item_int(CONFIG_ITEM_WIFI_TX_POWER, int_val);
+        }
+
+        if (json_obj_get_string(&pWebConfig->jctx, "MDNS_NAME", str_val, sizeof(str_val)) == OS_SUCCESS)
+        {
+            control_set_config_item_string(CONFIG_ITEM_MDNS_NAME, str_val);
+        }
+
+        vTaskDelay(pdMS_TO_TICKS(250));
+        control_save_user_data(1);
+    }
+    else if (strcmp(cmd, "SETPARAM") == 0)
+    {
+        int index;
+        float value;
+
+        ESP_LOGI(TAG, "Set Param");
+
+        if (json_obj_get_int(&pWebConfig->jctx, "INDEX", &index) == OS_SUCCESS)
+        {
+            if (json_obj_get_float(&pWebConfig->jctx, "VALUE", &value) == OS_SUCCESS)
+            {
+                usb_modify_parameter(index, value);
+            }
+            else
+            {
+                ESP_LOGW(TAG, "Could't find param value");
+            }
+        }
+    }
+    else if (strcmp(cmd, "SETPRESET") == 0)
+    {
+        ESP_LOGI(TAG, "Preset Set");
+
+        if (json_obj_get_int(&pWebConfig->jctx, "PRESET", &int_val) == OS_SUCCESS)
+        {
+            control_request_preset_index(int_val);
+        }
+    }
+    else if (strcmp(cmd, "GETCHANGES") == 0)
+    {
+        if (pWebConfig->ParamsChanged)
+        {
+            ESP_LOGI(TAG, "Param update");
+            wifi_build_params_json(false);
+            // wifi_build_params_json(false, false);
+            send_response(send_ctx, pWebConfig->TempBuffer);
+            pWebConfig->ParamsChanged = 0;
+        }
+
+        if (pWebConfig->PresetChanged)
+        {
+            ESP_LOGI(TAG, "Preset update");
+            wifi_build_preset_json();
+            send_response(send_ctx, pWebConfig->TempBuffer);
+            pWebConfig->PresetChanged = 0;
+        }
+
+        if (pWebConfig->ConfigChanged)
+        {
+            ESP_LOGI(TAG, "Config update");
+            wifi_build_config_json();
+            send_response(send_ctx, pWebConfig->TempBuffer);
+            pWebConfig->ConfigChanged = 0;
+        }
+    }
+    else if (strcmp(cmd, "SETPRESETORDER") == 0)
+    {
+        ESP_LOGI(TAG, "Preset Order Set");
+
+        int preset_order_count;
+
+        if (json_obj_get_array(&pWebConfig->jctx, "PRESET_ORDER", &preset_order_count) == OS_SUCCESS)
+        {
+            if (preset_order_count == usb_get_max_presets_for_connected_modeller())
+            {
+                uint8_t preset_order[MAX_SUPPORTED_PRESETS];
+
+                for (uint8_t i = 0; i < usb_get_max_presets_for_connected_modeller(); i++)
+                {
+                    int value;
+                    json_arr_get_int(&pWebConfig->jctx, i, &value);
+                    preset_order[i] = value;
+                }
+                control_set_preset_order(preset_order);
+                control_save_user_data(0);
+                UI_UpdatePresetList();
+            }
+        }
+    }
+    else if (strcmp(cmd, "SETPCMAP") == 0)
+    {
+        ESP_LOGI(TAG, "PC map set");
+
+        int map_count;
+
+        if (json_obj_get_array(&pWebConfig->jctx, "MAP", &map_count) == OS_SUCCESS)
+        {
+            if (map_count != 0)
+            {
+                uint8_t pc_map_vals[MAX_PC_MAP];
+
+                for (uint8_t i = 0; i < MAX_PC_MAP; i++)
+                {
+                    int value;
+                    json_arr_get_int(&pWebConfig->jctx, i, &value);
+                    pc_map_vals[i] = value;
+                }
+                control_set_pc_map(pc_map_vals);
+                control_save_user_data(0);
+            }
+        }
+    }
+    else
+    {
+        ESP_LOGW(TAG, "%s JSON unsupported CMD %s", source, cmd);
+    }
+
+    json_parse_end(&pWebConfig->jctx);
+}
+
+static void wifi_build_log_json()
+{
+    // init generation of json response
+    json_gen_str_start(&pWebConfig->jstr, pWebConfig->TempBuffer, MAX_TEMP_BUFFER, NULL, NULL);
+
+    // start json object, adds {
+    json_gen_start_object(&pWebConfig->jstr);
+
+    // add response
+    json_gen_obj_set_string(&pWebConfig->jstr, "CMD", "LOG");
+
+    json_gen_obj_set_string(&pWebConfig->jstr, "LOG", pWebConfig->Log);
+
+    // add the }
+    json_gen_end_object(&pWebConfig->jstr);
+
+    // end generation
+    json_gen_str_end(&pWebConfig->jstr);
+
+    //debug ESP_LOGI(TAG, "Json: %s", pWebConfig->TempBuffer);
+}
+
 /****************************************************************************
 * NAME:        
 * DESCRIPTION: 
@@ -353,7 +1037,8 @@ static esp_err_t build_send_ws_response_packet(httpd_req_t *req, char* payload)
 * RETURN:      none
 * NOTES:       none
 ****************************************************************************/
-static void wifi_build_params_json(void)
+static void wifi_build_params_json(bool all)
+// static void wifi_build_params_json(bool all, bool compact_values)
 {
     char str_val[64];
     tModellerParameter* param_ptr;
@@ -366,6 +1051,42 @@ static void wifi_build_params_json(void)
 
     // add response
     json_gen_obj_set_string(&pWebConfig->jstr, "CMD", "GETPARAMS");
+    json_gen_obj_set_bool(&pWebConfig->jstr, "ALL", all);
+
+    // if (compact_values && !all)
+    // {
+    //     json_gen_push_array(&pWebConfig->jstr, "VALUES");
+
+    //     switch (usb_get_connected_modeller_type())
+    //     {
+    //         case AMP_MODELLER_TONEX_ONE:    // fallthrough
+    //         case AMP_MODELLER_TONEX:        // fallthrough
+    //         default:
+    //         {
+    //             tonex_params_get_locked_access(&param_ptr);
+    //             for (uint16_t loop = 0; loop < TONEX_GLOBAL_LAST; loop++)
+    //             {
+    //                 json_gen_arr_set_float(&pWebConfig->jstr, param_ptr[loop].Value);
+    //             }
+    //             tonex_params_release_locked_access();
+    //         } break;
+
+    //         case AMP_MODELLER_VALETON_GP5:
+    //         {
+    //             valeton_params_get_locked_access(&param_ptr);
+    //             for (uint16_t loop = 0; loop < VALETON_GLOBAL_LAST; loop++)
+    //             {
+    //                 json_gen_arr_set_float(&pWebConfig->jstr, param_ptr[loop].Value);
+    //             }
+    //             valeton_params_release_locked_access();
+    //         } break;
+    //     }
+
+    //     json_gen_pop_array(&pWebConfig->jstr);
+    //     json_gen_end_object(&pWebConfig->jstr);
+    //     json_gen_str_end(&pWebConfig->jstr);
+    //     return;
+    // }
 
     json_gen_push_object(&pWebConfig->jstr, "PARAMS");
 
@@ -387,9 +1108,12 @@ static void wifi_build_params_json(void)
 
                 // add param details
                 json_gen_obj_set_float(&pWebConfig->jstr, "Val", param_ptr[loop].Value);
-                json_gen_obj_set_float(&pWebConfig->jstr, "Min", param_ptr[loop].Min);
-                json_gen_obj_set_float(&pWebConfig->jstr, "Max", param_ptr[loop].Max);
-                json_gen_obj_set_string(&pWebConfig->jstr, "NAME", param_ptr[loop].Name);
+                if (all)
+                {
+                    json_gen_obj_set_float(&pWebConfig->jstr, "Min", param_ptr[loop].Min);
+                    json_gen_obj_set_float(&pWebConfig->jstr, "Max", param_ptr[loop].Max);
+                    json_gen_obj_set_string(&pWebConfig->jstr, "NAME", param_ptr[loop].Name);
+                }
 
                 json_gen_pop_object(&pWebConfig->jstr);
 
@@ -412,9 +1136,12 @@ static void wifi_build_params_json(void)
 
                 // add param details
                 json_gen_obj_set_float(&pWebConfig->jstr, "Val", param_ptr[loop].Value);
-                json_gen_obj_set_float(&pWebConfig->jstr, "Min", param_ptr[loop].Min);
-                json_gen_obj_set_float(&pWebConfig->jstr, "Max", param_ptr[loop].Max);
-                json_gen_obj_set_string(&pWebConfig->jstr, "NAME", param_ptr[loop].Name);
+                if (all)
+                {
+                    json_gen_obj_set_float(&pWebConfig->jstr, "Min", param_ptr[loop].Min);
+                    json_gen_obj_set_float(&pWebConfig->jstr, "Max", param_ptr[loop].Max);
+                    json_gen_obj_set_string(&pWebConfig->jstr, "NAME", param_ptr[loop].Name);
+                }
 
                 json_gen_pop_object(&pWebConfig->jstr);
 
@@ -441,6 +1168,112 @@ static void wifi_build_params_json(void)
 * NAME:        
 * DESCRIPTION: 
 * PARAMETERS:  
+* RETURN:      none
+* NOTES:       none
+****************************************************************************/
+static void wifi_build_compact_params_json(void)
+{
+    tModellerParameter* param_ptr;
+
+    // init generation of json response
+    json_gen_str_start(&pWebConfig->jstr, pWebConfig->TempBuffer, MAX_TEMP_BUFFER, NULL, NULL);
+
+    // start json object, adds {
+    json_gen_start_object(&pWebConfig->jstr);
+
+    // add response
+    json_gen_obj_set_string(&pWebConfig->jstr, "CMD", "GETCOMPACTPARAMS");
+    json_gen_obj_set_int(&pWebConfig->jstr, "SCALE", 100);
+
+    json_gen_push_array(&pWebConfig->jstr, "VALUES");
+
+    switch (usb_get_connected_modeller_type())
+    {
+        case AMP_MODELLER_TONEX_ONE:    // fallthrough
+        case AMP_MODELLER_TONEX:        // fallthrough
+        default:
+        {
+            tonex_params_get_locked_access(&param_ptr);
+            for (uint16_t loop = 0; loop < TONEX_GLOBAL_LAST; loop++)
+            {
+                json_gen_arr_set_int(&pWebConfig->jstr, wifi_scale_compact_param_value(param_ptr[loop].Value));
+            }
+            tonex_params_release_locked_access();
+        } break;
+
+        case AMP_MODELLER_VALETON_GP5:
+        {
+            valeton_params_get_locked_access(&param_ptr);
+            for (uint16_t loop = 0; loop < VALETON_GLOBAL_LAST; loop++)
+            {
+                json_gen_arr_set_int(&pWebConfig->jstr, wifi_scale_compact_param_value(param_ptr[loop].Value));
+            }
+            valeton_params_release_locked_access();
+        } break;
+    }
+
+    json_gen_pop_array(&pWebConfig->jstr);
+    json_gen_end_object(&pWebConfig->jstr);
+    json_gen_str_end(&pWebConfig->jstr);
+}
+
+static int wifi_scale_compact_param_value(float value)
+{
+    // Instead of printing a float value to JSON with 5 decimal points, we can print it as a scaled integer, reducing the payload almost in half
+    const float scale = 100.0f;
+    float scaled_value = value * scale;
+    // Add/subtract 0.5 before truncating so compact values round to nearest 0.01.
+    return (int)(scaled_value >= 0.0f ? scaled_value + 0.5f : scaled_value - 0.5f);
+}
+
+/****************************************************************************
+* NAME:        
+* DESCRIPTION: 
+* PARAMETERS:  
+* RETURN:      none
+* NOTES:       none
+****************************************************************************/
+static void wifi_build_single_param_json(uint32_t param_index, float value)
+{
+    char str_val[64];
+
+    // init generation of json response
+    json_gen_str_start(&pWebConfig->jstr, pWebConfig->TempBuffer, MAX_TEMP_BUFFER, NULL, NULL);
+
+    // start json object, adds {
+    json_gen_start_object(&pWebConfig->jstr);
+
+    // add response
+    json_gen_obj_set_string(&pWebConfig->jstr, "CMD", "GETSINGLEPARAM");
+
+    json_gen_push_object(&pWebConfig->jstr, "PARAMS");
+
+    // add param index
+    sprintf(str_val, "%lu", param_index);
+    json_gen_push_object(&pWebConfig->jstr, str_val);
+
+    // add only the live value; full GETPARAMS already provides Min/Max/NAME.
+    json_gen_obj_set_float(&pWebConfig->jstr, "Val", value);
+
+    json_gen_pop_object(&pWebConfig->jstr);
+
+    // add the } for PARAMS
+    json_gen_pop_object(&pWebConfig->jstr);
+
+    // add the } for end
+    json_gen_end_object(&pWebConfig->jstr);
+
+    // end generation
+    json_gen_str_end(&pWebConfig->jstr);
+
+    //debug ESP_LOGI(TAG, "Json: %s", pWebConfig->TempBuffer);
+
+}
+
+/****************************************************************************
+* NAME:
+* DESCRIPTION:
+* PARAMETERS:
 * RETURN:      none
 * NOTES:       none
 ****************************************************************************/
@@ -620,6 +1453,7 @@ static void wifi_build_modeller_data_json(void)
     json_gen_obj_set_int(&pWebConfig->jstr, "MAX_PRESETS", usb_get_max_presets_for_connected_modeller());
     json_gen_obj_set_int(&pWebConfig->jstr, "START_PRESET", usb_get_first_preset_index_for_connected_modeller());
     json_gen_obj_set_int(&pWebConfig->jstr, "MODELLER_TYPE", usb_get_connected_modeller_type());
+    json_gen_obj_set_int(&pWebConfig->jstr, "HARDWARE_PLATFORM", HARDWARE_PLATFORM);
 
     // add the }
     json_gen_end_object(&pWebConfig->jstr);
@@ -765,8 +1599,6 @@ static esp_err_t ws_handler(httpd_req_t *req)
 {
     httpd_ws_frame_t ws_pkt;
     uint8_t* buf = NULL;
-    char str_val[64];
-    int int_val;
 
     if (req->method == HTTP_GET) 
     {
@@ -822,449 +1654,7 @@ static esp_err_t ws_handler(httpd_req_t *req)
         }
         else if (ws_pkt.type == HTTPD_WS_TYPE_TEXT)
         {
-            // parse the json command        
-            //debug ESP_LOGI(TAG, "%s", ws_pkt.payload);
-
-            if (json_parse_start(&pWebConfig->jctx, (const char*)ws_pkt.payload, strlen((const char*)ws_pkt.payload)) == OS_SUCCESS)
-            {
-                // get the command
-                if (json_obj_get_string(&pWebConfig->jctx, "CMD", str_val, sizeof(str_val)) == OS_SUCCESS)
-                {
-                    //debug ESP_LOGI(TAG, "WS got command %s", str_val);
-
-                    if (strcmp(str_val, "GETPARAMS") == 0)
-                    {
-                        // send current params
-                        ESP_LOGI(TAG, "Param request");
-
-                        // build json
-                        wifi_build_params_json();   
-                        
-                        // build packet and send
-                        build_send_ws_response_packet(req, pWebConfig->TempBuffer);              
-                    }
-                    else if (strcmp(str_val, "GETCONFIG") == 0)
-                    {
-                        // send current config
-                        ESP_LOGI(TAG, "Config request");
-
-                        // build response
-                        wifi_build_config_json();
-                        
-                        // build packet and send
-                        build_send_ws_response_packet(req, pWebConfig->TempBuffer);
-                    }
-                    else if (strcmp(str_val, "GETPRESET") == 0)
-                    {
-                        // send current preset details
-                        ESP_LOGI(TAG, "Preset request");
-
-                        // build json response
-                        wifi_build_preset_json();
-                        
-                        // build packet and send
-                        build_send_ws_response_packet(req, pWebConfig->TempBuffer);
-                    }
-                    else if (strcmp(str_val, "GETMODELLERDATA") == 0)
-                    {
-                        // send current preset details
-                        ESP_LOGI(TAG, "Modeller data request");
-
-                        // build json response
-                        wifi_build_modeller_data_json();
-                        
-                        // build packet and send
-                        build_send_ws_response_packet(req, pWebConfig->TempBuffer);
-                    }
-                    else if (strcmp(str_val, "GETSYNCCOMPLETE") == 0)
-                    {
-                        // send current sync status
-                        ESP_LOGI(TAG, "is Sync request");
-
-                        // build json response
-                        wifi_build_is_sync_complete_json();
-                        
-                        // build packet and send
-                        build_send_ws_response_packet(req, pWebConfig->TempBuffer);
-                    }
-                    else if (strcmp(str_val, "GETPRESETNAMES") == 0)
-                    {
-                        // send current preset details
-                        ESP_LOGI(TAG, "Preset names request");
-
-                        // build json response
-                        uint8_t max_presets = usb_get_max_presets_for_connected_modeller();
-                        
-                        for (uint8_t loop = 0; loop < max_presets; loop++)
-                        {
-                            presetIndexes[loop] = loop;
-                        }
-                        wifi_build_preset_names_json(presetIndexes, max_presets);
-                        
-                        // build packet and send
-                        build_send_ws_response_packet(req, pWebConfig->TempBuffer);
-                    }
-                    else if (strcmp(str_val, "SETCONFIG") == 0)
-                    {
-                        // set config
-                        ESP_LOGI(TAG, "Config Set");
-
-                        if (json_obj_get_int(&pWebConfig->jctx, "S_MIDI_EN", &int_val) == OS_SUCCESS)
-                        {
-                            control_set_config_item_int(CONFIG_ITEM_MIDI_ENABLE, int_val);
-                        }
-
-                        if (json_obj_get_int(&pWebConfig->jctx, "S_MIDI_CH", &int_val) == OS_SUCCESS)
-                        {
-                            control_set_config_item_int(CONFIG_ITEM_MIDI_CHANNEL, int_val);        
-                        }
-
-                        if (json_obj_get_int(&pWebConfig->jctx, "TOGGLE_BYPASS", &int_val) == OS_SUCCESS)
-                        {
-                            control_set_config_item_int(CONFIG_ITEM_TOGGLE_BYPASS, int_val);
-                        }
-
-                        if (json_obj_get_int(&pWebConfig->jctx, "LOOP_AROUND", &int_val) == OS_SUCCESS)
-                        {
-                            control_set_config_item_int(CONFIG_ITEM_LOOP_AROUND, int_val);
-                        }
-                        
-                        if (json_obj_get_int(&pWebConfig->jctx, "BT_MODE", &int_val) == OS_SUCCESS)
-                        {
-                            control_set_config_item_int(CONFIG_ITEM_BT_MODE, int_val);
-                        }
-
-                        if (json_obj_get_int(&pWebConfig->jctx, "BT_CHOC_EN", &int_val) == OS_SUCCESS)
-                        {
-                            control_set_config_item_int(CONFIG_ITEM_MV_CHOC_ENABLE, int_val);
-                        }
-
-                        if (json_obj_get_int(&pWebConfig->jctx, "BT_MD1_EN", &int_val) == OS_SUCCESS)
-                        {
-                            control_set_config_item_int(CONFIG_ITEM_XV_MD1_ENABLE, int_val);
-                        }
-
-                        if (json_obj_get_int(&pWebConfig->jctx, "BT_CUST_EN", &int_val) == OS_SUCCESS)
-                        {
-                            control_set_config_item_int(CONFIG_ITEM_CUSTOM_BT_ENABLE, int_val);
-                        }
-                        
-                        if (json_obj_get_string(&pWebConfig->jctx, "BT_CUST_NAME", str_val, sizeof(str_val)) == OS_SUCCESS)
-                        {
-                            control_set_config_item_string(CONFIG_ITEM_BT_CUSTOM_NAME, str_val);
-                        }
-
-                        if (json_obj_get_string(&pWebConfig->jctx, "BT_PERIPH_NAME", str_val, sizeof(str_val)) == OS_SUCCESS)
-                        {
-                            control_set_config_item_string(CONFIG_ITEM_BT_PERIPHERAL_NAME, str_val);
-                        }
-
-                        if (json_obj_get_int(&pWebConfig->jctx, "BT_MIDI_CC", &int_val) == OS_SUCCESS)
-                        {
-                            control_set_config_item_int(CONFIG_ITEM_ENABLE_BT_MIDI_CC, int_val);
-                        }
-                        
-                        if (json_obj_get_int(&pWebConfig->jctx, "FOOTSW_MODE", &int_val) == OS_SUCCESS)
-                        {
-                            control_set_config_item_int(CONFIG_ITEM_FOOTSWITCH_MODE, int_val);
-                        }
-
-                        if (json_obj_get_int(&pWebConfig->jctx, "SCREEN_ROT", &int_val) == OS_SUCCESS)
-                        {
-                            control_set_config_item_int(CONFIG_ITEM_SCREEN_ROTATION, int_val);
-                        }
-
-                        if (json_obj_get_int(&pWebConfig->jctx, "PRESET_SLOT", &int_val) == OS_SUCCESS)
-                        {
-                            control_set_config_item_int(CONFIG_ITEM_SAVE_PRESET_TO_SLOT, int_val);
-                        }
-
-                        if (json_obj_get_int(&pWebConfig->jctx, "HIGH_TCH_SNS", &int_val) == OS_SUCCESS)
-                        {
-                            control_set_config_item_int(CONFIG_ITEM_ENABLE_HIGHER_TOUCH_SENS, int_val);
-                        }
-
-                        if (json_obj_get_int(&pWebConfig->jctx, "DISABLE_BPM", &int_val) == OS_SUCCESS)
-                        {
-                            control_set_config_item_int(CONFIG_ITEM_DISABLE_BPM_FLASHER, int_val);
-                        }
-
-                        if (json_obj_get_int(&pWebConfig->jctx, "EXTFS_PS_LAYOUT", &int_val) == OS_SUCCESS)
-                        {
-                            control_set_config_item_int(CONFIG_ITEM_EXT_FOOTSW_PRESET_LAYOUT, int_val);
-                        }
-
-                        for (uint8_t i = 0; i < MAX_EXTERNAL_EFFECT_FOOTSWITCHES; i++)
-                        {
-                            uint16_t configItem = CONFIG_ITEM_EXT_FOOTSW_EFFECT1_SW + (i * 4);
-                            
-                            sprintf(str_val, "EXTFS_ES%u_SW", i + 1);
-                            if (json_obj_get_int(&pWebConfig->jctx, str_val, &int_val) == OS_SUCCESS) 
-                            {
-                                control_set_config_item_int(configItem, int_val);
-                            }
-
-                            sprintf(str_val, "EXTFS_ES%u_CC", i + 1);
-                            if (json_obj_get_int(&pWebConfig->jctx, str_val, &int_val) == OS_SUCCESS) 
-                            {
-                                control_set_config_item_int(configItem + 1, int_val);
-                            }
-
-                            sprintf(str_val, "EXTFS_ES%u_V1", i + 1);
-                            if (json_obj_get_int(&pWebConfig->jctx, str_val, &int_val) == OS_SUCCESS) 
-                            {
-                                control_set_config_item_int(configItem + 2, int_val);
-                            }
-
-                            sprintf(str_val, "EXTFS_ES%u_V2", i + 1);
-                            if (json_obj_get_int(&pWebConfig->jctx, str_val, &int_val) == OS_SUCCESS) 
-                            {
-                                control_set_config_item_int(configItem + 3, int_val);
-                            }
-                        }
-
-                        for (uint8_t i = 0; i < MAX_EXTERNAL_EFFECT_FOOTSWITCHES; i++)
-                        {
-                            uint16_t configItem = CONFIG_ITEM_EXT_ALT_FOOTSW_EFFECT1_CC + (i * 3);
-                            
-                            sprintf(str_val, "EXTFS_ES%u_CC_ALT", i + 1);
-                            if (json_obj_get_int(&pWebConfig->jctx, str_val, &int_val) == OS_SUCCESS) 
-                            {
-                                control_set_config_item_int(configItem, int_val);
-                            }
-
-                            sprintf(str_val, "EXTFS_ES%u_V1_ALT", i + 1);
-                            if (json_obj_get_int(&pWebConfig->jctx, str_val, &int_val) == OS_SUCCESS) 
-                            {
-                                control_set_config_item_int(configItem + 1, int_val);
-                            }
-
-                            sprintf(str_val, "EXTFS_ES%u_V2_ALT", i + 1);
-                            if (json_obj_get_int(&pWebConfig->jctx, str_val, &int_val) == OS_SUCCESS) 
-                            {
-                                control_set_config_item_int(configItem + 2, int_val);
-                            }
-                        }
-
-                        vTaskDelay(pdMS_TO_TICKS(250));
-
-                        for (uint8_t i = 0; i < MAX_INTERNAL_EFFECT_FOOTSWITCHES; i++)
-                        {
-                            uint16_t configItem = CONFIG_ITEM_INT_FOOTSW_EFFECT1_SW + (i * 4);
-                            
-                            sprintf(str_val, "INTFS_ES%u_SW", i + 1);
-                            if (json_obj_get_int(&pWebConfig->jctx, str_val, &int_val) == OS_SUCCESS) 
-                            {
-                                control_set_config_item_int(configItem, int_val);
-                            }
-
-                            sprintf(str_val, "INTFS_ES%u_CC", i + 1);
-                            if (json_obj_get_int(&pWebConfig->jctx, str_val, &int_val) == OS_SUCCESS) 
-                            {
-                                control_set_config_item_int(configItem + 1, int_val);
-                            }
-
-                            sprintf(str_val, "INTFS_ES%u_V1", i + 1);
-                            if (json_obj_get_int(&pWebConfig->jctx, str_val, &int_val) == OS_SUCCESS) 
-                            {
-                                control_set_config_item_int(configItem + 2, int_val);
-                            }
-
-                            sprintf(str_val, "INTFS_ES%u_V2", i + 1);
-                            if (json_obj_get_int(&pWebConfig->jctx, str_val, &int_val) == OS_SUCCESS) 
-                            {
-                                control_set_config_item_int(configItem + 3, int_val);
-                            }
-                        }
-
-                        for (uint8_t i = 0; i < MAX_INTERNAL_EFFECT_FOOTSWITCHES; i++)
-                        {
-                            uint16_t configItem = CONFIG_ITEM_INT_ALT_FOOTSW_EFFECT1_CC + (i * 3);
-                            
-                            sprintf(str_val, "INTFS_ES%u_CC_ALT", i + 1);
-                            if (json_obj_get_int(&pWebConfig->jctx, str_val, &int_val) == OS_SUCCESS) 
-                            {
-                                control_set_config_item_int(configItem, int_val);
-                            }
-
-                            sprintf(str_val, "INTFS_ES%u_V1_ALT", i + 1);
-                            if (json_obj_get_int(&pWebConfig->jctx, str_val, &int_val) == OS_SUCCESS) 
-                            {
-                                control_set_config_item_int(configItem + 1, int_val);
-                            }
-
-                            sprintf(str_val, "INTFS_ES%u_V2_ALT", i + 1);
-                            if (json_obj_get_int(&pWebConfig->jctx, str_val, &int_val) == OS_SUCCESS) 
-                            {
-                                control_set_config_item_int(configItem + 2, int_val);
-                            }
-                        }
-
-                        vTaskDelay(pdMS_TO_TICKS(250));
-
-                        // save it and reboot after
-                        control_save_user_data(1);
-                    }
-                    else if (strcmp(str_val, "SETWIFI") == 0)
-                    {
-                        // set config
-                        ESP_LOGI(TAG, "WiFi Set");
-
-                        if (json_obj_get_int(&pWebConfig->jctx, "WIFI_MODE", &int_val) == OS_SUCCESS)
-                        {
-                            control_set_config_item_int(CONFIG_ITEM_WIFI_MODE, int_val);
-                        }
-
-                        if (json_obj_get_string(&pWebConfig->jctx, "WIFI_SSID", str_val, sizeof(str_val)) == OS_SUCCESS)
-                        {
-                            control_set_config_item_string(CONFIG_ITEM_WIFI_SSID, str_val);
-                        }
-
-                        if (json_obj_get_string(&pWebConfig->jctx, "WIFI_PW", str_val, sizeof(str_val)) == OS_SUCCESS)
-                        {
-                            control_set_config_item_string(CONFIG_ITEM_WIFI_PASSWORD, str_val);
-                        }
-
-                        if (json_obj_get_int(&pWebConfig->jctx, "WIFI_POWER", &int_val) == OS_SUCCESS)
-                        {
-                            control_set_config_item_int(CONFIG_ITEM_WIFI_TX_POWER, int_val);
-                        }
-
-                        if (json_obj_get_string(&pWebConfig->jctx, "MDNS_NAME", str_val, sizeof(str_val)) == OS_SUCCESS)
-                        {
-                            control_set_config_item_string(CONFIG_ITEM_MDNS_NAME, str_val);
-                        }
-
-                        vTaskDelay(pdMS_TO_TICKS(250));
-
-                        // save it and reboot after
-                        control_save_user_data(1);
-                    }                
-                    else if (strcmp(str_val, "SETPARAM") == 0)
-                    {
-                        int index;
-                        float value;
-
-                        ESP_LOGI(TAG, "Set Param");
-
-                        if (json_obj_get_int(&pWebConfig->jctx, "INDEX", &index) == OS_SUCCESS)
-                        {
-                            if (json_obj_get_float(&pWebConfig->jctx, "VALUE", &value) == OS_SUCCESS)
-                            {
-                                usb_modify_parameter(index, value);
-                            }
-                            else
-                            {
-                                ESP_LOGW(TAG, "Could't find param value");
-                            }
-                        }
-                    }
-                    else if (strcmp(str_val, "SETPRESET") == 0)
-                    {
-                        // set preset
-                        ESP_LOGI(TAG, "Preset Set");
-
-                        if (json_obj_get_int(&pWebConfig->jctx, "PRESET", &int_val) == OS_SUCCESS)
-                        {
-                            control_request_preset_index(int_val);
-                        }
-                    }
-                    else if (strcmp(str_val, "GETCHANGES") == 0)
-                    {
-                        // check for any changes
-                        if (pWebConfig->ParamsChanged)
-                        {
-                            // send current params
-                            ESP_LOGI(TAG, "Param update");
-
-                            // build json
-                            wifi_build_params_json();   
-                        
-                            // build packet and send
-                            build_send_ws_response_packet(req, pWebConfig->TempBuffer);             
-                            pWebConfig->ParamsChanged = 0;
-                        }
-    
-                        if (pWebConfig->PresetChanged)
-                        {
-                            // send current preset
-                            ESP_LOGI(TAG, "Preset update");
-
-                            // build json response
-                            wifi_build_preset_json();
-                        
-                            // build packet and send
-                            build_send_ws_response_packet(req, pWebConfig->TempBuffer);
-
-                            pWebConfig->PresetChanged = 0;
-                        }
-    
-                        if (pWebConfig->ConfigChanged)
-                        {
-                            // send current config
-                            ESP_LOGI(TAG, "Config update");
-
-                            // build response
-                            wifi_build_config_json();
-                        
-                            // build packet and send
-                            build_send_ws_response_packet(req, pWebConfig->TempBuffer);
-
-                            pWebConfig->ConfigChanged = 0;
-                        }
-                    }
-                    else if (strcmp(str_val, "SETPRESETORDER") == 0)
-                    {
-                        // set preset
-                        ESP_LOGI(TAG, "Preset Order Set");
-
-                        int preset_order_count;
-
-                        if (json_obj_get_array(&pWebConfig->jctx, "PRESET_ORDER", &preset_order_count) == OS_SUCCESS)
-                        {
-                            if (preset_order_count == usb_get_max_presets_for_connected_modeller())
-                            {
-                                uint8_t preset_order[MAX_SUPPORTED_PRESETS];
-                                
-                                for (uint8_t i = 0; i < usb_get_max_presets_for_connected_modeller(); i++) 
-                                {
-                                    int value;
-                                    json_arr_get_int(&pWebConfig->jctx, i, &value);
-                                    preset_order[i] = value;
-                                }
-                                control_set_preset_order(preset_order);
-                                control_save_user_data(0);
-                                UI_UpdatePresetList();
-                            }
-                        }
-                    } 
-                    else if (strcmp(str_val, "SETPCMAP") == 0)
-                    {
-                        ESP_LOGI(TAG, "PC map set");
-
-                        int map_count;
-
-                        if (json_obj_get_array(&pWebConfig->jctx, "MAP", &map_count) == OS_SUCCESS)
-                        {
-                            if (map_count != 0)
-                            {
-                                uint8_t pc_map_vals[MAX_PC_MAP];
-                                
-                                for (uint8_t i = 0; i < MAX_PC_MAP; i++) 
-                                {
-                                    int value;
-                                    json_arr_get_int(&pWebConfig->jctx, i, &value);
-                                    pc_map_vals[i] = value;
-                                }
-                                control_set_pc_map(pc_map_vals);
-                                control_save_user_data(0);
-                            }
-                        }
-                    }
-                }
-
-                json_parse_end(&pWebConfig->jctx);
-            }
+            wifi_process_json_command((const char*)ws_pkt.payload, wifi_send_ws_json, req, "WS");
         }
 
         free(buf);
@@ -1830,7 +2220,6 @@ static void wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t e
         wifi_event_ap_staconnected_t* event = (wifi_event_ap_staconnected_t*) event_data;
         ESP_LOGI(TAG, "station "MACSTR" join, AID=%d", MAC2STR(event->mac), event->aid);
         client_connected = 1;
-
         control_set_wifi_status(1);
     } 
     else if (event_id == WIFI_EVENT_AP_STADISCONNECTED) 
@@ -2203,6 +2592,7 @@ static void wifi_config_task(void *arg)
     memset((void*)pWebConfig, 0, sizeof(tWebConfigData));
     pWebConfig->PresetIndex = 0;
     sprintf(pWebConfig->PresetNames[0], "1");
+    wifi_json_ready = true;
 
     memset((void*)&LocaterData, 0, sizeof(LocaterData));
     LocaterData.sock = -1;
@@ -2324,4 +2714,11 @@ void wifi_config_init(void)
     }
 
     xTaskCreatePinnedToCore(wifi_config_task, "WIFI", WIFI_CONFIG_TASK_STACK_SIZE, NULL, WIFI_TASK_PRIORITY, NULL, 0);
+}
+
+bool wifi_config_ready(void)
+{
+    return wifi_json_ready &&
+           (pWebConfig != NULL) &&
+           (wifi_input_queue != NULL);
 }

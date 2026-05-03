@@ -1549,8 +1549,12 @@ function configureParamRange(objname, value, min, max, step=1) {
     //console.log(objname);
     var paramrange = document.getElementById(objname);
     paramrange.step = step;
-    paramrange.min = min;
-    paramrange.max = max;
+    if (min !== undefined) {
+        paramrange.min = min;
+    }
+    if (max !== undefined) {
+        paramrange.max = max;
+    }
 
     // only update the value if not being currently dragged
     if (userIsDragging !== paramrange.id) {
@@ -3728,7 +3732,7 @@ function processReturnCmd(data) {
 
                     // request all the stuff                            
                     sendWS({"CMD": "GETPRESETNAMES"});
-                    sendWS({"CMD": "GETPARAMS"});   
+                    sendWS({"CMD": "GETPARAMS", "ALL": true});
                     sendWS({"CMD": "GETPRESET"});   
                 }
             }

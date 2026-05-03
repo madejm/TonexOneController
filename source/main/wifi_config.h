@@ -17,15 +17,22 @@ limitations under the License.
 
 #pragma once
 
+#include <stdbool.h>
+
 typedef enum
 {
     WIFI_SYNC_TYPE_PARAMS,
+    WIFI_SYNC_TYPE_SINGLE_PARAM,
     WIFI_SYNC_TYPE_PRESET_NAME,
     WIFI_SYNC_TYPE_PRESET,
-    WIFI_SYNC_TYPE_CONFIG
+    WIFI_SYNC_TYPE_CONFIG,
+    WIFI_SYNC_TYPE_LOG
 } WiFiSyncType;
 
 void wifi_config_init(void);
+bool wifi_config_ready(void);
+void wifi_handle_ble_json(const char *payload);
 
 // threadsafe API
 void wifi_request_sync(WiFiSyncType type, void* arg1, void* arg2);
+void wifi_log_msg(char* arg1);

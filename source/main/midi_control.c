@@ -17,6 +17,8 @@ limitations under the License.
 
 #include <stdio.h>
 #include <string.h>
+#include <inttypes.h>
+#include <stdlib.h>
 #include "sdkconfig.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -46,6 +48,7 @@ limitations under the License.
 #include "control.h"
 #include "task_priorities.h"
 #include "midi_control.h"
+#include "wifi_config.h"
 #include "midi_helper.h"
 
 static const char *TAG = "MidiBT";
@@ -55,6 +58,22 @@ static const char *TAG = "MidiBT";
 
 // 7772e5db-3868-4112-a1a9-f2669d106bf3   Midi characteristic
 static uint8_t MidiCharacteristicUUIDByteReversed[] = {0xF3, 0x6B, 0x10, 0x9D, 0x66, 0xF2, 0xA9, 0xA1, 0x12, 0x41, 0x68, 0x38, 0xDB, 0xE5, 0x72, 0x77};
+
+// 00112233-4455-6677-8899-AABBCCDDEEFF  custom BLE JSON notify characteristic
+static uint8_t JsonNotifyCharacteristicUUIDByteReversed[] = {0xFF, 0xEE, 0xDD, 0xCC, 0xBB, 0xAA, 0x99, 0x88, 0x77, 0x66, 0x55, 0x44, 0x33, 0x22, 0x11, 0x00};
+
+// 01020304-0506-0708-090A-0B0C0D0E0F10  custom BLE JSON write characteristic
+static uint8_t JsonWriteCharacteristicUUIDByteReversed[] = {0x10, 0x0F, 0x0E, 0x0D, 0x0C, 0x0B, 0x0A, 0x09, 0x08, 0x07, 0x06, 0x05, 0x04, 0x03, 0x02, 0x01};
+
+#define GATTS_JSON_CHAR_VAL_LEN_MAX 512
+#define BLE_JSON_NOTIFY_CHUNK_MAX   160
+#define BLE_JSON_CHUNK_HEADER_MAX   40
+#define BLE_JSON_NOTIFY_DELAY_MS    4
+#define BLE_JSON_CHUNK_ACK_ENABLED  0
+#define BLE_JSON_RX_QUEUE_LEN       16
+#define BLE_JSON_RX_CHUNK_COUNT_MAX 128
+#define BLE_JSON_RX_PAYLOAD_MAX     (16 * 1024)
+#define GATTS_NUM_HANDLE_TEST_A     12
 
 // 00002a19-0000-1000-8000-00805f9b34fb  battery level
 //static uint8_t BatteryLevelCharacteristicUUIDByteReversed[] = {0xFB, 0x34, 0x9B, 0x5F, 0x80, 0x00, 0x00, 0x80, 0x00, 0x10, 0x00, 0x00, 0x19, 0x2A, 0x00, 0x00};
@@ -77,7 +96,12 @@ static uint8_t MidiCharacteristicUUIDByteReversed[] = {0xF3, 0x6B, 0x10, 0x9D, 0
 static void esp_gap_cb(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *param);
 static void esp_gattc_cb(esp_gattc_cb_event_t event, esp_gatt_if_t gattc_if, esp_ble_gattc_cb_param_t *param);
 static void gattc_profile_a_event_handler(esp_gattc_cb_event_t event, esp_gatt_if_t gattc_if, esp_ble_gattc_cb_param_t *param);
-
+static void hello_world_notify_task(void *param);
+static void ble_json_rx_task(void *param);
+static bool send_hello_world_notification(void);
+static void ble_json_handle_write_payload(const uint8_t *data, uint16_t len);
+static void ble_json_queue_payload(char *payload);
+static void ble_json_reset_rx_chunk_assembly(void);
 
 static esp_bt_uuid_t remote_filter_char_uuid_reuse[5]; 
 
@@ -96,6 +120,43 @@ static uint8_t midi_serial_channel = 0;
 static uint16_t search_start_handle = 0xFFFF;
 static uint16_t search_end_handle = 0;
 static esp_gattc_descr_elem_t *descr_elem_result_a  = NULL;
+
+static bool hello_world_connected = false;
+static bool hello_world_notify_enabled = false;
+static bool json_notify_enabled = false;
+static uint16_t hello_world_conn_id = 0;
+static uint16_t json_notify_char_handle = 0;
+static uint16_t json_write_char_handle = 0;
+static uint16_t json_cccd_handle = 0;
+static bool json_service_started = false;
+static bool json_ble_congested = false;
+static bool json_ble_send_in_progress = false;
+static bool json_indication_pending = false;
+static esp_gatt_status_t json_indication_status = ESP_GATT_OK;
+static bool json_chunk_ack_received = false;
+static uint32_t json_chunk_ack_message_id = 0;
+static uint16_t json_chunk_ack_index = 0;
+static esp_gatt_if_t hello_world_gatts_if = ESP_GATT_IF_NONE;
+static uint8_t json_notify_value[GATTS_JSON_CHAR_VAL_LEN_MAX] = {0};
+static uint8_t json_write_value[GATTS_JSON_CHAR_VAL_LEN_MAX] = {0};
+static uint8_t json_cccd_value[2] = {0x00, 0x00};
+static QueueHandle_t ble_json_rx_queue = NULL;
+static TaskHandle_t ble_json_rx_task_handle = NULL;
+
+typedef struct {
+    char *payload;
+} ble_json_rx_message_t;
+
+static uint32_t json_rx_chunk_message_id = 0;
+static uint16_t json_rx_chunk_count = 0;
+static uint16_t json_rx_chunk_received = 0;
+static char **json_rx_chunk_parts = NULL;
+static uint16_t *json_rx_chunk_lengths = NULL;
+static size_t json_rx_chunk_total_len = 0;
+
+static portMUX_TYPE hello_world_state_mux = portMUX_INITIALIZER_UNLOCKED;
+static TaskHandle_t hello_world_task_handle = NULL;
+static uint32_t hello_world_counter = 0;
 
 static char remote_device_names[MAX_DEVICE_NAMES][MAX_DEVICE_NAME_LENGTH];
 static uint8_t remote_device_names_length = 0;
@@ -132,33 +193,20 @@ static struct gattc_profile_inst gl_profile_tab =
 
 
 // Server stuff
-#define GATTS_NUM_HANDLE_TEST_A     4
 
 static char periph_device_name[MAX_BT_PERIPHERAL_NAME + 1];
 
-#define GATTS_DEMO_CHAR_VAL_LEN_MAX 20
 #define PREPARE_BUF_MAX_SIZE        1024
-
-static uint8_t char1_str[20] = {0x00,0x00,0x00};
-static esp_gatt_char_prop_t a_property = 0;
-
-static esp_attr_value_t gatts_demo_char1_val =
-{
-    .attr_max_len = GATTS_DEMO_CHAR_VAL_LEN_MAX,
-    .attr_len     = sizeof(char1_str),
-    .attr_value   = char1_str,
-};
 
 static uint8_t adv_config_done = 0;
 #define adv_config_flag      (1 << 0)
 #define scan_rsp_config_flag (1 << 1)
 
-// Midi service UUID
-// 03b80e5a-ede8-4b33-a751-6ce34ec4c700
+// Custom JSON BLE service UUID
+// 11223344-5566-7788-99AA-BBCCDDEEFF00
 static uint8_t adv_service_uuid128[ESP_UUID_LEN_128] = {
     /* LSB <--------------------------------------------------------------------------------> MSB */
-    0x00, 0xC7, 0xC4, 0x4E, 0xE3, 0x6C, 0x51, 0xA7, 0x33, 0x4B, 0xE8, 0xED, 0x5A, 0x0E, 0xB8, 0x03 
-    //0x03, 0xB8, 0x0E, 0x5A, 0xED, 0xE8, 0x4B, 0x33, 0xA7, 0x51, 0x6C, 0xE3, 0x4E, 0xC4, 0xC7, 0x00 
+    0x00, 0xFF, 0xEE, 0xDD, 0xCC, 0xBB, 0xAA, 0x99, 0x88, 0x77, 0x66, 0x55, 0x44, 0x33, 0x22, 0x11
 };
 
 //adv data
@@ -246,6 +294,8 @@ static prepare_type_env_t a_prepare_write_env;
 
 void server_write_event_env(esp_gatt_if_t gatts_if, prepare_type_env_t *prepare_write_env, esp_ble_gatts_cb_param_t *param);
 void server_exec_write_event_env(prepare_type_env_t *prepare_write_env, esp_ble_gatts_cb_param_t *param);
+static void add_json_write_characteristic(uint16_t service_handle);
+static void start_json_service_if_ready(void);
 
 
 /****************************************************************************
@@ -525,6 +575,59 @@ void server_exec_write_event_env(prepare_type_env_t *prepare_write_env, esp_ble_
     prepare_write_env->prepare_len = 0;
 }
 
+static void add_json_write_characteristic(uint16_t service_handle)
+{
+    esp_bt_uuid_t json_write_uuid;
+    json_write_uuid.len = ESP_UUID_LEN_128;
+    memcpy((void*)json_write_uuid.uuid.uuid128, (void*)JsonWriteCharacteristicUUIDByteReversed, ESP_UUID_LEN_128);
+
+    esp_attr_value_t json_write_val = {
+        .attr_max_len = sizeof(json_write_value),
+        .attr_len = 0,
+        .attr_value = json_write_value,
+    };
+
+    esp_gatt_char_prop_t json_write_property = ESP_GATT_CHAR_PROP_BIT_WRITE_NR |
+                                               ESP_GATT_CHAR_PROP_BIT_WRITE |
+                                               ESP_GATT_CHAR_PROP_BIT_READ;
+    esp_err_t add_json_write_ret = esp_ble_gatts_add_char(service_handle,
+                                                          &json_write_uuid,
+                                                          ESP_GATT_PERM_READ | ESP_GATT_PERM_WRITE,
+                                                          json_write_property,
+                                                          &json_write_val,
+                                                          NULL);
+    if (add_json_write_ret)
+    {
+        ESP_LOGE(GATTS_TAG, "add JSON write char failed, error code =%x", add_json_write_ret);
+    }
+}
+
+static void start_json_service_if_ready(void)
+{
+    if (json_service_started ||
+        json_notify_char_handle == 0 ||
+        json_write_char_handle == 0 ||
+        json_cccd_handle == 0)
+    {
+        return;
+    }
+
+    esp_err_t start_ret = esp_ble_gatts_start_service(gls_profile_tab[PROFILE_A_APP_ID].service_handle);
+    if (start_ret)
+    {
+        ESP_LOGE(GATTS_TAG, "start service failed, error code =%x", start_ret);
+    }
+    else
+    {
+        json_service_started = true;
+        ESP_LOGI(GATTS_TAG, "Service started after full JSON characteristic/descriptor setup");
+        if (adv_config_done == 0)
+        {
+            esp_ble_gap_start_advertising(&adv_params);
+        }
+    }
+}
+
 static void gatts_profile_a_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, esp_ble_gatts_cb_param_t *param) 
 {
     switch (event) 
@@ -567,11 +670,22 @@ static void gatts_profile_a_event_handler(esp_gatts_cb_event_t event, esp_gatt_i
         esp_gatt_rsp_t rsp;
         memset(&rsp, 0, sizeof(esp_gatt_rsp_t));
         rsp.attr_value.handle = param->read.handle;
-        rsp.attr_value.len = 4;
-        rsp.attr_value.value[0] = 0xde;
-        rsp.attr_value.value[1] = 0xed;
-        rsp.attr_value.value[2] = 0xbe;
-        rsp.attr_value.value[3] = 0xef;
+
+        if (param->read.handle == json_write_char_handle || param->read.handle == json_notify_char_handle)
+        {
+            const char *msg = "BLE JSON char";
+            rsp.attr_value.len = strlen(msg);
+            memcpy(rsp.attr_value.value, msg, rsp.attr_value.len);
+        }
+        else
+        {
+            rsp.attr_value.len = 4;
+            rsp.attr_value.value[0] = 0xde;
+            rsp.attr_value.value[1] = 0xed;
+            rsp.attr_value.value[2] = 0xbe;
+            rsp.attr_value.value[3] = 0xef;
+        }
+
         esp_ble_gatts_send_response(gatts_if, param->read.conn_id, param->read.trans_id,
                                     ESP_GATT_OK, &rsp);
         break;
@@ -585,52 +699,79 @@ static void gatts_profile_a_event_handler(esp_gatts_cb_event_t event, esp_gatt_i
             ESP_LOGI(GATTS_TAG, "value len %d, value ", param->write.len);
             //ESP_LOG_BUFFER_HEX(GATTS_TAG, param->write.value, param->write.len);
 
-            // handle Midi data.
-            midi_helper_process_incoming_data(param->write.value, param->write.len, midi_serial_channel, 1);            
+            if (param->write.handle == json_write_char_handle)
+            {
+                ESP_LOGI(GATTS_TAG, "BLE JSON write received, len %d", param->write.len);
+                ble_json_handle_write_payload(param->write.value, param->write.len);
+            }
+            else if (param->write.handle != gls_profile_tab[PROFILE_A_APP_ID].descr_handle &&
+                     param->write.handle != json_cccd_handle)
+            {
+                // handle Midi data.
+                midi_helper_process_incoming_data(param->write.value, param->write.len, midi_serial_channel, 1);
+            }
 
-            if (gls_profile_tab[PROFILE_A_APP_ID].descr_handle == param->write.handle && param->write.len == 2)
+            if ((gls_profile_tab[PROFILE_A_APP_ID].descr_handle == param->write.handle || json_cccd_handle == param->write.handle) && param->write.len == 2)
             {
                 uint16_t descr_value = param->write.value[1]<<8 | param->write.value[0];
                 if (descr_value == 0x0001)
                 {
-                    if (a_property & ESP_GATT_CHAR_PROP_BIT_NOTIFY){
-                        ESP_LOGI(GATTS_TAG, "Notification enable");
-                        uint8_t notify_data[15];
-                        for (int i = 0; i < sizeof(notify_data); ++i)
-                        {
-                            notify_data[i] = i%0xff;
-                        }
-                        //the size of notify_data[] need less than MTU size
-                        esp_ble_gatts_send_indicate(gatts_if, param->write.conn_id, gls_profile_tab[PROFILE_A_APP_ID].char_handle,
-                                                sizeof(notify_data), notify_data, false);
+                    if (param->write.handle == gls_profile_tab[PROFILE_A_APP_ID].descr_handle)
+                    {
+                        ESP_LOGI(GATTS_TAG, "MIDI Notification enable");
+                        portENTER_CRITICAL(&hello_world_state_mux);
+                        hello_world_notify_enabled = true;
+                        portEXIT_CRITICAL(&hello_world_state_mux);
+                        send_hello_world_notification();
+                    }
+                    else
+                    {
+                        ESP_LOGI(GATTS_TAG, "BLE JSON Notification enable");
+                        portENTER_CRITICAL(&hello_world_state_mux);
+                        json_notify_enabled = true;
+                        portEXIT_CRITICAL(&hello_world_state_mux);
                     }
                 }
                 else if (descr_value == 0x0002)
                 {
-                    if (a_property & ESP_GATT_CHAR_PROP_BIT_INDICATE)
+                    if (param->write.handle == gls_profile_tab[PROFILE_A_APP_ID].descr_handle)
                     {
-                        ESP_LOGI(GATTS_TAG, "Indication enable");
-                        uint8_t indicate_data[15];
-                        for (int i = 0; i < sizeof(indicate_data); ++i)
-                        {
-                            indicate_data[i] = i%0xff;
-                        }
-                        
-                        //the size of indicate_data[] need less than MTU size
-                        esp_ble_gatts_send_indicate(gatts_if, param->write.conn_id, gls_profile_tab[PROFILE_A_APP_ID].char_handle,
-                                                sizeof(indicate_data), indicate_data, true);
+                        ESP_LOGI(GATTS_TAG, "MIDI Indication enable");
+                        portENTER_CRITICAL(&hello_world_state_mux);
+                        hello_world_notify_enabled = true;
+                        portEXIT_CRITICAL(&hello_world_state_mux);
+                        send_hello_world_notification();
+                    }
+                    else
+                    {
+                        ESP_LOGI(GATTS_TAG, "BLE JSON Indication enable");
+                        portENTER_CRITICAL(&hello_world_state_mux);
+                        json_notify_enabled = true;
+                        portEXIT_CRITICAL(&hello_world_state_mux);
                     }
                 }
                 else if (descr_value == 0x0000)
                 {
-                    ESP_LOGI(GATTS_TAG, "Notification/Indication disable");
+                    if (param->write.handle == gls_profile_tab[PROFILE_A_APP_ID].descr_handle)
+                    {
+                        ESP_LOGI(GATTS_TAG, "MIDI Notification/Indication disable");
+                        portENTER_CRITICAL(&hello_world_state_mux);
+                        hello_world_notify_enabled = false;
+                        portEXIT_CRITICAL(&hello_world_state_mux);
+                    }
+                    else
+                    {
+                        ESP_LOGI(GATTS_TAG, "BLE JSON Notification/Indication disable");
+                        portENTER_CRITICAL(&hello_world_state_mux);
+                        json_notify_enabled = false;
+                        portEXIT_CRITICAL(&hello_world_state_mux);
+                    }
                 }
                 else
                 {
                     ESP_LOGE(GATTS_TAG, "Unknown descriptor value");
                     ESP_LOG_BUFFER_HEX(GATTS_TAG, param->write.value, param->write.len);
                 }
-
             }
         }
         server_write_event_env(gatts_if, &a_prepare_write_env, param);
@@ -652,19 +793,35 @@ static void gatts_profile_a_event_handler(esp_gatts_cb_event_t event, esp_gatt_i
 
     case ESP_GATTS_CREATE_EVT:
         ESP_LOGI(GATTS_TAG, "Service create, status %d, service_handle %d", param->create.status, param->create.service_handle);
+        if (param->create.status != ESP_GATT_OK)
+        {
+            ESP_LOGE(GATTS_TAG, "Service create failed, status %d", param->create.status);
+            break;
+        }
         gls_profile_tab[PROFILE_A_APP_ID].service_handle = param->create.service_handle;
         gls_profile_tab[PROFILE_A_APP_ID].char_uuid.len = ESP_UUID_LEN_128; 
         memcpy((void*)gls_profile_tab[PROFILE_A_APP_ID].char_uuid.uuid.uuid128, (void*)MidiCharacteristicUUIDByteReversed, ESP_UUID_LEN_128);
 
-        esp_ble_gatts_start_service(gls_profile_tab[PROFILE_A_APP_ID].service_handle);
-        a_property = ESP_GATT_CHAR_PROP_BIT_READ | ESP_GATT_CHAR_PROP_BIT_WRITE_NR | ESP_GATT_CHAR_PROP_BIT_NOTIFY;
-        esp_err_t add_char_ret = esp_ble_gatts_add_char(gls_profile_tab[PROFILE_A_APP_ID].service_handle, &gls_profile_tab[PROFILE_A_APP_ID].char_uuid,
-                                                        ESP_GATT_PERM_READ | ESP_GATT_PERM_WRITE,
-                                                        a_property,
-                                                        &gatts_demo_char1_val, NULL);
-        if (add_char_ret)
+        esp_bt_uuid_t json_notify_uuid;
+        json_notify_uuid.len = ESP_UUID_LEN_128;
+        memcpy((void*)json_notify_uuid.uuid.uuid128, (void*)JsonNotifyCharacteristicUUIDByteReversed, ESP_UUID_LEN_128);
+
+        esp_attr_value_t json_notify_val = {
+            .attr_max_len = sizeof(json_notify_value),
+            .attr_len = 0,
+            .attr_value = json_notify_value,
+        };
+
+        esp_gatt_char_prop_t json_notify_property = ESP_GATT_CHAR_PROP_BIT_READ | ESP_GATT_CHAR_PROP_BIT_INDICATE;
+        esp_err_t add_json_notify_ret = esp_ble_gatts_add_char(gls_profile_tab[PROFILE_A_APP_ID].service_handle,
+                                                               &json_notify_uuid,
+                                                               ESP_GATT_PERM_READ,
+                                                               json_notify_property,
+                                                               &json_notify_val,
+                                                               NULL);
+        if (add_json_notify_ret)
         {
-            ESP_LOGE(GATTS_TAG, "add char failed, error code =%x",add_char_ret);
+            ESP_LOGE(GATTS_TAG, "add JSON notify char failed, error code =%x", add_json_notify_ret);
         }
         break;
 
@@ -678,34 +835,99 @@ static void gatts_profile_a_event_handler(esp_gatts_cb_event_t event, esp_gatt_i
 
         ESP_LOGI(GATTS_TAG, "Characteristic add, status %d, attr_handle %d, service_handle %d",
                 param->add_char.status, param->add_char.attr_handle, param->add_char.service_handle);
-        gls_profile_tab[PROFILE_A_APP_ID].char_handle = param->add_char.attr_handle;
-        gls_profile_tab[PROFILE_A_APP_ID].descr_uuid.len = ESP_UUID_LEN_16;
-        gls_profile_tab[PROFILE_A_APP_ID].descr_uuid.uuid.uuid16 = ESP_GATT_UUID_CHAR_CLIENT_CONFIG;
-        
+        if (param->add_char.status != ESP_GATT_OK)
+        {
+            ESP_LOGE(GATTS_TAG, "Characteristic add failed, status %d", param->add_char.status);
+            break;
+        }
+
+        if (param->add_char.char_uuid.len == ESP_UUID_LEN_128 &&
+            memcmp(param->add_char.char_uuid.uuid.uuid128, JsonWriteCharacteristicUUIDByteReversed, ESP_UUID_LEN_128) == 0)
+        {
+            json_write_char_handle = param->add_char.attr_handle;
+        }
+        else if (param->add_char.char_uuid.len == ESP_UUID_LEN_128 &&
+                 memcmp(param->add_char.char_uuid.uuid.uuid128, JsonNotifyCharacteristicUUIDByteReversed, ESP_UUID_LEN_128) == 0)
+        {
+            json_notify_char_handle = param->add_char.attr_handle;
+            esp_bt_uuid_t descr_uuid = {
+                .len = ESP_UUID_LEN_16,
+                .uuid = {.uuid16 = ESP_GATT_UUID_CHAR_CLIENT_CONFIG}
+            };
+            esp_attr_value_t cccd_val = {
+                .attr_max_len = sizeof(json_cccd_value),
+                .attr_len = sizeof(json_cccd_value),
+                .attr_value = json_cccd_value,
+            };
+            esp_attr_control_t cccd_control = {
+                .auto_rsp = ESP_GATT_AUTO_RSP,
+            };
+
+            esp_err_t add_descr_ret = esp_ble_gatts_add_char_descr(param->add_char.service_handle,
+                                                                    &descr_uuid,
+                                                                    ESP_GATT_PERM_READ | ESP_GATT_PERM_WRITE,
+                                                                    &cccd_val,
+                                                                    &cccd_control);
+            if (add_descr_ret)
+            {
+                ESP_LOGE(GATTS_TAG, "add JSON notify char descr failed, error code =%x", add_descr_ret);
+            }
+        }
+        else
+        {
+            ESP_LOGW(GATTS_TAG, "Unexpected char added, uuid does not match JSON read/write characteristics");
+        }
+
+        start_json_service_if_ready();
+
         esp_err_t get_attr_ret = esp_ble_gatts_get_attr_value(param->add_char.attr_handle,  &length, &prf_char);
         if (get_attr_ret == ESP_FAIL)
         {
             ESP_LOGE(GATTS_TAG, "ILLEGAL HANDLE");
         }
 
-        ESP_LOGI(GATTS_TAG, "the gatts demo char length = %x", length);
+        ESP_LOGI(GATTS_TAG, "the gatts char length = %x", length);
         for(int i = 0; i < length; i++)
         {
             ESP_LOGI(GATTS_TAG, "prf_char[%x] =%x",i,prf_char[i]);
-        }
-        esp_err_t add_descr_ret = esp_ble_gatts_add_char_descr(gls_profile_tab[PROFILE_A_APP_ID].service_handle, &gls_profile_tab[PROFILE_A_APP_ID].descr_uuid,
-                                                                ESP_GATT_PERM_READ | ESP_GATT_PERM_WRITE, NULL, NULL);
-        if (add_descr_ret)
-        {
-            ESP_LOGE(GATTS_TAG, "add char descr failed, error code =%x", add_descr_ret);
         }
         break;
     }
     
     case ESP_GATTS_ADD_CHAR_DESCR_EVT:
-        gls_profile_tab[PROFILE_A_APP_ID].descr_handle = param->add_char_descr.attr_handle;
-        ESP_LOGI(GATTS_TAG, "Descriptor add, status %d, attr_handle %d, service_handle %d",
-                 param->add_char_descr.status, param->add_char_descr.attr_handle, param->add_char_descr.service_handle);
+        if (param->add_char_descr.status != ESP_GATT_OK)
+        {
+            ESP_LOGE(GATTS_TAG, "Descriptor add failed, status %d", param->add_char_descr.status);
+            break;
+        }
+
+        if (param->add_char_descr.descr_uuid.len == ESP_UUID_LEN_16 &&
+            param->add_char_descr.descr_uuid.uuid.uuid16 == ESP_GATT_UUID_CHAR_CLIENT_CONFIG)
+        {
+            if (json_cccd_handle == 0)
+            {
+                json_cccd_handle = param->add_char_descr.attr_handle;
+                ESP_LOGI(GATTS_TAG, "CCCD added for JSON notify, status %d, attr_handle %d, service_handle %d",
+                         param->add_char_descr.status, param->add_char_descr.attr_handle, param->add_char_descr.service_handle);
+                add_json_write_characteristic(param->add_char_descr.service_handle);
+            }
+            else
+            {
+                ESP_LOGI(GATTS_TAG, "Extra CCCD added, attr_handle %d, service_handle %d",
+                         param->add_char_descr.attr_handle, param->add_char_descr.service_handle);
+            }
+        }
+        else
+        {
+            uint16_t uuid16 = 0;
+            if (param->add_char_descr.descr_uuid.len == ESP_UUID_LEN_16) {
+                uuid16 = param->add_char_descr.descr_uuid.uuid.uuid16;
+            }
+            ESP_LOGI(GATTS_TAG, "Descriptor added, uuid 0x%04x, attr_handle %d, service_handle %d",
+                     uuid16, param->add_char_descr.attr_handle, param->add_char_descr.service_handle);
+        }
+
+        start_json_service_if_ready();
         break;
 
     case ESP_GATTS_DELETE_EVT:
@@ -719,7 +941,7 @@ static void gatts_profile_a_event_handler(esp_gatts_cb_event_t event, esp_gatt_i
     case ESP_GATTS_STOP_EVT:
         break;
 
-    case ESP_GATTS_CONNECT_EVT: 
+    case ESP_GATTS_CONNECT_EVT:
     {
         esp_ble_conn_update_params_t conn_params = {0};
         memcpy(conn_params.bda, param->connect.remote_bda, sizeof(esp_bd_addr_t));
@@ -733,10 +955,23 @@ static void gatts_profile_a_event_handler(esp_gatts_cb_event_t event, esp_gatt_i
         // start sent the update connection parameters to the peer device.
         esp_ble_gap_update_conn_params(&conn_params);
 
+        portENTER_CRITICAL(&hello_world_state_mux);
+        hello_world_connected = true;
+        json_ble_congested = false;
+        json_chunk_ack_received = false;
+        hello_world_conn_id = param->connect.conn_id;
+        hello_world_gatts_if = gatts_if;
+        portEXIT_CRITICAL(&hello_world_state_mux);
+
+        if (hello_world_task_handle == NULL)
+        {
+            xTaskCreate(hello_world_notify_task, "hello_world_notify", 4096, NULL, tskIDLE_PRIORITY + 1, &hello_world_task_handle);
+        }
+
         ESP_LOGI(GATTS_TAG, "Connected, conn_id %u, remote "ESP_BD_ADDR_STR"", param->connect.conn_id, ESP_BD_ADDR_HEX(param->connect.remote_bda));
-        
-        // start security connect with peer device when receive the connect event sent by the master
-        esp_ble_set_encryption(param->connect.remote_bda, ESP_BLE_SEC_ENCRYPT_MITM);
+
+        // no forced MITM encryption here; allow iOS to connect without an extra BLE pairing step
+        // esp_ble_set_encryption(param->connect.remote_bda, ESP_BLE_SEC_ENCRYPT_MITM);
 
         break;
     }
@@ -745,10 +980,30 @@ static void gatts_profile_a_event_handler(esp_gatts_cb_event_t event, esp_gatt_i
         ESP_LOGI(GATTS_TAG, "Disconnected, remote "ESP_BD_ADDR_STR", reason 0x%02x", ESP_BD_ADDR_HEX(param->disconnect.remote_bda), param->disconnect.reason);
         esp_ble_gap_start_advertising(&adv_params);
         control_set_bt_status(0);
+        portENTER_CRITICAL(&hello_world_state_mux);
+        hello_world_connected = false;
+        hello_world_notify_enabled = false;
+        json_notify_enabled = false;
+        json_ble_congested = false;
+        json_ble_send_in_progress = false;
+        json_indication_pending = false;
+        json_indication_status = ESP_GATT_OK;
+        json_chunk_ack_received = false;
+        hello_world_conn_id = 0;
+        hello_world_gatts_if = ESP_GATT_IF_NONE;
+        portEXIT_CRITICAL(&hello_world_state_mux);
+        ble_json_reset_rx_chunk_assembly();
         break;
 
     case ESP_GATTS_CONF_EVT:
         ESP_LOGI(GATTS_TAG, "Confirm receive, status %d, attr_handle %d", param->conf.status, param->conf.handle);
+        portENTER_CRITICAL(&hello_world_state_mux);
+        if (param->conf.handle == json_notify_char_handle)
+        {
+            json_indication_pending = false;
+            json_indication_status = param->conf.status;
+        }
+        portEXIT_CRITICAL(&hello_world_state_mux);
         if (param->conf.status != ESP_GATT_OK)
         {
             ESP_LOG_BUFFER_HEX(GATTS_TAG, param->conf.value, param->conf.len);
@@ -759,7 +1014,14 @@ static void gatts_profile_a_event_handler(esp_gatts_cb_event_t event, esp_gatt_i
     case ESP_GATTS_CANCEL_OPEN_EVT:
     case ESP_GATTS_CLOSE_EVT:
     case ESP_GATTS_LISTEN_EVT:
+        break;
+
     case ESP_GATTS_CONGEST_EVT:
+        portENTER_CRITICAL(&hello_world_state_mux);
+        json_ble_congested = param->congest.congested;
+        portEXIT_CRITICAL(&hello_world_state_mux);
+        ESP_LOGI(GATTS_TAG, "GATT congestion state: %d", param->congest.congested);
+        break;
     default:
         break;
     }
@@ -1155,7 +1417,7 @@ static void esp_gap_cb(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *par
     {
         case ESP_GAP_BLE_ADV_DATA_SET_COMPLETE_EVT:
             adv_config_done &= (~adv_config_flag);
-            if (adv_config_done == 0)
+            if (adv_config_done == 0 && json_service_started)
             {
                 esp_ble_gap_start_advertising(&adv_params);
             }
@@ -1163,7 +1425,7 @@ static void esp_gap_cb(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *par
 
         case ESP_GAP_BLE_SCAN_RSP_DATA_SET_COMPLETE_EVT:
             adv_config_done &= (~scan_rsp_config_flag);
-            if (adv_config_done == 0)
+            if (adv_config_done == 0 && json_service_started)
             {
                 esp_ble_gap_start_advertising(&adv_params);
             }
@@ -1463,6 +1725,453 @@ static void InitDeviceList(void)
     ESP_LOGI(GATTC_TAG, "Device List length: %d", remote_device_names_length);
 }
 
+static bool send_hello_world_notification(void)
+{
+    bool can_notify = false;
+    esp_gatt_if_t gatts_if = ESP_GATT_IF_NONE;
+    uint16_t conn_id = 0;
+    uint16_t char_handle = 0;
+
+    portENTER_CRITICAL(&hello_world_state_mux);
+    can_notify = hello_world_connected && hello_world_notify_enabled && gls_profile_tab[PROFILE_A_APP_ID].char_handle != 0;
+    if (can_notify)
+    {
+        gatts_if = hello_world_gatts_if;
+        conn_id = hello_world_conn_id;
+        char_handle = gls_profile_tab[PROFILE_A_APP_ID].char_handle;
+    }
+    portEXIT_CRITICAL(&hello_world_state_mux);
+
+    if (!can_notify)
+    {
+        return false;
+    }
+
+    char hello_text[32];
+    int len = snprintf(hello_text, sizeof(hello_text), "Hello world %lu", ++hello_world_counter);
+    if (len <= 0 || len > sizeof(hello_text))
+    {
+        return false;
+    }
+
+    esp_err_t err = esp_ble_gatts_send_indicate(gatts_if, conn_id, char_handle, (uint16_t)len, (uint8_t*)hello_text, false);
+    if (err != ESP_OK)
+    {
+        ESP_LOGE(GATTS_TAG, "Failed to send Hello world notification: %s", esp_err_to_name(err));
+        return false;
+    }
+
+    ESP_LOGI(GATTS_TAG, "Sent Hello world message: %s", hello_text);
+    return true;
+}
+
+static bool send_ble_json_notification(esp_gatt_if_t gatts_if, uint16_t conn_id, uint16_t char_handle, const uint8_t *data, uint16_t len)
+{
+    for (uint8_t retry = 0; retry < 50; retry++)
+    {
+        bool congested;
+
+        portENTER_CRITICAL(&hello_world_state_mux);
+        congested = json_ble_congested;
+        portEXIT_CRITICAL(&hello_world_state_mux);
+
+        if (congested)
+        {
+            vTaskDelay(pdMS_TO_TICKS(10));
+            continue;
+        }
+
+        portENTER_CRITICAL(&hello_world_state_mux);
+        json_indication_pending = true;
+        json_indication_status = ESP_GATT_OK;
+        portEXIT_CRITICAL(&hello_world_state_mux);
+
+        esp_err_t err = esp_ble_gatts_send_indicate(gatts_if, conn_id, char_handle, len, (uint8_t*)data, true);
+        if (err == ESP_OK)
+        {
+            for (uint8_t wait = 0; wait < 100; wait++)
+            {
+                bool pending;
+                esp_gatt_status_t status;
+
+                portENTER_CRITICAL(&hello_world_state_mux);
+                pending = json_indication_pending;
+                status = json_indication_status;
+                portEXIT_CRITICAL(&hello_world_state_mux);
+
+                if (!pending)
+                {
+                    if (status == ESP_GATT_OK)
+                    {
+                        vTaskDelay(pdMS_TO_TICKS(BLE_JSON_NOTIFY_DELAY_MS));
+                        return true;
+                    }
+
+                    ESP_LOGW(GATTS_TAG, "BLE JSON indication confirm failed: %d", status);
+                    break;
+                }
+
+                vTaskDelay(pdMS_TO_TICKS(5));
+            }
+
+            portENTER_CRITICAL(&hello_world_state_mux);
+            if (json_indication_pending)
+            {
+                json_indication_pending = false;
+            }
+            portEXIT_CRITICAL(&hello_world_state_mux);
+            ESP_LOGW(GATTS_TAG, "BLE JSON indication confirm timeout");
+        }
+        else
+        {
+            portENTER_CRITICAL(&hello_world_state_mux);
+            json_indication_pending = false;
+            portEXIT_CRITICAL(&hello_world_state_mux);
+        }
+
+        ESP_LOGW(GATTS_TAG, "BLE JSON notification send retry %u failed: %s", retry + 1, esp_err_to_name(err));
+        vTaskDelay(pdMS_TO_TICKS(10));
+    }
+
+    ESP_LOGE(GATTS_TAG, "Failed to send BLE JSON notification after retries");
+    return false;
+}
+
+bool midi_send_ble_json(const char *payload)
+{
+    if (!payload)
+    {
+        return false;
+    }
+
+    bool can_notify = false;
+    esp_gatt_if_t gatts_if = ESP_GATT_IF_NONE;
+    uint16_t conn_id = 0;
+    uint16_t char_handle = 0;
+
+    portENTER_CRITICAL(&hello_world_state_mux);
+    can_notify = hello_world_connected && json_notify_enabled && json_notify_char_handle != 0;
+    if (can_notify)
+    {
+        gatts_if = hello_world_gatts_if;
+        conn_id = hello_world_conn_id;
+        char_handle = json_notify_char_handle;
+    }
+    portEXIT_CRITICAL(&hello_world_state_mux);
+
+    if (!can_notify)
+    {
+        return false;
+    }
+
+    portENTER_CRITICAL(&hello_world_state_mux);
+    if (json_ble_send_in_progress)
+    {
+        portEXIT_CRITICAL(&hello_world_state_mux);
+        ESP_LOGD(GATTS_TAG, "BLE JSON send already in progress, dropping payload");
+        return false;
+    }
+    json_ble_send_in_progress = true;
+    portEXIT_CRITICAL(&hello_world_state_mux);
+
+    bool sent = false;
+    size_t len = strlen(payload);
+    if (len == 0)
+    {
+        ESP_LOGW(GATTS_TAG, "BLE JSON payload length invalid: %zu", len);
+        goto cleanup;
+    }
+
+    if (len <= BLE_JSON_NOTIFY_CHUNK_MAX)
+    {
+        if (!send_ble_json_notification(gatts_if, conn_id, char_handle, (const uint8_t*)payload, (uint16_t)len))
+        {
+            goto cleanup;
+        }
+
+        ESP_LOGI(GATTS_TAG, "Sent BLE JSON notification: %s", payload);
+        sent = true;
+        goto cleanup;
+    }
+
+    uint16_t chunk_count = (uint16_t)((len + BLE_JSON_NOTIFY_CHUNK_MAX - 1) / BLE_JSON_NOTIFY_CHUNK_MAX);
+    uint32_t message_id = ++hello_world_counter;
+
+    ESP_LOGI(GATTS_TAG, "Sending BLE JSON in %u chunks, len %zu", chunk_count, len);
+
+    for (uint16_t chunk_index = 0; chunk_index < chunk_count; chunk_index++)
+    {
+        size_t offset = (size_t)chunk_index * BLE_JSON_NOTIFY_CHUNK_MAX;
+        size_t chunk_len = len - offset;
+        if (chunk_len > BLE_JSON_NOTIFY_CHUNK_MAX)
+        {
+            chunk_len = BLE_JSON_NOTIFY_CHUNK_MAX;
+        }
+
+        uint8_t chunk[BLE_JSON_NOTIFY_CHUNK_MAX + BLE_JSON_CHUNK_HEADER_MAX];
+        int header_len = snprintf((char*)chunk, BLE_JSON_CHUNK_HEADER_MAX, "#TJCHUNK:%" PRIu32 ":%u:%u:", message_id, chunk_index, chunk_count);
+        if (header_len <= 0 || header_len >= BLE_JSON_CHUNK_HEADER_MAX)
+        {
+            ESP_LOGE(GATTS_TAG, "BLE JSON chunk header too long");
+            goto cleanup;
+        }
+
+        memcpy(chunk + header_len, payload + offset, chunk_len);
+        uint16_t packet_len = (uint16_t)(header_len + chunk_len);
+        if (!send_ble_json_notification(gatts_if, conn_id, char_handle, chunk, packet_len))
+        {
+            goto cleanup;
+        }
+    }
+
+    sent = true;
+
+cleanup:
+    portENTER_CRITICAL(&hello_world_state_mux);
+    json_ble_send_in_progress = false;
+    portEXIT_CRITICAL(&hello_world_state_mux);
+    return sent;
+}
+
+static void ble_json_queue_payload(char *payload)
+{
+    if (!payload)
+    {
+        return;
+    }
+
+    if (ble_json_rx_queue)
+    {
+        ble_json_rx_message_t message = {
+            .payload = payload,
+        };
+
+        if (xQueueSend(ble_json_rx_queue, &message, 0) == pdPASS)
+        {
+            return;
+        }
+
+        ESP_LOGW(GATTS_TAG, "BLE JSON RX queue full, dropping command");
+    }
+    else
+    {
+        ESP_LOGW(GATTS_TAG, "BLE JSON RX queue not ready");
+    }
+
+    free(payload);
+}
+
+static void ble_json_reset_rx_chunk_assembly(void)
+{
+    if (json_rx_chunk_parts)
+    {
+        for (uint16_t index = 0; index < json_rx_chunk_count; index++)
+        {
+            free(json_rx_chunk_parts[index]);
+        }
+        free(json_rx_chunk_parts);
+    }
+
+    free(json_rx_chunk_lengths);
+    json_rx_chunk_parts = NULL;
+    json_rx_chunk_lengths = NULL;
+    json_rx_chunk_message_id = 0;
+    json_rx_chunk_count = 0;
+    json_rx_chunk_received = 0;
+    json_rx_chunk_total_len = 0;
+}
+
+static void ble_json_handle_write_payload(const uint8_t *data, uint16_t len)
+{
+    if (!data || len == 0)
+    {
+        return;
+    }
+
+    char *json_payload = malloc((size_t)len + 1);
+    if (!json_payload)
+    {
+        ESP_LOGE(GATTS_TAG, "BLE JSON RX malloc failed");
+        return;
+    }
+
+    memcpy(json_payload, data, len);
+    json_payload[len] = '\0';
+
+    if (strncmp(json_payload, "#TJACK:", 7) == 0)
+    {
+        char *ack_index_text = strchr(json_payload + 7, ':');
+        if (ack_index_text)
+        {
+            *ack_index_text = '\0';
+            ack_index_text++;
+
+            uint32_t ack_message_id = (uint32_t)strtoul(json_payload + 7, NULL, 10);
+            uint16_t ack_index = (uint16_t)strtoul(ack_index_text, NULL, 10);
+
+            portENTER_CRITICAL(&hello_world_state_mux);
+            json_chunk_ack_message_id = ack_message_id;
+            json_chunk_ack_index = ack_index;
+            json_chunk_ack_received = true;
+            portEXIT_CRITICAL(&hello_world_state_mux);
+            ESP_LOGD(GATTS_TAG, "BLE JSON chunk ack %" PRIu32 ":%u", ack_message_id, ack_index);
+        }
+        free(json_payload);
+        return;
+    }
+
+    if (strncmp(json_payload, "#TJCHUNK:", 9) != 0)
+    {
+        ble_json_queue_payload(json_payload);
+        return;
+    }
+
+    char *delimiters[4] = {0};
+    char *scan = json_payload;
+    for (uint8_t index = 0; index < 4; index++)
+    {
+        delimiters[index] = strchr(scan, ':');
+        if (!delimiters[index])
+        {
+            ESP_LOGW(GATTS_TAG, "Malformed BLE JSON RX chunk header");
+            free(json_payload);
+            return;
+        }
+        scan = delimiters[index] + 1;
+    }
+
+    *delimiters[1] = '\0';
+    *delimiters[2] = '\0';
+    *delimiters[3] = '\0';
+
+    uint32_t message_id = (uint32_t)strtoul(delimiters[0] + 1, NULL, 10);
+    uint16_t chunk_index = (uint16_t)strtoul(delimiters[1] + 1, NULL, 10);
+    uint16_t chunk_count = (uint16_t)strtoul(delimiters[2] + 1, NULL, 10);
+    size_t payload_offset = (size_t)((delimiters[3] + 1) - json_payload);
+    if (payload_offset > len)
+    {
+        ESP_LOGW(GATTS_TAG, "Invalid BLE JSON RX chunk payload offset");
+        free(json_payload);
+        return;
+    }
+    size_t chunk_len = len - payload_offset;
+
+    if (chunk_count == 0 || chunk_count > BLE_JSON_RX_CHUNK_COUNT_MAX || chunk_index >= chunk_count)
+    {
+        ESP_LOGW(GATTS_TAG, "Invalid BLE JSON RX chunk %" PRIu32 ":%u/%u", message_id, chunk_index, chunk_count);
+        free(json_payload);
+        return;
+    }
+
+    if (json_rx_chunk_message_id != message_id || json_rx_chunk_count != chunk_count)
+    {
+        ble_json_reset_rx_chunk_assembly();
+        json_rx_chunk_parts = calloc(chunk_count, sizeof(char*));
+        json_rx_chunk_lengths = calloc(chunk_count, sizeof(uint16_t));
+        if (!json_rx_chunk_parts || !json_rx_chunk_lengths)
+        {
+            ESP_LOGE(GATTS_TAG, "BLE JSON RX chunk assembly malloc failed");
+            ble_json_reset_rx_chunk_assembly();
+            free(json_payload);
+            return;
+        }
+        json_rx_chunk_message_id = message_id;
+        json_rx_chunk_count = chunk_count;
+    }
+
+    if (json_rx_chunk_total_len + chunk_len > BLE_JSON_RX_PAYLOAD_MAX)
+    {
+        ESP_LOGW(GATTS_TAG, "BLE JSON RX chunked payload too large");
+        ble_json_reset_rx_chunk_assembly();
+        free(json_payload);
+        return;
+    }
+
+    if (!json_rx_chunk_parts[chunk_index])
+    {
+        json_rx_chunk_received++;
+    }
+    else
+    {
+        json_rx_chunk_total_len -= json_rx_chunk_lengths[chunk_index];
+        free(json_rx_chunk_parts[chunk_index]);
+    }
+
+    char *chunk_copy = malloc(chunk_len);
+    if (!chunk_copy)
+    {
+        ESP_LOGE(GATTS_TAG, "BLE JSON RX chunk malloc failed");
+        ble_json_reset_rx_chunk_assembly();
+        free(json_payload);
+        return;
+    }
+
+    memcpy(chunk_copy, data + payload_offset, chunk_len);
+    json_rx_chunk_parts[chunk_index] = chunk_copy;
+    json_rx_chunk_lengths[chunk_index] = (uint16_t)chunk_len;
+    json_rx_chunk_total_len += chunk_len;
+    ESP_LOGI(GATTS_TAG, "Received BLE JSON RX chunk %u/%u for %" PRIu32, chunk_index + 1, chunk_count, message_id);
+    free(json_payload);
+
+    if (json_rx_chunk_received != json_rx_chunk_count)
+    {
+        return;
+    }
+
+    char *complete_payload = malloc(json_rx_chunk_total_len + 1);
+    if (!complete_payload)
+    {
+        ESP_LOGE(GATTS_TAG, "BLE JSON RX complete malloc failed");
+        ble_json_reset_rx_chunk_assembly();
+        return;
+    }
+
+    size_t write_offset = 0;
+    for (uint16_t index = 0; index < json_rx_chunk_count; index++)
+    {
+        memcpy(complete_payload + write_offset, json_rx_chunk_parts[index], json_rx_chunk_lengths[index]);
+        write_offset += json_rx_chunk_lengths[index];
+    }
+    complete_payload[write_offset] = '\0';
+
+    ESP_LOGI(GATTS_TAG, "Reassembled BLE JSON RX payload for %" PRIu32 ", len %zu", json_rx_chunk_message_id, write_offset);
+    ble_json_reset_rx_chunk_assembly();
+    ble_json_queue_payload(complete_payload);
+}
+
+static void hello_world_notify_task(void *param)
+{
+    const TickType_t delay = pdMS_TO_TICKS(5000);
+
+    while (1)
+    {
+        send_hello_world_notification();
+        vTaskDelay(delay);
+    }
+}
+
+static void ble_json_rx_task(void *param)
+{
+    while (!wifi_config_ready())
+    {
+        vTaskDelay(pdMS_TO_TICKS(50));
+    }
+
+    ble_json_rx_message_t message;
+
+    while (1)
+    {
+        if (xQueueReceive(ble_json_rx_queue, &message, portMAX_DELAY) == pdPASS)
+        {
+            if (message.payload)
+            {
+                wifi_handle_ble_json(message.payload);
+                free(message.payload);
+            }
+        }
+    }
+}
+
 /****************************************************************************
 * NAME:        
 * DESCRIPTION: 
@@ -1569,20 +2278,32 @@ static void init_BLE(void)
             return;
         }
 
-        // set the security iocap & auth_req & key size & init key response key parameters to the stack
-        esp_ble_auth_req_t auth_req = ESP_LE_AUTH_REQ_SC_MITM_BOND;     //bonding with peer device after authentication
-        esp_ble_io_cap_t iocap = ESP_IO_CAP_NONE;           //set the IO capability to No output No input
+        if (ble_json_rx_queue == NULL)
+        {
+            ble_json_rx_queue = xQueueCreate(BLE_JSON_RX_QUEUE_LEN, sizeof(ble_json_rx_message_t));
+            if (ble_json_rx_queue == NULL)
+            {
+                ESP_LOGE(GATTS_TAG, "Failed to create BLE JSON RX queue");
+                return;
+            }
+        }
 
-        uint8_t key_size = 16;      //the key size should be 7~16 bytes
+        if (ble_json_rx_task_handle == NULL)
+        {
+            xTaskCreate(ble_json_rx_task, "ble_json_rx", 4096, NULL, tskIDLE_PRIORITY + 1, &ble_json_rx_task_handle);
+        }
+
+        // set the security iocap & auth_req & key size & init key response key parameters to the stack
+        esp_ble_auth_req_t auth_req = ESP_LE_AUTH_NO_BOND;     // no bonding required, simplify iOS connection
+        esp_ble_io_cap_t iocap = ESP_IO_CAP_NONE;           // set the IO capability to No output No input
+
+        uint8_t key_size = 16;      // the key size should be 7~16 bytes
         uint8_t init_key = ESP_BLE_ENC_KEY_MASK | ESP_BLE_ID_KEY_MASK;
         uint8_t rsp_key = ESP_BLE_ENC_KEY_MASK | ESP_BLE_ID_KEY_MASK;
         
-        //set static passkey
-        uint32_t passkey = 123456;
         uint8_t auth_option = ESP_BLE_ONLY_ACCEPT_SPECIFIED_AUTH_DISABLE;
         uint8_t oob_support = ESP_BLE_OOB_DISABLE;
 
-        esp_ble_gap_set_security_param(ESP_BLE_SM_SET_STATIC_PASSKEY, &passkey, sizeof(uint32_t));
         esp_ble_gap_set_security_param(ESP_BLE_SM_AUTHEN_REQ_MODE, &auth_req, sizeof(uint8_t));
         esp_ble_gap_set_security_param(ESP_BLE_SM_IOCAP_MODE, &iocap, sizeof(uint8_t));
         esp_ble_gap_set_security_param(ESP_BLE_SM_MAX_KEY_SIZE, &key_size, sizeof(uint8_t));
