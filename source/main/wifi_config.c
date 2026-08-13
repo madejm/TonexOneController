@@ -2035,10 +2035,13 @@ static void wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t e
 *****************************************************************************/
 static void wifi_init_sta(void)
 {
+    esp_netif_t* sta_netif;
+    char host_name[MAX_MDNS_NAME];
+
     ESP_ERROR_CHECK(esp_netif_init());
 
     ESP_ERROR_CHECK(esp_event_loop_create_default());
-    esp_netif_create_default_wifi_sta();
+    sta_netif = esp_netif_create_default_wifi_sta();
 
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
     ESP_ERROR_CHECK(esp_wifi_init(&cfg));
@@ -2070,6 +2073,11 @@ static void wifi_init_sta(void)
     // get credentials from config
     control_get_config_item_string(CONFIG_ITEM_WIFI_SSID, pWebConfig->wifi_ssid);
     control_get_config_item_string(CONFIG_ITEM_WIFI_PASSWORD, pWebConfig->wifi_password);
+
+    // use the configured mDNS name as the DHCP hostname as well, so the device
+    // is identifiable in the router instead of appearing as "espressif"    
+    control_get_config_item_string(CONFIG_ITEM_MDNS_NAME, host_name);
+    esp_netif_set_hostname(sta_netif, host_name);
 
     // set SSID and password
     strcpy((char*)wifi_config.sta.ssid, pWebConfig->wifi_ssid);
@@ -2103,7 +2111,6 @@ static void wifi_init_sta(void)
     {
         ESP_LOGE(TAG, "UNEXPECTED EVENT");
     }
-    vEventGroupDelete(s_wifi_event_group);
 }
 
 /****************************************************************************
