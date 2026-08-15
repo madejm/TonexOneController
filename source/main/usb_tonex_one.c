@@ -501,7 +501,7 @@ static esp_err_t usb_tonex_one_set_preset_in_slot(uint16_t preset, Slot newSlot,
     }
 
     // make sure direct monitoring is on so sound not muted from USB connection
-    TonexData->Message.PedalData.StateData[TonexData->Message.PedalData.StateDataLength - TONEX_STATE_OFFSET_END_DIRECT_MONITOR] = 1;
+    //Removed now, allowing config from UI. TonexData->Message.PedalData.StateData[TonexData->Message.PedalData.StateDataLength - TONEX_STATE_OFFSET_END_DIRECT_MONITOR] = 1;
 
     // check if setting same preset twice will set bypass
     if (control_get_config_item_int(CONFIG_ITEM_TOGGLE_BYPASS))
@@ -598,7 +598,7 @@ static esp_err_t usb_tonex_one_set_ab_slots(uint16_t preset_a, uint16_t preset_b
     TonexData->Message.PedalData.StateData[TONEX_STATE_OFFSET_START_STOMP_MODE] = 0;
 
     // make sure direct monitoring is on so sound not muted from USB connection
-    TonexData->Message.PedalData.StateData[len - TONEX_STATE_OFFSET_END_DIRECT_MONITOR] = 1;
+    // removed now, allowing config from UI. TonexData->Message.PedalData.StateData[len - TONEX_STATE_OFFSET_END_DIRECT_MONITOR] = 1;
 
     // set both slot presets
     TonexData->Message.PedalData.StateData[len - TONEX_STATE_OFFSET_END_SLOT_A_PRESET] = preset_a;
@@ -749,6 +749,13 @@ static esp_err_t usb_tonex_one_modify_global(uint16_t global_val, float value)
             // bit of a hack here. Return fail code, so caller can avoid sending the state data unneccessarily
             res = ESP_FAIL;
         } break;
+
+        case TONEX_GLOBAL_DIRECT_MONITOR:
+        {
+            // modify the direct monitor value in state
+            TonexData->Message.PedalData.StateData[TonexData->Message.PedalData.StateDataLength - TONEX_STATE_OFFSET_END_DIRECT_MONITOR] = (uint8_t)value;
+            res = ESP_OK;
+        } break;
     }
 
     return res;
@@ -790,6 +797,8 @@ static TonexStatus usb_tonex_one_parse_state(uint8_t* unframed, uint16_t length,
         param_ptr[TONEX_GLOBAL_TUNING_REFERENCE].Value = (float)freq;
 
         param_ptr[TONEX_GLOBAL_BYPASS].Value = (float)TonexData->Message.PedalData.StateData[TonexData->Message.PedalData.StateDataLength - TONEX_STATE_OFFSET_END_BYPASS_MODE];
+
+        param_ptr[TONEX_GLOBAL_DIRECT_MONITOR].Value = (float)TonexData->Message.PedalData.StateData[TonexData->Message.PedalData.StateDataLength - TONEX_STATE_OFFSET_END_DIRECT_MONITOR];
 
         tonex_params_release_locked_access();
     }

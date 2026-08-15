@@ -2392,10 +2392,35 @@ void create_screen_settings() {
                             lv_obj_set_style_bg_color(obj, lv_color_hex(0x513d2b), LV_PART_INDICATOR | LV_STATE_CHECKED);
                         }
                         {
+                            // ui_DirectMonitorLabel
+                            lv_obj_t *obj = lv_label_create(parent_obj);
+                            objects.ui_direct_monitor_label = obj;
+                            lv_obj_set_pos(obj, 13, -92);
+                            lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
+                            lv_obj_clear_flag(obj, LV_OBJ_FLAG_SCROLLABLE);
+                            lv_obj_set_style_text_font(obj, &lv_font_montserrat_24, LV_PART_MAIN | LV_STATE_DEFAULT);
+                            lv_obj_set_style_text_align(obj, LV_TEXT_ALIGN_AUTO, LV_PART_MAIN | LV_STATE_DEFAULT);
+                            lv_obj_set_style_align(obj, LV_ALIGN_LEFT_MID, LV_PART_MAIN | LV_STATE_DEFAULT);
+                            lv_label_set_text_static(obj, "Dir Monitor");
+                        }
+                        {
+                            // ui_DirectMonitorSwitch
+                            lv_obj_t *obj = lv_switch_create(parent_obj);
+                            objects.ui_direct_monitor_switch = obj;
+                            lv_obj_set_pos(obj, 168, -92);
+                            lv_obj_set_size(obj, 80, 35);
+                            lv_obj_add_event_cb(obj, action_parameter_changed, LV_EVENT_RELEASED, (void *)0);
+                            lv_obj_set_style_align(obj, LV_ALIGN_LEFT_MID, LV_PART_MAIN | LV_STATE_DEFAULT);
+                            lv_obj_set_style_bg_color(obj, lv_color_hex(0xfb9230), LV_PART_MAIN | LV_STATE_CHECKED);
+                            lv_obj_set_style_bg_color(obj, lv_color_hex(0x674d35), LV_PART_KNOB | LV_STATE_DEFAULT);
+                            lv_obj_set_style_bg_color(obj, lv_color_hex(0xfb9230), LV_PART_KNOB | LV_STATE_CHECKED);
+                            lv_obj_set_style_bg_color(obj, lv_color_hex(0x513d2b), LV_PART_INDICATOR | LV_STATE_CHECKED);
+                        }
+                        {
                             // ui_BPMLabel
                             lv_obj_t *obj = lv_label_create(parent_obj);
                             objects.ui_bpm_label = obj;
-                            lv_obj_set_pos(obj, 13, -92);
+                            lv_obj_set_pos(obj, 13, -36);
                             lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
                             lv_obj_clear_flag(obj, LV_OBJ_FLAG_SCROLLABLE);
                             lv_obj_set_style_text_font(obj, &lv_font_montserrat_24, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -2406,7 +2431,7 @@ void create_screen_settings() {
                             // ui_BPMSlider
                             lv_obj_t *obj = lv_slider_create(parent_obj);
                             objects.ui_bpm_slider = obj;
-                            lv_obj_set_pos(obj, 168, -92);
+                            lv_obj_set_pos(obj, 168, -36);
                             lv_obj_set_size(obj, 500, 20);
                             lv_slider_set_range(obj, 40, 240);
                             lv_slider_set_value(obj, 60, LV_ANIM_OFF);
@@ -2421,7 +2446,7 @@ void create_screen_settings() {
                             // ui_BPMValue
                             lv_obj_t *obj = lv_label_create(parent_obj);
                             objects.ui_bpm_value = obj;
-                            lv_obj_set_pos(obj, 683, -92);
+                            lv_obj_set_pos(obj, 683, -36);
                             lv_obj_set_size(obj, 100, LV_SIZE_CONTENT);
                             lv_obj_add_event_cb(obj, action_value_clicked, LV_EVENT_PRESSED, (void *)0);
                             lv_obj_add_flag(obj, LV_OBJ_FLAG_CLICKABLE);
@@ -2434,7 +2459,7 @@ void create_screen_settings() {
                             // ui_InputTrimLabel
                             lv_obj_t *obj = lv_label_create(parent_obj);
                             objects.ui_input_trim_label = obj;
-                            lv_obj_set_pos(obj, 13, -36);
+                            lv_obj_set_pos(obj, 13, 21);
                             lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
                             lv_obj_clear_flag(obj, LV_OBJ_FLAG_SCROLLABLE);
                             lv_obj_set_style_text_font(obj, &lv_font_montserrat_24, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -2445,7 +2470,7 @@ void create_screen_settings() {
                             // ui_InputTrimSlider
                             lv_obj_t *obj = lv_slider_create(parent_obj);
                             objects.ui_input_trim_slider = obj;
-                            lv_obj_set_pos(obj, 168, -36);
+                            lv_obj_set_pos(obj, 168, 21);
                             lv_obj_set_size(obj, 500, 20);
                             lv_slider_set_range(obj, -15, 15);
                             lv_obj_add_event_cb(obj, action_slider_event, LV_EVENT_RELEASED, (void *)0);
@@ -2459,7 +2484,7 @@ void create_screen_settings() {
                             // ui_InputTrimValue
                             lv_obj_t *obj = lv_label_create(parent_obj);
                             objects.ui_input_trim_value = obj;
-                            lv_obj_set_pos(obj, 683, -36);
+                            lv_obj_set_pos(obj, 683, 21);
                             lv_obj_set_size(obj, 100, LV_SIZE_CONTENT);
                             lv_obj_add_event_cb(obj, action_value_clicked, LV_EVENT_PRESSED, (void *)0);
                             lv_obj_add_flag(obj, LV_OBJ_FLAG_CLICKABLE);
@@ -2472,7 +2497,7 @@ void create_screen_settings() {
                             // ui_TuningReferenceLabel
                             lv_obj_t *obj = lv_label_create(parent_obj);
                             objects.ui_tuning_reference_label = obj;
-                            lv_obj_set_pos(obj, 13, 21);
+                            lv_obj_set_pos(obj, 13, 76);
                             lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
                             lv_obj_clear_flag(obj, LV_OBJ_FLAG_SCROLLABLE);
                             lv_obj_set_style_text_font(obj, &lv_font_montserrat_24, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -2483,7 +2508,7 @@ void create_screen_settings() {
                             // ui_TuningReferenceSlider
                             lv_obj_t *obj = lv_slider_create(parent_obj);
                             objects.ui_tuning_reference_slider = obj;
-                            lv_obj_set_pos(obj, 168, 21);
+                            lv_obj_set_pos(obj, 168, 76);
                             lv_obj_set_size(obj, 500, 20);
                             lv_slider_set_range(obj, 415, 465);
                             lv_slider_set_value(obj, 440, LV_ANIM_OFF);
@@ -2498,7 +2523,7 @@ void create_screen_settings() {
                             // ui_TuningReferenceValue
                             lv_obj_t *obj = lv_label_create(parent_obj);
                             objects.ui_tuning_reference_value = obj;
-                            lv_obj_set_pos(obj, 683, 21);
+                            lv_obj_set_pos(obj, 683, 76);
                             lv_obj_set_size(obj, 100, LV_SIZE_CONTENT);
                             lv_obj_add_event_cb(obj, action_value_clicked, LV_EVENT_PRESSED, (void *)0);
                             lv_obj_add_flag(obj, LV_OBJ_FLAG_CLICKABLE);
@@ -2511,7 +2536,7 @@ void create_screen_settings() {
                             // ui_VolumeLabel
                             lv_obj_t *obj = lv_label_create(parent_obj);
                             objects.ui_volume_label = obj;
-                            lv_obj_set_pos(obj, 13, 77);
+                            lv_obj_set_pos(obj, 13, 133);
                             lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
                             lv_obj_clear_flag(obj, LV_OBJ_FLAG_SCROLLABLE);
                             lv_obj_set_style_text_font(obj, &lv_font_montserrat_24, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -2522,7 +2547,7 @@ void create_screen_settings() {
                             // ui_VolumeSlider
                             lv_obj_t *obj = lv_slider_create(parent_obj);
                             objects.ui_volume_slider = obj;
-                            lv_obj_set_pos(obj, 168, 77);
+                            lv_obj_set_pos(obj, 168, 133);
                             lv_obj_set_size(obj, 500, 20);
                             lv_slider_set_range(obj, -40, 3);
                             lv_obj_add_event_cb(obj, action_slider_event, LV_EVENT_RELEASED, (void *)0);
@@ -2536,7 +2561,7 @@ void create_screen_settings() {
                             // ui_VolumeValue
                             lv_obj_t *obj = lv_label_create(parent_obj);
                             objects.ui_volume_value = obj;
-                            lv_obj_set_pos(obj, 683, 76);
+                            lv_obj_set_pos(obj, 683, 133);
                             lv_obj_set_size(obj, 100, LV_SIZE_CONTENT);
                             lv_obj_add_event_cb(obj, action_value_clicked, LV_EVENT_PRESSED, (void *)0);
                             lv_obj_add_flag(obj, LV_OBJ_FLAG_CLICKABLE);

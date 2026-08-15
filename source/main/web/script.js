@@ -182,6 +182,7 @@ const TONEX_GLOBAL_TEMPO_SOURCE = 113;
 const TONEX_GLOBAL_TUNING_REFERENCE = 114;
 const TONEX_GLOBAL_BYPASS = 115;
 const TONEX_GLOBAL_MASTER_VOLUME = 116;
+const TONEX_GLOBAL_DIRECT_MONITOR = 117;
 
 // valeton params
 const ValetonParameters = {
@@ -2336,7 +2337,7 @@ function processReturnCmd(data) {
                                 configureParamSwitch("gb_tempos", value);
                                 setParamData("gb_tempos", parseInt(key));
                                 break;
-
+                          
                             case TONEX_GLOBAL_TUNING_REFERENCE:
                                 configureParamRange("gb_tref", value, min, max, 1);
                                 setParamData("gb_tref", parseInt(key));
@@ -2350,6 +2351,11 @@ function processReturnCmd(data) {
                             case TONEX_GLOBAL_MASTER_VOLUME:
                                 configureParamRange("gb_vol", value, min, max, 0.1);
                                 setParamData("gb_vol", parseInt(key));
+                                break;
+
+                            case TONEX_GLOBAL_DIRECT_MONITOR:
+                                configureParamSwitch("gb_dirmon", value);
+                                setParamData("gb_dirmon", parseInt(key));
                                 break;
                         }
                     } 

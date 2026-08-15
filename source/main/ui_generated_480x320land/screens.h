@@ -204,6 +204,8 @@ typedef struct _objects_t {
     lv_obj_t *ui_cab_bypass_switch;
     lv_obj_t *ui_tempo_sourcet_label;
     lv_obj_t *ui_tempo_source_switch;
+    lv_obj_t *ui_direct_monitor_label;
+    lv_obj_t *ui_direct_monitor_switch;
     lv_obj_t *ui_bpm_label;
     lv_obj_t *ui_bpm_slider;
     lv_obj_t *ui_bpm_value;

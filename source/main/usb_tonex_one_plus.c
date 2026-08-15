@@ -745,6 +745,13 @@ static esp_err_t usb_tonex_one_plus_modify_global(uint16_t global_val, float val
             // bit of a hack here. Return fail code, so caller can avoid sending the state data unneccessarily
             res = ESP_FAIL;
         } break;
+
+        case TONEX_GLOBAL_DIRECT_MONITOR:
+        {
+            // modify the direct monitor value in state
+            TonexData->Message.PedalData.StateData[TonexData->Message.PedalData.StateDataLength - TONEX_STATE_OFFSET_END_DIRECT_MONITOR] = (uint8_t)value;
+            res = ESP_OK;
+        } break;
     }
 
     return res;
@@ -783,6 +790,8 @@ static TonexStatus usb_tonex_one_plus_parse_state(uint8_t* unframed, uint16_t le
         uint16_t freq;
         memcpy((void*)&freq, (void*)&TonexData->Message.PedalData.StateData[TonexData->Message.PedalData.StateDataLength - TONEX_STATE_OFFSET_END_TUNING_REF], sizeof(uint16_t));
         param_ptr[TONEX_GLOBAL_TUNING_REFERENCE].Value = (float)freq;
+
+        param_ptr[TONEX_GLOBAL_DIRECT_MONITOR].Value = (float)TonexData->Message.PedalData.StateData[TonexData->Message.PedalData.StateDataLength - TONEX_STATE_OFFSET_END_DIRECT_MONITOR];
 
         tonex_params_release_locked_access();
     }
