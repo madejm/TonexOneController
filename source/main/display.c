@@ -97,7 +97,7 @@ static const char *TAG = "app_display";
 #define MAX_SKIN_IMAGES                 100
 #define SKIN_PARTITION_TYPE             0x40
 #define SKIN_PARTITION_NAME             "skins"
-#define SLIDER_STOP_DELAY               150   // msec
+#define SLIDER_STOP_DELAY               225   // msec
 
 enum UIElements
 {

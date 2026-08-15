@@ -228,7 +228,7 @@ static void wifi_send_ws_async(const char* payload)
 *****************************************************************************/
 static uint8_t process_wifi_command(tWiFiMessage* message)
 {
-    ESP_LOGI(TAG, "command %d", message->Event);
+    //debug ESP_LOGI(TAG, "command %d", message->Event);
 
     // check what we got
     switch (message->Event)
