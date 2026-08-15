@@ -77,6 +77,8 @@ limitations under the License.
 #include "valeton_params.h"
 #include "platform_common.h"
 
+#if !CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+
 static const char __attribute__((unused)) *TAG = "app_display_valeton";
 
 #if CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI          
@@ -3598,3 +3600,4 @@ void valeton_value_changed(lv_event_t * e)
     lv_obj_add_flag(objects.ui_val_settings_dialog, LV_OBJ_FLAG_HIDDEN);
 #endif    //CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI
 }
+#endif // CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM

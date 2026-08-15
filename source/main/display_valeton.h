@@ -24,6 +24,8 @@ extern "C" {
 
 #include "lvgl.h"
 
+#if !CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+
 void valeton_show_settings_tab(lv_event_t* e);
 void valeton_action_effect_icon_clicked(lv_event_t* e);
 void valeton_action_parameter_changed(lv_event_t* e);
@@ -31,6 +33,8 @@ void valeton_update_icon_order(void);
 uint8_t valeton_update_ui_parameters(void);
 void valeton_value_clicked(lv_event_t *e);
 void valeton_value_changed(lv_event_t * e);
+
+#endif //CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
 
 #ifdef __cplusplus
 } /*extern "C"*/

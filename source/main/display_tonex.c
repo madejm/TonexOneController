@@ -889,7 +889,7 @@ void tonex_action_parameter_changed(lv_event_t * e)
 *****************************************************************************/
 void tonex_update_icon_order(void)
 {
-#if CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI          
+#if CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI
     bool gatePost = lv_obj_has_state(objects.ui_noise_gate_post_switch, LV_STATE_CHECKED);
     bool compPost = lv_obj_has_state(objects.ui_compressor_post_switch, LV_STATE_CHECKED);
     bool eqPost = lv_obj_has_state(objects.ui_eq_post_switch, LV_STATE_CHECKED);
@@ -951,6 +951,13 @@ void tonex_update_icon_order(void)
         icons[index] = objects.ui_icon_reverb;
     }
     
+    #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+    for (uint8_t i = 0; i<8; i++)
+    {
+        lv_obj_t *icon = icons[i];
+        lv_obj_move_to_index(icon, i);
+    }
+    #else
     // get the icon coords for this platform
     int16_t offsets[8];
     platform_get_icon_coords(offsets, sizeof(offsets) / sizeof(int16_t));
@@ -961,6 +968,7 @@ void tonex_update_icon_order(void)
         int16_t offset = offsets[i];
         lv_obj_set_x(icon, offset);
     }
+    #endif
 #endif    
 }
 
@@ -1006,12 +1014,20 @@ uint8_t tonex_update_ui_parameters(void)
                     if (param_entry->Value)
                     {
                         lv_obj_add_state(objects.ui_noise_gate_switch, LV_STATE_CHECKED);
+                        #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+                        lv_obj_add_state(objects.ui_icon_gate, LV_STATE_CHECKED);
+                        #else
                         lv_img_set_src(objects.ui_icon_gate, (lv_obj_t*)&img_effect_icon_gate_on);
+                        #endif
                     }
                     else
                     {
                         lv_obj_clear_state(objects.ui_noise_gate_switch, LV_STATE_CHECKED);
+                        #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+                        lv_obj_clear_state(objects.ui_icon_gate, LV_STATE_CHECKED);
+                        #else
                         lv_img_set_src(objects.ui_icon_gate, (lv_obj_t*)&img_effect_icon_gate_off);
+                        #endif
                     }
                 } break;
 
@@ -1071,12 +1087,20 @@ uint8_t tonex_update_ui_parameters(void)
                     if (param_entry->Value)
                     {
                         lv_obj_add_state(objects.ui_compressor_enable_switch, LV_STATE_CHECKED);
+                        #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+                        lv_obj_add_state(objects.ui_icon_comp, LV_STATE_CHECKED);
+                        #else
                         lv_img_set_src(objects.ui_icon_comp, (lv_obj_t*)&img_effect_icon_comp_on);
+                        #endif
                     }
                     else
                     {
                         lv_obj_clear_state(objects.ui_compressor_enable_switch, LV_STATE_CHECKED);
+                        #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+                        lv_obj_clear_state(objects.ui_icon_comp, LV_STATE_CHECKED);
+                        #else
                         lv_img_set_src(objects.ui_icon_comp, (lv_obj_t*)&img_effect_icon_comp_off);
+                        #endif
                     }
                 } break;
 
@@ -1203,12 +1227,20 @@ uint8_t tonex_update_ui_parameters(void)
                     if (param_entry->Value)
                     {
                         lv_obj_add_state(objects.ui_amp_enable_switch, LV_STATE_CHECKED);
+                        #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+                        lv_obj_add_state(objects.ui_icon_amp, LV_STATE_CHECKED);
+                        #else
                         lv_img_set_src(objects.ui_icon_amp, (lv_obj_t*)&img_effect_icon_amp_on);
+                        #endif
                     }
                     else
                     {
                         lv_obj_clear_state(objects.ui_amp_enable_switch, LV_STATE_CHECKED);
+                        #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+                        lv_obj_clear_state(objects.ui_icon_amp, LV_STATE_CHECKED);
+                        #else
                         lv_img_set_src(objects.ui_icon_amp, (lv_obj_t*)&img_effect_icon_amp_off);
+                        #endif
                     }
                 } break;
 
@@ -1223,11 +1255,19 @@ uint8_t tonex_update_ui_parameters(void)
 
                     if (param_entry->Value == TONEX_CABINET_DISABLED)
                     {
+                        #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+                        lv_obj_clear_state(objects.ui_icon_cab, LV_STATE_CHECKED);
+                        #else
                         lv_img_set_src(objects.ui_icon_cab, (lv_obj_t*)&img_effect_icon_cab_off);
+                        #endif
                     }
                     else
                     {
+                        #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+                        lv_obj_add_state(objects.ui_icon_cab, LV_STATE_CHECKED);
+                        #else
                         lv_img_set_src(objects.ui_icon_cab, (lv_obj_t*)&img_effect_icon_cab_on);
+                        #endif
                     }
                 } break;
 
@@ -1356,6 +1396,9 @@ uint8_t tonex_update_ui_parameters(void)
                     {
                         lv_obj_add_state(objects.ui_reverb_enable_switch, LV_STATE_CHECKED);
 
+                        #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+                        lv_obj_add_state(objects.ui_icon_reverb, LV_STATE_CHECKED);
+                        #else
                         // show enabled icon with letter to indicate the type
                         switch ((int)param_ptr[TONEX_PARAM_REVERB_MODEL].Value)
                         {
@@ -1390,11 +1433,16 @@ uint8_t tonex_update_ui_parameters(void)
                                 lv_img_set_src(objects.ui_icon_reverb, (lv_obj_t*)&img_effect_icon_reverb_on_p);
                             } break;
                         }
+                        #endif // CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
                     }
                     else
                     {
                         lv_obj_clear_state(objects.ui_reverb_enable_switch, LV_STATE_CHECKED);
+                        #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+                        lv_obj_clear_state(objects.ui_icon_reverb, LV_STATE_CHECKED);
+                        #else
                         lv_img_set_src(objects.ui_icon_reverb, (lv_obj_t*)&img_effect_icon_reverb_off);
+                        #endif // CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
                     }
                 } break;
 
@@ -1805,6 +1853,9 @@ uint8_t tonex_update_ui_parameters(void)
                     {
                         lv_obj_add_state(objects.ui_modulation_enable_switch, LV_STATE_CHECKED);
 
+                        #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+                        lv_obj_add_state(objects.ui_icon_mod, LV_STATE_CHECKED);
+                        #else
                         // show enabled icon with letter to indicate the type
                         switch ((int)param_ptr[TONEX_PARAM_MODULATION_MODEL].Value)
                         {
@@ -1834,11 +1885,16 @@ uint8_t tonex_update_ui_parameters(void)
                                 lv_img_set_src(objects.ui_icon_mod, (lv_obj_t*)&img_effect_icon_mod_on_rotary);
                             } break;
                         }
+                        #endif // CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
                     }
                     else
                     {
                         lv_obj_clear_state(objects.ui_modulation_enable_switch, LV_STATE_CHECKED);
+                        #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+                        lv_obj_clear_state(objects.ui_icon_mod, LV_STATE_CHECKED);
+                        #else
                         lv_img_set_src(objects.ui_icon_mod, (lv_obj_t*)&img_effect_icon_mod_off);
+                        #endif // CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
                     }
                 } break;
 
@@ -2360,6 +2416,9 @@ uint8_t tonex_update_ui_parameters(void)
                     {
                         lv_obj_add_state(objects.ui_delay_enable_switch, LV_STATE_CHECKED);
 
+                        #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+                        lv_obj_add_state(objects.ui_icon_delay, LV_STATE_CHECKED);
+                        #else
                          // show enabled icon with letter to indicate the type
                          switch ((int)param_ptr[TONEX_PARAM_DELAY_MODEL].Value)
                          {
@@ -2374,11 +2433,16 @@ uint8_t tonex_update_ui_parameters(void)
                                  lv_img_set_src(objects.ui_icon_delay, (lv_obj_t*)&img_effect_icon_delay_on_t);
                              } break;
                          }
+                        #endif // CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
                     }
                     else
                     {
                         lv_obj_clear_state(objects.ui_delay_enable_switch, LV_STATE_CHECKED);
+                        #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+                        lv_obj_clear_state(objects.ui_icon_delay, LV_STATE_CHECKED);
+                        #else
                         lv_img_set_src(objects.ui_icon_delay, (lv_obj_t*)&img_effect_icon_delay_off);
+                        #endif // CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
                     }
                 } break;
 
@@ -2608,7 +2672,11 @@ uint8_t tonex_update_ui_parameters(void)
                     lv_obj_set_user_data(objects.ui_bpm_value, (void*)(uintptr_t)TONEX_GLOBAL_BPM);      
 
                     char buf[128];
+                    #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+                    sprintf(buf, "%.0f", param_entry->Value);
+                    #else
                     sprintf(buf, "%.1f", param_entry->Value);
+                    #endif
                     lv_label_set_text(objects.ui_bpm_value_label, buf);             
 
 #if CONFIG_TONEX_CONTROLLER_SHOW_BPM_INDICATOR                            

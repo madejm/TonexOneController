@@ -274,9 +274,9 @@ static const char *TAG = "app_control";
 static QueueHandle_t control_input_queue;
 static tControlData ControlData;
 
-#if CONFIG_TONEX_CONTROLLER_HAS_DISPLAY
+// #if CONFIG_TONEX_CONTROLLER_HAS_DISPLAY
 static uint8_t PresetIndexForOrderValue(uint8_t value);
-#endif
+// #endif
 static uint8_t SaveUserData(void);
 static uint8_t LoadUserData(void);
 static uint8_t SavePresetUserText(uint16_t preset_index, char* text);
@@ -300,18 +300,25 @@ static void update_bank_ui()
     uint8_t presetIndex3 = ControlData.ConfigData.PresetOrderMappingConfig.PresetOrder[ControlData.BankIndex * 4 + 2];
     uint8_t presetIndex4 = ControlData.ConfigData.PresetOrderMappingConfig.PresetOrder[ControlData.BankIndex * 4 + 3];
 
-    uint8_t skinIndex1 = ControlData.ConfigData.SkinConfig.SkinIndex[presetIndex1];
-    uint8_t skinIndex2 = ControlData.ConfigData.SkinConfig.SkinIndex[presetIndex2];
-    uint8_t skinIndex3 = ControlData.ConfigData.SkinConfig.SkinIndex[presetIndex3];
-    uint8_t skinIndex4 = ControlData.ConfigData.SkinConfig.SkinIndex[presetIndex4];
-    
-    UI_SetBankIndex(
-        ControlData.BankIndex,
-        skinIndex1,
-        skinIndex2,
-        skinIndex3,
-        skinIndex4
-    );
+    uint32_t presetColor1;
+    uint32_t presetColor2;
+    uint32_t presetColor3;
+    uint32_t presetColor4;
+    tonex_params_colors_get_color(presetIndex1, &presetColor1);
+    tonex_params_colors_get_color(presetIndex2, &presetColor2);
+    tonex_params_colors_get_color(presetIndex3, &presetColor3);
+    tonex_params_colors_get_color(presetIndex4, &presetColor4);
+
+    char *presetName1 = ControlData.PresetNames[presetIndex1];
+    char *presetName2 = ControlData.PresetNames[presetIndex2];
+    char *presetName3 = ControlData.PresetNames[presetIndex3];
+    char *presetName4 = ControlData.PresetNames[presetIndex4];
+
+    UI_SetBankIndex(ControlData.BankIndex);
+    UI_SetPresetButton(0, presetColor1, presetName1);
+    UI_SetPresetButton(1, presetColor2, presetName2);
+    UI_SetPresetButton(2, presetColor3, presetName3);
+    UI_SetPresetButton(3, presetColor4, presetName4);
 }
 #endif
 
@@ -2667,7 +2674,7 @@ uint8_t control_get_sync_complete(void)
     return ControlData.SyncComplete;
 }
 
-#if CONFIG_TONEX_CONTROLLER_HAS_DISPLAY
+// #if CONFIG_TONEX_CONTROLLER_HAS_DISPLAY
 /****************************************************************************
 * NAME:        
 * DESCRIPTION: 
@@ -2686,7 +2693,7 @@ static uint8_t PresetIndexForOrderValue(uint8_t value)
     }
     return -1;
 }
-#endif
+// #endif
 
 /****************************************************************************
 * NAME:        

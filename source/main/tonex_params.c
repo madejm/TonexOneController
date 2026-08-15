@@ -28,6 +28,7 @@ limitations under the License.
 #include "usb_tonex_one.h"
 #include "control.h"
 #include "tonex_params.h"
+#include "screens.h"
 
 
 #define PARAM_MUTEX_TIMEOUT         2000        // msec
@@ -255,26 +256,38 @@ const char *Style_DelayTimeSignatures[18] = {
     "1/1 T"
 };
 
-void tonex_params_get_ui_style(TonexParameter_t param, uint8_t paramValue, uint32_t *color, char const **name, char const **value, FxSelectedValueIndex_t *selectedValueIndex, const tModellerParameter *allParameters) {
+const char *Style_CabinetTypes[3] = {
+    "OFF", "VIR", "MODEL"
+};
+
+void tonex_params_get_ui_style(
+    TonexParameter_t param,
+    uint8_t paramValue1,
+    uint8_t paramValue2,
+    uint32_t *color,
+    char const **name,
+    char const **value1,
+    char const **value2,
+    const tModellerParameter *allParameters
+) {
     if (param >= TONEX_GLOBAL_BPM) {
-        *color = 0xD1A60C;
+        // *color = 0xD1A60C;
+        *color = theme_colors[THEME_ID_DEFAULT][COLOR_ID_DEFAULT_GRAY];
         
         switch (param) {
             case TONEX_GLOBAL_BPM:
                 *name = "TAP BPM";
-                *selectedValueIndex = FX_SELECTED_VALUE_1;
-                *value = NULL;
                 break;
             case TONEX_GLOBAL_INPUT_TRIM:
                 *name = "INPUT TRIM";
                 break;
             case TONEX_GLOBAL_CABSIM_BYPASS:
                 *name = "CABSIM";
-                *value = *selectedValueIndex == FX_SELECTED_VALUE_1 ? "ON" : "OFF";
                 break;
             case TONEX_GLOBAL_TEMPO_SOURCE:
                 *name = "TEMPO";
-                *value = *selectedValueIndex == FX_SELECTED_VALUE_1 ? "GLOBAL" : "PRESET";
+                *value1 = "GLOBAL";
+                *value2 = "PRESET";
                 break;
             case TONEX_GLOBAL_TUNING_REFERENCE:
                 *name = "TUNING";
@@ -293,22 +306,24 @@ void tonex_params_get_ui_style(TonexParameter_t param, uint8_t paramValue, uint3
                 break;
         }
     } else if (param >= TONEX_PARAM_DELAY_POST) {
-        *color = 0x72ac3a;
+        *color = theme_colors[THEME_ID_DEFAULT][COLOR_ID_DELAY];
         *name = "DELAY";
 
         switch (param) {
             case TONEX_PARAM_DELAY_POST:
-                *value = *selectedValueIndex == FX_SELECTED_VALUE_1 ? "PRE" : "POST";
+                *value1 = "PRE";
+                *value2 = "POST";
                 break;
             case TONEX_PARAM_DELAY_ENABLE:
-                *value = *selectedValueIndex == FX_SELECTED_VALUE_1 ? "OFF" : "ON";
                 break;
             case TONEX_PARAM_DELAY_MODEL:
-                *value = Style_DelayModels[paramValue];
+                *value1 = Style_DelayModels[paramValue1];
+                *value2 = Style_DelayModels[paramValue2];
                 break;
             case TONEX_PARAM_DELAY_DIGITAL_TS:
             case TONEX_PARAM_DELAY_TAPE_TS:
-                *value = Style_DelayTimeSignatures[paramValue];
+                *value1 = Style_DelayTimeSignatures[paramValue1];
+                *value2 = Style_DelayTimeSignatures[paramValue2];
                 break;
             case TONEX_PARAM_DELAY_DIGITAL_TIME:
             case TONEX_PARAM_DELAY_TAPE_TIME:
@@ -316,26 +331,28 @@ void tonex_params_get_ui_style(TonexParameter_t param, uint8_t paramValue, uint3
                 break;
             case TONEX_PARAM_DELAY_DIGITAL_MODE:
             case TONEX_PARAM_DELAY_TAPE_MODE:
-                *value = *selectedValueIndex == FX_SELECTED_VALUE_1 ? "NORMAL" : "PING PONG";
+                *value1 = "NORMAL";
+                *value2 = "PING PONG";
                 break;
             default:
                 *name = "DELAY ?";
                 break;
         }
     } else if (param >= TONEX_PARAM_MODULATION_POST) {
-        *color = 0xe3a929;
+        *color = theme_colors[THEME_ID_DEFAULT][COLOR_ID_MODULATION];
         *name = Style_ModModels[(uint8_t)allParameters[TONEX_PARAM_MODULATION_MODEL].Value];
 
         switch (param) {
             case TONEX_PARAM_MODULATION_POST:
-                *value = *selectedValueIndex == FX_SELECTED_VALUE_1 ? "PRE" : "POST";
+                *value1 = "PRE";
+                *value2 = "POST";
                 break;
             case TONEX_PARAM_MODULATION_ENABLE:
-                *value = *selectedValueIndex == FX_SELECTED_VALUE_1 ? "OFF" : "ON";
                 break;
             case TONEX_PARAM_MODULATION_MODEL:
                 *name = "MOD";
-                *value = Style_ModModels[paramValue];
+                *value1 = Style_ModModels[paramValue1];
+                *value2 = Style_ModModels[paramValue2];
                 break;
             case TONEX_PARAM_MODULATION_TREMOLO_LEVEL:
                 *name = "TREM LVL";
@@ -345,25 +362,26 @@ void tonex_params_get_ui_style(TonexParameter_t param, uint8_t paramValue, uint3
                 break;
         }
     } else if (param >= TONEX_PARAM_REVERB_POSITION) {
-        *color = 0x006ff3;
+        *color = theme_colors[THEME_ID_DEFAULT][COLOR_ID_REVERB];
         *name = "REVERB";
 
         switch (param) {
             case TONEX_PARAM_REVERB_POSITION:
-                *value = *selectedValueIndex == FX_SELECTED_VALUE_1 ? "PRE" : "POST";
+                *value1 = "PRE";
+                *value2 = "POST";
                 break;
             case TONEX_PARAM_REVERB_ENABLE:
-                *value = *selectedValueIndex == FX_SELECTED_VALUE_1 ? "OFF" : "ON";
                 break;
             case TONEX_PARAM_REVERB_MODEL:
-                *value = Style_ReverbModels[paramValue];
+                *value1 = Style_ReverbModels[paramValue1];
+                *value2 = Style_ReverbModels[paramValue2];
                 break;
             default:
                 *name = "REVERB ?";
                 break;
         }
     } else if (param >= TONEX_PARAM_MODEL_PRESENCE) {
-        *color = 0xe83f3b;
+        *color = theme_colors[THEME_ID_DEFAULT][COLOR_ID_AMPLIFIER];
         *name = "AMP";
 
         switch (param) {
@@ -378,34 +396,24 @@ void tonex_params_get_ui_style(TonexParameter_t param, uint8_t paramValue, uint3
                 break;
         }
     } else if (param >= TONEX_PARAM_CABINET_UNKNOWN) {
-        *color = 0xeb5e22;
+        *color = theme_colors[THEME_ID_DEFAULT][COLOR_ID_CABINET];
         *name = "CAB";
 
         switch (param) {
             case TONEX_PARAM_CABINET_TYPE:
-                switch (paramValue) {
-                    case 0:
-                        *value = "OFF";
-                        break;
-                    case 1:
-                        *value = "VIR";
-                        break;
-                    case 2:
-                        *value = "MODEL";
-                        break;
-                }
+                *value1 = Style_CabinetTypes[paramValue1];
+                *value2 = Style_CabinetTypes[paramValue2];
                 break;
             default:
                 *name = "CAB ?";
                 break;
         }
     } else if (param >= TONEX_PARAM_MODEL_AMP_ENABLE) {
-        *color = 0xe83f3b;
+        *color = theme_colors[THEME_ID_DEFAULT][COLOR_ID_AMPLIFIER];
         *name = "AMP";
 
         switch (param) {
             case TONEX_PARAM_MODEL_AMP_ENABLE:
-                *value = *selectedValueIndex == FX_SELECTED_VALUE_1 ? "OFF" : "ON";
                 break;
             case TONEX_PARAM_MODEL_GAIN:
                 *name = "GAIN";
@@ -421,27 +429,28 @@ void tonex_params_get_ui_style(TonexParameter_t param, uint8_t paramValue, uint3
                 break;
         }
     } else if (param >= TONEX_PARAM_EQ_POST) {
-        *color = 0xa49e96;
+        *color = theme_colors[THEME_ID_DEFAULT][COLOR_ID_DEFAULT_GRAY];
         *name = "EQ";
 
         switch (param) {
             case TONEX_PARAM_EQ_POST:
-                *value = *selectedValueIndex == FX_SELECTED_VALUE_1 ? "PRE" : "POST";
+                *value1 = "PRE";
+                *value2 = "POST";
                 break;
             default:
                 *name = "EQ ?";
                 break;
         }
     } else if (param >= TONEX_PARAM_COMP_POST) {
-        *color = 0xcc4891;
+        *color = theme_colors[THEME_ID_DEFAULT][COLOR_ID_COMPRESSOR];
         *name = "COMP";
 
         switch (param) {
             case TONEX_PARAM_COMP_POST:
-                *value = *selectedValueIndex == FX_SELECTED_VALUE_1 ? "PRE" : "POST";
+                *value1 = "PRE";
+                *value2 = "POST";
                 break;
             case TONEX_PARAM_COMP_ENABLE:
-                *value = *selectedValueIndex == FX_SELECTED_VALUE_1 ? "OFF" : "ON";
                 break;
             case TONEX_PARAM_COMP_THRESHOLD:
                 *name = "COMP TRSH";
@@ -457,15 +466,15 @@ void tonex_params_get_ui_style(TonexParameter_t param, uint8_t paramValue, uint3
                 break;
         }
     } else { // param >= TONEX_PARAM_NOISE_GATE_POST
-        *color = 0x664ef9;
+        *color = theme_colors[THEME_ID_DEFAULT][COLOR_ID_NOISE_GATE];
         *name = "GATE";
 
         switch (param) {
             case TONEX_PARAM_NOISE_GATE_POST:
-                *value = *selectedValueIndex == FX_SELECTED_VALUE_1 ? "PRE" : "POST";
+                *value1 = "PRE";
+                *value2 = "POST";
                 break;
             case TONEX_PARAM_NOISE_GATE_ENABLE:
-                *value = *selectedValueIndex == FX_SELECTED_VALUE_1 ? "OFF" : "ON";
                 break;
             case TONEX_PARAM_NOISE_GATE_THRESHOLD:
                 *name = "GATE TRSH";

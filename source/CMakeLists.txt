@@ -7,7 +7,7 @@ set(SDKCONFIG "${CMAKE_BINARY_DIR}/sdkconfig")
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 project(TonexController)
 
-if(CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI)
+if((CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI) AND (NOT CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM))
     # Flash the custom skins partition
     set(partition skins)
     idf_build_get_property(project_dir PROJECT_DIR)
