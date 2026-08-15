@@ -24,6 +24,7 @@ extern void action_value_clicked(lv_event_t * e);
 extern void action_value_keyboard_ok(lv_event_t * e);
 extern void action_tuner_pressed(lv_event_t * e);
 extern void action_tuner_close(lv_event_t * e);
+extern void action_slider_event(lv_event_t * e);
 
 #ifdef __cplusplus
 }

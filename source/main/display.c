@@ -97,6 +97,7 @@ static const char *TAG = "app_display";
 #define MAX_SKIN_IMAGES                 100
 #define SKIN_PARTITION_TYPE             0x40
 #define SKIN_PARTITION_NAME             "skins"
+#define SLIDER_STOP_DELAY               150   // msec
 
 enum UIElements
 {
@@ -170,7 +171,8 @@ static float current_tuner_ref_freq = 440.0f;
 #ifndef clampf
     #define clampf(x, lo, hi)  ((x) < (lo) ? (lo) : ((x) > (hi) ? (hi) : (x)))
 #endif
-
+static lv_timer_t* slider_stop_timer = NULL;
+static lv_obj_t* last_active_slider = NULL;
 #endif    
 
 /****************************************************************************
@@ -754,6 +756,81 @@ void action_value_keyboard_ok(lv_event_t * e)
             } break;
         }            
     }    
+}
+
+/****************************************************************************
+* NAME:        
+* DESCRIPTION: 
+* PARAMETERS:  
+* RETURN:      
+* NOTES:       
+*****************************************************************************/
+static void slider_stop_timer_cb(lv_timer_t* timer)
+{
+    if (last_active_slider == NULL)
+    {
+        return;
+    }
+
+    // send simulated event for this slider
+    lv_event_t event;
+    lv_memset_00(&event, sizeof(event));
+    event.target = last_active_slider;
+    event.current_target = last_active_slider;
+    event.code = LV_EVENT_RELEASED;
+    action_parameter_changed(&event);
+
+    // Clean up
+    lv_timer_del(timer);
+    slider_stop_timer = NULL;
+    last_active_slider = NULL;
+}
+
+/****************************************************************************
+* NAME:        
+* DESCRIPTION: 
+* PARAMETERS:  
+* RETURN:      
+* NOTES:       
+*****************************************************************************/
+void action_slider_event(lv_event_t* e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_obj_t* slider = lv_event_get_target(e);
+
+    if (code == LV_EVENT_VALUE_CHANGED) 
+    {
+        last_active_slider = slider;
+
+        if (slider_stop_timer) 
+        {
+            // restart the timer countdown
+            lv_timer_reset(slider_stop_timer);
+        } 
+        else 
+        {
+            // Create timer to fire after a time delay
+            slider_stop_timer = lv_timer_create(slider_stop_timer_cb, SLIDER_STOP_DELAY,  NULL);
+        }
+    }
+    else if (code == LV_EVENT_RELEASED) 
+    {
+        if (slider_stop_timer && last_active_slider == slider) 
+        {
+            lv_timer_del(slider_stop_timer);
+            slider_stop_timer = NULL;
+
+            // send simulated event for this slider
+            lv_event_t event;
+            lv_memset_00(&event, sizeof(event));
+            event.target = last_active_slider;
+            event.current_target = last_active_slider;
+            event.code = LV_EVENT_RELEASED;
+            action_parameter_changed(&event);
+
+            last_active_slider = NULL;
+        }
+    }
 }
 
 /****************************************************************************

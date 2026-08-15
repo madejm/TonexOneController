@@ -274,6 +274,15 @@
       "componentGroups": [],
       "userProperties": [],
       "name": "TunerClose"
+    },
+    {
+      "objID": "4b76e835-9fc3-4d03-8a03-61da8f40a8f9",
+      "components": [],
+      "connectionLines": [],
+      "localVariables": [],
+      "componentGroups": [],
+      "userProperties": [],
+      "name": "SliderEvent"
     }
   ],
   "userPages": [
@@ -3504,7 +3513,14 @@
                           "objID": "b655d5c6-75ac-42fd-e546-e64dfe8c3f39",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "0d327c07-d767-4613-d221-9d487e5c1e0a",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -3693,7 +3709,14 @@
                           "objID": "1b170528-e5e2-486c-c123-5a35ad21d65e",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "187a63e0-74ff-4345-f1c5-1e39e3167c35",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -3882,7 +3905,14 @@
                           "objID": "d79c6e57-36bf-437e-9a57-e4b710069fdd",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "00a9c9ad-9806-487e-a01a-bdedcf6c9a2d",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -4387,7 +4417,14 @@
                           "objID": "99a26f0c-1e98-4797-9de8-7a729167b8a4",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "e514a716-307a-43c6-a284-b045358d50a6",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -4576,7 +4613,14 @@
                           "objID": "569f0244-78f8-4de8-b100-bb882d923b08",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "419fe116-dbb7-4a2f-f53e-723185ae317b",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -4765,7 +4809,14 @@
                           "objID": "8f9473f7-7b0b-454b-c1f9-8dc9826a186f",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "7ba83797-5bfe-4a7d-d78f-d7f114eb8ae3",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -5310,7 +5361,14 @@
                           "objID": "84ffca43-1d98-4570-d04a-99055877fd24",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "40116dbd-4ea6-40c6-8966-8eecb2d72149",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -5499,7 +5557,14 @@
                           "objID": "25f4a152-1b04-4ed4-b77c-1b29fdd92f45",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "578f77d2-9e67-4748-de13-fd6bbbe9b779",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -5688,7 +5753,14 @@
                           "objID": "b80b4e4d-11ab-441e-dd0e-24a5fc8a9801",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "5ed3e71c-ddc2-4a9b-f787-07e74683507e",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -5877,7 +5949,14 @@
                           "objID": "0a8af56c-06b2-4e82-dcdd-5df71d90b1f8",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "ac2415e3-f1f2-400c-ff18-e0dcad72205b",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -6252,7 +6331,14 @@
                           "objID": "28936262-d38e-4e0f-9776-e0a96a55ef32",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "ecebdefe-50ae-4546-f2ab-286f4eb7081e",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -6441,7 +6527,14 @@
                           "objID": "4f5cea46-c408-460b-8569-122a0484b9d8",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "3a4e1cc0-f241-472b-ea81-1b4474f814be",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -6630,7 +6723,14 @@
                           "objID": "a92937fd-ffed-46de-c867-6c4f7c439421",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "16ea98c8-9cc2-499d-980b-4cde33cfd3ae",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -6819,7 +6919,14 @@
                           "objID": "a25705bf-a55d-4a2a-ecb0-6af6a13fcab5",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "38e591c2-39a6-4474-ea91-433315d33b8b",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -7728,7 +7835,14 @@
                           "objID": "e7d75f6a-0b4a-45e2-8f11-5f4e8b02ea4b",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "613abcb1-d297-4db1-f8a1-bfe4fed73771",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -7917,7 +8031,14 @@
                           "objID": "8a15f096-039a-4457-ba16-795faaf56d50",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "b593d32e-0ea1-4ac5-9325-e2f408efcb27",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -8106,7 +8227,14 @@
                           "objID": "7083f18e-e118-4ea3-ddaa-3c1fa5316a28",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "53b8d2fd-8de4-45b2-92e0-efc1a883fd84",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -8295,7 +8423,14 @@
                           "objID": "8c9aac32-35ef-4f1d-cbf6-8f40047f5592",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "5c8a4ed4-5363-48a6-9b4f-e5a13b820b2a",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -9204,7 +9339,14 @@
                           "objID": "5fbb2a0b-b3fd-4310-8551-107740dbbdaa",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "730a2d3e-99f8-4337-a016-12f3409525ad",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -9515,7 +9657,14 @@
                           "objID": "d1244ceb-b092-477d-81c6-1ea6daa49730",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "456821a0-40ea-4f97-e5d9-4bc3f8b20a71",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -9705,7 +9854,14 @@
                           "objID": "f1268c10-6357-4dd2-8661-1a2bdd21c14f",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "c13900fd-5fbe-4981-c81f-06c249d5404c",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -10370,7 +10526,14 @@
                           "objID": "de4feac3-f28e-42ae-d9a2-f0a2d6e2bc19",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "8bf17f7e-0dfa-48bd-e997-d1cfc8852331",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -10559,7 +10722,14 @@
                           "objID": "3c3b762e-7fa7-43b5-f0da-84cae2da4cf2",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "e4b12719-1ba9-4ca3-8b06-4a16fe3ea7f2",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -10748,7 +10918,14 @@
                           "objID": "ba40fa01-7560-4ab5-97b6-80f57018ff99",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "07c45c88-e7a1-411f-a2e1-0bac4dfed88d",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -10937,7 +11114,14 @@
                           "objID": "d443cc19-70fe-4617-cefe-81d5ff9662fe",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "a92791e4-52fc-4bde-c0b6-82a4b4ab84e8",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -11432,7 +11616,14 @@
                           "objID": "c8ad1aaf-08f8-436e-df9f-311ac544cebd",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "7c0463e4-fbfc-4c81-d47b-eeaa18bbfd4a",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -11621,7 +11812,14 @@
                           "objID": "415952ef-0b4a-4bd5-c1d2-4d78d5f3b2db",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "7220f8ec-b0cc-4bb2-f6ef-b4df714ab407",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -11810,7 +12008,14 @@
                           "objID": "e4bcf9b4-c2c7-4466-c47f-0a438666ff0f",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "388066c6-2d48-463a-f159-a61faa4ac697",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -11999,7 +12204,14 @@
                           "objID": "6c527ab6-07ca-4dd6-8ccd-024a7dab5138",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "2c1c5a6f-e81a-4428-b7f0-cccfb2ddc647",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -12901,7 +13113,14 @@
                           "objID": "86ff09e7-97b5-4def-c088-cd1f5bc46505",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "298611ed-b87b-4dc1-a92d-28761aef8058",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -13093,7 +13312,14 @@
                           "objID": "a938abdf-06fe-4954-dfc5-2962860b63bc",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "51f678a9-5ac9-40cd-8e3a-fb572e386d8b",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -13285,7 +13511,14 @@
                           "objID": "04c25a62-de94-48f3-964a-ee6ee65238dc",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "4f79bf8a-0169-4434-aa31-455d2a01c3c0",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -13477,7 +13710,14 @@
                           "objID": "9fffe7d4-34f5-4ff9-bb13-36d2d06f34b3",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "fee14d5d-7842-44d9-b7fe-962fd97db9bd",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -13669,7 +13909,14 @@
                           "objID": "77855b13-9f22-4560-f2f0-0fbd15b7d78e",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "d650393a-c487-4bf4-b877-0a43bbf2b794",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -14183,7 +14430,14 @@
                           "objID": "095f079d-ac65-47af-d0f6-5d10751382f4",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "51c04df6-f295-4411-9e6e-41b8f6d3c00f",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -14375,7 +14629,14 @@
                           "objID": "b1198f8b-cc0d-4bb3-9d75-749a49306d06",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "06e1ac51-0ecf-4726-c12e-6692356bb6f4",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -14567,7 +14828,14 @@
                           "objID": "f219549a-d90f-4a06-83da-ab2fe561571b",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "d3c1d1d2-c838-40cd-cc20-ef3464e891fc",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -14759,7 +15027,14 @@
                           "objID": "996b18ca-0d0b-4a36-d57c-90561a567482",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "58f0be4a-2dcd-4e41-99cc-d25b7fa28c14",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -14951,7 +15226,14 @@
                           "objID": "7674b886-cfc1-4b5d-cae1-fb04102ab6a3",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "c99635ac-773d-4527-f943-2b73e20bcb79",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -15455,7 +15737,14 @@
                           "objID": "0b07f131-e8dd-4f90-cb65-8e9b7bcf1d6e",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "1d219ea9-19ea-4da8-865b-299e73c89f60",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -15647,7 +15936,14 @@
                           "objID": "c66d5c87-9d3c-4811-9329-fcc888885427",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "3fa30d57-6c2a-4b50-db52-23dc7b1230cb",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -15839,7 +16135,14 @@
                           "objID": "24932760-50c0-4dd5-d938-061dc230dddf",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "3f932ce0-1ff0-4f43-98a4-511a9f6724a8",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -16031,7 +16334,14 @@
                           "objID": "1f2e5b8e-be2b-4c0a-d929-ff65c8b15e25",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "75f147c7-6171-41bf-83df-418594f1ea12",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -16223,7 +16533,14 @@
                           "objID": "f507f01b-28a1-4947-cbe8-e1cd27a7ac1a",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "23d1f5b2-7291-44b5-b4eb-056e0d2027f8",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -16727,7 +17044,14 @@
                           "objID": "54a37ce0-8b71-4647-b9d2-e95593d4c9b6",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "10d54f47-c149-4323-b6b0-ce34762e6be2",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -16919,7 +17243,14 @@
                           "objID": "42e293be-4792-4945-9330-7d903eac926a",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "81c35375-3322-4cea-9124-94f74ef82e86",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -17111,7 +17442,14 @@
                           "objID": "bbdbc8ad-842d-49ae-bb5e-47f23cf55ebf",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "045fac7f-dde4-4e0d-ba8f-6e7d91b52bff",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -17303,7 +17641,14 @@
                           "objID": "61513737-9dce-4d1a-a92d-42f98efd6e61",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "69aa7877-9c06-46df-c2de-f34490f87a26",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -17495,7 +17840,14 @@
                           "objID": "30a5bf27-28a5-475d-977e-ba3e52c656b7",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "28caddc3-6a59-4f9b-9d51-717016a60d2d",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -17999,7 +18351,14 @@
                           "objID": "bf979fc3-e2d8-4056-c279-10e524e8f988",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "ac89e60a-a814-4604-f326-b24a49b339b1",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -18191,7 +18550,14 @@
                           "objID": "aeb27b24-b409-4074-f196-6a1014bb5b93",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "d5daeab8-2257-4a85-a8c6-85bba4409c00",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -18383,7 +18749,14 @@
                           "objID": "15963c48-8b11-4b4d-c798-d2bd8e60dfa7",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "bff43c13-2f6d-42d6-a40d-2837dd10046e",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -18575,7 +18948,14 @@
                           "objID": "e21529f9-d973-4648-affa-951b4410e68b",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "0fedfba7-c409-4162-8c85-8e47c06b4a13",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -18767,7 +19147,14 @@
                           "objID": "c21de9cc-81b9-41c7-d561-e2e1306a5949",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "1ecaa380-6627-4326-af9d-3b1afce0c626",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -19271,7 +19658,14 @@
                           "objID": "c9a850ac-2a79-4fbb-c1d1-5ecacdaa1a51",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "25b0574e-d454-4bd1-c463-e4280158d14a",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -19463,7 +19857,14 @@
                           "objID": "f7c01ade-c1bb-4cae-93c0-a99cc10cf827",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "a2e2a4cb-e439-4947-8581-4514de83b8b6",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -19655,7 +20056,14 @@
                           "objID": "d50284c3-55ae-445a-fde8-442420daa930",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "7264e209-813f-4bf5-ad40-86d3bb451c90",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -19847,7 +20255,14 @@
                           "objID": "b9c47dc4-7f27-4991-81b8-310795fdb99b",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "a9ff5a22-8524-458f-a1ed-0703994755de",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -20039,7 +20454,14 @@
                           "objID": "74993f5c-654a-4226-a72c-fcea6bc7510f",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "c39ba4d1-2b09-45ee-d197-ac204eb46eba",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -20543,7 +20965,14 @@
                           "objID": "30bd60e2-9a1e-403c-a589-b7c5b68f4e01",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "0873c30e-7a52-4235-fc70-bd7e090fb50f",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -20735,7 +21164,14 @@
                           "objID": "5913b93f-6d44-48c4-eb97-2028e7277884",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "e59d47c0-e3d7-400e-f7c5-2ed7a333ccde",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -20927,7 +21363,14 @@
                           "objID": "fc3e2fc1-a622-471f-8335-ce6d8102b8e6",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "13d7a33d-f430-42f4-8224-af90610f7c35",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -21119,7 +21562,14 @@
                           "objID": "9fb46d51-e9fc-4a70-84be-ed17b893854f",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "437719c1-13dc-406d-80bb-4c79d342518c",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -21311,7 +21761,14 @@
                           "objID": "f875c4f7-b695-4551-b38c-1fe244b0b183",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "becb7f83-5f3a-4066-8eee-50d2de244a86",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -21815,7 +22272,14 @@
                           "objID": "c5e9e4db-1930-48e7-b55f-15d26c6eb0f9",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "9b85d8ae-3f75-4197-ed1a-2e6cedc13295",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -22007,7 +22471,14 @@
                           "objID": "a9417b05-14b4-4c5c-ef25-a452195db538",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "25f1eff9-f106-4657-a2a0-ff29938b016a",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -22199,7 +22670,14 @@
                           "objID": "0c79e159-76c1-467e-b8a5-8d283163b2a7",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "ec11cef5-a968-47d1-a0ac-a598536a2ea7",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -22391,7 +22869,14 @@
                           "objID": "d1046a00-ddfd-488c-bdea-53f6087f1769",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "fd6070f6-2212-4b18-c5e3-95c8d51056e2",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -22583,7 +23068,14 @@
                           "objID": "f976bd0f-47e3-4df0-9595-054982a8a404",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "1be19b65-9382-4ea6-9ab8-6f83979521b0",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -23087,7 +23579,14 @@
                           "objID": "a20c82ab-bd86-48ff-cb4e-0c652e33ce36",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "1e8165cc-a5f9-4223-fb15-3206b33a5fec",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -23279,7 +23778,14 @@
                           "objID": "aea01293-cf09-4e6e-ac1a-04139c1fb3dc",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "5a8a340a-5f0a-4529-f95b-7aaf830c9089",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -23471,7 +23977,14 @@
                           "objID": "ae5172fd-060f-495e-f20a-e145be341529",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "c8a5f305-5e64-45ef-abc2-a89dccf88e5c",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -23663,7 +24176,14 @@
                           "objID": "4ce8b974-c468-4ba6-8b72-eade17528ee2",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "af3b9833-85ca-4e54-b6fa-380ec66a587f",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -23855,7 +24375,14 @@
                           "objID": "34b6a69d-2004-4929-8426-bc191a53130c",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "820042e1-b656-4080-de6d-7d390fa122a7",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -24359,7 +24886,14 @@
                           "objID": "0ee500f4-f806-4ab9-e0af-6f0fb6ef85bc",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "bcd303c7-be7d-4efb-c0e2-d9d1c7d8955b",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -24551,7 +25085,14 @@
                           "objID": "2e19a174-1a00-4797-87be-69f9e5fc9dfe",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "525f346b-62b0-4801-88f2-eb82a08cc9be",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -24743,7 +25284,14 @@
                           "objID": "60f21270-4f27-43e3-e7db-ceacd0246d8a",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "acd2ef0b-68b2-4e76-8b96-86fad707f641",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -24935,7 +25483,14 @@
                           "objID": "d60a866b-6512-4bd6-a1f1-5f19e9ab24dd",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "e1b3a64a-4416-48b6-bc3c-313ec83ab06e",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -25127,7 +25682,14 @@
                           "objID": "f0538888-3c2f-4506-b9c1-e9618567b9b0",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "d4730dfa-994d-4663-f289-1117b6b0a76d",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -25500,7 +26062,14 @@
                           "objID": "96e651dd-466f-451d-ed5f-b4478f46daa7",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "e3c745de-73f0-42b3-f43e-51eaf901937d",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -25692,7 +26261,14 @@
                           "objID": "5a638f58-f032-4145-aa85-68c120a15327",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "c804627c-6fa3-41fe-f10a-4ea3df4443c9",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -25884,7 +26460,14 @@
                           "objID": "b4bb984a-759e-4fc7-9a21-fe2c43c9161d",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "02f51639-d8b1-4ba4-802c-061fa22676a7",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],

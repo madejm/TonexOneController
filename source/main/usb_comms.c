@@ -211,7 +211,7 @@ void class_driver_task(void *arg)
 
                 usb_valeton_gp5_init(&driver_obj, usb_input_queue);
             }
-            if ((dev_desc->idVendor == IK_MULTIMEDIA_USB_VENDOR) && (dev_desc->idProduct == TONEX_ONE_PLUS_PRODUCT_ID))
+            else if ((dev_desc->idVendor == IK_MULTIMEDIA_USB_VENDOR) && (dev_desc->idProduct == TONEX_ONE_PLUS_PRODUCT_ID))
             {
                 // found Tonex One Plus
                 ESP_LOGI(TAG, "Found Tonex One Plus");
