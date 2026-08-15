@@ -567,6 +567,7 @@ void create_screen_screen1() {
                     lv_obj_set_size(obj, 800, 275);
                     lv_obj_add_event_cb(obj, action_keyboard_ok, LV_EVENT_READY, (void *)0);
                     lv_obj_add_flag(obj, LV_OBJ_FLAG_HIDDEN);
+                    lv_obj_clear_flag(obj, LV_OBJ_FLAG_GESTURE_BUBBLE);
                     lv_obj_set_style_align(obj, LV_ALIGN_DEFAULT, LV_PART_MAIN | LV_STATE_DEFAULT);
                 }
                 {

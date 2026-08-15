@@ -38,6 +38,7 @@ limitations under the License.
 #include "tonex_params.h"
 #include "midi_helper.h"
 #include "midi_helper_tonex.h"
+#include "display.h"
 
 static const char *TAG = "app_midi_helper_tonex";
 
@@ -214,10 +215,18 @@ esp_err_t midi_helper_tonex_adjust_param_via_midi(uint8_t change_num, uint8_t mi
             if (midi_value == 127)
             {
                 control_request_tuner(1);
+
+#if CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI
+                UI_SetTunerState(1);
+#endif                
             }
             else
             {
                 control_request_tuner(0);
+
+#if CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI
+                UI_SetTunerState(0);
+#endif                 
             }
 
             // no param change needed

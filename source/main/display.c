@@ -109,7 +109,8 @@ enum UIElements
     UI_ELEMENT_PRESET_DESCRIPTION,
     UI_ELEMENT_PARAMETERS,
     UI_ELEMENT_TOAST,
-    UI_ELEMENT_TUNER_FREQ
+    UI_ELEMENT_TUNER_FREQ,
+    UI_ELEMENT_TUNER_STATE
 };
 
 enum UIAction
@@ -617,7 +618,8 @@ void action_save_skin_edit(lv_event_t * e)
 {
     ESP_LOGI(TAG, "UI save skin edit");
 
-    action_keyboard_ok(e);
+    // make sure user text is saved
+    lv_event_send(objects.ui_entry_keyboard, LV_EVENT_READY, NULL);
     control_save_user_data(0);
     
     lv_obj_add_flag(objects.ui_ok_tick, LV_OBJ_FLAG_HIDDEN);
@@ -708,7 +710,7 @@ void action_keyboard_ok(lv_event_t * e)
 {
     lv_event_code_t event_code = lv_event_get_code(e);
 
-    if(event_code == LV_EVENT_READY) 
+    if (event_code == LV_EVENT_READY) 
     {
         // hide keyboard
         lv_obj_add_flag(objects.ui_entry_keyboard, LV_OBJ_FLAG_HIDDEN);
@@ -887,6 +889,29 @@ void UI_SetWiFiStatus(uint8_t state)
     if (xQueueSend(ui_update_queue, (void*)&ui_update, 0) != pdPASS)
     {
         ESP_LOGE(TAG, "UI Update queue send failed!");            
+    }
+}
+
+/****************************************************************************
+* NAME:        
+* DESCRIPTION: 
+* PARAMETERS:  
+* RETURN:      
+* NOTES:       
+*****************************************************************************/
+void UI_SetTunerState(uint8_t state)
+{
+    tUIUpdate ui_update;
+
+    // build command
+    ui_update.ElementID = UI_ELEMENT_TUNER_STATE;
+    ui_update.Action = UI_ACTION_NONE;
+    ui_update.Value = state;
+
+    // send to queue
+    if (xQueueSend(ui_update_queue, (void*)&ui_update, 0) != pdPASS)
+    {
+        ESP_LOGE(TAG, "UI SetTunerState queue send failed!");            
     }
 }
 
@@ -1204,7 +1229,7 @@ static  __attribute__((unused)) uint8_t update_ui_element(tUIUpdate* update)
     lv_obj_t* element_1 = NULL;
 
     switch (update->ElementID)
-    {
+    {    
         case UI_ELEMENT_USB_STATUS:
         {
             element_1 = objects.ui_usb_status_fail;
@@ -1370,6 +1395,25 @@ static  __attribute__((unused)) uint8_t update_ui_element(tUIUpdate* update)
                 lv_label_set_text(objects.ui_tuner_note_label, buf);
             }
 #endif            
+        } break;
+
+        case UI_ELEMENT_TUNER_STATE:
+        {
+#if CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI    
+            if (usb_get_connected_modeller_type() == AMP_MODELLER_TONEX_ONE_PLUS)
+            {
+                if (update->Value == 1)
+                {
+                    // show tuner page
+                    action_tuner_pressed(NULL);
+                }        
+                else 
+                { 
+                    // hide tuner page
+                    action_tuner_close(NULL);
+                }
+            }
+#endif  //CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI          
         } break;
 
         default:
