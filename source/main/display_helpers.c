@@ -12,7 +12,15 @@ typedef struct {
     lv_obj_t * label;
     const char *format;
     float multiplier;
+    float defaultValue;
 } drag_data_t;
+
+static void label_set_value(drag_data_t * data, int32_t value)
+{
+    char buf[20];
+    sprintf(buf, data->format, ((float)value) / data->multiplier);
+    lv_label_set_text(data->label, buf);
+}
 
 static int32_t arc_drag_accumulator = 0;
 static void arc_drag_cb(lv_event_t * e)
@@ -41,11 +49,7 @@ static void arc_drag_cb(lv_event_t * e)
     if(delta) {
         int32_t value = lv_arc_get_value(arc) + delta;
         lv_arc_set_value(arc, value);
-
-        char buf[20];
-        sprintf(buf, data->format, ((float)value) / data->multiplier);
-        lv_label_set_text(data->label, buf);
-
+        label_set_value(data, value);
         lv_event_send(arc, LV_EVENT_VALUE_CHANGED, NULL);
     }
 }
@@ -57,17 +61,27 @@ static void drag_released_cb(lv_event_t * e)
     lv_event_send(arc, LV_EVENT_RELEASED, NULL);
 }
 
+static void arc_reset_cb(lv_event_t * e)
+{
+    drag_data_t * data = lv_event_get_user_data(e);
+
+    lv_arc_set_value(data->arc, (int16_t)(data->defaultValue * data->multiplier));
+    label_set_value(data,       (int16_t)(data->defaultValue * data->multiplier));
+    lv_event_send(data->arc, LV_EVENT_VALUE_CHANGED, NULL);
+}
+
 static void drag_delete_cb(lv_event_t *e)
 {
     drag_data_t *data = lv_event_get_user_data(e);
     lv_mem_free(data);
 }
 
-void lv_helper_create_arc_gesture(
+static void lv_helper_create_arc_gesture(
     lv_obj_t *arc,
     lv_obj_t *label,
     const char *format,
-    float multiplier
+    float multiplier,
+    float defaultValue
 ) {
     lv_obj_t * parent = lv_obj_get_parent(arc);
 
@@ -107,35 +121,42 @@ void lv_helper_create_arc_gesture(
     data->label = label;
     data->format = format;
     data->multiplier = multiplier;
-    
+    data->defaultValue = defaultValue;
+
     lv_obj_add_event_cb(drag, arc_drag_cb, LV_EVENT_PRESSED, data);
     lv_obj_add_event_cb(drag, arc_drag_cb, LV_EVENT_PRESSING, data);
     lv_obj_add_event_cb(drag, drag_delete_cb, LV_EVENT_DELETE, data);
+    lv_obj_add_event_cb(drag, arc_reset_cb, LV_EVENT_LONG_PRESSED, data);
     lv_obj_add_event_cb(drag, drag_released_cb, LV_EVENT_RELEASED, arc);
 }
 
 #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
 void customize_ui() {
-    lv_helper_create_arc_gesture(objects.ui_noise_gate_threshold_arc, objects.ui_noise_gate_threshold_value, "%1.1f", 10.0f);
-    lv_helper_create_arc_gesture(objects.ui_noise_gate_release_arc,   objects.ui_noise_gate_release_value,   "%1.1f", 10.0f);
-    lv_helper_create_arc_gesture(objects.ui_noise_gate_depth_arc,     objects.ui_noise_gate_depth_value,     "%1.1f", 10.0f);
+    lv_helper_create_arc_gesture(objects.ui_noise_gate_threshold_slider, objects.ui_noise_gate_threshold_value, "%1.0f", 1.0f, -100);
+    lv_helper_create_arc_gesture(objects.ui_noise_gate_release_slider,   objects.ui_noise_gate_release_value,   "%1.0f", 1.0f, 20);
+    lv_helper_create_arc_gesture(objects.ui_noise_gate_depth_slider,     objects.ui_noise_gate_depth_value,     "%1.0f", 1.0f, 60);
 
-    lv_helper_create_arc_gesture(objects.ui_compressor_threshold_arc, objects.ui_compressor_threshold_value, "%1.1f", 10.0f);
-    lv_helper_create_arc_gesture(objects.ui_compressor_gain_arc,      objects.ui_compressor_gain_value,      "%1.1f", 10.0f);
-    lv_helper_create_arc_gesture(objects.ui_compressor_attack_arc,    objects.ui_compressor_attack_value,    "%1.1f", 10.0f);
+    lv_helper_create_arc_gesture(objects.ui_compressor_threshold_slider, objects.ui_compressor_threshold_value, "%1.1f", 1.0f, 0);
+    lv_helper_create_arc_gesture(objects.ui_compressor_gain_slider,      objects.ui_compressor_gain_value,      "%1.0f", 1.0f, -8);
+    lv_helper_create_arc_gesture(objects.ui_compressor_attack_slider,    objects.ui_compressor_attack_value,    "%1.0f", 1.0f, 5);
 
-    lv_helper_create_arc_gesture(objects.ui_amplifier_gain_arc,       objects.ui_amplifier_gain_value,       "%1.1f", 10.0f);
-    lv_helper_create_arc_gesture(objects.ui_amplifier_volume_arc,     objects.ui_amplifier_volume_value,     "%1.1f", 10.0f);
-    lv_helper_create_arc_gesture(objects.ui_amplifier_depth_arc,      objects.ui_amplifier_depth_value,      "%1.1f", 10.0f);
-    lv_helper_create_arc_gesture(objects.ui_amplifier_presense_arc,   objects.ui_amplifier_presense_value,   "%1.1f", 10.0f);
+    lv_helper_create_arc_gesture(objects.ui_amplifier_gain_slider,       objects.ui_amplifier_gain_value,       "%1.1f", 10.0f, 5);
+    lv_helper_create_arc_gesture(objects.ui_amplifier_volume_slider,     objects.ui_amplifier_volume_value,     "%1.1f", 10.0f, 5);
+    lv_helper_create_arc_gesture(objects.ui_amplifier_depth_slider,      objects.ui_amplifier_depth_value,      "%1.1f", 10.0f, 5);
+    lv_helper_create_arc_gesture(objects.ui_amplifier_presense_slider,   objects.ui_amplifier_presense_value,   "%1.1f", 10.0f, 5);
 
-    lv_helper_create_arc_gesture(objects.ui_eq_bass_freq_arc,         objects.ui_eq_bass_freq_value,         "%1.0f", 1.0f);
-    lv_helper_create_arc_gesture(objects.ui_eq_bass_arc,              objects.ui_eq_bass_value,              "%1.1f", 10.0f);
-    lv_helper_create_arc_gesture(objects.ui_eq_mid_freq_arc,          objects.ui_eq_mid_freq_value,          "%1.0f", 1.0f);
-    lv_helper_create_arc_gesture(objects.ui_eq_mid_qarc,              objects.ui_eq_mid_qvalue,              "%1.1f", 10.0f);
-    lv_helper_create_arc_gesture(objects.ui_eq_mid_arc,               objects.ui_eq_mid_value,               "%1.1f", 10.0f);
-    lv_helper_create_arc_gesture(objects.ui_eq_treble_freq_arc,       objects.ui_eq_treble_freq_value,       "%1.0f", 1.0f);
-    lv_helper_create_arc_gesture(objects.ui_eq_treble_arc,            objects.ui_eq_treble_value,            "%1.1f", 10.0f);
+    lv_helper_create_arc_gesture(objects.ui_eq_bass_freq_slider,         objects.ui_eq_bass_freq_value,         "%1.0f", 1.0f,  300);
+    lv_helper_create_arc_gesture(objects.ui_eq_bass_slider,              objects.ui_eq_bass_value,              "%1.1f", 10.0f, 5);
+    lv_helper_create_arc_gesture(objects.ui_eq_mid_freq_slider,          objects.ui_eq_mid_freq_value,          "%1.0f", 1.0f,  750);
+    lv_helper_create_arc_gesture(objects.ui_eq_mid_qslider,              objects.ui_eq_mid_qvalue,              "%1.1f", 10.0f, 0.7);
+    lv_helper_create_arc_gesture(objects.ui_eq_mid_slider,               objects.ui_eq_mid_value,               "%1.1f", 10.0f, 5);
+    lv_helper_create_arc_gesture(objects.ui_eq_treble_freq_slider,       objects.ui_eq_treble_freq_value,       "%1.0f", 1.0f,  2000);
+    lv_helper_create_arc_gesture(objects.ui_eq_treble_slider,            objects.ui_eq_treble_value,            "%1.1f", 10.0f, 5);
+
+    lv_helper_create_arc_gesture(objects.ui_bpm_slider,                  objects.ui_bpm_value,                  "%1.0f", 1.0f, 120);
+    lv_helper_create_arc_gesture(objects.ui_input_trim_slider,           objects.ui_input_trim_value,           "%1.0f", 1.0f, 0);
+    lv_helper_create_arc_gesture(objects.ui_tuning_reference_slider,     objects.ui_tuning_reference_value,     "%1.0f", 1.0f, 440);
+    lv_helper_create_arc_gesture(objects.ui_volume_slider,               objects.ui_volume_value,               "%1.0f", 1.0f, 5);
 
     eq_canvas_setup();
 }
