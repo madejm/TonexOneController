@@ -67,6 +67,16 @@ lv_style_t *get_style_container_preset_MAIN_DEFAULT();
 void add_style_container_preset(lv_obj_t *obj);
 void remove_style_container_preset(lv_obj_t *obj);
 
+// Style: Tab Settings Old
+lv_style_t *get_style_tab_settings_old_MAIN_DEFAULT();
+void add_style_tab_settings_old(lv_obj_t *obj);
+void remove_style_tab_settings_old(lv_obj_t *obj);
+
+// Style: Tab Sub Settings
+lv_style_t *get_style_tab_sub_settings_MAIN_DEFAULT();
+void add_style_tab_sub_settings(lv_obj_t *obj);
+void remove_style_tab_sub_settings(lv_obj_t *obj);
+
 // Style: Tab Settings
 lv_style_t *get_style_tab_settings_MAIN_DEFAULT();
 void add_style_tab_settings(lv_obj_t *obj);
@@ -96,6 +106,47 @@ lv_style_t *get_style_switch_default_KNOB_CHECKED();
 lv_style_t *get_style_switch_default_INDICATOR_CHECKED();
 void add_style_switch_default(lv_obj_t *obj);
 void remove_style_switch_default(lv_obj_t *obj);
+
+// Style: Switch Dark
+lv_style_t *get_style_switch_dark_MAIN_DEFAULT();
+lv_style_t *get_style_switch_dark_KNOB_DEFAULT();
+lv_style_t *get_style_switch_dark_KNOB_CHECKED();
+lv_style_t *get_style_switch_dark_INDICATOR_CHECKED();
+void add_style_switch_dark(lv_obj_t *obj);
+void remove_style_switch_dark(lv_obj_t *obj);
+
+// Style: Label Arc Value
+lv_style_t *get_style_label_arc_value_MAIN_DEFAULT();
+void add_style_label_arc_value(lv_obj_t *obj);
+void remove_style_label_arc_value(lv_obj_t *obj);
+
+// Style: Tabview Sub Settings
+lv_style_t *get_style_tabview_sub_settings_MAIN_DEFAULT();
+void add_style_tabview_sub_settings(lv_obj_t *obj);
+void remove_style_tabview_sub_settings(lv_obj_t *obj);
+
+// Style: Bar Sub Settings
+lv_style_t *get_style_bar_sub_settings_ITEMS_DEFAULT();
+lv_style_t *get_style_bar_sub_settings_ITEMS_CHECKED();
+lv_style_t *get_style_bar_sub_settings_MAIN_DEFAULT();
+void add_style_bar_sub_settings(lv_obj_t *obj);
+void remove_style_bar_sub_settings(lv_obj_t *obj);
+
+// Style: Container Sub Settings
+lv_style_t *get_style_container_sub_settings_MAIN_DEFAULT();
+void add_style_container_sub_settings(lv_obj_t *obj);
+void remove_style_container_sub_settings(lv_obj_t *obj);
+
+// Style: Container Sub Settings 2
+lv_style_t *get_style_container_sub_settings_2_MAIN_DEFAULT();
+void add_style_container_sub_settings_2(lv_obj_t *obj);
+void remove_style_container_sub_settings_2(lv_obj_t *obj);
+
+// Style: Dropdown Sub Settings
+lv_style_t *get_style_dropdown_sub_settings_MAIN_DEFAULT();
+lv_style_t *get_style_dropdown_sub_settings_INDICATOR_DEFAULT();
+void add_style_dropdown_sub_settings(lv_obj_t *obj);
+void remove_style_dropdown_sub_settings(lv_obj_t *obj);
 
 #ifdef __cplusplus
 }

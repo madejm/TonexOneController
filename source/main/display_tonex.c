@@ -313,6 +313,20 @@ void tonex_action_parameter_changed(lv_event_t * e)
     {
         usb_modify_parameter(TONEX_PARAM_NOISE_GATE_POST, lv_obj_has_state(obj, LV_STATE_CHECKED) ? 1 : 0);
     }
+    #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+    else if (obj == objects.ui_noise_gate_threshold_arc)
+    {
+        usb_modify_parameter(TONEX_PARAM_NOISE_GATE_THRESHOLD, lv_arc_get_value(obj));
+    }
+    else if (obj == objects.ui_noise_gate_release_arc)
+    {
+        usb_modify_parameter(TONEX_PARAM_NOISE_GATE_RELEASE, lv_arc_get_value(obj));
+    }
+    else if (obj == objects.ui_noise_gate_depth_arc)
+    {
+        usb_modify_parameter(TONEX_PARAM_NOISE_GATE_DEPTH, lv_arc_get_value(obj));
+    }
+    #else
     else if (obj == objects.ui_noise_gate_threshold_slider)
     {
         usb_modify_parameter(TONEX_PARAM_NOISE_GATE_THRESHOLD, lv_slider_get_value(obj));
@@ -325,6 +339,7 @@ void tonex_action_parameter_changed(lv_event_t * e)
     {
         usb_modify_parameter(TONEX_PARAM_NOISE_GATE_DEPTH, lv_slider_get_value(obj));
     }
+    #endif // CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
     else if (obj == objects.ui_compressor_enable_switch)
     {
         usb_modify_parameter(TONEX_PARAM_COMP_ENABLE, lv_obj_has_state(obj, LV_STATE_CHECKED) ? 1 : 0);
@@ -333,6 +348,20 @@ void tonex_action_parameter_changed(lv_event_t * e)
     {
         usb_modify_parameter(TONEX_PARAM_COMP_POST, lv_obj_has_state(obj, LV_STATE_CHECKED) ? 1 : 0);
     }
+    #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+    else if (obj == objects.ui_compressor_threshold_arc)
+    {
+        usb_modify_parameter(TONEX_PARAM_COMP_THRESHOLD, lv_arc_get_value(obj));
+    }
+    else if (obj == objects.ui_compressor_attack_arc)
+    {
+        usb_modify_parameter(TONEX_PARAM_COMP_ATTACK, lv_arc_get_value(obj));
+    }
+    else if (obj == objects.ui_compressor_gain_arc)
+    {
+        usb_modify_parameter(TONEX_PARAM_COMP_MAKE_UP, lv_arc_get_value(obj));
+    }
+    #else
     else if (obj == objects.ui_compressor_threshold_slider)
     {
         usb_modify_parameter(TONEX_PARAM_COMP_THRESHOLD, lv_slider_get_value(obj));
@@ -345,6 +374,7 @@ void tonex_action_parameter_changed(lv_event_t * e)
     {
         usb_modify_parameter(TONEX_PARAM_COMP_MAKE_UP, lv_slider_get_value(obj));
     }
+    #endif // CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
     else if (obj == objects.ui_eq_post_switch)
     {
         usb_modify_parameter(TONEX_PARAM_EQ_POST, lv_obj_has_state(obj, LV_STATE_CHECKED) ? 1 : 0);
@@ -864,7 +894,17 @@ void tonex_action_parameter_changed(lv_event_t * e)
     else if (obj == objects.ui_cabinet_model_dropdown)
     {
         usb_modify_parameter(TONEX_PARAM_CABINET_TYPE, lv_dropdown_get_selected(obj));
-    } 
+    }
+    #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+    else if (obj == objects.ui_amplifier_gain_arc)
+    {
+        usb_modify_parameter(TONEX_PARAM_MODEL_GAIN, ((float)lv_arc_get_value(obj))/10.0f);
+    }
+    else if (obj == objects.ui_amplifier_volume_arc)
+    {
+        usb_modify_parameter(TONEX_PARAM_MODEL_VOLUME, ((float)lv_arc_get_value(obj))/10.0f);
+    }
+    #else
     else if (obj == objects.ui_amplifier_gain_slider)
     {
         usb_modify_parameter(TONEX_PARAM_MODEL_GAIN, ((float)lv_slider_get_value(obj))/10.0f);
@@ -873,6 +913,7 @@ void tonex_action_parameter_changed(lv_event_t * e)
     {
         usb_modify_parameter(TONEX_PARAM_MODEL_VOLUME, ((float)lv_slider_get_value(obj))/10.0f);
     }
+    #endif // CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
     #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
     else if (obj == objects.ui_amplifier_presense_arc)
     {
@@ -1076,8 +1117,13 @@ uint8_t tonex_update_ui_parameters(void)
 
                 case TONEX_PARAM_NOISE_GATE_THRESHOLD:
                 {                            
+                    #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+                    lv_arc_set_range(objects.ui_noise_gate_threshold_arc, round(param_entry->Min), round(param_entry->Max));
+                    lv_arc_set_value(objects.ui_noise_gate_threshold_arc, round(param_entry->Value));
+                    #else
                     lv_slider_set_range(objects.ui_noise_gate_threshold_slider, round(param_entry->Min), round(param_entry->Max));
                     lv_slider_set_value(objects.ui_noise_gate_threshold_slider, round(param_entry->Value), LV_ANIM_OFF);
+                    #endif // CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
 
                     // show value and units
                     sprintf(value_string, "%d db", (int)round(param_entry->Value));
@@ -1089,8 +1135,13 @@ uint8_t tonex_update_ui_parameters(void)
 
                 case TONEX_PARAM_NOISE_GATE_RELEASE:
                 {
+                    #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+                    lv_arc_set_range(objects.ui_noise_gate_release_arc, round(param_entry->Min), round(param_entry->Max));
+                    lv_arc_set_value(objects.ui_noise_gate_release_arc, round(param_entry->Value)); 
+                    #else
                     lv_slider_set_range(objects.ui_noise_gate_release_slider, round(param_entry->Min), round(param_entry->Max));
                     lv_slider_set_value(objects.ui_noise_gate_release_slider, round(param_entry->Value), LV_ANIM_OFF); 
+                    #endif // CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
                     
                     // show value and units
                     sprintf(value_string, "%d ms", (int)round(param_entry->Value));
@@ -1102,8 +1153,13 @@ uint8_t tonex_update_ui_parameters(void)
 
                 case TONEX_PARAM_NOISE_GATE_DEPTH:
                 {                            
+                    #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+                    lv_arc_set_range(objects.ui_noise_gate_depth_arc, round(param_entry->Min), round(param_entry->Max));
+                    lv_arc_set_value(objects.ui_noise_gate_depth_arc, round(param_entry->Value));
+                    #else
                     lv_slider_set_range(objects.ui_noise_gate_depth_slider, round(param_entry->Min), round(param_entry->Max));
                     lv_slider_set_value(objects.ui_noise_gate_depth_slider, round(param_entry->Value), LV_ANIM_OFF);
+                    #endif // CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
 
                     // show value and units
                     sprintf(value_string, "%d db", (int)round(param_entry->Value));
@@ -1149,8 +1205,13 @@ uint8_t tonex_update_ui_parameters(void)
 
                 case TONEX_PARAM_COMP_THRESHOLD:
                 {                            
+                    #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+                    lv_arc_set_range(objects.ui_compressor_threshold_arc, round(param_entry->Min), round(param_entry->Max));
+                    lv_arc_set_value(objects.ui_compressor_threshold_arc, round(param_entry->Value));
+                    #else
                     lv_slider_set_range(objects.ui_compressor_threshold_slider, round(param_entry->Min), round(param_entry->Max));
                     lv_slider_set_value(objects.ui_compressor_threshold_slider, round(param_entry->Value), LV_ANIM_OFF);
+                    #endif // CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
 
                     // show value and units
                     sprintf(value_string, "%1.1f db", param_entry->Value);
@@ -1162,8 +1223,13 @@ uint8_t tonex_update_ui_parameters(void)
 
                 case TONEX_PARAM_COMP_MAKE_UP:
                 {
+                    #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+                    lv_arc_set_range(objects.ui_compressor_gain_arc, round(param_entry->Min), round(param_entry->Max));
+                    lv_arc_set_value(objects.ui_compressor_gain_arc, round(param_entry->Value));    
+                    #else
                     lv_slider_set_range(objects.ui_compressor_gain_slider, round(param_entry->Min), round(param_entry->Max));
                     lv_slider_set_value(objects.ui_compressor_gain_slider, round(param_entry->Value), LV_ANIM_OFF);    
+                    #endif // CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
 
                     // show value and units
                     sprintf(value_string, "%d db", (int)round(param_entry->Value));
@@ -1175,8 +1241,13 @@ uint8_t tonex_update_ui_parameters(void)
 
                 case TONEX_PARAM_COMP_ATTACK:
                 {
+                    #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+                    lv_arc_set_range(objects.ui_compressor_attack_arc, round(param_entry->Min), round(param_entry->Max));
+                    lv_arc_set_value(objects.ui_compressor_attack_arc, round(param_entry->Value)); 
+                    #else
                     lv_slider_set_range(objects.ui_compressor_attack_slider, round(param_entry->Min), round(param_entry->Max));
-                    lv_slider_set_value(objects.ui_compressor_attack_slider, round(param_entry->Value), LV_ANIM_OFF);                            
+                    lv_slider_set_value(objects.ui_compressor_attack_slider, round(param_entry->Value), LV_ANIM_OFF); 
+                    #endif // CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM                           
 
                     // show value and units
                     sprintf(value_string, "%d ms", (int)round(param_entry->Value));
@@ -1373,8 +1444,13 @@ uint8_t tonex_update_ui_parameters(void)
 
                 case TONEX_PARAM_MODEL_GAIN:
                 {
+                    #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+                    lv_arc_set_range(objects.ui_amplifier_gain_arc, round(param_entry->Min), round(param_entry->Max * 10.0f));
+                    lv_arc_set_value(objects.ui_amplifier_gain_arc, round(param_entry->Value * 10.0f));   
+                    #else
                     lv_slider_set_range(objects.ui_amplifier_gain_slider, round(param_entry->Min), round(param_entry->Max * 10.0f));
-                    lv_slider_set_value(objects.ui_amplifier_gain_slider, round(param_entry->Value * 10.0f), LV_ANIM_OFF);     
+                    lv_slider_set_value(objects.ui_amplifier_gain_slider, round(param_entry->Value * 10.0f), LV_ANIM_OFF);   
+                    #endif // CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM  
 
                     // show value and units
                     sprintf(value_string, "%1.1f", param_entry->Value);
@@ -1386,8 +1462,13 @@ uint8_t tonex_update_ui_parameters(void)
 
                 case TONEX_PARAM_MODEL_VOLUME:
                 {
+                    #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+                    lv_arc_set_range(objects.ui_amplifier_volume_arc, round(param_entry->Min), round(param_entry->Max * 10.0f));
+                    lv_arc_set_value(objects.ui_amplifier_volume_arc, round(param_entry->Value * 10.0f)); 
+                    #else
                     lv_slider_set_range(objects.ui_amplifier_volume_slider, round(param_entry->Min), round(param_entry->Max * 10.0f));
-                    lv_slider_set_value(objects.ui_amplifier_volume_slider, round(param_entry->Value * 10.0f), LV_ANIM_OFF);   
+                    lv_slider_set_value(objects.ui_amplifier_volume_slider, round(param_entry->Value * 10.0f), LV_ANIM_OFF); 
+                    #endif // CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM  
                     
                     // show value and units
                     sprintf(value_string, "%1.1f", param_entry->Value);

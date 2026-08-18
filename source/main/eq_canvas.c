@@ -271,6 +271,9 @@ void eq_canvas_setup(void)
         canvas_height,
         LV_IMG_CF_TRUE_COLOR_ALPHA
     );
+
+    lv_canvas_fill_bg(objects.ui_eq_canvas, lv_color_black(), LV_OPA_TRANSP);
+    
     request_redraw();
     lv_timer_create(redraw_timer_cb, EQ_REDRAW_PERIOD_MS, NULL);
 }
