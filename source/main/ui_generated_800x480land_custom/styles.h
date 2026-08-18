@@ -20,6 +20,12 @@ lv_style_t *get_style_button_basic_MAIN_PRESSED();
 void add_style_button_basic(lv_obj_t *obj);
 void remove_style_button_basic(lv_obj_t *obj);
 
+// Style: Button Preset List Options
+lv_style_t *get_style_button_preset_list_options_MAIN_DEFAULT();
+lv_style_t *get_style_button_preset_list_options_MAIN_PRESSED();
+void add_style_button_preset_list_options(lv_obj_t *obj);
+void remove_style_button_preset_list_options(lv_obj_t *obj);
+
 // Style: Button Chain
 lv_style_t *get_style_button_chain_MAIN_DEFAULT();
 lv_style_t *get_style_button_chain_MAIN_CHECKED();
@@ -60,6 +66,36 @@ void remove_style_label_preset_index(lv_obj_t *obj);
 lv_style_t *get_style_container_preset_MAIN_DEFAULT();
 void add_style_container_preset(lv_obj_t *obj);
 void remove_style_container_preset(lv_obj_t *obj);
+
+// Style: Tab Settings
+lv_style_t *get_style_tab_settings_MAIN_DEFAULT();
+void add_style_tab_settings(lv_obj_t *obj);
+void remove_style_tab_settings(lv_obj_t *obj);
+
+// Style: Arc Settings
+lv_style_t *get_style_arc_settings_KNOB_DEFAULT();
+lv_style_t *get_style_arc_settings_INDICATOR_DEFAULT();
+lv_style_t *get_style_arc_settings_MAIN_DEFAULT();
+void add_style_arc_settings(lv_obj_t *obj);
+void remove_style_arc_settings(lv_obj_t *obj);
+
+// Style: Button Preset List
+lv_style_t *get_style_button_preset_list_MAIN_DEFAULT();
+void add_style_button_preset_list(lv_obj_t *obj);
+void remove_style_button_preset_list(lv_obj_t *obj);
+
+// Style: Container Preset List Cell
+lv_style_t *get_style_container_preset_list_cell_MAIN_DEFAULT();
+void add_style_container_preset_list_cell(lv_obj_t *obj);
+void remove_style_container_preset_list_cell(lv_obj_t *obj);
+
+// Style: Switch Default
+lv_style_t *get_style_switch_default_MAIN_DEFAULT();
+lv_style_t *get_style_switch_default_KNOB_DEFAULT();
+lv_style_t *get_style_switch_default_KNOB_CHECKED();
+lv_style_t *get_style_switch_default_INDICATOR_CHECKED();
+void add_style_switch_default(lv_obj_t *obj);
+void remove_style_switch_default(lv_obj_t *obj);
 
 #ifdef __cplusplus
 }

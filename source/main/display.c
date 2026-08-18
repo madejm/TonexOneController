@@ -82,6 +82,7 @@ limitations under the License.
 #include "midi_helper.h"
 #include "footswitches.h"
 #include "fx_handler_helper.h"
+#include "display_helpers.h"
 
 static const char *TAG = "app_display";
 
@@ -671,6 +672,25 @@ void action_close_settings_page(lv_event_t * e)
 *****************************************************************************/
 void action_show_settings_page(lv_event_t * e)
 {
+
+    WiFiMode WiFiMode = control_get_config_item_int(CONFIG_ITEM_WIFI_MODE);
+    WiFiTxPower WifiTxPower = control_get_config_item_int(CONFIG_ITEM_WIFI_TX_POWER);
+
+    lv_dropdown_set_selected(objects.ui_wifi_mode_dropdown, WiFiMode);
+    lv_dropdown_set_selected(objects.ui_wifi_power_dropdown, WifiTxPower);
+
+    char WifiSSID[MAX_WIFI_SSID_PW];
+    char WifiPassword[MAX_WIFI_SSID_PW];
+    char MDNSName[MAX_MDNS_NAME];
+    
+    control_get_config_item_string(CONFIG_ITEM_WIFI_SSID, WifiSSID);
+    control_get_config_item_string(CONFIG_ITEM_WIFI_PASSWORD, WifiPassword);
+    control_get_config_item_string(CONFIG_ITEM_MDNS_NAME, MDNSName);
+
+    lv_textarea_set_text(objects.ui_wifi_ssid_textarea, WifiSSID);
+    lv_textarea_set_text(objects.ui_wifi_password_textarea, WifiPassword);
+    lv_textarea_set_text(objects.ui_mdns_name_textarea, MDNSName);
+
     switch (usb_get_connected_modeller_type())
     {
         case AMP_MODELLER_TONEX_ONE:        // fallthrough
@@ -682,7 +702,9 @@ void action_show_settings_page(lv_event_t * e)
 
         case AMP_MODELLER_VALETON_GP5:
         {
+            #if !CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
             lv_scr_load_anim(objects.val_settings, LV_SCR_LOAD_ANIM_FADE_IN, 0, 0, false);
+            #endif
         } break;
     }    
 }
@@ -1425,52 +1447,6 @@ static void updateFSButtons() {
             }
         }
     }
-}
-
-/****************************************************************************
-* NAME:        
-* DESCRIPTION: 
-* PARAMETERS:  
-* RETURN:      
-* NOTES:       
-*****************************************************************************/
-void action_open_controller_page_clicked(lv_event_t * e)
-{
-    ESP_LOGI(TAG, "action_open_controller_page_clicked");
-
-    WiFiMode WiFiMode = control_get_config_item_int(CONFIG_ITEM_WIFI_MODE);
-    WiFiTxPower WifiTxPower = control_get_config_item_int(CONFIG_ITEM_WIFI_TX_POWER);
-
-    lv_dropdown_set_selected(objects.ui_wifi_mode_dropdown, WiFiMode);
-    lv_dropdown_set_selected(objects.ui_wifi_power_dropdown, WifiTxPower);
-
-    char WifiSSID[MAX_WIFI_SSID_PW];
-    char WifiPassword[MAX_WIFI_SSID_PW];
-    char MDNSName[MAX_MDNS_NAME];
-    
-    control_get_config_item_string(CONFIG_ITEM_WIFI_SSID, WifiSSID);
-    control_get_config_item_string(CONFIG_ITEM_WIFI_PASSWORD, WifiPassword);
-    control_get_config_item_string(CONFIG_ITEM_MDNS_NAME, MDNSName);
-
-    lv_textarea_set_text(objects.ui_wifi_ssid_textarea, WifiSSID);
-    lv_textarea_set_text(objects.ui_wifi_password_textarea, WifiPassword);
-    lv_textarea_set_text(objects.ui_mdns_name_textarea, MDNSName);
-
-    lv_scr_load_anim(objects.controller_settings, LV_SCR_LOAD_ANIM_FADE_IN, 0, 0, false);
-}
-
-/****************************************************************************
-* NAME:        
-* DESCRIPTION: 
-* PARAMETERS:  
-* RETURN:      
-* NOTES:       
-*****************************************************************************/
-void action_close_controller_page(lv_event_t * e)
-{
-    ESP_LOGI(TAG, "action_close_controller_page");
-
-    lv_scr_load_anim(objects.settings, LV_SCR_LOAD_ANIM_FADE_IN, 0, 0, false);
 }
 
 /****************************************************************************
@@ -2967,4 +2943,8 @@ void display_init(i2c_master_bus_handle_t bus_handle, SemaphoreHandle_t I2CMutex
     // create display task
     xTaskCreatePinnedToCore(display_task, "Dsp", DISPLAY_TASK_STACK_SIZE, NULL, DISPLAY_TASK_PRIORITY, NULL, 1);
 #endif
+
+#if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+    customize_ui();
+#endif // CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
 }

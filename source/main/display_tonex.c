@@ -348,6 +348,36 @@ void tonex_action_parameter_changed(lv_event_t * e)
     {
         usb_modify_parameter(TONEX_PARAM_EQ_POST, lv_obj_has_state(obj, LV_STATE_CHECKED) ? 1 : 0);
     }
+    #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+    else if (obj == objects.ui_eq_bass_arc)
+    {
+        usb_modify_parameter(TONEX_PARAM_EQ_BASS, ((float)lv_arc_get_value(obj))/10.0f);
+    }
+    else if (obj == objects.ui_eq_bass_freq_arc)
+    {
+        usb_modify_parameter(TONEX_PARAM_EQ_BASS_FREQ, ((float)lv_arc_get_value(obj)));
+    }
+    else if (obj == objects.ui_eq_mid_arc)
+    {
+        usb_modify_parameter(TONEX_PARAM_EQ_MID, ((float)lv_arc_get_value(obj))/10.0f);
+    }
+    else if (obj == objects.ui_eq_mid_qarc)
+    {
+        usb_modify_parameter(TONEX_PARAM_EQ_MIDQ, ((float)lv_arc_get_value(obj))/10.0f);
+    }
+    else if (obj == objects.ui_eq_mid_freq_arc)
+    {
+        usb_modify_parameter(TONEX_PARAM_EQ_MID_FREQ, ((float)lv_arc_get_value(obj)));
+    }
+    else if (obj == objects.ui_eq_treble_arc)
+    {
+        usb_modify_parameter(TONEX_PARAM_EQ_TREBLE, ((float)lv_arc_get_value(obj))/10.0f);
+    }
+    else if (obj == objects.ui_eq_treble_freq_arc)
+    {
+        usb_modify_parameter(TONEX_PARAM_EQ_TREBLE_FREQ, ((float)lv_arc_get_value(obj)));
+    }
+    #else
     else if (obj == objects.ui_eq_bass_slider)
     {
         usb_modify_parameter(TONEX_PARAM_EQ_BASS, ((float)lv_slider_get_value(obj))/10.0f);
@@ -364,6 +394,7 @@ void tonex_action_parameter_changed(lv_event_t * e)
     {
         usb_modify_parameter(TONEX_PARAM_EQ_TREBLE, ((float)lv_slider_get_value(obj))/10.0f);
     }
+    #endif //CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
     else if (obj == objects.ui_reverb_enable_switch)
     {
         usb_modify_parameter(TONEX_PARAM_REVERB_ENABLE, lv_obj_has_state(obj, LV_STATE_CHECKED) ? 1 : 0);
@@ -841,6 +872,16 @@ void tonex_action_parameter_changed(lv_event_t * e)
     {
         usb_modify_parameter(TONEX_PARAM_MODEL_VOLUME, ((float)lv_slider_get_value(obj))/10.0f);
     }
+    #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+    else if (obj == objects.ui_amplifier_presense_arc)
+    {
+        usb_modify_parameter(TONEX_PARAM_MODEL_PRESENCE, ((float)lv_arc_get_value(obj))/10.0f);
+    }
+    else if (obj == objects.ui_amplifier_depth_arc)
+    {
+        usb_modify_parameter(TONEX_PARAM_MODEL_DEPTH, ((float)lv_arc_get_value(obj))/10.0f);
+    }
+    #else
     else if (obj == objects.ui_amplifier_presense_slider)
     {
         usb_modify_parameter(TONEX_PARAM_MODEL_PRESENCE, ((float)lv_slider_get_value(obj))/10.0f);
@@ -849,6 +890,7 @@ void tonex_action_parameter_changed(lv_event_t * e)
     {
         usb_modify_parameter(TONEX_PARAM_MODEL_DEPTH, ((float)lv_slider_get_value(obj))/10.0f);
     }
+    #endif // CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
     else if (obj == objects.ui_bpm_slider)
     {
         usb_modify_parameter(TONEX_GLOBAL_BPM, lv_slider_get_value(obj));
@@ -1157,8 +1199,13 @@ uint8_t tonex_update_ui_parameters(void)
 
                 case TONEX_PARAM_EQ_BASS:
                 {
+                    #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+                    lv_arc_set_range(objects.ui_eq_bass_arc, round(param_entry->Min), round(param_entry->Max * 10.0f));
+                    lv_arc_set_value(objects.ui_eq_bass_arc, round(param_entry->Value * 10.0f));
+                    #else
                     lv_slider_set_range(objects.ui_eq_bass_slider, round(param_entry->Min), round(param_entry->Max * 10.0f));
-                    lv_slider_set_value(objects.ui_eq_bass_slider, round(param_entry->Value * 10.0f), LV_ANIM_OFF);   
+                    lv_slider_set_value(objects.ui_eq_bass_slider, round(param_entry->Value * 10.0f), LV_ANIM_OFF);
+                    #endif
 
                     // show value and units
                     sprintf(value_string, "%1.1f", param_entry->Value);
@@ -1170,13 +1217,28 @@ uint8_t tonex_update_ui_parameters(void)
 
                 case TONEX_PARAM_EQ_BASS_FREQ:
                 {
-                    // not exposed via UI
+                    #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+                    lv_arc_set_range(objects.ui_eq_bass_freq_arc, round(param_entry->Min), round(param_entry->Max));
+                    lv_arc_set_value(objects.ui_eq_bass_freq_arc, round(param_entry->Value));
+
+                    // show value and units
+                    sprintf(value_string, "%1.0f", param_entry->Value);
+                    lv_label_set_text(objects.ui_eq_bass_freq_value, value_string);        
+                    
+                    // set user data for later use
+                    lv_obj_set_user_data(objects.ui_eq_bass_freq_value, (void*)(uintptr_t)TONEX_PARAM_EQ_BASS_FREQ);
+                    #endif
                 } break;
 
                 case TONEX_PARAM_EQ_MID:
                 {
+                    #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+                    lv_arc_set_range(objects.ui_eq_mid_arc, round(param_entry->Min), round(param_entry->Max * 10.0f));
+                    lv_arc_set_value(objects.ui_eq_mid_arc, round(param_entry->Value * 10.0f));
+                    #else
                     lv_slider_set_range(objects.ui_eq_mid_slider, round(param_entry->Min), round(param_entry->Max * 10.0f));
-                    lv_slider_set_value(objects.ui_eq_mid_slider, round(param_entry->Value * 10.0f), LV_ANIM_OFF);   
+                    lv_slider_set_value(objects.ui_eq_mid_slider, round(param_entry->Value * 10.0f), LV_ANIM_OFF);
+                    #endif
 
                     // show value and units
                     sprintf(value_string, "%1.1f", param_entry->Value);
@@ -1188,8 +1250,13 @@ uint8_t tonex_update_ui_parameters(void)
 
                 case TONEX_PARAM_EQ_MIDQ:
                 {
+                    #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+                    lv_arc_set_range(objects.ui_eq_mid_qarc, round(param_entry->Min * 10.0f), round(param_entry->Max * 10.0f));
+                    lv_arc_set_value(objects.ui_eq_mid_qarc, round(param_entry->Value * 10.0f));
+                    #else
                     lv_slider_set_range(objects.ui_eq_mid_qslider, round(param_entry->Min * 10.0f), round(param_entry->Max * 10.0f));
-                    lv_slider_set_value(objects.ui_eq_mid_qslider, round(param_entry->Value * 10.0f), LV_ANIM_OFF);                            
+                    lv_slider_set_value(objects.ui_eq_mid_qslider, round(param_entry->Value * 10.0f), LV_ANIM_OFF);
+                    #endif                       
                     
                     // show value and units
                     sprintf(value_string, "%1.1f", param_entry->Value);
@@ -1201,13 +1268,28 @@ uint8_t tonex_update_ui_parameters(void)
 
                 case TONEX_PARAM_EQ_MID_FREQ:
                 {
-                    // not exposed via UI
+                    #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+                    lv_arc_set_range(objects.ui_eq_mid_freq_arc, round(param_entry->Min), round(param_entry->Max));
+                    lv_arc_set_value(objects.ui_eq_mid_freq_arc, round(param_entry->Value));
+
+                    // show value and units
+                    sprintf(value_string, "%1.0f", param_entry->Value);
+                    lv_label_set_text(objects.ui_eq_mid_freq_value, value_string);        
+                    
+                    // set user data for later use
+                    lv_obj_set_user_data(objects.ui_eq_mid_freq_value, (void*)(uintptr_t)TONEX_PARAM_EQ_MID_FREQ); 
+                    #endif
                 } break;
 
                 case TONEX_PARAM_EQ_TREBLE:
-                {                            
+                {                
+                    #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+                    lv_arc_set_range(objects.ui_eq_treble_arc, round(param_entry->Min), round(param_entry->Max * 10.0f));
+                    lv_arc_set_value(objects.ui_eq_treble_arc, round(param_entry->Value * 10.0f));
+                    #else
                     lv_slider_set_range(objects.ui_eq_treble_slider, round(param_entry->Min), round(param_entry->Max * 10.0f));
                     lv_slider_set_value(objects.ui_eq_treble_slider, round(param_entry->Value * 10.0f), LV_ANIM_OFF);
+                    #endif
                     
                     // show value and units
                     sprintf(value_string, "%1.1f", param_entry->Value);
@@ -1219,7 +1301,17 @@ uint8_t tonex_update_ui_parameters(void)
 
                 case TONEX_PARAM_EQ_TREBLE_FREQ:
                 {
-                    // not exposed via UI    
+                    #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+                    lv_arc_set_range(objects.ui_eq_treble_freq_arc, round(param_entry->Min), round(param_entry->Max));
+                    lv_arc_set_value(objects.ui_eq_treble_freq_arc, round(param_entry->Value));   
+
+                    // show value and units
+                    sprintf(value_string, "%1.0f", param_entry->Value);
+                    lv_label_set_text(objects.ui_eq_treble_freq_value, value_string);        
+                    
+                    // set user data for later use
+                    lv_obj_set_user_data(objects.ui_eq_treble_freq_value, (void*)(uintptr_t)TONEX_PARAM_EQ_TREBLE_FREQ); 
+                    #endif
                 } break;
                 
                 case TONEX_PARAM_MODEL_AMP_ENABLE:
@@ -1303,9 +1395,14 @@ uint8_t tonex_update_ui_parameters(void)
                 } break;
 
                 case TONEX_PARAM_MODEL_PRESENCE:
-                {                            
+                {
+                    #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+                    lv_arc_set_range(objects.ui_amplifier_presense_arc, round(param_entry->Min), round(param_entry->Max * 10.0f));
+                    lv_arc_set_value(objects.ui_amplifier_presense_arc, round(param_entry->Value * 10.0f));
+                    #else
                     lv_slider_set_range(objects.ui_amplifier_presense_slider, round(param_entry->Min), round(param_entry->Max * 10.0f));
                     lv_slider_set_value(objects.ui_amplifier_presense_slider, round(param_entry->Value * 10.0f), LV_ANIM_OFF);
+                    #endif
 
                     // show value and units
                     sprintf(value_string, "%1.1f", param_entry->Value);
@@ -1327,8 +1424,13 @@ uint8_t tonex_update_ui_parameters(void)
 
                 case TONEX_PARAM_MODEL_DEPTH:
                 {
+                    #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+                    lv_arc_set_range(objects.ui_amplifier_depth_arc, round(param_entry->Min), round(param_entry->Max * 10.0f));
+                    lv_arc_set_value(objects.ui_amplifier_depth_arc, round(param_entry->Value * 10.0f));
+                    #else
                     lv_slider_set_range(objects.ui_amplifier_depth_slider, round(param_entry->Min), round(param_entry->Max * 10.0f));
                     lv_slider_set_value(objects.ui_amplifier_depth_slider, round(param_entry->Value * 10.0f), LV_ANIM_OFF);
+                    #endif
 
                     // show value and units
                     sprintf(value_string, "%1.1f", param_entry->Value);
