@@ -70,6 +70,7 @@ limitations under the License.
 #include "usb_tonex.h"
 #include "display.h"
 #include "display_tonex.h"
+#include "eq_canvas.h"
 #include "CH422G.h"
 #include "control.h"
 #include "task_priorities.h" 
@@ -1213,6 +1214,7 @@ uint8_t tonex_update_ui_parameters(void)
                     
                     // set user data for later use
                     lv_obj_set_user_data(objects.ui_eq_bass_value, (void*)(uintptr_t)TONEX_PARAM_EQ_BASS);                                        
+                    eq_canvas_update_bass_gain(param_entry->Value);
                 } break;
 
                 case TONEX_PARAM_EQ_BASS_FREQ:
@@ -1228,6 +1230,7 @@ uint8_t tonex_update_ui_parameters(void)
                     // set user data for later use
                     lv_obj_set_user_data(objects.ui_eq_bass_freq_value, (void*)(uintptr_t)TONEX_PARAM_EQ_BASS_FREQ);
                     #endif
+                    eq_canvas_update_bass_frequency(param_entry->Value);
                 } break;
 
                 case TONEX_PARAM_EQ_MID:
@@ -1246,6 +1249,7 @@ uint8_t tonex_update_ui_parameters(void)
                     
                     // set user data for later use
                     lv_obj_set_user_data(objects.ui_eq_mid_value, (void*)(uintptr_t)TONEX_PARAM_EQ_MID);                                        
+                    eq_canvas_update_mid_gain(param_entry->Value);
                 } break;
 
                 case TONEX_PARAM_EQ_MIDQ:
@@ -1264,6 +1268,7 @@ uint8_t tonex_update_ui_parameters(void)
                     
                     // set user data for later use
                     lv_obj_set_user_data(objects.ui_eq_mid_qvalue, (void*)(uintptr_t)TONEX_PARAM_EQ_MIDQ);                                        
+                    eq_canvas_update_mid_q(param_entry->Value);
                 } break;
 
                 case TONEX_PARAM_EQ_MID_FREQ:
@@ -1279,6 +1284,7 @@ uint8_t tonex_update_ui_parameters(void)
                     // set user data for later use
                     lv_obj_set_user_data(objects.ui_eq_mid_freq_value, (void*)(uintptr_t)TONEX_PARAM_EQ_MID_FREQ); 
                     #endif
+                    eq_canvas_update_mid_frequency(param_entry->Value);
                 } break;
 
                 case TONEX_PARAM_EQ_TREBLE:
@@ -1297,6 +1303,7 @@ uint8_t tonex_update_ui_parameters(void)
                     
                     // set user data for later use
                     lv_obj_set_user_data(objects.ui_eq_treble_value, (void*)(uintptr_t)TONEX_PARAM_EQ_TREBLE);                                        
+                    eq_canvas_update_treble_gain(param_entry->Value);
                 } break;
 
                 case TONEX_PARAM_EQ_TREBLE_FREQ:
@@ -1312,6 +1319,7 @@ uint8_t tonex_update_ui_parameters(void)
                     // set user data for later use
                     lv_obj_set_user_data(objects.ui_eq_treble_freq_value, (void*)(uintptr_t)TONEX_PARAM_EQ_TREBLE_FREQ); 
                     #endif
+                    eq_canvas_update_treble_frequency(param_entry->Value);
                 } break;
                 
                 case TONEX_PARAM_MODEL_AMP_ENABLE:
@@ -1410,6 +1418,7 @@ uint8_t tonex_update_ui_parameters(void)
                     
                     // set user data for later use
                     lv_obj_set_user_data(objects.ui_amplifier_presense_value, (void*)(uintptr_t)TONEX_PARAM_MODEL_PRESENCE);                                        
+                    eq_canvas_update_presence_gain(param_entry->Value);
                 } break;
 
                 //case TONEX_PARAM_CABINET_UNKNOWN:
@@ -1438,6 +1447,7 @@ uint8_t tonex_update_ui_parameters(void)
                     
                     // set user data for later use
                     lv_obj_set_user_data(objects.ui_amplifier_depth_value, (void*)(uintptr_t)TONEX_PARAM_MODEL_DEPTH);                                        
+                    eq_canvas_update_depth_gain(param_entry->Value);
                 } break;
 
                 case TONEX_PARAM_VIR_RESO:

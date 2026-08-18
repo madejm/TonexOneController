@@ -179,6 +179,7 @@ typedef struct _objects_t {
     lv_obj_t *ui_amplifier_volume_slider;
     lv_obj_t *ui_amplifier_volume_value;
     lv_obj_t *ui_eq_tab;
+    lv_obj_t *ui_eq_canvas;
     lv_obj_t *obj4;
     lv_obj_t *obj5;
     lv_obj_t *ui_amplifier_depth_arc;

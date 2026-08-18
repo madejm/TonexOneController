@@ -5,6 +5,7 @@
 #include "lvgl.h"
 #include "screens.h"
 #include "display_helpers.h"
+#include "eq_canvas.h"
 
 static int32_t arc_drag_accumulator = 0;
 static void arc_drag_cb(lv_event_t * e)
@@ -93,5 +94,7 @@ void customize_ui() {
     lv_helper_create_arc_gesture(objects.ui_eq_treble_freq_arc);
     lv_helper_create_arc_gesture(objects.ui_eq_treble_arc);
     lv_helper_create_arc_gesture(objects.ui_amplifier_presense_arc);
+
+    eq_canvas_setup();
 }
 #endif

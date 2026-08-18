@@ -11263,6 +11263,7 @@
                       "hiddenInEditor": false,
                       "timeline": [],
                       "eventHandlers": [],
+                      "identifier": "ui_EQCanvas",
                       "leftUnit": "px",
                       "topUnit": "px",
                       "widthUnit": "%",
@@ -11283,9 +11284,19 @@
                         "definition": {
                           "MAIN": {
                             "DEFAULT": {
-                              "bg_opa": 60,
-                              "radius": 20,
-                              "clip_corner": true
+                              "radius": 12,
+                              "clip_corner": true,
+                              "line_color": "#FFFFFF",
+                              "arc_color": "highlight",
+                              "arc_width": 4,
+                              "line_width": 2,
+                              "bg_color": "button secondary",
+                              "bg_opa": 128,
+                              "line_opa": 127,
+                              "pad_left": 8,
+                              "pad_right": 8,
+                              "pad_top": 4,
+                              "pad_bottom": 4
                             }
                           }
                         }
@@ -11447,7 +11458,15 @@
                                   },
                                   "hiddenInEditor": false,
                                   "timeline": [],
-                                  "eventHandlers": [],
+                                  "eventHandlers": [
+                                    {
+                                      "objID": "a7a607af-f8a3-44d0-de50-887d9e4b64f9",
+                                      "eventName": "RELEASED",
+                                      "handlerType": "action",
+                                      "action": "ParameterChanged",
+                                      "userData": 0
+                                    }
+                                  ],
                                   "identifier": "ui_AmplifierDepthArc",
                                   "leftUnit": "px",
                                   "topUnit": "px",
