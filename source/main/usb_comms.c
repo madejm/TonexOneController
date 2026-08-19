@@ -211,6 +211,16 @@ void class_driver_task(void *arg)
 
                 usb_valeton_gp5_init(&driver_obj, usb_input_queue);
             }
+            else if ((dev_desc->idVendor == IK_MULTIMEDIA_USB_VENDOR) && (dev_desc->idProduct == TONEX_ONE_PLUG_PRODUCT_ID))
+            {
+                // found Tonex One Plug
+                ESP_LOGI(TAG, "Found Tonex One Plug");
+
+                //todo: can the Plug share the Plus code???
+                AmpModellerType = AMP_MODELLER_TONEX_ONE_PLUS;
+
+                usb_tonex_one_plus_init(&driver_obj, usb_input_queue);
+            }
             else if ((dev_desc->idVendor == IK_MULTIMEDIA_USB_VENDOR) && (dev_desc->idProduct == TONEX_ONE_PLUS_PRODUCT_ID))
             {
                 // found Tonex One Plus

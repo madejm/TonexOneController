@@ -27,6 +27,7 @@ extern "C" {
 #define TONEX_ONE_PRODUCT_ID            0x00D1
 #define TONEX_PRODUCT_ID                0x0068
 #define TONEX_ONE_PLUS_PRODUCT_ID       0x00EB
+#define TONEX_ONE_PLUG_PRODUCT_ID       0x00D5
 
 #define VALETON_USB_VENDOR              0x84EF
 #define VALETON_GP5_PRODUCT_ID          0x0184
