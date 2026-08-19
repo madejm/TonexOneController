@@ -148,6 +148,13 @@ lv_style_t *get_style_dropdown_sub_settings_INDICATOR_DEFAULT();
 void add_style_dropdown_sub_settings(lv_obj_t *obj);
 void remove_style_dropdown_sub_settings(lv_obj_t *obj);
 
+// Style: Dropdown List Sub Settings
+lv_style_t *get_style_dropdown_list_sub_settings_MAIN_DEFAULT();
+lv_style_t *get_style_dropdown_list_sub_settings_SELECTED_DEFAULT();
+lv_style_t *get_style_dropdown_list_sub_settings_SELECTED_CHECKED();
+void add_style_dropdown_list_sub_settings(lv_obj_t *obj);
+void remove_style_dropdown_list_sub_settings(lv_obj_t *obj);
+
 #ifdef __cplusplus
 }
 #endif

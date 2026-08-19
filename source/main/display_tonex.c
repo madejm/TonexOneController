@@ -412,32 +412,32 @@ void tonex_action_parameter_changed(lv_event_t * e)
         {
             case TONEX_REVERB_SPRING_1:
             {
-                usb_modify_parameter(TONEX_PARAM_REVERB_SPRING1_MIX, lv_slider_get_value(obj));
+                usb_modify_parameter(TONEX_PARAM_REVERB_SPRING1_MIX, LV_SLIDER_GET_VALUE(obj));
             } break;
 
             case TONEX_REVERB_SPRING_2:
             {
-                usb_modify_parameter(TONEX_PARAM_REVERB_SPRING2_MIX, lv_slider_get_value(obj));
+                usb_modify_parameter(TONEX_PARAM_REVERB_SPRING2_MIX, LV_SLIDER_GET_VALUE(obj));
             } break;
 
             case TONEX_REVERB_SPRING_3:
             {
-                usb_modify_parameter(TONEX_PARAM_REVERB_SPRING3_MIX, lv_slider_get_value(obj));
+                usb_modify_parameter(TONEX_PARAM_REVERB_SPRING3_MIX, LV_SLIDER_GET_VALUE(obj));
             } break;
 
             case TONEX_REVERB_SPRING_4:
             {
-                usb_modify_parameter(TONEX_PARAM_REVERB_SPRING4_MIX, lv_slider_get_value(obj));
+                usb_modify_parameter(TONEX_PARAM_REVERB_SPRING4_MIX, LV_SLIDER_GET_VALUE(obj));
             } break;
 
             case TONEX_REVERB_ROOM:
             {
-                usb_modify_parameter(TONEX_PARAM_REVERB_ROOM_MIX, lv_slider_get_value(obj));
+                usb_modify_parameter(TONEX_PARAM_REVERB_ROOM_MIX, LV_SLIDER_GET_VALUE(obj));
             } break;
 
             case TONEX_REVERB_PLATE:
             {
-                usb_modify_parameter(TONEX_PARAM_REVERB_PLATE_MIX, lv_slider_get_value(obj));
+                usb_modify_parameter(TONEX_PARAM_REVERB_PLATE_MIX, LV_SLIDER_GET_VALUE(obj));
             } break;
         }        
     }
@@ -448,32 +448,32 @@ void tonex_action_parameter_changed(lv_event_t * e)
         {
             case TONEX_REVERB_SPRING_1:
             {
-                usb_modify_parameter(TONEX_PARAM_REVERB_SPRING1_TIME, lv_slider_get_value(obj));
+                usb_modify_parameter(TONEX_PARAM_REVERB_SPRING1_TIME, LV_SLIDER_GET_VALUE(obj));
             } break;
 
             case TONEX_REVERB_SPRING_2:
             {
-                usb_modify_parameter(TONEX_PARAM_REVERB_SPRING2_TIME, lv_slider_get_value(obj));
+                usb_modify_parameter(TONEX_PARAM_REVERB_SPRING2_TIME, LV_SLIDER_GET_VALUE(obj));
             } break;
 
             case TONEX_REVERB_SPRING_3:
             {
-                usb_modify_parameter(TONEX_PARAM_REVERB_SPRING3_TIME, lv_slider_get_value(obj));
+                usb_modify_parameter(TONEX_PARAM_REVERB_SPRING3_TIME, LV_SLIDER_GET_VALUE(obj));
             } break;
 
             case TONEX_REVERB_SPRING_4:
             {
-                usb_modify_parameter(TONEX_PARAM_REVERB_SPRING4_TIME, lv_slider_get_value(obj));
+                usb_modify_parameter(TONEX_PARAM_REVERB_SPRING4_TIME, LV_SLIDER_GET_VALUE(obj));
             } break;
 
             case TONEX_REVERB_ROOM:
             {
-                usb_modify_parameter(TONEX_PARAM_REVERB_ROOM_TIME, lv_slider_get_value(obj));
+                usb_modify_parameter(TONEX_PARAM_REVERB_ROOM_TIME, LV_SLIDER_GET_VALUE(obj));
             } break;
 
             case TONEX_REVERB_PLATE:
             {
-                usb_modify_parameter(TONEX_PARAM_REVERB_PLATE_TIME, lv_slider_get_value(obj));
+                usb_modify_parameter(TONEX_PARAM_REVERB_PLATE_TIME, LV_SLIDER_GET_VALUE(obj));
             } break;
         }        
     }
@@ -484,32 +484,32 @@ void tonex_action_parameter_changed(lv_event_t * e)
         {
             case TONEX_REVERB_SPRING_1:
             {
-                usb_modify_parameter(TONEX_PARAM_REVERB_SPRING1_PREDELAY, lv_slider_get_value(obj));
+                usb_modify_parameter(TONEX_PARAM_REVERB_SPRING1_PREDELAY, LV_SLIDER_GET_VALUE(obj));
             } break;
 
             case TONEX_REVERB_SPRING_2:
             {
-                usb_modify_parameter(TONEX_PARAM_REVERB_SPRING2_PREDELAY, lv_slider_get_value(obj));
+                usb_modify_parameter(TONEX_PARAM_REVERB_SPRING2_PREDELAY, LV_SLIDER_GET_VALUE(obj));
             } break;
 
             case TONEX_REVERB_SPRING_3:
             {
-                usb_modify_parameter(TONEX_PARAM_REVERB_SPRING3_PREDELAY, lv_slider_get_value(obj));
+                usb_modify_parameter(TONEX_PARAM_REVERB_SPRING3_PREDELAY, LV_SLIDER_GET_VALUE(obj));
             } break;
 
             case TONEX_REVERB_SPRING_4:
             {
-                usb_modify_parameter(TONEX_PARAM_REVERB_SPRING4_PREDELAY, lv_slider_get_value(obj));
+                usb_modify_parameter(TONEX_PARAM_REVERB_SPRING4_PREDELAY, LV_SLIDER_GET_VALUE(obj));
             } break;
 
             case TONEX_REVERB_ROOM:
             {
-                usb_modify_parameter(TONEX_PARAM_REVERB_ROOM_PREDELAY, lv_slider_get_value(obj));
+                usb_modify_parameter(TONEX_PARAM_REVERB_ROOM_PREDELAY, LV_SLIDER_GET_VALUE(obj));
             } break;
 
             case TONEX_REVERB_PLATE:
             {
-                usb_modify_parameter(TONEX_PARAM_REVERB_PLATE_PREDELAY, lv_slider_get_value(obj));
+                usb_modify_parameter(TONEX_PARAM_REVERB_PLATE_PREDELAY, LV_SLIDER_GET_VALUE(obj));
             } break;
         }        
     }
@@ -520,32 +520,32 @@ void tonex_action_parameter_changed(lv_event_t * e)
         {
             case TONEX_REVERB_SPRING_1:
             {
-                usb_modify_parameter(TONEX_PARAM_REVERB_SPRING1_COLOR, lv_slider_get_value(obj));
+                usb_modify_parameter(TONEX_PARAM_REVERB_SPRING1_COLOR, LV_SLIDER_GET_VALUE(obj));
             } break;
 
             case TONEX_REVERB_SPRING_2:
             {
-                usb_modify_parameter(TONEX_PARAM_REVERB_SPRING2_COLOR, lv_slider_get_value(obj));
+                usb_modify_parameter(TONEX_PARAM_REVERB_SPRING2_COLOR, LV_SLIDER_GET_VALUE(obj));
             } break;
 
             case TONEX_REVERB_SPRING_3:
             {
-                usb_modify_parameter(TONEX_PARAM_REVERB_SPRING3_COLOR, lv_slider_get_value(obj));
+                usb_modify_parameter(TONEX_PARAM_REVERB_SPRING3_COLOR, LV_SLIDER_GET_VALUE(obj));
             } break;
 
             case TONEX_REVERB_SPRING_4:
             {
-                usb_modify_parameter(TONEX_PARAM_REVERB_SPRING4_COLOR, lv_slider_get_value(obj));
+                usb_modify_parameter(TONEX_PARAM_REVERB_SPRING4_COLOR, LV_SLIDER_GET_VALUE(obj));
             } break;
 
             case TONEX_REVERB_ROOM:
             {
-                usb_modify_parameter(TONEX_PARAM_REVERB_ROOM_COLOR, lv_slider_get_value(obj));
+                usb_modify_parameter(TONEX_PARAM_REVERB_ROOM_COLOR, LV_SLIDER_GET_VALUE(obj));
             } break;
 
             case TONEX_REVERB_PLATE:
             {
-                usb_modify_parameter(TONEX_PARAM_REVERB_PLATE_COLOR, lv_slider_get_value(obj));
+                usb_modify_parameter(TONEX_PARAM_REVERB_PLATE_COLOR, LV_SLIDER_GET_VALUE(obj));
             } break;
         }        
     }
@@ -629,27 +629,27 @@ void tonex_action_parameter_changed(lv_event_t * e)
         {
             case TONEX_MODULATION_CHORUS:
             {
-                usb_modify_parameter(TONEX_PARAM_MODULATION_CHORUS_RATE, lv_slider_get_value(obj));
+                usb_modify_parameter(TONEX_PARAM_MODULATION_CHORUS_RATE, LV_SLIDER_GET_VALUE(obj));
             } break;
 
             case TONEX_MODULATION_TREMOLO:
             {
-                usb_modify_parameter(TONEX_PARAM_MODULATION_TREMOLO_RATE, lv_slider_get_value(obj));
+                usb_modify_parameter(TONEX_PARAM_MODULATION_TREMOLO_RATE, LV_SLIDER_GET_VALUE(obj));
             } break;
 
             case TONEX_MODULATION_PHASER:
             {
-                usb_modify_parameter(TONEX_PARAM_MODULATION_PHASER_RATE, lv_slider_get_value(obj));
+                usb_modify_parameter(TONEX_PARAM_MODULATION_PHASER_RATE, LV_SLIDER_GET_VALUE(obj));
             } break;
 
             case TONEX_MODULATION_FLANGER:
             {
-                usb_modify_parameter(TONEX_PARAM_MODULATION_FLANGER_RATE, lv_slider_get_value(obj));
+                usb_modify_parameter(TONEX_PARAM_MODULATION_FLANGER_RATE, LV_SLIDER_GET_VALUE(obj));
             } break;
 
             case TONEX_MODULATION_ROTARY:
             {
-                usb_modify_parameter(TONEX_PARAM_MODULATION_ROTARY_SPEED, lv_slider_get_value(obj));
+                usb_modify_parameter(TONEX_PARAM_MODULATION_ROTARY_SPEED, LV_SLIDER_GET_VALUE(obj));
             } break;
         }
     }
@@ -660,27 +660,27 @@ void tonex_action_parameter_changed(lv_event_t * e)
         {
             case TONEX_MODULATION_CHORUS:
             {
-                usb_modify_parameter(TONEX_PARAM_MODULATION_CHORUS_DEPTH, lv_slider_get_value(obj));
+                usb_modify_parameter(TONEX_PARAM_MODULATION_CHORUS_DEPTH, LV_SLIDER_GET_VALUE(obj));
             } break;
 
             case TONEX_MODULATION_TREMOLO:
             {
-                usb_modify_parameter(TONEX_PARAM_MODULATION_TREMOLO_SHAPE, lv_slider_get_value(obj));
+                usb_modify_parameter(TONEX_PARAM_MODULATION_TREMOLO_SHAPE, LV_SLIDER_GET_VALUE(obj));
             } break;
 
             case TONEX_MODULATION_PHASER:
             {
-                usb_modify_parameter(TONEX_PARAM_MODULATION_PHASER_DEPTH, lv_slider_get_value(obj));
+                usb_modify_parameter(TONEX_PARAM_MODULATION_PHASER_DEPTH, LV_SLIDER_GET_VALUE(obj));
             } break;
 
             case TONEX_MODULATION_FLANGER:
             {
-                usb_modify_parameter(TONEX_PARAM_MODULATION_FLANGER_DEPTH, lv_slider_get_value(obj));
+                usb_modify_parameter(TONEX_PARAM_MODULATION_FLANGER_DEPTH, LV_SLIDER_GET_VALUE(obj));
             } break;
 
             case TONEX_MODULATION_ROTARY:
             {
-                usb_modify_parameter(TONEX_PARAM_MODULATION_ROTARY_RADIUS, lv_slider_get_value(obj));
+                usb_modify_parameter(TONEX_PARAM_MODULATION_ROTARY_RADIUS, LV_SLIDER_GET_VALUE(obj));
             } break;
         }
     }
@@ -691,27 +691,27 @@ void tonex_action_parameter_changed(lv_event_t * e)
         {
             case TONEX_MODULATION_CHORUS:
             {
-                usb_modify_parameter(TONEX_PARAM_MODULATION_CHORUS_LEVEL, lv_slider_get_value(obj));
+                usb_modify_parameter(TONEX_PARAM_MODULATION_CHORUS_LEVEL, LV_SLIDER_GET_VALUE(obj));
             } break;
 
             case TONEX_MODULATION_TREMOLO:
             {
-                usb_modify_parameter(TONEX_PARAM_MODULATION_TREMOLO_SPREAD, lv_slider_get_value(obj));
+                usb_modify_parameter(TONEX_PARAM_MODULATION_TREMOLO_SPREAD, LV_SLIDER_GET_VALUE(obj));
             } break;
 
             case TONEX_MODULATION_PHASER:
             {
-                usb_modify_parameter(TONEX_PARAM_MODULATION_PHASER_LEVEL, lv_slider_get_value(obj));
+                usb_modify_parameter(TONEX_PARAM_MODULATION_PHASER_LEVEL, LV_SLIDER_GET_VALUE(obj));
             } break;
 
             case TONEX_MODULATION_FLANGER:
             {
-                usb_modify_parameter(TONEX_PARAM_MODULATION_FLANGER_FEEDBACK, lv_slider_get_value(obj));
+                usb_modify_parameter(TONEX_PARAM_MODULATION_FLANGER_FEEDBACK, LV_SLIDER_GET_VALUE(obj));
             } break;
 
             case TONEX_MODULATION_ROTARY:
             {
-                usb_modify_parameter(TONEX_PARAM_MODULATION_ROTARY_SPREAD, lv_slider_get_value(obj));
+                usb_modify_parameter(TONEX_PARAM_MODULATION_ROTARY_SPREAD, LV_SLIDER_GET_VALUE(obj));
             } break;
         }
     }
@@ -727,7 +727,7 @@ void tonex_action_parameter_changed(lv_event_t * e)
 
             case TONEX_MODULATION_TREMOLO:
             {
-                usb_modify_parameter(TONEX_PARAM_MODULATION_TREMOLO_LEVEL, lv_slider_get_value(obj));
+                usb_modify_parameter(TONEX_PARAM_MODULATION_TREMOLO_LEVEL, LV_SLIDER_GET_VALUE(obj));
             } break;
 
             case TONEX_MODULATION_PHASER:
@@ -737,12 +737,12 @@ void tonex_action_parameter_changed(lv_event_t * e)
 
             case TONEX_MODULATION_FLANGER:
             {
-                usb_modify_parameter(TONEX_PARAM_MODULATION_FLANGER_LEVEL, lv_slider_get_value(obj));
+                usb_modify_parameter(TONEX_PARAM_MODULATION_FLANGER_LEVEL, LV_SLIDER_GET_VALUE(obj));
             } break;
 
             case TONEX_MODULATION_ROTARY:
             {
-                usb_modify_parameter(TONEX_PARAM_MODULATION_ROTARY_LEVEL, lv_slider_get_value(obj));
+                usb_modify_parameter(TONEX_PARAM_MODULATION_ROTARY_LEVEL, LV_SLIDER_GET_VALUE(obj));
             } break;
         }
     }
@@ -797,12 +797,12 @@ void tonex_action_parameter_changed(lv_event_t * e)
         {
             case TONEX_DELAY_DIGITAL:
             {
-                usb_modify_parameter(TONEX_PARAM_DELAY_DIGITAL_TIME, lv_slider_get_value(obj));
+                usb_modify_parameter(TONEX_PARAM_DELAY_DIGITAL_TIME, LV_SLIDER_GET_VALUE(obj));
             } break;
 
             case TONEX_DELAY_TAPE:
             {
-                usb_modify_parameter(TONEX_PARAM_DELAY_TAPE_TIME, lv_slider_get_value(obj));
+                usb_modify_parameter(TONEX_PARAM_DELAY_TAPE_TIME, LV_SLIDER_GET_VALUE(obj));
             } break;
         }
     }
@@ -829,12 +829,12 @@ void tonex_action_parameter_changed(lv_event_t * e)
         {
             case TONEX_DELAY_DIGITAL:
             {
-                usb_modify_parameter(TONEX_PARAM_DELAY_DIGITAL_FEEDBACK, lv_slider_get_value(obj));
+                usb_modify_parameter(TONEX_PARAM_DELAY_DIGITAL_FEEDBACK, LV_SLIDER_GET_VALUE(obj));
             } break;
 
             case TONEX_DELAY_TAPE:
             {
-                usb_modify_parameter(TONEX_PARAM_DELAY_TAPE_FEEDBACK, lv_slider_get_value(obj));
+                usb_modify_parameter(TONEX_PARAM_DELAY_TAPE_FEEDBACK, LV_SLIDER_GET_VALUE(obj));
             } break;
         }        
     }
@@ -845,12 +845,12 @@ void tonex_action_parameter_changed(lv_event_t * e)
         {
             case TONEX_DELAY_DIGITAL:
             {
-                usb_modify_parameter(TONEX_PARAM_DELAY_DIGITAL_MIX, lv_slider_get_value(obj));
+                usb_modify_parameter(TONEX_PARAM_DELAY_DIGITAL_MIX, LV_SLIDER_GET_VALUE(obj));
             } break;
 
             case TONEX_DELAY_TAPE:
             {
-                usb_modify_parameter(TONEX_PARAM_DELAY_TAPE_MIX, lv_slider_get_value(obj));
+                usb_modify_parameter(TONEX_PARAM_DELAY_TAPE_MIX, LV_SLIDER_GET_VALUE(obj));
             } break;
         }     
     }
@@ -1523,8 +1523,8 @@ uint8_t tonex_update_ui_parameters(void)
                 {
                     if (param_ptr[TONEX_PARAM_REVERB_MODEL].Value == TONEX_REVERB_SPRING_1)
                     {                            
-                        lv_slider_set_range(objects.ui_reverb_time_slider, round(param_entry->Min), round(param_entry->Max));
-                        lv_slider_set_value(objects.ui_reverb_time_slider, round(param_entry->Value), LV_ANIM_OFF);                                
+                        LV_SLIDER_SET_RANGE(objects.ui_reverb_time_slider, round(param_entry->Min), round(param_entry->Max));
+                        LV_SLIDER_SET_VALUE(objects.ui_reverb_time_slider, round(param_entry->Value));                                
                         
                         // show value and units
                         sprintf(value_string, "%1.1f", param_entry->Value);
@@ -1539,8 +1539,8 @@ uint8_t tonex_update_ui_parameters(void)
                 {
                     if (param_ptr[TONEX_PARAM_REVERB_MODEL].Value == TONEX_REVERB_SPRING_1)
                     {                          
-                        lv_slider_set_range(objects.ui_reverb_predelay_slider, round(param_entry->Min), round(param_entry->Max));  
-                        lv_slider_set_value(objects.ui_reverb_predelay_slider, round(param_entry->Value), LV_ANIM_OFF);  
+                        LV_SLIDER_SET_RANGE(objects.ui_reverb_predelay_slider, round(param_entry->Min), round(param_entry->Max));  
+                        LV_SLIDER_SET_VALUE(objects.ui_reverb_predelay_slider, round(param_entry->Value));  
                         
                         // show value and units
                         sprintf(value_string, FRMT("%d", "ms"), (int)round(param_entry->Value));
@@ -1555,8 +1555,8 @@ uint8_t tonex_update_ui_parameters(void)
                 {
                     if (param_ptr[TONEX_PARAM_REVERB_MODEL].Value == TONEX_REVERB_SPRING_1)
                     {                            
-                        lv_slider_set_range(objects.ui_reverb_color_slider, round(param_entry->Min), round(param_entry->Max));
-                        lv_slider_set_value(objects.ui_reverb_color_slider, round(param_entry->Value), LV_ANIM_OFF);   
+                        LV_SLIDER_SET_RANGE(objects.ui_reverb_color_slider, round(param_entry->Min), round(param_entry->Max));
+                        LV_SLIDER_SET_VALUE(objects.ui_reverb_color_slider, round(param_entry->Value));   
                         
                         // show value and units
                         sprintf(value_string, "%d", (int)round(param_entry->Value));
@@ -1571,8 +1571,8 @@ uint8_t tonex_update_ui_parameters(void)
                 {
                     if (param_ptr[TONEX_PARAM_REVERB_MODEL].Value == TONEX_REVERB_SPRING_1)
                     {                           
-                        lv_slider_set_range(objects.ui_reverb_mix_slider, round(param_entry->Min), round(param_entry->Max)); 
-                        lv_slider_set_value(objects.ui_reverb_mix_slider, round(param_entry->Value), LV_ANIM_OFF);   
+                        LV_SLIDER_SET_RANGE(objects.ui_reverb_mix_slider, round(param_entry->Min), round(param_entry->Max)); 
+                        LV_SLIDER_SET_VALUE(objects.ui_reverb_mix_slider, round(param_entry->Value));   
 
                         // show value and units
                         sprintf(value_string, FRMT_NS("%d", "%%"), (int)round(param_entry->Value));
@@ -1587,8 +1587,8 @@ uint8_t tonex_update_ui_parameters(void)
                 {
                     if (param_ptr[TONEX_PARAM_REVERB_MODEL].Value == TONEX_REVERB_SPRING_2)
                     {                                                            
-                        lv_slider_set_range(objects.ui_reverb_time_slider, round(param_entry->Min), round(param_entry->Max));
-                        lv_slider_set_value(objects.ui_reverb_time_slider, round(param_entry->Value), LV_ANIM_OFF);
+                        LV_SLIDER_SET_RANGE(objects.ui_reverb_time_slider, round(param_entry->Min), round(param_entry->Max));
+                        LV_SLIDER_SET_VALUE(objects.ui_reverb_time_slider, round(param_entry->Value));
 
                         // show value and units
                         sprintf(value_string, "%1.1f", param_entry->Value);
@@ -1603,8 +1603,8 @@ uint8_t tonex_update_ui_parameters(void)
                 {
                     if (param_ptr[TONEX_PARAM_REVERB_MODEL].Value == TONEX_REVERB_SPRING_2)
                     {                            
-                        lv_slider_set_range(objects.ui_reverb_predelay_slider, round(param_entry->Min), round(param_entry->Max));
-                        lv_slider_set_value(objects.ui_reverb_predelay_slider, round(param_entry->Value), LV_ANIM_OFF);  
+                        LV_SLIDER_SET_RANGE(objects.ui_reverb_predelay_slider, round(param_entry->Min), round(param_entry->Max));
+                        LV_SLIDER_SET_VALUE(objects.ui_reverb_predelay_slider, round(param_entry->Value));  
                         
                         // show value and units
                         sprintf(value_string, FRMT("%d", "ms"), (int)round(param_entry->Value));
@@ -1619,8 +1619,8 @@ uint8_t tonex_update_ui_parameters(void)
                 {
                     if (param_ptr[TONEX_PARAM_REVERB_MODEL].Value == TONEX_REVERB_SPRING_2)
                     {                                                            
-                        lv_slider_set_range(objects.ui_reverb_color_slider, round(param_entry->Min), round(param_entry->Max));
-                        lv_slider_set_value(objects.ui_reverb_color_slider, round(param_entry->Value), LV_ANIM_OFF);
+                        LV_SLIDER_SET_RANGE(objects.ui_reverb_color_slider, round(param_entry->Min), round(param_entry->Max));
+                        LV_SLIDER_SET_VALUE(objects.ui_reverb_color_slider, round(param_entry->Value));
 
                         // show value and units
                         sprintf(value_string, "%d", (int)round(param_entry->Value));
@@ -1635,8 +1635,8 @@ uint8_t tonex_update_ui_parameters(void)
                 {
                     if (param_ptr[TONEX_PARAM_REVERB_MODEL].Value == TONEX_REVERB_SPRING_2)
                     {                            
-                        lv_slider_set_range(objects.ui_reverb_mix_slider, round(param_entry->Min), round(param_entry->Max));
-                        lv_slider_set_value(objects.ui_reverb_mix_slider, round(param_entry->Value), LV_ANIM_OFF);       
+                        LV_SLIDER_SET_RANGE(objects.ui_reverb_mix_slider, round(param_entry->Min), round(param_entry->Max));
+                        LV_SLIDER_SET_VALUE(objects.ui_reverb_mix_slider, round(param_entry->Value));       
                         
                         // show value and units
                         sprintf(value_string, FRMT_NS("%d", "%%"), (int)round(param_entry->Value));
@@ -1651,8 +1651,8 @@ uint8_t tonex_update_ui_parameters(void)
                 {
                     if (param_ptr[TONEX_PARAM_REVERB_MODEL].Value == TONEX_REVERB_SPRING_3)
                     {             
-                        lv_slider_set_range(objects.ui_reverb_time_slider, round(param_entry->Min), round(param_entry->Max));               
-                        lv_slider_set_value(objects.ui_reverb_time_slider, round(param_entry->Value), LV_ANIM_OFF);     
+                        LV_SLIDER_SET_RANGE(objects.ui_reverb_time_slider, round(param_entry->Min), round(param_entry->Max));               
+                        LV_SLIDER_SET_VALUE(objects.ui_reverb_time_slider, round(param_entry->Value));     
 
                         // show value and units
                         sprintf(value_string, "%1.1f", param_entry->Value);
@@ -1667,8 +1667,8 @@ uint8_t tonex_update_ui_parameters(void)
                 {
                     if (param_ptr[TONEX_PARAM_REVERB_MODEL].Value == TONEX_REVERB_SPRING_3)
                     {              
-                        lv_slider_set_range(objects.ui_reverb_predelay_slider, round(param_entry->Min), round(param_entry->Max));              
-                        lv_slider_set_value(objects.ui_reverb_predelay_slider, round(param_entry->Value), LV_ANIM_OFF);    
+                        LV_SLIDER_SET_RANGE(objects.ui_reverb_predelay_slider, round(param_entry->Min), round(param_entry->Max));              
+                        LV_SLIDER_SET_VALUE(objects.ui_reverb_predelay_slider, round(param_entry->Value));    
                         
                         // show value and units
                         sprintf(value_string, FRMT("%d", "ms"), (int)round(param_entry->Value));
@@ -1683,8 +1683,8 @@ uint8_t tonex_update_ui_parameters(void)
                 {
                     if (param_ptr[TONEX_PARAM_REVERB_MODEL].Value == TONEX_REVERB_SPRING_3)
                     {                            
-                        lv_slider_set_range(objects.ui_reverb_color_slider, round(param_entry->Min), round(param_entry->Max));
-                        lv_slider_set_value(objects.ui_reverb_color_slider, round(param_entry->Value), LV_ANIM_OFF);    
+                        LV_SLIDER_SET_RANGE(objects.ui_reverb_color_slider, round(param_entry->Min), round(param_entry->Max));
+                        LV_SLIDER_SET_VALUE(objects.ui_reverb_color_slider, round(param_entry->Value));    
                         
                         // show value and units
                         sprintf(value_string, "%d", (int)round(param_entry->Value));
@@ -1699,8 +1699,8 @@ uint8_t tonex_update_ui_parameters(void)
                 {
                     if (param_ptr[TONEX_PARAM_REVERB_MODEL].Value == TONEX_REVERB_SPRING_3)
                     {                            
-                        lv_slider_set_range(objects.ui_reverb_mix_slider, round(param_entry->Min), round(param_entry->Max));
-                        lv_slider_set_value(objects.ui_reverb_mix_slider, round(param_entry->Value), LV_ANIM_OFF);    
+                        LV_SLIDER_SET_RANGE(objects.ui_reverb_mix_slider, round(param_entry->Min), round(param_entry->Max));
+                        LV_SLIDER_SET_VALUE(objects.ui_reverb_mix_slider, round(param_entry->Value));    
                         
                         // show value and units
                         sprintf(value_string, FRMT_NS("%d", "%%"), (int)round(param_entry->Value));
@@ -1715,8 +1715,8 @@ uint8_t tonex_update_ui_parameters(void)
                 {
                     if (param_ptr[TONEX_PARAM_REVERB_MODEL].Value == TONEX_REVERB_SPRING_4)
                     {                    
-                        lv_slider_set_range(objects.ui_reverb_time_slider, round(param_entry->Min), round(param_entry->Max));        
-                        lv_slider_set_value(objects.ui_reverb_time_slider, round(param_entry->Value), LV_ANIM_OFF);    
+                        LV_SLIDER_SET_RANGE(objects.ui_reverb_time_slider, round(param_entry->Min), round(param_entry->Max));        
+                        LV_SLIDER_SET_VALUE(objects.ui_reverb_time_slider, round(param_entry->Value));    
                         
                         // show value and units
                         sprintf(value_string, "%1.1f", param_entry->Value);
@@ -1731,8 +1731,8 @@ uint8_t tonex_update_ui_parameters(void)
                 {
                     if (param_ptr[TONEX_PARAM_REVERB_MODEL].Value == TONEX_REVERB_SPRING_4)
                     {                            
-                        lv_slider_set_range(objects.ui_reverb_predelay_slider, round(param_entry->Min), round(param_entry->Max));
-                        lv_slider_set_value(objects.ui_reverb_predelay_slider, round(param_entry->Value), LV_ANIM_OFF);    
+                        LV_SLIDER_SET_RANGE(objects.ui_reverb_predelay_slider, round(param_entry->Min), round(param_entry->Max));
+                        LV_SLIDER_SET_VALUE(objects.ui_reverb_predelay_slider, round(param_entry->Value));    
                         
                         // show value and units
                         sprintf(value_string, FRMT("%d", "ms"), (int)round(param_entry->Value));
@@ -1747,8 +1747,8 @@ uint8_t tonex_update_ui_parameters(void)
                 {
                     if (param_ptr[TONEX_PARAM_REVERB_MODEL].Value == TONEX_REVERB_SPRING_4)
                     {                            
-                        lv_slider_set_range(objects.ui_reverb_color_slider, round(param_entry->Min), round(param_entry->Max));
-                        lv_slider_set_value(objects.ui_reverb_color_slider, round(param_entry->Value), LV_ANIM_OFF);   
+                        LV_SLIDER_SET_RANGE(objects.ui_reverb_color_slider, round(param_entry->Min), round(param_entry->Max));
+                        LV_SLIDER_SET_VALUE(objects.ui_reverb_color_slider, round(param_entry->Value));   
                         
                         // show value and units
                         sprintf(value_string, "%d", (int)round(param_entry->Value));
@@ -1763,8 +1763,8 @@ uint8_t tonex_update_ui_parameters(void)
                 {
                     if (param_ptr[TONEX_PARAM_REVERB_MODEL].Value == TONEX_REVERB_SPRING_4)
                     {                            
-                        lv_slider_set_range(objects.ui_reverb_mix_slider, round(param_entry->Min), round(param_entry->Max));
-                        lv_slider_set_value(objects.ui_reverb_mix_slider, round(param_entry->Value), LV_ANIM_OFF);   
+                        LV_SLIDER_SET_RANGE(objects.ui_reverb_mix_slider, round(param_entry->Min), round(param_entry->Max));
+                        LV_SLIDER_SET_VALUE(objects.ui_reverb_mix_slider, round(param_entry->Value));   
                         
                         // show value and units
                         sprintf(value_string, FRMT_NS("%d", "%%"), (int)round(param_entry->Value));
@@ -1779,8 +1779,8 @@ uint8_t tonex_update_ui_parameters(void)
                 {
                     if (param_ptr[TONEX_PARAM_REVERB_MODEL].Value == TONEX_REVERB_ROOM)
                     {                        
-                        lv_slider_set_range(objects.ui_reverb_time_slider, round(param_entry->Min), round(param_entry->Max));    
-                        lv_slider_set_value(objects.ui_reverb_time_slider, round(param_entry->Value), LV_ANIM_OFF);   
+                        LV_SLIDER_SET_RANGE(objects.ui_reverb_time_slider, round(param_entry->Min), round(param_entry->Max));    
+                        LV_SLIDER_SET_VALUE(objects.ui_reverb_time_slider, round(param_entry->Value));   
                         
                         // show value and units
                         sprintf(value_string, "%1.1f", param_entry->Value);
@@ -1795,8 +1795,8 @@ uint8_t tonex_update_ui_parameters(void)
                 {
                     if (param_ptr[TONEX_PARAM_REVERB_MODEL].Value == TONEX_REVERB_ROOM)
                     {                            
-                        lv_slider_set_range(objects.ui_reverb_predelay_slider, round(param_entry->Min), round(param_entry->Max));
-                        lv_slider_set_value(objects.ui_reverb_predelay_slider, round(param_entry->Value), LV_ANIM_OFF);   
+                        LV_SLIDER_SET_RANGE(objects.ui_reverb_predelay_slider, round(param_entry->Min), round(param_entry->Max));
+                        LV_SLIDER_SET_VALUE(objects.ui_reverb_predelay_slider, round(param_entry->Value));   
                         
                         // show value and units
                         sprintf(value_string, FRMT("%d", "ms"), (int)round(param_entry->Value));
@@ -1811,8 +1811,8 @@ uint8_t tonex_update_ui_parameters(void)
                 {
                     if (param_ptr[TONEX_PARAM_REVERB_MODEL].Value == TONEX_REVERB_ROOM)
                     {                            
-                        lv_slider_set_range(objects.ui_reverb_color_slider, round(param_entry->Min), round(param_entry->Max));
-                        lv_slider_set_value(objects.ui_reverb_color_slider, round(param_entry->Value), LV_ANIM_OFF);    
+                        LV_SLIDER_SET_RANGE(objects.ui_reverb_color_slider, round(param_entry->Min), round(param_entry->Max));
+                        LV_SLIDER_SET_VALUE(objects.ui_reverb_color_slider, round(param_entry->Value));    
                         
                         // show value and units
                         sprintf(value_string, "%d", (int)round(param_entry->Value));
@@ -1827,8 +1827,8 @@ uint8_t tonex_update_ui_parameters(void)
                 {
                     if (param_ptr[TONEX_PARAM_REVERB_MODEL].Value == TONEX_REVERB_ROOM)
                     {                            
-                        lv_slider_set_range(objects.ui_reverb_mix_slider, round(param_entry->Min), round(param_entry->Max));
-                        lv_slider_set_value(objects.ui_reverb_mix_slider, round(param_entry->Value), LV_ANIM_OFF);    
+                        LV_SLIDER_SET_RANGE(objects.ui_reverb_mix_slider, round(param_entry->Min), round(param_entry->Max));
+                        LV_SLIDER_SET_VALUE(objects.ui_reverb_mix_slider, round(param_entry->Value));    
                         
                         // show value and units
                         sprintf(value_string, FRMT_NS("%d", "%%"), (int)round(param_entry->Value));
@@ -1843,8 +1843,8 @@ uint8_t tonex_update_ui_parameters(void)
                 {
                     if (param_ptr[TONEX_PARAM_REVERB_MODEL].Value == TONEX_REVERB_PLATE)
                     {                            
-                        lv_slider_set_range(objects.ui_reverb_time_slider, round(param_entry->Min), round(param_entry->Max));
-                        lv_slider_set_value(objects.ui_reverb_time_slider, round(param_entry->Value), LV_ANIM_OFF);  
+                        LV_SLIDER_SET_RANGE(objects.ui_reverb_time_slider, round(param_entry->Min), round(param_entry->Max));
+                        LV_SLIDER_SET_VALUE(objects.ui_reverb_time_slider, round(param_entry->Value));  
                         
                         // show value and units
                         sprintf(value_string, "%1.1f", param_entry->Value);
@@ -1859,8 +1859,8 @@ uint8_t tonex_update_ui_parameters(void)
                 {
                     if (param_ptr[TONEX_PARAM_REVERB_MODEL].Value == TONEX_REVERB_PLATE)
                     {                    
-                        lv_slider_set_range(objects.ui_reverb_predelay_slider, round(param_entry->Min), round(param_entry->Max));        
-                        lv_slider_set_value(objects.ui_reverb_predelay_slider, round(param_entry->Value), LV_ANIM_OFF);     
+                        LV_SLIDER_SET_RANGE(objects.ui_reverb_predelay_slider, round(param_entry->Min), round(param_entry->Max));        
+                        LV_SLIDER_SET_VALUE(objects.ui_reverb_predelay_slider, round(param_entry->Value));     
                         
                         // show value and units
                         sprintf(value_string, FRMT("%d", "ms"), (int)round(param_entry->Value));
@@ -1875,8 +1875,8 @@ uint8_t tonex_update_ui_parameters(void)
                 {
                     if (param_ptr[TONEX_PARAM_REVERB_MODEL].Value == TONEX_REVERB_PLATE)
                     {                            
-                        lv_slider_set_range(objects.ui_reverb_color_slider, round(param_entry->Min), round(param_entry->Max));
-                        lv_slider_set_value(objects.ui_reverb_color_slider, round(param_entry->Value), LV_ANIM_OFF);   
+                        LV_SLIDER_SET_RANGE(objects.ui_reverb_color_slider, round(param_entry->Min), round(param_entry->Max));
+                        LV_SLIDER_SET_VALUE(objects.ui_reverb_color_slider, round(param_entry->Value));   
                         
                         // show value and units
                         sprintf(value_string, "%d", (int)round(param_entry->Value));
@@ -1891,8 +1891,8 @@ uint8_t tonex_update_ui_parameters(void)
                 {
                     if (param_ptr[TONEX_PARAM_REVERB_MODEL].Value == TONEX_REVERB_PLATE)
                     {                            
-                        lv_slider_set_range(objects.ui_reverb_mix_slider, round(param_entry->Min), round(param_entry->Max));
-                        lv_slider_set_value(objects.ui_reverb_mix_slider, round(param_entry->Value), LV_ANIM_OFF);  
+                        LV_SLIDER_SET_RANGE(objects.ui_reverb_mix_slider, round(param_entry->Min), round(param_entry->Max));
+                        LV_SLIDER_SET_VALUE(objects.ui_reverb_mix_slider, round(param_entry->Value));  
                         
                         // show value and units
                         sprintf(value_string, FRMT_NS("%d", "%%"), (int)round(param_entry->Value));
@@ -1978,6 +1978,11 @@ uint8_t tonex_update_ui_parameters(void)
                             lv_label_set_text(objects.ui_modulation_param1_label, "Rate");
                             lv_label_set_text(objects.ui_modulation_param2_label, "Depth");
                             lv_label_set_text(objects.ui_modulation_param3_label, "Level");
+                            #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+                            lv_label_set_text(objects.ui_modulation_param1_unit, "Hz");
+                            lv_label_set_text(objects.ui_modulation_param2_unit, "%");
+                            lv_label_set_text(objects.ui_modulation_param3_unit, "dB");
+                            #endif
                             lv_obj_add_flag(objects.ui_modulation_param4_label, LV_OBJ_FLAG_HIDDEN);
                             lv_obj_add_flag(objects.ui_modulation_param4_slider, LV_OBJ_FLAG_HIDDEN);
                             lv_obj_add_flag(objects.ui_modulation_param4_value, LV_OBJ_FLAG_HIDDEN);
@@ -1989,6 +1994,12 @@ uint8_t tonex_update_ui_parameters(void)
                             lv_label_set_text(objects.ui_modulation_param2_label, "Shape");
                             lv_label_set_text(objects.ui_modulation_param3_label, "Spread");
                             lv_label_set_text(objects.ui_modulation_param4_label, "Level");
+                            #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+                            lv_label_set_text(objects.ui_modulation_param1_unit, "Hz");
+                            lv_label_set_text(objects.ui_modulation_param2_unit, "t");
+                            lv_label_set_text(objects.ui_modulation_param3_unit, "%");
+                            lv_label_set_text(objects.ui_modulation_param4_unit, "dB");
+                            #endif
                             lv_obj_clear_flag(objects.ui_modulation_param4_label, LV_OBJ_FLAG_HIDDEN);
                             lv_obj_clear_flag(objects.ui_modulation_param4_slider, LV_OBJ_FLAG_HIDDEN);
                             lv_obj_clear_flag(objects.ui_modulation_param4_value, LV_OBJ_FLAG_HIDDEN);
@@ -1999,6 +2010,11 @@ uint8_t tonex_update_ui_parameters(void)
                             lv_label_set_text(objects.ui_modulation_param1_label, "Rate");
                             lv_label_set_text(objects.ui_modulation_param2_label, "Depth");
                             lv_label_set_text(objects.ui_modulation_param3_label, "Level");
+                            #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+                            lv_label_set_text(objects.ui_modulation_param1_unit, "Hz");
+                            lv_label_set_text(objects.ui_modulation_param2_unit, "%");
+                            lv_label_set_text(objects.ui_modulation_param3_unit, "dB");
+                            #endif
                             lv_obj_add_flag(objects.ui_modulation_param4_label, LV_OBJ_FLAG_HIDDEN);
                             lv_obj_add_flag(objects.ui_modulation_param4_slider, LV_OBJ_FLAG_HIDDEN);
                             lv_obj_add_flag(objects.ui_modulation_param4_value, LV_OBJ_FLAG_HIDDEN);
@@ -2010,6 +2026,12 @@ uint8_t tonex_update_ui_parameters(void)
                             lv_label_set_text(objects.ui_modulation_param2_label, "Depth");
                             lv_label_set_text(objects.ui_modulation_param3_label, "Feedback");
                             lv_label_set_text(objects.ui_modulation_param4_label, "Level");
+                            #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+                            lv_label_set_text(objects.ui_modulation_param1_unit, "Hz");
+                            lv_label_set_text(objects.ui_modulation_param2_unit, "%");
+                            lv_label_set_text(objects.ui_modulation_param3_unit, "%");
+                            lv_label_set_text(objects.ui_modulation_param4_unit, "dB");
+                            #endif
                             lv_obj_clear_flag(objects.ui_modulation_param4_label, LV_OBJ_FLAG_HIDDEN);
                             lv_obj_clear_flag(objects.ui_modulation_param4_slider, LV_OBJ_FLAG_HIDDEN);
                             lv_obj_clear_flag(objects.ui_modulation_param4_value, LV_OBJ_FLAG_HIDDEN);
@@ -2021,6 +2043,12 @@ uint8_t tonex_update_ui_parameters(void)
                             lv_label_set_text(objects.ui_modulation_param2_label, "Radius");
                             lv_label_set_text(objects.ui_modulation_param3_label, "Spread");
                             lv_label_set_text(objects.ui_modulation_param4_label, "Level");
+                            #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+                            lv_label_set_text(objects.ui_modulation_param1_unit, "RPM");
+                            lv_label_set_text(objects.ui_modulation_param2_unit, "mm");
+                            lv_label_set_text(objects.ui_modulation_param3_unit, "%");
+                            lv_label_set_text(objects.ui_modulation_param4_unit, "dB");
+                            #endif
                             lv_obj_clear_flag(objects.ui_modulation_param4_label, LV_OBJ_FLAG_HIDDEN);
                             lv_obj_clear_flag(objects.ui_modulation_param4_slider, LV_OBJ_FLAG_HIDDEN);
                             lv_obj_clear_flag(objects.ui_modulation_param4_value, LV_OBJ_FLAG_HIDDEN);
@@ -2066,11 +2094,11 @@ uint8_t tonex_update_ui_parameters(void)
                 {
                     if (param_ptr[TONEX_PARAM_MODULATION_MODEL].Value == TONEX_MODULATION_CHORUS)
                     { 
-                        lv_slider_set_range(objects.ui_modulation_param1_slider, round(param_entry->Min), round(param_entry->Max));
-                        lv_slider_set_value(objects.ui_modulation_param1_slider, round(param_entry->Value), LV_ANIM_OFF);   
+                        LV_SLIDER_SET_RANGE(objects.ui_modulation_param1_slider, round(param_entry->Min), round(param_entry->Max));
+                        LV_SLIDER_SET_VALUE(objects.ui_modulation_param1_slider, round(param_entry->Value));   
                                                         
                         // show value and units
-                        sprintf(value_string, "%1.1f Hz", param_entry->Value);
+                        sprintf(value_string, FRMT("%1.1f", "Hz"), param_entry->Value);
                         lv_label_set_text(objects.ui_modulation_param1_value, value_string);        
                         
                         // set user data for later use
@@ -2082,8 +2110,8 @@ uint8_t tonex_update_ui_parameters(void)
                 {
                     if (param_ptr[TONEX_PARAM_MODULATION_MODEL].Value == TONEX_MODULATION_CHORUS)
                     { 
-                        lv_slider_set_range(objects.ui_modulation_param2_slider, round(param_entry->Min), round(param_entry->Max));
-                        lv_slider_set_value(objects.ui_modulation_param2_slider, round(param_entry->Value), LV_ANIM_OFF);     
+                        LV_SLIDER_SET_RANGE(objects.ui_modulation_param2_slider, round(param_entry->Min), round(param_entry->Max));
+                        LV_SLIDER_SET_VALUE(objects.ui_modulation_param2_slider, round(param_entry->Value));     
                                                                                 
                         // show value and units
                         sprintf(value_string, FRMT_NS("%d", "%%"), (int)round(param_entry->Value));
@@ -2098,8 +2126,8 @@ uint8_t tonex_update_ui_parameters(void)
                 {
                     if (param_ptr[TONEX_PARAM_MODULATION_MODEL].Value == TONEX_MODULATION_CHORUS)
                     { 
-                        lv_slider_set_range(objects.ui_modulation_param3_slider, round(param_entry->Min), round(param_entry->Max));
-                        lv_slider_set_value(objects.ui_modulation_param3_slider, round(param_entry->Value), LV_ANIM_OFF);  
+                        LV_SLIDER_SET_RANGE(objects.ui_modulation_param3_slider, round(param_entry->Min), round(param_entry->Max));
+                        LV_SLIDER_SET_VALUE(objects.ui_modulation_param3_slider, round(param_entry->Value));  
                                                                                 
                         // show value and units
                         sprintf(value_string, "%1.1f", param_entry->Value);
@@ -2143,8 +2171,8 @@ uint8_t tonex_update_ui_parameters(void)
                 {
                     if (param_ptr[TONEX_PARAM_MODULATION_MODEL].Value == TONEX_MODULATION_TREMOLO)
                     { 
-                        lv_slider_set_range(objects.ui_modulation_param1_slider, round(param_entry->Min), round(param_entry->Max));
-                        lv_slider_set_value(objects.ui_modulation_param1_slider, round(param_entry->Value), LV_ANIM_OFF);   
+                        LV_SLIDER_SET_RANGE(objects.ui_modulation_param1_slider, round(param_entry->Min), round(param_entry->Max));
+                        LV_SLIDER_SET_VALUE(objects.ui_modulation_param1_slider, round(param_entry->Value));   
                                                                                                                     
                         // show value and units
                         sprintf(value_string, FRMT("%1.1f", "Hz"), param_entry->Value);
@@ -2159,8 +2187,8 @@ uint8_t tonex_update_ui_parameters(void)
                 {
                     if (param_ptr[TONEX_PARAM_MODULATION_MODEL].Value == TONEX_MODULATION_TREMOLO)
                     { 
-                        lv_slider_set_range(objects.ui_modulation_param2_slider, round(param_entry->Min), round(param_entry->Max));
-                        lv_slider_set_value(objects.ui_modulation_param2_slider, round(param_entry->Value), LV_ANIM_OFF);    
+                        LV_SLIDER_SET_RANGE(objects.ui_modulation_param2_slider, round(param_entry->Min), round(param_entry->Max));
+                        LV_SLIDER_SET_VALUE(objects.ui_modulation_param2_slider, round(param_entry->Value));    
                                                                                                                                       
                         // show value and units
                         sprintf(value_string, "%1.1f", param_entry->Value);
@@ -2175,8 +2203,8 @@ uint8_t tonex_update_ui_parameters(void)
                 {
                     if (param_ptr[TONEX_PARAM_MODULATION_MODEL].Value == TONEX_MODULATION_TREMOLO)
                     { 
-                        lv_slider_set_range(objects.ui_modulation_param3_slider, round(param_entry->Min), round(param_entry->Max));
-                        lv_slider_set_value(objects.ui_modulation_param3_slider, round(param_entry->Value), LV_ANIM_OFF);    
+                        LV_SLIDER_SET_RANGE(objects.ui_modulation_param3_slider, round(param_entry->Min), round(param_entry->Max));
+                        LV_SLIDER_SET_VALUE(objects.ui_modulation_param3_slider, round(param_entry->Value));    
                                                                                                                                       
                         // show value and units
                         sprintf(value_string, FRMT_NS("%d", "%%"), (int)round(param_entry->Value));
@@ -2191,8 +2219,8 @@ uint8_t tonex_update_ui_parameters(void)
                 {
                     if (param_ptr[TONEX_PARAM_MODULATION_MODEL].Value == TONEX_MODULATION_TREMOLO)
                     { 
-                        lv_slider_set_range(objects.ui_modulation_param4_slider, round(param_entry->Min), round(param_entry->Max));
-                        lv_slider_set_value(objects.ui_modulation_param4_slider, round(param_entry->Value), LV_ANIM_OFF); 
+                        LV_SLIDER_SET_RANGE(objects.ui_modulation_param4_slider, round(param_entry->Min), round(param_entry->Max));
+                        LV_SLIDER_SET_VALUE(objects.ui_modulation_param4_slider, round(param_entry->Value)); 
                                                                                                       
                         // show value and units
                         sprintf(value_string, "%1.1f", param_entry->Value);
@@ -2236,8 +2264,8 @@ uint8_t tonex_update_ui_parameters(void)
                 {
                     if (param_ptr[TONEX_PARAM_MODULATION_MODEL].Value == TONEX_MODULATION_PHASER)
                     { 
-                        lv_slider_set_range(objects.ui_modulation_param1_slider, round(param_entry->Min), round(param_entry->Max));
-                        lv_slider_set_value(objects.ui_modulation_param1_slider, round(param_entry->Value), LV_ANIM_OFF);   
+                        LV_SLIDER_SET_RANGE(objects.ui_modulation_param1_slider, round(param_entry->Min), round(param_entry->Max));
+                        LV_SLIDER_SET_VALUE(objects.ui_modulation_param1_slider, round(param_entry->Value));   
                                                                                                       
                         // show value and units
                         sprintf(value_string, FRMT("%1.1f", "Hz"), param_entry->Value);
@@ -2252,8 +2280,8 @@ uint8_t tonex_update_ui_parameters(void)
                 {
                     if (param_ptr[TONEX_PARAM_MODULATION_MODEL].Value == TONEX_MODULATION_PHASER)
                     { 
-                        lv_slider_set_range(objects.ui_modulation_param2_slider, round(param_entry->Min), round(param_entry->Max));
-                        lv_slider_set_value(objects.ui_modulation_param2_slider, round(param_entry->Value), LV_ANIM_OFF);                                
+                        LV_SLIDER_SET_RANGE(objects.ui_modulation_param2_slider, round(param_entry->Min), round(param_entry->Max));
+                        LV_SLIDER_SET_VALUE(objects.ui_modulation_param2_slider, round(param_entry->Value));                                
                                                                                                    
                         // show value and units
                         sprintf(value_string, FRMT_NS("%d", "%%"), (int)round(param_entry->Value));
@@ -2268,8 +2296,8 @@ uint8_t tonex_update_ui_parameters(void)
                 {
                     if (param_ptr[TONEX_PARAM_MODULATION_MODEL].Value == TONEX_MODULATION_PHASER)
                     { 
-                        lv_slider_set_range(objects.ui_modulation_param3_slider, round(param_entry->Min), round(param_entry->Max));
-                        lv_slider_set_value(objects.ui_modulation_param3_slider, round(param_entry->Value), LV_ANIM_OFF);   
+                        LV_SLIDER_SET_RANGE(objects.ui_modulation_param3_slider, round(param_entry->Min), round(param_entry->Max));
+                        LV_SLIDER_SET_VALUE(objects.ui_modulation_param3_slider, round(param_entry->Value));   
                                                                                                    
                         // show value and units
                         sprintf(value_string, "%1.1f", param_entry->Value);
@@ -2313,8 +2341,8 @@ uint8_t tonex_update_ui_parameters(void)
                 {
                     if (param_ptr[TONEX_PARAM_MODULATION_MODEL].Value == TONEX_MODULATION_FLANGER)
                     { 
-                        lv_slider_set_range(objects.ui_modulation_param1_slider, round(param_entry->Min), round(param_entry->Max));
-                        lv_slider_set_value(objects.ui_modulation_param1_slider, round(param_entry->Value), LV_ANIM_OFF);   
+                        LV_SLIDER_SET_RANGE(objects.ui_modulation_param1_slider, round(param_entry->Min), round(param_entry->Max));
+                        LV_SLIDER_SET_VALUE(objects.ui_modulation_param1_slider, round(param_entry->Value));   
                                                                                                    
                         // show value and units
                         sprintf(value_string, FRMT("%1.1f", "Hz"), param_entry->Value);
@@ -2329,8 +2357,8 @@ uint8_t tonex_update_ui_parameters(void)
                 {
                     if (param_ptr[TONEX_PARAM_MODULATION_MODEL].Value == TONEX_MODULATION_FLANGER)
                     { 
-                        lv_slider_set_range(objects.ui_modulation_param2_slider, round(param_entry->Min), round(param_entry->Max));
-                        lv_slider_set_value(objects.ui_modulation_param2_slider, round(param_entry->Value), LV_ANIM_OFF);      
+                        LV_SLIDER_SET_RANGE(objects.ui_modulation_param2_slider, round(param_entry->Min), round(param_entry->Max));
+                        LV_SLIDER_SET_VALUE(objects.ui_modulation_param2_slider, round(param_entry->Value));      
                                                                                                   
                         // show value and units
                         sprintf(value_string, FRMT_NS("%d", "%%"), (int)round(param_entry->Value));
@@ -2345,8 +2373,8 @@ uint8_t tonex_update_ui_parameters(void)
                 {
                     if (param_ptr[TONEX_PARAM_MODULATION_MODEL].Value == TONEX_MODULATION_FLANGER)
                     { 
-                        lv_slider_set_range(objects.ui_modulation_param3_slider, round(param_entry->Min), round(param_entry->Max));
-                        lv_slider_set_value(objects.ui_modulation_param3_slider, round(param_entry->Value), LV_ANIM_OFF);    
+                        LV_SLIDER_SET_RANGE(objects.ui_modulation_param3_slider, round(param_entry->Min), round(param_entry->Max));
+                        LV_SLIDER_SET_VALUE(objects.ui_modulation_param3_slider, round(param_entry->Value));    
                                                                                                   
                         // show value and units
                         sprintf(value_string, FRMT_NS("%d", "%%"), (int)round(param_entry->Value));
@@ -2361,8 +2389,8 @@ uint8_t tonex_update_ui_parameters(void)
                 {
                     if (param_ptr[TONEX_PARAM_MODULATION_MODEL].Value == TONEX_MODULATION_FLANGER)
                     { 
-                        lv_slider_set_range(objects.ui_modulation_param4_slider, round(param_entry->Min), round(param_entry->Max));
-                        lv_slider_set_value(objects.ui_modulation_param4_slider, round(param_entry->Value), LV_ANIM_OFF);      
+                        LV_SLIDER_SET_RANGE(objects.ui_modulation_param4_slider, round(param_entry->Min), round(param_entry->Max));
+                        LV_SLIDER_SET_VALUE(objects.ui_modulation_param4_slider, round(param_entry->Value));      
                                                                                                   
                         // show value and units
                         sprintf(value_string, "%1.1f", param_entry->Value);
@@ -2406,8 +2434,8 @@ uint8_t tonex_update_ui_parameters(void)
                 {
                     if (param_ptr[TONEX_PARAM_MODULATION_MODEL].Value == TONEX_MODULATION_ROTARY)
                     {                                 
-                        lv_slider_set_range(objects.ui_modulation_param1_slider, round(param_entry->Min), round(param_entry->Max));
-                        lv_slider_set_value(objects.ui_modulation_param1_slider, round(param_entry->Value), LV_ANIM_OFF);
+                        LV_SLIDER_SET_RANGE(objects.ui_modulation_param1_slider, round(param_entry->Min), round(param_entry->Max));
+                        LV_SLIDER_SET_VALUE(objects.ui_modulation_param1_slider, round(param_entry->Value));
                                                                                                   
                         // show value and units
                         sprintf(value_string, FRMT("%d", "RPM"), (int)round(param_entry->Value));
@@ -2422,8 +2450,8 @@ uint8_t tonex_update_ui_parameters(void)
                 {
                     if (param_ptr[TONEX_PARAM_MODULATION_MODEL].Value == TONEX_MODULATION_ROTARY)
                     { 
-                        lv_slider_set_range(objects.ui_modulation_param2_slider, round(param_entry->Min), round(param_entry->Max));
-                        lv_slider_set_value(objects.ui_modulation_param2_slider, round(param_entry->Value), LV_ANIM_OFF);    
+                        LV_SLIDER_SET_RANGE(objects.ui_modulation_param2_slider, round(param_entry->Min), round(param_entry->Max));
+                        LV_SLIDER_SET_VALUE(objects.ui_modulation_param2_slider, round(param_entry->Value));    
                                                                                                  
                         // show value and units
                         sprintf(value_string, FRMT("%d", "mm"), (int)round(param_entry->Value));
@@ -2438,8 +2466,8 @@ uint8_t tonex_update_ui_parameters(void)
                 {
                     if (param_ptr[TONEX_PARAM_MODULATION_MODEL].Value == TONEX_MODULATION_ROTARY)
                     { 
-                        lv_slider_set_range(objects.ui_modulation_param3_slider, round(param_entry->Min), round(param_entry->Max));
-                        lv_slider_set_value(objects.ui_modulation_param3_slider, round(param_entry->Value), LV_ANIM_OFF);     
+                        LV_SLIDER_SET_RANGE(objects.ui_modulation_param3_slider, round(param_entry->Min), round(param_entry->Max));
+                        LV_SLIDER_SET_VALUE(objects.ui_modulation_param3_slider, round(param_entry->Value));     
                                                                                                  
                         // show value and units
                         sprintf(value_string, FRMT_NS("%d", "%%"), (int)round(param_entry->Value));
@@ -2454,8 +2482,8 @@ uint8_t tonex_update_ui_parameters(void)
                 {
                     if (param_ptr[TONEX_PARAM_MODULATION_MODEL].Value == TONEX_MODULATION_ROTARY)
                     { 
-                        lv_slider_set_range(objects.ui_modulation_param4_slider, round(param_entry->Min), round(param_entry->Max));
-                        lv_slider_set_value(objects.ui_modulation_param4_slider, round(param_entry->Value), LV_ANIM_OFF);    
+                        LV_SLIDER_SET_RANGE(objects.ui_modulation_param4_slider, round(param_entry->Min), round(param_entry->Max));
+                        LV_SLIDER_SET_VALUE(objects.ui_modulation_param4_slider, round(param_entry->Value));    
                                                                                                  
                         // show value and units
                         sprintf(value_string, "%1.1f", param_entry->Value);
@@ -2552,8 +2580,8 @@ uint8_t tonex_update_ui_parameters(void)
                 {
                     if (param_ptr[TONEX_PARAM_DELAY_MODEL].Value == TONEX_DELAY_DIGITAL)
                     { 
-                        lv_slider_set_range(objects.ui_delay_ts_slider, round(param_entry->Min), round(param_entry->Max));
-                        lv_slider_set_value(objects.ui_delay_ts_slider, round(param_entry->Value), LV_ANIM_OFF);   
+                        LV_SLIDER_SET_RANGE(objects.ui_delay_ts_slider, round(param_entry->Min), round(param_entry->Max));
+                        LV_SLIDER_SET_VALUE(objects.ui_delay_ts_slider, round(param_entry->Value));   
                                                                                                  
                         // show value and units
                         sprintf(value_string, FRMT("%d", "ms"), (int)round(param_entry->Value));
@@ -2568,8 +2596,8 @@ uint8_t tonex_update_ui_parameters(void)
                 {
                     if (param_ptr[TONEX_PARAM_DELAY_MODEL].Value == TONEX_DELAY_DIGITAL)
                     { 
-                        lv_slider_set_range(objects.ui_delay_feedback_slider, round(param_entry->Min), round(param_entry->Max));
-                        lv_slider_set_value(objects.ui_delay_feedback_slider, round(param_entry->Value), LV_ANIM_OFF);    
+                        LV_SLIDER_SET_RANGE(objects.ui_delay_feedback_slider, round(param_entry->Min), round(param_entry->Max));
+                        LV_SLIDER_SET_VALUE(objects.ui_delay_feedback_slider, round(param_entry->Value));    
                                                                                                  
                         // show value and units
                         sprintf(value_string, FRMT_NS("%d", "%%"), (int)round(param_entry->Value));
@@ -2599,8 +2627,8 @@ uint8_t tonex_update_ui_parameters(void)
                 {
                     if (param_ptr[TONEX_PARAM_DELAY_MODEL].Value == TONEX_DELAY_DIGITAL)
                     { 
-                        lv_slider_set_range(objects.ui_delay_mix_slider, round(param_entry->Min), round(param_entry->Max));
-                        lv_slider_set_value(objects.ui_delay_mix_slider, round(param_entry->Value), LV_ANIM_OFF);    
+                        LV_SLIDER_SET_RANGE(objects.ui_delay_mix_slider, round(param_entry->Min), round(param_entry->Max));
+                        LV_SLIDER_SET_VALUE(objects.ui_delay_mix_slider, round(param_entry->Value));    
                                                                                                                                 
                         // show value and units
                         sprintf(value_string, FRMT_NS("%d", "%%"), (int)round(param_entry->Value));
@@ -2644,8 +2672,8 @@ uint8_t tonex_update_ui_parameters(void)
                 {
                     if (param_ptr[TONEX_PARAM_DELAY_MODEL].Value == TONEX_DELAY_TAPE)
                     { 
-                        lv_slider_set_range(objects.ui_delay_ts_slider, round(param_entry->Min), round(param_entry->Max));
-                        lv_slider_set_value(objects.ui_delay_ts_slider, round(param_entry->Value), LV_ANIM_OFF);    
+                        LV_SLIDER_SET_RANGE(objects.ui_delay_ts_slider, round(param_entry->Min), round(param_entry->Max));
+                        LV_SLIDER_SET_VALUE(objects.ui_delay_ts_slider, round(param_entry->Value));    
                                                                                                                                  
                         // show value and units
                         sprintf(value_string, FRMT("%d", "ms"), (int)round(param_entry->Value));
@@ -2660,8 +2688,8 @@ uint8_t tonex_update_ui_parameters(void)
                 {
                     if (param_ptr[TONEX_PARAM_DELAY_MODEL].Value == TONEX_DELAY_TAPE)
                     { 
-                        lv_slider_set_range(objects.ui_delay_feedback_slider, round(param_entry->Min), round(param_entry->Max));
-                        lv_slider_set_value(objects.ui_delay_feedback_slider, round(param_entry->Value), LV_ANIM_OFF);    
+                        LV_SLIDER_SET_RANGE(objects.ui_delay_feedback_slider, round(param_entry->Min), round(param_entry->Max));
+                        LV_SLIDER_SET_VALUE(objects.ui_delay_feedback_slider, round(param_entry->Value));    
                                                                                                                                  
                         // show value and units
                         sprintf(value_string, FRMT_NS("%d", "%%"), (int)round(param_entry->Value));
@@ -2691,8 +2719,8 @@ uint8_t tonex_update_ui_parameters(void)
                 {
                     if (param_ptr[TONEX_PARAM_DELAY_MODEL].Value == TONEX_DELAY_TAPE)
                     { 
-                        lv_slider_set_range(objects.ui_delay_mix_slider, round(param_entry->Min), round(param_entry->Max));
-                        lv_slider_set_value(objects.ui_delay_mix_slider, round(param_entry->Value), LV_ANIM_OFF);   
+                        LV_SLIDER_SET_RANGE(objects.ui_delay_mix_slider, round(param_entry->Min), round(param_entry->Max));
+                        LV_SLIDER_SET_VALUE(objects.ui_delay_mix_slider, round(param_entry->Value));   
                                                                                                                                  
                         // show value and units
                         sprintf(value_string, FRMT_NS("%d", "%%"), (int)round(param_entry->Value));

@@ -23,6 +23,9 @@ limitations under the License.
 extern "C" {
 #endif
 
+#include "esp_err.h"
+#include "control.h"
+
 enum TonexReverbModels
 {
     TONEX_REVERB_SPRING_1,
