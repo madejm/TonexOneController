@@ -57,6 +57,9 @@ void UI_SetAltMode(bool altMode);
 void UI_SetPresetDescription(char* text);
 void UI_RefreshParameterValues(void);
 void UI_ShowToast(char* text);
+void UI_SetTunerResult(const char *note, float cents, bool valid,
+                       uint32_t frequency_tenths, uint8_t channel);
+void UI_SetTunerStatus(const char *status, bool error);
 
 #ifdef __cplusplus
 } /*extern "C"*/

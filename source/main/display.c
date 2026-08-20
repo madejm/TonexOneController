@@ -122,6 +122,7 @@ enum UIElements
     UI_ELEMENT_PARAMETERS,
     UI_ELEMENT_TOAST,
     UI_ELEMENT_PRESET_LIST,
+    UI_ELEMENT_TUNER,
 };
 
 enum UIAction
@@ -142,6 +143,7 @@ typedef struct
     uint8_t Action;
     uint32_t Value;
     uint16_t State;
+    float FloatValue;
     char Text[MAX_UI_TEXT];
 } tUIUpdate;
 
@@ -1638,6 +1640,50 @@ void UI_SetUSBStatus(uint8_t state)
 }
 
 /****************************************************************************
+* NAME:        UI_SetTunerResult
+* DESCRIPTION: Thread-safe tuner label update.
+*****************************************************************************/
+void UI_SetTunerResult(const char *note, float cents, bool valid,
+                       uint32_t frequency_tenths, uint8_t channel)
+{
+    if (ui_update_queue == NULL)
+    {
+        return;
+    }
+
+    tUIUpdate ui_update = {0};
+    ui_update.ElementID = UI_ELEMENT_TUNER;
+    ui_update.Action = UI_ACTION_NONE;
+    ui_update.State = valid ? 1U : 0U;
+    ui_update.FloatValue = cents;
+    ui_update.Value = frequency_tenths;
+    ui_update.Action = channel;
+    strncpy(ui_update.Text, note, MAX_UI_TEXT - 1U);
+    ui_update.Text[MAX_UI_TEXT - 1U] = '\0';
+
+    /* Dropping an old visual update is preferable to blocking the audio task. */
+    xQueueSend(ui_update_queue, (void *)&ui_update, 0);
+}
+
+void UI_SetTunerStatus(const char *status, bool error)
+{
+    if (ui_update_queue == NULL)
+    {
+        return;
+    }
+
+    tUIUpdate ui_update = {0};
+    ui_update.ElementID = UI_ELEMENT_TUNER;
+    ui_update.Action = UI_ACTION_NONE;
+    ui_update.State = error ? 3U : 2U;
+    strncpy(ui_update.Text, status, MAX_UI_TEXT - 1U);
+    ui_update.Text[MAX_UI_TEXT - 1U] = '\0';
+
+    /* Status changes are rare and must remain visible without a serial console. */
+    xQueueSend(ui_update_queue, (void *)&ui_update, pdMS_TO_TICKS(20));
+}
+
+/****************************************************************************
 * NAME:        
 * DESCRIPTION: 
 * PARAMETERS:  
@@ -2362,6 +2408,33 @@ static  __attribute__((unused)) uint8_t update_ui_element(tUIUpdate* update)
                 updatePresetListSelection();
                 updatePresetListNames();
             }
+        } break;
+
+        case UI_ELEMENT_TUNER:
+        {
+#if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+            char cents_text[48];
+            if (update->State >= 2U)
+            {
+                lv_label_set_text(objects.ui_tuner_note, update->State == 3U ? "ERR" : "--");
+                lv_label_set_text(objects.ui_tuner_cents, update->Text);
+            }
+            else if (update->State)
+            {
+                lv_label_set_text(objects.ui_tuner_note, update->Text);
+                snprintf(cents_text, sizeof(cents_text), "%lu.%luHz %+.1fc C%u",
+                         (unsigned long)(update->Value / 10U),
+                         (unsigned long)(update->Value % 10U), update->FloatValue,
+                         (unsigned int)update->Action + 1U);
+                lv_label_set_text(objects.ui_tuner_cents, cents_text);
+            }
+            else
+            {
+                lv_label_set_text(objects.ui_tuner_note, "--");
+                lv_label_set_text(objects.ui_tuner_cents, "NO SIGNAL");
+            }
+#endif
+            return 1;
         } break;
 
         default:

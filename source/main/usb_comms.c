@@ -44,9 +44,11 @@ limitations under the License.
 #include "usb/cdc_acm_host.h"
 #include "usb_tonex_common.h"
 #include "usb_tonex_one.h"
+#include "usb_tonex_tuner.h"
 #include "usb_tonex.h"
 #include "usb_valeton_gp5.h"
 #include "control.h"
+#include "display.h"
 #include "task_priorities.h"
 
 #ifdef CONFIG_USB_HOST_ENABLE_ENUM_FILTER_CALLBACK
@@ -193,7 +195,16 @@ void class_driver_task(void *arg)
                 ESP_LOGI(TAG, "Found Tonex One");
                 AmpModellerType = AMP_MODELLER_TONEX_ONE;
 
+                UI_SetTunerStatus("STARTING USB AUDIO", false);
                 usb_tonex_one_init(&driver_obj, usb_input_queue);
+
+                // POC: start clean UAC2 capture and the chromatic tuner immediately.
+                // Later this will be gated by the TONEX ONE tuner state.
+                err = usb_tonex_tuner_init(&driver_obj);
+                if (err != ESP_OK)
+                {
+                    ESP_LOGE(TAG, "TONEX tuner capture init failed: %s", esp_err_to_name(err));
+                }
             }
             else if ((dev_desc->idVendor == IK_MULTIMEDIA_USB_VENDOR) && (dev_desc->idProduct == TONEX_PRODUCT_ID))
             {
@@ -235,17 +246,12 @@ void class_driver_task(void *arg)
         {
             ESP_LOGI(TAG, "USB close device");
 
-            // Release the interface
-            if (AmpModellerType != AMP_MODELLER_NONE)
-            {
-                usb_host_interface_release(driver_obj.client_hdl, driver_obj.dev_hdl, 1);
-            }
-            
             // clean up
             switch (AmpModellerType)
             {
                 case AMP_MODELLER_TONEX_ONE:
                 {
+                    usb_tonex_tuner_deinit();
                     usb_tonex_one_deinit();
                 } break;
 
@@ -304,7 +310,12 @@ void class_driver_task(void *arg)
             } break;
         }
 
-        vTaskDelay(pdMS_TO_TICKS(1));
+        /* The client event handler already blocks for up to 1 ms. Extra sleeps
+           leave gaps between isochronous URBs while the tuner is capturing. */
+        if (AmpModellerType != AMP_MODELLER_TONEX_ONE ||
+            !usb_tonex_tuner_is_active()) {
+            vTaskDelay(pdMS_TO_TICKS(1));
+        }
     }
 
     usb_host_client_deregister(driver_obj.client_hdl);

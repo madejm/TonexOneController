@@ -1525,11 +1525,8 @@ void usb_tonex_one_handle(class_driver_t* driver_obj)
             InputBuffers[loop].ReadyToRead = 0;
             InputBuffers[loop].ReadyToWrite = 1;   
 
-            vTaskDelay(pdMS_TO_TICKS(2)); 
         } 
     }
-
-    vTaskDelay(pdMS_TO_TICKS(2));
 }
 
 /****************************************************************************
@@ -1620,7 +1617,11 @@ void usb_tonex_one_init(class_driver_t* driver_obj, QueueHandle_t comms_queue)
             if (next_desc->bDescriptorType == USB_B_DESCRIPTOR_TYPE_ENDPOINT)
             {
                 usb_ep_desc_t *mod_desc = (usb_ep_desc_t *)next_desc;
-                if (mod_desc->wMaxPacketSize > 64)
+                // The TONEX ONE reports a high-speed packet size for its full-speed
+                // CDC OUT endpoint. Do not alter the isochronous audio endpoints.
+                if ((mod_desc->bEndpointAddress == 0x07) &&
+                    (USB_EP_DESC_GET_XFERTYPE(mod_desc) == USB_TRANSFER_TYPE_BULK) &&
+                    (mod_desc->wMaxPacketSize > 64))
                 {
                     ESP_LOGW(TAG, "EP 0x%02X with wrong wMaxPacketSize %d - fixed to 64", mod_desc->bEndpointAddress, mod_desc->wMaxPacketSize);
                     mod_desc->wMaxPacketSize = 64;

@@ -55,6 +55,7 @@ limitations under the License.
 #include "valeton_params.h"
 #include "usb_comms.h"
 #include "usb_tonex_one.h"
+#include "usb_tonex_tuner.h"
 #include "display.h"
 
 #define WIFI_CONFIG_TASK_STACK_SIZE   (3 * 1024)
@@ -92,6 +93,7 @@ typedef esp_err_t (*wifi_json_sender_t)(void *ctx, const char *payload);
 
 static esp_err_t ws_handler(httpd_req_t *req);
 static esp_err_t embedded_files_handler(httpd_req_t *req);
+static esp_err_t send_tonex_capture_wav(httpd_req_t *req);
 static void wifi_kill_all(void);
 static void wifi_build_params_json(bool all);
 // static void wifi_build_params_json(bool all, bool compact_values);
@@ -1678,6 +1680,118 @@ static esp_err_t send_embedded_png_file(httpd_req_t *req, const char* start, uin
     return httpd_resp_send(req, start, length);
 }
 
+static void wav_write_u16(uint8_t *destination, uint16_t value)
+{
+    destination[0] = (uint8_t)value;
+    destination[1] = (uint8_t)(value >> 8);
+}
+
+static void wav_write_u32(uint8_t *destination, uint32_t value)
+{
+    destination[0] = (uint8_t)value;
+    destination[1] = (uint8_t)(value >> 8);
+    destination[2] = (uint8_t)(value >> 16);
+    destination[3] = (uint8_t)(value >> 24);
+}
+
+static esp_err_t send_tonex_capture_wav(httpd_req_t *req)
+{
+    usb_tonex_capture_view_t capture;
+    if (!usb_tonex_tuner_capture_acquire(&capture)) {
+        httpd_resp_set_status(req, "409 Conflict");
+        httpd_resp_set_type(req, "text/plain");
+        return httpd_resp_sendstr(req, "TONEX capture is not ready yet\n");
+    }
+
+    uint8_t header[44] = {0};
+    const uint16_t block_align = capture.channels * capture.subslot_size;
+    const uint32_t byte_rate = capture.sample_rate * block_align;
+    const uint32_t data_size = (uint32_t)capture.data_size;
+    const uint32_t received_frames = data_size / block_align;
+    const uint32_t received_rate = capture.capture_wall_ms > 0U
+        ? received_frames * 1000U / capture.capture_wall_ms : 0U;
+    char metadata[384];
+    const int metadata_length = snprintf(
+        metadata, sizeof(metadata),
+        "{\"wall_ms\":%lu,\"received_sps\":%lu,\"packet_40\":%lu,\"packet_48\":%lu,"
+        "\"packet_56\":%lu,\"packet_352\":%lu,\"packet_360\":%lu,"
+        "\"packet_other\":%lu,\"packet_completed\":%lu,\"packet_skipped\":%lu,"
+        "\"packet_failed\":%lu,\"qualifier_status\":%u,\"qualifier_length\":%u,"
+        "\"other_speed_status\":%u,\"other_speed_length\":%u}\n",
+        (unsigned long)capture.capture_wall_ms,
+        (unsigned long)received_rate,
+        (unsigned long)capture.packets_40,
+        (unsigned long)capture.packets_48,
+        (unsigned long)capture.packets_56,
+        (unsigned long)capture.packets_352,
+        (unsigned long)capture.packets_360,
+        (unsigned long)capture.packets_other,
+        (unsigned long)capture.packets_completed,
+        (unsigned long)capture.packets_skipped,
+        (unsigned long)capture.packets_failed,
+        capture.qualifier_status,
+        capture.qualifier_length,
+        capture.other_speed_status,
+        capture.other_speed_length);
+    const uint32_t metadata_size =
+        metadata_length > 0 && metadata_length < (int)sizeof(metadata)
+        ? (uint32_t)metadata_length : 0U;
+    const uint32_t padded_metadata_size = (metadata_size + 1U) & ~1U;
+    memcpy(&header[0], "RIFF", 4);
+    wav_write_u32(&header[4], 36U + data_size + 8U + padded_metadata_size);
+    memcpy(&header[8], "WAVEfmt ", 8);
+    wav_write_u32(&header[16], 16U);
+    wav_write_u16(&header[20], 1U); /* PCM; USB byte layout remains untouched. */
+    wav_write_u16(&header[22], capture.channels);
+    wav_write_u32(&header[24], capture.sample_rate);
+    wav_write_u32(&header[28], byte_rate);
+    wav_write_u16(&header[32], block_align);
+    wav_write_u16(&header[34], capture.subslot_size * 8U);
+    memcpy(&header[36], "data", 4);
+    wav_write_u32(&header[40], data_size);
+
+    char packet_352[16];
+    char packet_360[16];
+    char packet_other[16];
+    snprintf(packet_352, sizeof(packet_352), "%lu", (unsigned long)capture.packets_352);
+    snprintf(packet_360, sizeof(packet_360), "%lu", (unsigned long)capture.packets_360);
+    snprintf(packet_other, sizeof(packet_other), "%lu", (unsigned long)capture.packets_other);
+    httpd_resp_set_type(req, "audio/wav");
+    httpd_resp_set_hdr(req, "Content-Disposition", "attachment; filename=tonex-capture.wav");
+    httpd_resp_set_hdr(req, "Cache-Control", "no-store");
+    httpd_resp_set_hdr(req, "X-Tonex-Packets-352", packet_352);
+    httpd_resp_set_hdr(req, "X-Tonex-Packets-360", packet_360);
+    httpd_resp_set_hdr(req, "X-Tonex-Packets-Other", packet_other);
+
+    esp_err_t result = httpd_resp_send_chunk(req, (const char *)header, sizeof(header));
+    for (size_t offset = 0; result == ESP_OK && offset < capture.data_size;) {
+        const size_t remaining = capture.data_size - offset;
+        const size_t chunk_size = remaining < (16U * 1024U) ? remaining : (16U * 1024U);
+        result = httpd_resp_send_chunk(
+            req, (const char *)capture.data + offset, chunk_size);
+        offset += chunk_size;
+    }
+    if (result == ESP_OK) {
+        uint8_t metadata_header[8];
+        memcpy(&metadata_header[0], "tnex", 4);
+        wav_write_u32(&metadata_header[4], metadata_size);
+        result = httpd_resp_send_chunk(
+            req, (const char *)metadata_header, sizeof(metadata_header));
+        if (result == ESP_OK && metadata_size > 0U) {
+            result = httpd_resp_send_chunk(req, metadata, metadata_size);
+        }
+        if (result == ESP_OK && padded_metadata_size != metadata_size) {
+            static const char padding = 0;
+            result = httpd_resp_send_chunk(req, &padding, 1U);
+        }
+    }
+    if (result == ESP_OK) {
+        result = httpd_resp_send_chunk(req, NULL, 0);
+    }
+    usb_tonex_tuner_capture_release();
+    return result;
+}
+
 /****************************************************************************
 * NAME:        
 * DESCRIPTION: 
@@ -1706,6 +1820,10 @@ static esp_err_t embedded_files_handler(httpd_req_t *req)
         return httpd_resp_send(req, 
                                (const char*)web_index_html_start,
                                web_index_html_end - web_index_html_start);
+    }
+    else if (strcmp(requested, "tonex-capture.wav") == 0)
+    {
+        return send_tonex_capture_wav(req);
     }
     else if (strcmp(requested, "img/amp_disabled.png") == 0) 
     {

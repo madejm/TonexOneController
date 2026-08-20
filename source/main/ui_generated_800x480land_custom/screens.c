@@ -2168,6 +2168,28 @@ void create_screen_screen1() {
                 }
             }
         }
+        {
+            // ui_TunerNote
+            lv_obj_t *obj = lv_label_create(parent_obj);
+            objects.ui_tuner_note = obj;
+            lv_obj_set_pos(obj, 0, 0);
+            lv_obj_set_size(obj, 247, 105);
+            lv_obj_set_style_text_font(obj, &ui_font_ibm_18, LV_PART_MAIN | LV_STATE_DEFAULT);
+            lv_obj_set_style_bg_color(obj, lv_color_hex(0xc70000), LV_PART_MAIN | LV_STATE_DEFAULT);
+            lv_obj_set_style_bg_opa(obj, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+            lv_label_set_text_static(obj, "NOTE");
+        }
+        {
+            // ui_TunerCents
+            lv_obj_t *obj = lv_label_create(parent_obj);
+            objects.ui_tuner_cents = obj;
+            lv_obj_set_pos(obj, -1, 105);
+            lv_obj_set_size(obj, 248, 195);
+            lv_obj_set_style_text_font(obj, &ui_font_ibm_18, LV_PART_MAIN | LV_STATE_DEFAULT);
+            lv_obj_set_style_bg_color(obj, lv_color_hex(0x00a91a), LV_PART_MAIN | LV_STATE_DEFAULT);
+            lv_obj_set_style_bg_opa(obj, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+            lv_label_set_text_static(obj, "CENTS");
+        }
     }
     
     tick_screen_screen1();

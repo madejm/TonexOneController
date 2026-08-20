@@ -136,6 +136,8 @@ typedef struct _objects_t {
     lv_obj_t *ui_bpm_title_label_1;
     lv_obj_t *ui_bpm_value_label;
     lv_obj_t *ui_bpm_indicator;
+    lv_obj_t *ui_tuner_note;
+    lv_obj_t *ui_tuner_cents;
     lv_obj_t *ui_settings_tab_view;
     lv_obj_t *obj2;
     lv_obj_t *ui_gate_tab;
