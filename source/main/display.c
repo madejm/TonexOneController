@@ -482,7 +482,8 @@ void ui_show_settings_tab(lv_event_t * e)
     {
         case AMP_MODELLER_TONEX_ONE:        // fallthrough
         case AMP_MODELLER_TONEX:            // fallthrough
-        case AMP_MODELLER_TONEX_ONE_PLUS:
+        case AMP_MODELLER_TONEX_ONE_PLUS:   // fallthrough
+        case AMP_MODELLER_TONEX_PLUG:
         default:
         {
             tonex_show_settings_tab(e);
@@ -509,6 +510,7 @@ void action_effect_icon_clicked(lv_event_t * e)
         case AMP_MODELLER_TONEX_ONE:        // fallthrough
         case AMP_MODELLER_TONEX:            // fallthrough
         case AMP_MODELLER_TONEX_ONE_PLUS:   // fallthrough
+        case AMP_MODELLER_TONEX_PLUG:
         default:
         {
             tonex_action_effect_icon_clicked(e);
@@ -575,6 +577,7 @@ void action_show_settings_page(lv_event_t * e)
         case AMP_MODELLER_TONEX_ONE:        // fallthrough
         case AMP_MODELLER_TONEX:            // fallthrough
         case AMP_MODELLER_TONEX_ONE_PLUS:   // fallthrough
+        case AMP_MODELLER_TONEX_PLUG:
         default:
         {
             lv_scr_load_anim(objects.settings, LV_SCR_LOAD_ANIM_FADE_IN, 0, 0, false);
@@ -676,6 +679,7 @@ void action_value_clicked(lv_event_t *e)
         case AMP_MODELLER_TONEX_ONE:        // fallthrough
         case AMP_MODELLER_TONEX:            // fallthrough
         case AMP_MODELLER_TONEX_ONE_PLUS:   // fallthrough
+        case AMP_MODELLER_TONEX_PLUG:
         default:
         {
             tonex_value_clicked(e);         
@@ -745,6 +749,7 @@ void action_value_keyboard_ok(lv_event_t * e)
             case AMP_MODELLER_TONEX_ONE:        // fallthrough
             case AMP_MODELLER_TONEX:            // fallthrough
             case AMP_MODELLER_TONEX_ONE_PLUS:   // fallthrough
+            case AMP_MODELLER_TONEX_PLUG:
             default:
             {
                 tonex_value_changed(e);
@@ -847,6 +852,7 @@ void action_parameter_changed(lv_event_t * e)
         case AMP_MODELLER_TONEX_ONE:        // fallthrough
         case AMP_MODELLER_TONEX:            // fallthrough
         case AMP_MODELLER_TONEX_ONE_PLUS:   // fallthrough
+        case AMP_MODELLER_TONEX_PLUG:
         default:
         {
             tonex_action_parameter_changed(e);
@@ -1279,6 +1285,7 @@ void updateIconOrder(void)
         case AMP_MODELLER_TONEX_ONE:        // fallthrough
         case AMP_MODELLER_TONEX:            // fallthrough
         case AMP_MODELLER_TONEX_ONE_PLUS:   // fallthrough
+        case AMP_MODELLER_TONEX_PLUG:
         default:
         {
             tonex_update_icon_order();
@@ -1319,6 +1326,7 @@ static  __attribute__((unused)) uint8_t update_ui_element(tUIUpdate* update)
                     case AMP_MODELLER_TONEX_ONE:        // fallthrough
                     case AMP_MODELLER_TONEX:            // fallthrough
                     case AMP_MODELLER_TONEX_ONE_PLUS:   // fallthrough
+                    case AMP_MODELLER_TONEX_PLUG:
                     default:
                     {
 #if CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI                                    
@@ -1400,6 +1408,7 @@ static  __attribute__((unused)) uint8_t update_ui_element(tUIUpdate* update)
                 case AMP_MODELLER_TONEX_ONE:        // fallthrough
                 case AMP_MODELLER_TONEX:            // fallthrough
                 case AMP_MODELLER_TONEX_ONE_PLUS:   // fallthrough
+                case AMP_MODELLER_TONEX_PLUG:
                 default:
                 {
                     tonex_update_ui_parameters();

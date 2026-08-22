@@ -980,7 +980,8 @@ static uint8_t process_control_command(tControlMessage* message)
                 {
                     case AMP_MODELLER_TONEX_ONE:        // fallthrough
                     case AMP_MODELLER_TONEX:            // fallthrough
-                    case AMP_MODELLER_TONEX_ONE_PLUS:
+                    case AMP_MODELLER_TONEX_ONE_PLUS:   // fallthrough
+                    case AMP_MODELLER_TONEX_PLUG:
                     default:
                     {
                         usb_modify_parameter(TONEX_GLOBAL_BPM, ControlData.TapTempo.BPM);
@@ -2662,7 +2663,8 @@ static void UpdateFootswitchLeds(void)
         switch (usb_get_connected_modeller_type())
         {
             case AMP_MODELLER_TONEX_ONE:    // fallthrough
-            case AMP_MODELLER_TONEX_ONE_PLUS:
+            case AMP_MODELLER_TONEX_ONE_PLUS:   // fallthrough
+            case AMP_MODELLER_TONEX_PLUG:
             {
                 // tonex one has colour per preset
                 if (tonex_params_colors_get_color(ControlData.PresetIndex, &preset_color) == ESP_OK)
@@ -2721,7 +2723,8 @@ static void UpdateFootswitchLeds(void)
                                 {
                                     case AMP_MODELLER_TONEX_ONE:        // fallthrough
                                     case AMP_MODELLER_TONEX:            // fallthrough
-                                    case AMP_MODELLER_TONEX_ONE_PLUS:
+                                    case AMP_MODELLER_TONEX_ONE_PLUS:   // fallthrough
+                                    case AMP_MODELLER_TONEX_PLUG:
                                     default:
                                     {
                                         switch (param)
@@ -2950,7 +2953,8 @@ esp_err_t control_get_connected_modeller_params_locked_access(tModellerParameter
     {
         case AMP_MODELLER_TONEX_ONE:        // fallthrough
         case AMP_MODELLER_TONEX:            // fallthrough
-        case AMP_MODELLER_TONEX_ONE_PLUS:
+        case AMP_MODELLER_TONEX_ONE_PLUS:   // fallthrough
+        case AMP_MODELLER_TONEX_PLUG:
         default:
         {
             return tonex_params_get_locked_access(param_ptr);
@@ -2976,7 +2980,8 @@ esp_err_t control_release_connected_modeller_params_locked_access(void)
     {
         case AMP_MODELLER_TONEX_ONE:        // fallthrough
         case AMP_MODELLER_TONEX:            // fallthrough
-        case AMP_MODELLER_TONEX_ONE_PLUS:
+        case AMP_MODELLER_TONEX_ONE_PLUS:   // fallthrough
+        case AMP_MODELLER_TONEX_PLUG:
         default:
         {
             return tonex_params_release_locked_access();

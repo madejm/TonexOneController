@@ -27,7 +27,7 @@ extern "C" {
 #define TONEX_ONE_PRODUCT_ID            0x00D1
 #define TONEX_PRODUCT_ID                0x0068
 #define TONEX_ONE_PLUS_PRODUCT_ID       0x00EB
-#define TONEX_ONE_PLUG_PRODUCT_ID       0x00D5
+#define TONEX_PLUG_PRODUCT_ID           0x00D5
 
 #define VALETON_USB_VENDOR              0x84EF
 #define VALETON_GP5_PRODUCT_ID          0x0184
@@ -41,6 +41,7 @@ enum AmpModellers
     AMP_MODELLER_TONEX,     // full size pedal with 3 footswitches
     AMP_MODELLER_VALETON_GP5,
     AMP_MODELLER_TONEX_ONE_PLUS,
+    AMP_MODELLER_TONEX_PLUG,
 };
 
 enum USB_Commands
