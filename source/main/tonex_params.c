@@ -23,7 +23,6 @@ limitations under the License.
 #include "esp_log.h"
 #include "usb/usb_host.h"
 #include "usb/cdc_acm_host.h"
-#include "driver/i2c.h"
 #include "usb_comms.h"
 #include "usb_tonex_one.h"
 #include "control.h"
@@ -181,6 +180,7 @@ static tModellerParameter TonexParameters[TONEX_GLOBAL_LAST] =
     {440,    415,    465,  "TUNEREF", MODELLER_PARAM_TYPE_RANGE, 0, 0, 0},              // TONEX_GLOBAL_TUNING_REFERENCE
     {0,      0,      1,    "BYPASS",  MODELLER_PARAM_TYPE_SWITCH, 0, 0, 0},             // TONEX_GLOBAL_BYPASS
     {0,     -40,     3,    "MVOL", MODELLER_PARAM_TYPE_RANGE, 0, 0, 0},                 // TONEX_GLOBAL_MASTER_VOLUME
+    {0,      0,      1,    "DIRMON", MODELLER_PARAM_TYPE_SWITCH, 0, 0, 0},              // TONEX_GLOBAL_DIRECT_MONITOR
 };
 
 static tTonexPresetColor TonexPresetColors[MAX_SUPPORTED_PRESETS];

@@ -35,7 +35,6 @@ typedef struct {
     esp_lcd_panel_t base;
     esp_lcd_panel_io_handle_t io;
     int reset_gpio_num;
-    bool reset_level;
     int x_gap;
     int y_gap;
     uint8_t fb_bits_per_pixel;
@@ -43,6 +42,9 @@ typedef struct {
     uint8_t colmod_val; // save current value of LCD_CMD_COLMOD register
     const gc9107_lcd_init_cmd_t *init_cmds;
     uint16_t init_cmds_size;
+    struct {
+        unsigned int reset_level: 1;
+    } flags;
 } gc9107_panel_t;
 
 esp_err_t esp_lcd_new_panel_gc9107(const esp_lcd_panel_io_handle_t io, const esp_lcd_panel_dev_config_t *panel_dev_config, esp_lcd_panel_handle_t *ret_panel)
@@ -62,7 +64,7 @@ esp_err_t esp_lcd_new_panel_gc9107(const esp_lcd_panel_io_handle_t io, const esp
     }
 
 #if ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(5, 0, 0)
-    switch (panel_dev_config->color_space) {
+    switch (panel_dev_config->rgb_ele_order) {
     case ESP_LCD_COLOR_SPACE_RGB:
         gc9107->madctl_val = 0;
         break;
@@ -73,7 +75,7 @@ esp_err_t esp_lcd_new_panel_gc9107(const esp_lcd_panel_io_handle_t io, const esp
         ESP_GOTO_ON_FALSE(false, ESP_ERR_NOT_SUPPORTED, err, TAG, "unsupported color space");
         break;
     }
-#else
+#elif ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(6, 0, 0)
     switch (panel_dev_config->rgb_endian) {
     case LCD_RGB_ENDIAN_RGB:
         gc9107->madctl_val = 0;
@@ -83,6 +85,18 @@ esp_err_t esp_lcd_new_panel_gc9107(const esp_lcd_panel_io_handle_t io, const esp
         break;
     default:
         ESP_GOTO_ON_FALSE(false, ESP_ERR_NOT_SUPPORTED, err, TAG, "unsupported rgb endian");
+        break;
+    }
+#else
+    switch (panel_dev_config->rgb_ele_order) {
+    case LCD_RGB_ELEMENT_ORDER_RGB:
+        gc9107->madctl_val = 0;
+        break;
+    case LCD_RGB_ELEMENT_ORDER_BGR:
+        gc9107->madctl_val |= LCD_CMD_BGR_BIT;
+        break;
+    default:
+        ESP_GOTO_ON_FALSE(false, ESP_ERR_NOT_SUPPORTED, err, TAG, "unsupported rgb element order");
         break;
     }
 #endif
@@ -104,7 +118,7 @@ esp_err_t esp_lcd_new_panel_gc9107(const esp_lcd_panel_io_handle_t io, const esp
 
     gc9107->io = io;
     gc9107->reset_gpio_num = panel_dev_config->reset_gpio_num;
-    gc9107->reset_level = panel_dev_config->flags.reset_active_high;
+    gc9107->flags.reset_level = panel_dev_config->flags.reset_active_high;
     if (panel_dev_config->vendor_config) {
         gc9107->init_cmds = ((gc9107_vendor_config_t *)panel_dev_config->vendor_config)->init_cmds;
         gc9107->init_cmds_size = ((gc9107_vendor_config_t *)panel_dev_config->vendor_config)->init_cmds_size;
@@ -125,7 +139,8 @@ esp_err_t esp_lcd_new_panel_gc9107(const esp_lcd_panel_io_handle_t io, const esp
     *ret_panel = &(gc9107->base);
     ESP_LOGD(TAG, "new gc9107 panel @%p", gc9107);
 
-    ESP_LOGI(TAG, "LCD panel create success, version: %d.%d.%d", ESP_LCD_GC9107_VER_MAJOR, ESP_LCD_GC9107_VER_MINOR, ESP_LCD_GC9107_VER_PATCH);
+    ESP_LOGI(TAG, "LCD panel create success, version: %d.%d.%d", ESP_LCD_GC9107_VER_MAJOR, ESP_LCD_GC9107_VER_MINOR,
+             ESP_LCD_GC9107_VER_PATCH);
 
     return ESP_OK;
 
@@ -158,10 +173,12 @@ static esp_err_t panel_gc9107_reset(esp_lcd_panel_t *panel)
 
     // perform hardware reset
     if (gc9107->reset_gpio_num >= 0) {
-        gpio_set_level(gc9107->reset_gpio_num, gc9107->reset_level);
-        vTaskDelay(pdMS_TO_TICKS(10));
-        gpio_set_level(gc9107->reset_gpio_num, !gc9107->reset_level);
-        vTaskDelay(pdMS_TO_TICKS(10));
+        gpio_set_level(gc9107->reset_gpio_num, 1);
+        vTaskDelay(pdMS_TO_TICKS(50));
+        gpio_set_level(gc9107->reset_gpio_num, 0);
+        vTaskDelay(pdMS_TO_TICKS(50));
+        gpio_set_level(gc9107->reset_gpio_num, 1);
+        vTaskDelay(pdMS_TO_TICKS(120));
     } else { // perform software reset
         ESP_RETURN_ON_ERROR(esp_lcd_panel_io_tx_param(io, LCD_CMD_SWRESET, NULL, 0), TAG, "send command failed");
         vTaskDelay(pdMS_TO_TICKS(20)); // spec, wait at least 5ms before sending new command
@@ -171,51 +188,34 @@ static esp_err_t panel_gc9107_reset(esp_lcd_panel_t *panel)
 }
 
 static const gc9107_lcd_init_cmd_t vendor_specific_init_default[] = {
-//  {cmd, { data }, data_size, delay_ms}
-    // Enable Inter Register
-    {0xfe, (uint8_t []){0x00}, 0, 0},
-    {0xef, (uint8_t []){0x00}, 0, 0},
-    {0xeb, (uint8_t []){0x14}, 1, 0},
-    {0x84, (uint8_t []){0x60}, 1, 0},
-    {0x85, (uint8_t []){0xff}, 1, 0},
-    {0x86, (uint8_t []){0xff}, 1, 0},
-    {0x87, (uint8_t []){0xff}, 1, 0},
-    {0x8e, (uint8_t []){0xff}, 1, 0},
-    {0x8f, (uint8_t []){0xff}, 1, 0},
-    {0x88, (uint8_t []){0x0a}, 1, 0},
-    {0x89, (uint8_t []){0x23}, 1, 0},
-    {0x8a, (uint8_t []){0x00}, 1, 0},
-    {0x8b, (uint8_t []){0x80}, 1, 0},
-    {0x8c, (uint8_t []){0x01}, 1, 0},
-    {0x8d, (uint8_t []){0x03}, 1, 0},
-    {0x90, (uint8_t []){0x08, 0x08, 0x08, 0x08}, 4, 0},
-    {0xff, (uint8_t []){0x60, 0x01, 0x04}, 3, 0},
-    {0xC3, (uint8_t []){0x13}, 1, 0},
-    {0xC4, (uint8_t []){0x13}, 1, 0},
-    {0xC9, (uint8_t []){0x30}, 1, 0},
-    {0xbe, (uint8_t []){0x11}, 1, 0},
-    {0xe1, (uint8_t []){0x10, 0x0e}, 2, 0},
-    {0xdf, (uint8_t []){0x21, 0x0c, 0x02}, 3, 0},
-    // Set gamma
-    {0xF0, (uint8_t []){0x45, 0x09, 0x08, 0x08, 0x26, 0x2a}, 6, 0},
-    {0xF1, (uint8_t []){0x43, 0x70, 0x72, 0x36, 0x37, 0x6f}, 6, 0},
-    {0xF2, (uint8_t []){0x45, 0x09, 0x08, 0x08, 0x26, 0x2a}, 6, 0},
-    {0xF3, (uint8_t []){0x43, 0x70, 0x72, 0x36, 0x37, 0x6f}, 6, 0},
-    {0xed, (uint8_t []){0x1b, 0x0b}, 2, 0},
-    {0xae, (uint8_t []){0x77}, 1, 0},
-    {0xcd, (uint8_t []){0x63}, 1, 0},
-    {0x70, (uint8_t []){0x07, 0x07, 0x04, 0x0e, 0x0f, 0x09, 0x07, 0x08, 0x03}, 9, 0},
-    {0xE8, (uint8_t []){0x34}, 1, 0}, // 4 dot inversion
-    {0x60, (uint8_t []){0x38, 0x0b, 0x6D, 0x6D, 0x39, 0xf0, 0x6D, 0x6D}, 8, 0},
-    {0x61, (uint8_t []){0x38, 0xf4, 0x6D, 0x6D, 0x38, 0xf7, 0x6D, 0x6D}, 8, 0},
-    {0x62, (uint8_t []){0x38, 0x0D, 0x71, 0xED, 0x70, 0x70, 0x38, 0x0F, 0x71, 0xEF, 0x70, 0x70}, 12, 0},
-    {0x63, (uint8_t []){0x38, 0x11, 0x71, 0xF1, 0x70, 0x70, 0x38, 0x13, 0x71, 0xF3, 0x70, 0x70}, 12, 0},
-    {0x64, (uint8_t []){0x28, 0x29, 0xF1, 0x01, 0xF1, 0x00, 0x07}, 7, 0},
-    {0x66, (uint8_t []){0x3C, 0x00, 0xCD, 0x67, 0x45, 0x45, 0x10, 0x00, 0x00, 0x00}, 10, 0},
-    {0x67, (uint8_t []){0x00, 0x3C, 0x00, 0x00, 0x00, 0x01, 0x54, 0x10, 0x32, 0x98}, 10, 0},
-    {0x74, (uint8_t []){0x10, 0x45, 0x80, 0x00, 0x00, 0x4E, 0x00}, 7, 0},
-    {0x98, (uint8_t []){0x3e, 0x07}, 2, 0},
-    {0x99, (uint8_t []){0x3e, 0x07}, 2, 0},
+    {0xB0, (uint8_t[]){0xC0}, 1, 0},
+    {0xB2, (uint8_t[]){0x2F}, 1, 0},
+    {0xB3, (uint8_t[]){0x03}, 1, 0},
+    {0xB6, (uint8_t[]){0x19}, 1, 0},
+    {0xB7, (uint8_t[]){0x01}, 1, 0},
+
+    {0xAC, (uint8_t[]){0xCB}, 1, 0},
+    {0xAB, (uint8_t[]){0x0E}, 1, 0},
+
+    {0xB4, (uint8_t[]){0x04}, 1, 0},
+
+    {0xA8, (uint8_t[]){0x19}, 1, 0},
+
+    {0xB8, (uint8_t[]){0x08}, 1, 0},
+
+    {0xE8, (uint8_t[]){0x24}, 1, 0},
+    {0xE9, (uint8_t[]){0x48}, 1, 0},
+    {0xEA, (uint8_t[]){0x22}, 1, 0},
+
+    {0xC6, (uint8_t[]){0x30}, 1, 0},
+    {0xC7, (uint8_t[]){0x18}, 1, 0},
+
+    {0xF0, (uint8_t[]){0x1F, 0x28, 0x04, 0x3E, 0x2A, 0x2E, 0x20, 0x00, 0x0C, 0x06, 0x00, 0x1C, 0x1F, 0x0F}, 14, 0},
+    {0xF1, (uint8_t[]){0x00, 0x2D, 0x2F, 0x3C, 0x6F, 0x1C, 0x0B, 0x00, 0x00, 0x00, 0x07, 0x0D, 0x11, 0x0F}, 14, 0},
+
+    {0x21, NULL, 0, 0},
+    {0x11, NULL, 0, 120},
+    {0x29, NULL, 0, 20},
 };
 
 static esp_err_t panel_gc9107_init(esp_lcd_panel_t *panel)
@@ -225,7 +225,7 @@ static esp_err_t panel_gc9107_init(esp_lcd_panel_t *panel)
 
     // LCD goes into sleep mode and display will be turned off after power on reset, exit sleep mode first
     ESP_RETURN_ON_ERROR(esp_lcd_panel_io_tx_param(io, LCD_CMD_SLPOUT, NULL, 0), TAG, "send command failed");
-    vTaskDelay(pdMS_TO_TICKS(100));
+    vTaskDelay(pdMS_TO_TICKS(120));
     ESP_RETURN_ON_ERROR(esp_lcd_panel_io_tx_param(io, LCD_CMD_MADCTL, (uint8_t[]) {
         gc9107->madctl_val,
     }, 1), TAG, "send command failed");

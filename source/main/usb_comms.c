@@ -38,12 +38,13 @@ limitations under the License.
 #include "esp_crc.h"
 #include "esp_intr_alloc.h"
 #include "usb/usb_host.h"
-#include "driver/i2c.h"
 #include "esp_task_wdt.h"
 #include "usb_comms.h"
 #include "usb/cdc_acm_host.h"
 #include "usb_tonex_common.h"
 #include "usb_tonex_one.h"
+#include "usb_tonex_one_plus.h"
+#include "usb_tonex_plug.h"
 #include "usb_tonex.h"
 #include "usb_valeton_gp5.h"
 #include "control.h"
@@ -211,6 +212,22 @@ void class_driver_task(void *arg)
 
                 usb_valeton_gp5_init(&driver_obj, usb_input_queue);
             }
+            else if ((dev_desc->idVendor == IK_MULTIMEDIA_USB_VENDOR) && (dev_desc->idProduct == TONEX_PLUG_PRODUCT_ID))
+            {
+                // found Tonex Plug
+                ESP_LOGI(TAG, "Found Tonex Plug");
+                AmpModellerType = AMP_MODELLER_TONEX_PLUG;
+
+                usb_tonex_plug_init(&driver_obj, usb_input_queue);
+            }
+            else if ((dev_desc->idVendor == IK_MULTIMEDIA_USB_VENDOR) && (dev_desc->idProduct == TONEX_ONE_PLUS_PRODUCT_ID))
+            {
+                // found Tonex One Plus
+                ESP_LOGI(TAG, "Found Tonex One Plus");
+                AmpModellerType = AMP_MODELLER_TONEX_ONE_PLUS;
+
+                usb_tonex_one_plus_init(&driver_obj, usb_input_queue);
+            }
             else
             {
                 // check the device class
@@ -259,6 +276,16 @@ void class_driver_task(void *arg)
                     usb_valeton_gp5_deinit();
                 } break;
 
+                case AMP_MODELLER_TONEX_PLUG:
+                {
+                    usb_tonex_plug_deinit();
+                } break;
+
+                case AMP_MODELLER_TONEX_ONE_PLUS:
+                {
+                    usb_tonex_one_plus_deinit();
+                } break;
+
                 default:
                 {
                     // nothing needed
@@ -298,6 +325,16 @@ void class_driver_task(void *arg)
                 usb_valeton_gp5_handle(&driver_obj);
             } break;
             
+            case AMP_MODELLER_TONEX_PLUG:
+            {
+                usb_tonex_plug_handle(&driver_obj);
+            } break;
+
+            case AMP_MODELLER_TONEX_ONE_PLUS:
+            {
+                usb_tonex_one_plus_handle(&driver_obj);    
+            } break;
+
             default:
             {
                 // nothing needed
@@ -433,6 +470,34 @@ void usb_set_preset(uint32_t preset)
         if (xQueueSend(usb_input_queue, (void*)&message, 0) != pdPASS)
         {
             ESP_LOGE(TAG, "usb_set_preset queue send failed!");            
+        }
+    }
+}
+
+/****************************************************************************
+* NAME:        
+* DESCRIPTION: 
+* PARAMETERS:  
+* RETURN:      
+* NOTES:       
+*****************************************************************************/
+void usb_request_tuner(uint8_t state)
+{
+    tUSBMessage message;
+
+    if (usb_input_queue == NULL)
+    {
+        ESP_LOGE(TAG, "usb_request_tuner queue null");            
+    }
+    else
+    {
+        message.Command = USB_COMMAND_REQUEST_TUNER;
+        message.Payload = state;
+
+        // send to queue
+        if (xQueueSend(usb_input_queue, (void*)&message, 0) != pdPASS)
+        {
+            ESP_LOGE(TAG, "usb_request_tuner queue send failed!");            
         }
     }
 }
@@ -606,6 +671,16 @@ uint8_t usb_get_max_presets_for_connected_modeller(void)
         {
             max = MAX_PRESETS_VALETON_GP5;
         } break;
+
+        case AMP_MODELLER_TONEX_PLUG:
+        {
+            max = MAX_PRESETS_TONEX_PLUG;
+        } break;
+
+        case AMP_MODELLER_TONEX_ONE_PLUS:
+        {
+            max = MAX_PRESETS_TONEX_ONE_PLUS;
+        } break;
     }
 
     return max;
@@ -638,6 +713,16 @@ uint8_t usb_get_first_preset_index_for_connected_modeller(void)
         case AMP_MODELLER_VALETON_GP5:
         {
             first = 0;
+        } break;
+        
+        case AMP_MODELLER_TONEX_PLUG:
+        {
+            first = 1;
+        } break;
+
+        case AMP_MODELLER_TONEX_ONE_PLUS:
+        {
+            first = 1;
         } break;
     }
 

@@ -7,7 +7,7 @@
       "objID": "fd434352-2277-c4a8-e87e-e96cfcbf2305",
       "projectVersion": "v3",
       "projectType": "lvgl",
-      "lvglVersion": "8.3",
+      "lvglVersion": "8.4.0",
       "extensions": [],
       "imports": [],
       "flowSupport": false,
@@ -20,7 +20,10 @@
       "authorLink": "https://github.com/Builty/TonexOneController/tree/main",
       "resourceFiles": [],
       "hiddenWidgetLines": "dimmed",
-      "dimmedLinesOpacity": "20"
+      "dimmedLinesOpacity": "20",
+      "embedBitmaps": true,
+      "embedFonts": true,
+      "cacheFonts": false
     },
     "build": {
       "objID": "72794a43-a0fc-13c2-7eb5-67dd952141a4",
@@ -99,6 +102,7 @@
       "fileSystemPath": "",
       "lvglInclude": "lvgl.h",
       "screensLifetimeSupport": false,
+      "useDockerDesktop": true,
       "generateSourceCodeForEezFramework": false,
       "compressFlowDefinition": false,
       "executionQueueSize": 1000,
@@ -117,6 +121,7 @@
       "components": [],
       "connectionLines": [],
       "localVariables": [],
+      "componentGroups": [],
       "userProperties": [],
       "name": "NextClicked",
       "description": "Next button press handler",
@@ -127,6 +132,7 @@
       "components": [],
       "connectionLines": [],
       "localVariables": [],
+      "componentGroups": [],
       "userProperties": [],
       "name": "PreviousClicked",
       "implementationType": "native"
@@ -136,6 +142,7 @@
       "components": [],
       "connectionLines": [],
       "localVariables": [],
+      "componentGroups": [],
       "userProperties": [],
       "name": "AmpSkinNext",
       "implementationType": "native"
@@ -145,6 +152,7 @@
       "components": [],
       "connectionLines": [],
       "localVariables": [],
+      "componentGroups": [],
       "userProperties": [],
       "name": "AmpSkinPrevious",
       "implementationType": "native"
@@ -154,6 +162,7 @@
       "components": [],
       "connectionLines": [],
       "localVariables": [],
+      "componentGroups": [],
       "userProperties": [],
       "name": "ParameterChanged",
       "implementationType": "native"
@@ -163,6 +172,7 @@
       "components": [],
       "connectionLines": [],
       "localVariables": [],
+      "componentGroups": [],
       "userProperties": [],
       "name": "CloseSettingsPage"
     },
@@ -171,6 +181,7 @@
       "components": [],
       "connectionLines": [],
       "localVariables": [],
+      "componentGroups": [],
       "userProperties": [],
       "name": "ShowSettingsPage"
     },
@@ -179,6 +190,7 @@
       "components": [],
       "connectionLines": [],
       "localVariables": [],
+      "componentGroups": [],
       "userProperties": [],
       "name": "EnableSkinEdit"
     },
@@ -187,6 +199,7 @@
       "components": [],
       "connectionLines": [],
       "localVariables": [],
+      "componentGroups": [],
       "userProperties": [],
       "name": "SaveSkinEdit"
     },
@@ -195,6 +208,7 @@
       "components": [],
       "connectionLines": [],
       "localVariables": [],
+      "componentGroups": [],
       "userProperties": [],
       "name": "KeyboardOK"
     },
@@ -203,6 +217,7 @@
       "components": [],
       "connectionLines": [],
       "localVariables": [],
+      "componentGroups": [],
       "userProperties": [],
       "name": "PresetDescriptionPressed"
     },
@@ -211,6 +226,7 @@
       "components": [],
       "connectionLines": [],
       "localVariables": [],
+      "componentGroups": [],
       "userProperties": [],
       "name": "EffectIconClicked"
     },
@@ -219,6 +235,7 @@
       "components": [],
       "connectionLines": [],
       "localVariables": [],
+      "componentGroups": [],
       "userProperties": [],
       "name": "Gesture"
     },
@@ -227,6 +244,7 @@
       "components": [],
       "connectionLines": [],
       "localVariables": [],
+      "componentGroups": [],
       "userProperties": [],
       "name": "ValueClicked"
     },
@@ -235,8 +253,36 @@
       "components": [],
       "connectionLines": [],
       "localVariables": [],
+      "componentGroups": [],
       "userProperties": [],
       "name": "ValueKeyboardOK"
+    },
+    {
+      "objID": "36e362b9-db78-4323-95a4-00477de35ada",
+      "components": [],
+      "connectionLines": [],
+      "localVariables": [],
+      "componentGroups": [],
+      "userProperties": [],
+      "name": "TunerPressed"
+    },
+    {
+      "objID": "e20fc07c-baf1-4547-b201-073b6db6dce9",
+      "components": [],
+      "connectionLines": [],
+      "localVariables": [],
+      "componentGroups": [],
+      "userProperties": [],
+      "name": "TunerClose"
+    },
+    {
+      "objID": "4b76e835-9fc3-4d03-8a03-61da8f40a8f9",
+      "components": [],
+      "connectionLines": [],
+      "localVariables": [],
+      "componentGroups": [],
+      "userProperties": [],
+      "name": "SliderEvent"
     }
   ],
   "userPages": [
@@ -363,7 +409,8 @@
                       "pivotY": 0,
                       "zoom": 256,
                       "angle": 0,
-                      "innerAlign": "CENTER"
+                      "innerAlign": "CENTER",
+                      "sizeMode": "VIRTUAL"
                     },
                     {
                       "objID": "9b4cc475-fd14-452f-b60b-31047100feaa",
@@ -461,7 +508,8 @@
                       "pivotY": 0,
                       "zoom": 256,
                       "angle": 0,
-                      "innerAlign": "CENTER"
+                      "innerAlign": "CENTER",
+                      "sizeMode": "VIRTUAL"
                     },
                     {
                       "objID": "9366fa7e-f062-410e-9ca6-c96b75d2e595",
@@ -507,7 +555,8 @@
                       "pivotY": 0,
                       "zoom": 256,
                       "angle": 0,
-                      "innerAlign": "CENTER"
+                      "innerAlign": "CENTER",
+                      "sizeMode": "VIRTUAL"
                     },
                     {
                       "objID": "31b55091-7bb9-4e42-fb34-f4c1c67ad70d",
@@ -553,7 +602,8 @@
                       "pivotY": 0,
                       "zoom": 256,
                       "angle": 0,
-                      "innerAlign": "CENTER"
+                      "innerAlign": "CENTER",
+                      "sizeMode": "VIRTUAL"
                     },
                     {
                       "objID": "3330c110-9659-4ca5-b11a-47b67473744f",
@@ -601,7 +651,8 @@
                       "pivotY": 0,
                       "zoom": 256,
                       "angle": 0,
-                      "innerAlign": "CENTER"
+                      "innerAlign": "CENTER",
+                      "sizeMode": "VIRTUAL"
                     },
                     {
                       "objID": "9fd826fe-c690-416b-be55-75d76786a05c",
@@ -649,7 +700,8 @@
                       "pivotY": 0,
                       "zoom": 256,
                       "angle": 0,
-                      "innerAlign": "CENTER"
+                      "innerAlign": "CENTER",
+                      "sizeMode": "VIRTUAL"
                     },
                     {
                       "objID": "d0d818da-037c-4a36-bed4-dfbe053713f4",
@@ -697,7 +749,8 @@
                       "pivotY": 0,
                       "zoom": 256,
                       "angle": 0,
-                      "innerAlign": "CENTER"
+                      "innerAlign": "CENTER",
+                      "sizeMode": "VIRTUAL"
                     }
                   ],
                   "widgetFlags": "CLICK_FOCUSABLE|GESTURE_BUBBLE|PRESS_LOCK|SCROLL_CHAIN_HOR|SCROLL_CHAIN_VER|SCROLL_ELASTIC|SCROLL_MOMENTUM|SCROLL_WITH_ARROW|SNAPPABLE",
@@ -799,7 +852,8 @@
                       "pivotY": 0,
                       "zoom": 256,
                       "angle": 0,
-                      "innerAlign": "CENTER"
+                      "innerAlign": "CENTER",
+                      "sizeMode": "VIRTUAL"
                     }
                   ],
                   "widgetFlags": "CLICK_FOCUSABLE|GESTURE_BUBBLE|PRESS_LOCK|SCROLLABLE|SCROLL_CHAIN_HOR|SCROLL_CHAIN_VER|SCROLL_ELASTIC|SCROLL_MOMENTUM|SCROLL_WITH_ARROW|SNAPPABLE",
@@ -957,7 +1011,7 @@
                   "left": 6,
                   "top": 124,
                   "width": 188,
-                  "height": 129,
+                  "height": 86,
                   "customInputs": [],
                   "customOutputs": [],
                   "style": {
@@ -1095,6 +1149,66 @@
                   },
                   "group": "",
                   "groupIndex": 0
+                },
+                {
+                  "objID": "f129c639-b40d-433d-a3ba-5500ff1538ba",
+                  "type": "LVGLImageWidget",
+                  "left": 708,
+                  "top": 295,
+                  "width": 70,
+                  "height": 71,
+                  "customInputs": [],
+                  "customOutputs": [],
+                  "style": {
+                    "objID": "d8d29940-5304-4175-f904-4ced1dabd3dc",
+                    "useStyle": "default",
+                    "conditionalStyles": [],
+                    "childStyles": []
+                  },
+                  "timeline": [],
+                  "eventHandlers": [
+                    {
+                      "objID": "6d3f9303-9255-401f-e3a5-c556998c9fb2",
+                      "eventName": "CLICKED",
+                      "handlerType": "action",
+                      "action": "TunerPressed",
+                      "userData": 0
+                    }
+                  ],
+                  "identifier": "ui_tuner_button",
+                  "leftUnit": "px",
+                  "topUnit": "px",
+                  "widthUnit": "content",
+                  "heightUnit": "content",
+                  "children": [],
+                  "widgetFlags": "ADV_HITTEST|CLICK_FOCUSABLE|GESTURE_BUBBLE|PRESS_LOCK|SCROLL_CHAIN_HOR|SCROLL_CHAIN_VER|SCROLL_ELASTIC|SCROLL_MOMENTUM|SCROLL_WITH_ARROW|SNAPPABLE",
+                  "hiddenFlag": true,
+                  "hiddenFlagType": "literal",
+                  "clickableFlag": true,
+                  "clickableFlagType": "literal",
+                  "flagScrollbarMode": "",
+                  "flagScrollDirection": "",
+                  "scrollSnapX": "",
+                  "scrollSnapY": "",
+                  "checkedStateType": "literal",
+                  "disabledStateType": "literal",
+                  "states": "",
+                  "localStyles": {
+                    "objID": "1f7cec15-1be6-4780-c57c-dae3fab74d21"
+                  },
+                  "group": "",
+                  "groupIndex": 0,
+                  "image": "tuner",
+                  "setPivot": false,
+                  "pivotX": 0,
+                  "pivotY": 0,
+                  "zoom": 256,
+                  "angle": 0,
+                  "innerAlign": "CENTER",
+                  "sizeMode": "VIRTUAL",
+                  "value": 0,
+                  "valueType": "literal",
+                  "previewValue": 0
                 },
                 {
                   "objID": "02b57dd5-5be6-4565-81e2-83cc4e3375b7",
@@ -1369,7 +1483,8 @@
                       "pivotY": 0,
                       "zoom": 256,
                       "angle": 0,
-                      "innerAlign": "CENTER"
+                      "innerAlign": "CENTER",
+                      "sizeMode": "VIRTUAL"
                     },
                     {
                       "objID": "2172b98c-7608-4fa7-8a68-a46d5734430c",
@@ -1432,7 +1547,8 @@
                       "pivotY": 0,
                       "zoom": 256,
                       "angle": 0,
-                      "innerAlign": "CENTER"
+                      "innerAlign": "CENTER",
+                      "sizeMode": "VIRTUAL"
                     },
                     {
                       "objID": "9807ab9f-0fd5-4881-a58c-5c324e9296a2",
@@ -1495,7 +1611,8 @@
                       "pivotY": 0,
                       "zoom": 256,
                       "angle": 0,
-                      "innerAlign": "CENTER"
+                      "innerAlign": "CENTER",
+                      "sizeMode": "VIRTUAL"
                     },
                     {
                       "objID": "1d8e1ffc-0e03-4477-9e44-f55b79bd47bc",
@@ -1558,7 +1675,8 @@
                       "pivotY": 0,
                       "zoom": 256,
                       "angle": 0,
-                      "innerAlign": "CENTER"
+                      "innerAlign": "CENTER",
+                      "sizeMode": "VIRTUAL"
                     },
                     {
                       "objID": "c68acabf-e17e-4cdc-e977-5cb2b8ea418f",
@@ -1621,7 +1739,8 @@
                       "pivotY": 0,
                       "zoom": 256,
                       "angle": 0,
-                      "innerAlign": "CENTER"
+                      "innerAlign": "CENTER",
+                      "sizeMode": "VIRTUAL"
                     },
                     {
                       "objID": "a23e4bcf-d00d-4bed-8315-9430fdf6b9b5",
@@ -1684,7 +1803,8 @@
                       "pivotY": 0,
                       "zoom": 256,
                       "angle": 0,
-                      "innerAlign": "CENTER"
+                      "innerAlign": "CENTER",
+                      "sizeMode": "VIRTUAL"
                     },
                     {
                       "objID": "9dcbbf14-fa95-4049-fe1e-6bdc4a0734b3",
@@ -1747,7 +1867,8 @@
                       "pivotY": 0,
                       "zoom": 256,
                       "angle": 0,
-                      "innerAlign": "CENTER"
+                      "innerAlign": "CENTER",
+                      "sizeMode": "VIRTUAL"
                     },
                     {
                       "objID": "9569a6e5-71b0-490d-9a33-149e31d106bc",
@@ -1810,7 +1931,8 @@
                       "pivotY": 0,
                       "zoom": 256,
                       "angle": 0,
-                      "innerAlign": "CENTER"
+                      "innerAlign": "CENTER",
+                      "sizeMode": "VIRTUAL"
                     },
                     {
                       "objID": "58dbbe30-3f2f-4ef4-d843-a2027c33f59e",
@@ -1873,7 +1995,8 @@
                       "pivotY": 0,
                       "zoom": 256,
                       "angle": 0,
-                      "innerAlign": "CENTER"
+                      "innerAlign": "CENTER",
+                      "sizeMode": "VIRTUAL"
                     }
                   ],
                   "widgetFlags": "CLICK_FOCUSABLE|GESTURE_BUBBLE|PRESS_LOCK|SCROLL_CHAIN_HOR|SCROLL_CHAIN_VER|SCROLL_ELASTIC|SCROLL_MOMENTUM|SCROLL_WITH_ARROW|SNAPPABLE",
@@ -1988,7 +2111,8 @@
                       "pivotY": 0,
                       "zoom": 256,
                       "angle": 0,
-                      "innerAlign": "CENTER"
+                      "innerAlign": "CENTER",
+                      "sizeMode": "VIRTUAL"
                     },
                     {
                       "objID": "054ef294-8926-487a-e379-a5487d659b99",
@@ -2051,7 +2175,8 @@
                       "pivotY": 0,
                       "zoom": 256,
                       "angle": 0,
-                      "innerAlign": "CENTER"
+                      "innerAlign": "CENTER",
+                      "sizeMode": "VIRTUAL"
                     },
                     {
                       "objID": "7e38a5af-d650-436a-b37d-d2cc97b59a7f",
@@ -2114,7 +2239,8 @@
                       "pivotY": 0,
                       "zoom": 256,
                       "angle": 0,
-                      "innerAlign": "CENTER"
+                      "innerAlign": "CENTER",
+                      "sizeMode": "VIRTUAL"
                     },
                     {
                       "objID": "6627d130-ae7d-4d86-d3e7-6c43be8c213e",
@@ -2177,7 +2303,8 @@
                       "pivotY": 0,
                       "zoom": 256,
                       "angle": 0,
-                      "innerAlign": "CENTER"
+                      "innerAlign": "CENTER",
+                      "sizeMode": "VIRTUAL"
                     },
                     {
                       "objID": "16aab216-9da8-4d68-d215-54e57d33051c",
@@ -2240,7 +2367,8 @@
                       "pivotY": 0,
                       "zoom": 256,
                       "angle": 0,
-                      "innerAlign": "CENTER"
+                      "innerAlign": "CENTER",
+                      "sizeMode": "VIRTUAL"
                     },
                     {
                       "objID": "141695e9-fa4e-4eff-ef24-4307e0ca6ca6",
@@ -2303,7 +2431,8 @@
                       "pivotY": 0,
                       "zoom": 256,
                       "angle": 0,
-                      "innerAlign": "CENTER"
+                      "innerAlign": "CENTER",
+                      "sizeMode": "VIRTUAL"
                     },
                     {
                       "objID": "0ef561fa-58b0-49d2-b587-a5d7d49a9c56",
@@ -2366,7 +2495,8 @@
                       "pivotY": 0,
                       "zoom": 256,
                       "angle": 0,
-                      "innerAlign": "CENTER"
+                      "innerAlign": "CENTER",
+                      "sizeMode": "VIRTUAL"
                     },
                     {
                       "objID": "aa185271-65d3-4edb-d4c2-957693a585ef",
@@ -2429,7 +2559,8 @@
                       "pivotY": 0,
                       "zoom": 256,
                       "angle": 0,
-                      "innerAlign": "CENTER"
+                      "innerAlign": "CENTER",
+                      "sizeMode": "VIRTUAL"
                     },
                     {
                       "objID": "5699a557-cc56-4972-9766-b0e5ebe1ea9c",
@@ -2492,7 +2623,8 @@
                       "pivotY": 0,
                       "zoom": 256,
                       "angle": 0,
-                      "innerAlign": "CENTER"
+                      "innerAlign": "CENTER",
+                      "sizeMode": "VIRTUAL"
                     },
                     {
                       "objID": "ec059f2d-8a99-4161-8e8c-7218152c883a",
@@ -2555,7 +2687,8 @@
                       "pivotY": 0,
                       "zoom": 256,
                       "angle": 0,
-                      "innerAlign": "CENTER"
+                      "innerAlign": "CENTER",
+                      "sizeMode": "VIRTUAL"
                     },
                     {
                       "objID": "07f4e922-4285-4de0-ac9d-be6571ccba7d",
@@ -2611,7 +2744,8 @@
                       "pivotY": 0,
                       "zoom": 256,
                       "angle": 0,
-                      "innerAlign": "CENTER"
+                      "innerAlign": "CENTER",
+                      "sizeMode": "VIRTUAL"
                     }
                   ],
                   "widgetFlags": "CLICK_FOCUSABLE|GESTURE_BUBBLE|PRESS_LOCK|SCROLL_CHAIN_HOR|SCROLL_CHAIN_VER|SCROLL_ELASTIC|SCROLL_MOMENTUM|SCROLL_WITH_ARROW|SNAPPABLE",
@@ -2695,7 +2829,8 @@
                   "pivotY": 0,
                   "zoom": 256,
                   "angle": 0,
-                  "innerAlign": "CENTER"
+                  "innerAlign": "CENTER",
+                  "sizeMode": "VIRTUAL"
                 },
                 {
                   "objID": "58bfa162-b377-44c6-97b3-21456f87aed3",
@@ -2752,7 +2887,8 @@
                   "pivotY": 0,
                   "zoom": 256,
                   "angle": 0,
-                  "innerAlign": "CENTER"
+                  "innerAlign": "CENTER",
+                  "sizeMode": "VIRTUAL"
                 },
                 {
                   "objID": "e1c9173a-62a2-4cbe-dd94-6265baa09b9f",
@@ -2786,7 +2922,7 @@
                   "widthUnit": "px",
                   "heightUnit": "px",
                   "children": [],
-                  "widgetFlags": "GESTURE_BUBBLE|PRESS_LOCK|SCROLLABLE|SCROLL_CHAIN_HOR|SCROLL_CHAIN_VER|SCROLL_ELASTIC|SCROLL_MOMENTUM|SCROLL_WITH_ARROW|SNAPPABLE",
+                  "widgetFlags": "PRESS_LOCK|SCROLLABLE|SCROLL_CHAIN_HOR|SCROLL_CHAIN_VER|SCROLL_ELASTIC|SCROLL_MOMENTUM|SCROLL_WITH_ARROW|SNAPPABLE",
                   "hiddenFlag": true,
                   "hiddenFlagType": "literal",
                   "clickableFlag": true,
@@ -2869,7 +3005,8 @@
                   "pivotY": 0,
                   "zoom": 256,
                   "angle": 0,
-                  "innerAlign": "CENTER"
+                  "innerAlign": "CENTER",
+                  "sizeMode": "VIRTUAL"
                 }
               ],
               "widgetFlags": "CLICK_FOCUSABLE|PRESS_LOCK|SCROLL_CHAIN_HOR|SCROLL_CHAIN_VER|SCROLL_ELASTIC|SCROLL_MOMENTUM|SCROLL_WITH_ARROW|SNAPPABLE",
@@ -2912,6 +3049,7 @@
       ],
       "connectionLines": [],
       "localVariables": [],
+      "componentGroups": [],
       "userProperties": [],
       "name": "Screen1",
       "left": 0,
@@ -3375,7 +3513,14 @@
                           "objID": "b655d5c6-75ac-42fd-e546-e64dfe8c3f39",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "0d327c07-d767-4613-d221-9d487e5c1e0a",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -3564,7 +3709,14 @@
                           "objID": "1b170528-e5e2-486c-c123-5a35ad21d65e",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "187a63e0-74ff-4345-f1c5-1e39e3167c35",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -3753,7 +3905,14 @@
                           "objID": "d79c6e57-36bf-437e-9a57-e4b710069fdd",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "00a9c9ad-9806-487e-a01a-bdedcf6c9a2d",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -4258,7 +4417,14 @@
                           "objID": "99a26f0c-1e98-4797-9de8-7a729167b8a4",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "e514a716-307a-43c6-a284-b045358d50a6",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -4447,7 +4613,14 @@
                           "objID": "569f0244-78f8-4de8-b100-bb882d923b08",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "419fe116-dbb7-4a2f-f53e-723185ae317b",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -4636,7 +4809,14 @@
                           "objID": "8f9473f7-7b0b-454b-c1f9-8dc9826a186f",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "7ba83797-5bfe-4a7d-d78f-d7f114eb8ae3",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -5181,7 +5361,14 @@
                           "objID": "84ffca43-1d98-4570-d04a-99055877fd24",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "40116dbd-4ea6-40c6-8966-8eecb2d72149",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -5370,7 +5557,14 @@
                           "objID": "25f4a152-1b04-4ed4-b77c-1b29fdd92f45",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "578f77d2-9e67-4748-de13-fd6bbbe9b779",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -5559,7 +5753,14 @@
                           "objID": "b80b4e4d-11ab-441e-dd0e-24a5fc8a9801",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "5ed3e71c-ddc2-4a9b-f787-07e74683507e",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -5748,7 +5949,14 @@
                           "objID": "0a8af56c-06b2-4e82-dcdd-5df71d90b1f8",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "ac2415e3-f1f2-400c-ff18-e0dcad72205b",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -6123,7 +6331,14 @@
                           "objID": "28936262-d38e-4e0f-9776-e0a96a55ef32",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "ecebdefe-50ae-4546-f2ab-286f4eb7081e",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -6312,7 +6527,14 @@
                           "objID": "4f5cea46-c408-460b-8569-122a0484b9d8",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "3a4e1cc0-f241-472b-ea81-1b4474f814be",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -6501,7 +6723,14 @@
                           "objID": "a92937fd-ffed-46de-c867-6c4f7c439421",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "16ea98c8-9cc2-499d-980b-4cde33cfd3ae",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -6690,7 +6919,14 @@
                           "objID": "a25705bf-a55d-4a2a-ecb0-6af6a13fcab5",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "38e591c2-39a6-4474-ea91-433315d33b8b",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -7599,7 +7835,14 @@
                           "objID": "e7d75f6a-0b4a-45e2-8f11-5f4e8b02ea4b",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "613abcb1-d297-4db1-f8a1-bfe4fed73771",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -7788,7 +8031,14 @@
                           "objID": "8a15f096-039a-4457-ba16-795faaf56d50",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "b593d32e-0ea1-4ac5-9325-e2f408efcb27",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -7977,7 +8227,14 @@
                           "objID": "7083f18e-e118-4ea3-ddaa-3c1fa5316a28",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "53b8d2fd-8de4-45b2-92e0-efc1a883fd84",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -8166,7 +8423,14 @@
                           "objID": "8c9aac32-35ef-4f1d-cbf6-8f40047f5592",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "5c8a4ed4-5363-48a6-9b4f-e5a13b820b2a",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -9075,7 +9339,14 @@
                           "objID": "5fbb2a0b-b3fd-4310-8551-107740dbbdaa",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "730a2d3e-99f8-4337-a016-12f3409525ad",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -9386,7 +9657,14 @@
                           "objID": "d1244ceb-b092-477d-81c6-1ea6daa49730",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "456821a0-40ea-4f97-e5d9-4bc3f8b20a71",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -9576,7 +9854,14 @@
                           "objID": "f1268c10-6357-4dd2-8661-1a2bdd21c14f",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "c13900fd-5fbe-4981-c81f-06c249d5404c",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -10241,7 +10526,14 @@
                           "objID": "de4feac3-f28e-42ae-d9a2-f0a2d6e2bc19",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "8bf17f7e-0dfa-48bd-e997-d1cfc8852331",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -10430,7 +10722,14 @@
                           "objID": "3c3b762e-7fa7-43b5-f0da-84cae2da4cf2",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "e4b12719-1ba9-4ca3-8b06-4a16fe3ea7f2",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -10619,7 +10918,14 @@
                           "objID": "ba40fa01-7560-4ab5-97b6-80f57018ff99",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "07c45c88-e7a1-411f-a2e1-0bac4dfed88d",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -10808,7 +11114,14 @@
                           "objID": "d443cc19-70fe-4617-cefe-81d5ff9662fe",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "a92791e4-52fc-4bde-c0b6-82a4b4ab84e8",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -11232,10 +11545,133 @@
                       "groupIndex": 0
                     },
                     {
-                      "objID": "f3cd2b3a-ab5c-41af-9ee8-9bf93439752a",
+                      "objID": "42aaa386-260a-4f59-f02c-a98ef9806120",
                       "type": "LVGLLabelWidget",
                       "left": 13,
                       "top": -92,
+                      "width": 138,
+                      "height": 27,
+                      "customInputs": [],
+                      "customOutputs": [],
+                      "style": {
+                        "objID": "328c7c60-d14e-4300-f7df-46fd23bb5cc9",
+                        "useStyle": "default",
+                        "conditionalStyles": [],
+                        "childStyles": []
+                      },
+                      "timeline": [],
+                      "eventHandlers": [],
+                      "identifier": "ui_DirectMonitorLabel",
+                      "leftUnit": "px",
+                      "topUnit": "px",
+                      "widthUnit": "content",
+                      "heightUnit": "content",
+                      "children": [],
+                      "widgetFlags": "CLICK_FOCUSABLE|GESTURE_BUBBLE|PRESS_LOCK|SCROLL_CHAIN_HOR|SCROLL_CHAIN_VER|SCROLL_ELASTIC|SCROLL_MOMENTUM|SCROLL_WITH_ARROW|SNAPPABLE",
+                      "hiddenFlagType": "literal",
+                      "clickableFlagType": "literal",
+                      "flagScrollbarMode": "",
+                      "flagScrollDirection": "",
+                      "scrollSnapX": "",
+                      "scrollSnapY": "",
+                      "checkedStateType": "literal",
+                      "disabledStateType": "literal",
+                      "states": "",
+                      "localStyles": {
+                        "objID": "66fce305-dc73-4b8a-8598-b8a7999831de",
+                        "definition": {
+                          "MAIN": {
+                            "DEFAULT": {
+                              "text_font": "MONTSERRAT_24",
+                              "text_align": "AUTO",
+                              "align": "LEFT_MID"
+                            }
+                          }
+                        }
+                      },
+                      "group": "",
+                      "groupIndex": 0,
+                      "text": "Dir Monitor",
+                      "textType": "literal",
+                      "longMode": "WRAP",
+                      "recolor": false
+                    },
+                    {
+                      "objID": "e0a91659-8b2c-4d4f-b3f7-f6d579b33445",
+                      "type": "LVGLSwitchWidget",
+                      "left": 168,
+                      "top": -92,
+                      "width": 80,
+                      "height": 35,
+                      "customInputs": [],
+                      "customOutputs": [],
+                      "style": {
+                        "objID": "7dc0b775-3e15-4c95-f9e2-407f9446d404",
+                        "useStyle": "default",
+                        "conditionalStyles": [],
+                        "childStyles": []
+                      },
+                      "timeline": [],
+                      "eventHandlers": [
+                        {
+                          "objID": "740e9c26-0b84-4989-d9b0-0c3d3de4ab8f",
+                          "eventName": "RELEASED",
+                          "handlerType": "action",
+                          "action": "ParameterChanged",
+                          "userData": 0
+                        }
+                      ],
+                      "identifier": "ui_DirectMonitorSwitch",
+                      "leftUnit": "px",
+                      "topUnit": "px",
+                      "widthUnit": "px",
+                      "heightUnit": "px",
+                      "children": [],
+                      "widgetFlags": "CHECKABLE|CLICK_FOCUSABLE|GESTURE_BUBBLE|PRESS_LOCK|SCROLL_CHAIN_HOR|SCROLL_CHAIN_VER|SCROLL_ELASTIC|SCROLL_MOMENTUM|SCROLL_ON_FOCUS|SCROLL_WITH_ARROW|SNAPPABLE",
+                      "hiddenFlagType": "literal",
+                      "clickableFlag": true,
+                      "clickableFlagType": "literal",
+                      "flagScrollbarMode": "",
+                      "flagScrollDirection": "",
+                      "scrollSnapX": "",
+                      "scrollSnapY": "",
+                      "checkedStateType": "literal",
+                      "disabledStateType": "literal",
+                      "states": "",
+                      "localStyles": {
+                        "objID": "d106e8c1-0b60-4ddb-e3c5-aa9032770c7b",
+                        "definition": {
+                          "MAIN": {
+                            "DEFAULT": {
+                              "align": "LEFT_MID"
+                            },
+                            "CHECKED": {
+                              "bg_color": "FB9230"
+                            }
+                          },
+                          "KNOB": {
+                            "DEFAULT": {
+                              "bg_color": "674D35"
+                            },
+                            "CHECKED": {
+                              "bg_color": "FB9230"
+                            }
+                          },
+                          "INDICATOR": {
+                            "CHECKED": {
+                              "bg_color": "513D2B"
+                            }
+                          }
+                        }
+                      },
+                      "group": "",
+                      "groupIndex": 0
+                    },
+                    {
+                      "objID": "f3cd2b3a-ab5c-41af-9ee8-9bf93439752a",
+                      "type": "LVGLLabelWidget",
+                      "left": 13,
+                      "top": -36,
                       "width": 58,
                       "height": 27,
                       "customInputs": [],
@@ -11286,7 +11722,7 @@
                       "objID": "60e94b33-a2a5-45bf-be50-0ad370b9c330",
                       "type": "LVGLSliderWidget",
                       "left": 168,
-                      "top": -92,
+                      "top": -36,
                       "width": 500,
                       "height": 20,
                       "customInputs": [],
@@ -11303,7 +11739,14 @@
                           "objID": "c8ad1aaf-08f8-436e-df9f-311ac544cebd",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "7c0463e4-fbfc-4c81-d47b-eeaa18bbfd4a",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -11364,7 +11807,7 @@
                       "objID": "af40537c-0f39-4ed4-85f2-7e97df0294fe",
                       "type": "LVGLLabelWidget",
                       "left": 683,
-                      "top": -92,
+                      "top": -36,
                       "width": 100,
                       "height": 27,
                       "customInputs": [],
@@ -11424,7 +11867,7 @@
                       "objID": "aa64108c-2481-474d-b621-944ffd0558b3",
                       "type": "LVGLLabelWidget",
                       "left": 13,
-                      "top": -36,
+                      "top": 21,
                       "width": 127,
                       "height": 27,
                       "customInputs": [],
@@ -11475,7 +11918,7 @@
                       "objID": "7cdae175-0941-4048-f00f-7d18d6234cc3",
                       "type": "LVGLSliderWidget",
                       "left": 168,
-                      "top": -36,
+                      "top": 21,
                       "width": 500,
                       "height": 20,
                       "customInputs": [],
@@ -11492,7 +11935,14 @@
                           "objID": "415952ef-0b4a-4bd5-c1d2-4d78d5f3b2db",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "7220f8ec-b0cc-4bb2-f6ef-b4df714ab407",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -11553,7 +12003,7 @@
                       "objID": "5157dd93-2913-4dd4-e0d9-4e789eb983cf",
                       "type": "LVGLLabelWidget",
                       "left": 683,
-                      "top": -36,
+                      "top": 21,
                       "width": 100,
                       "height": 27,
                       "customInputs": [],
@@ -11613,7 +12063,7 @@
                       "objID": "6d811ef7-af00-4030-f37b-de6cc1550e3e",
                       "type": "LVGLLabelWidget",
                       "left": 13,
-                      "top": 21,
+                      "top": 76,
                       "width": 133,
                       "height": 27,
                       "customInputs": [],
@@ -11664,7 +12114,7 @@
                       "objID": "a1e6179d-e5bd-44fa-b15e-846ac621e1d3",
                       "type": "LVGLSliderWidget",
                       "left": 168,
-                      "top": 21,
+                      "top": 76,
                       "width": 500,
                       "height": 20,
                       "customInputs": [],
@@ -11681,7 +12131,14 @@
                           "objID": "e4bcf9b4-c2c7-4466-c47f-0a438666ff0f",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "388066c6-2d48-463a-f159-a61faa4ac697",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -11742,7 +12199,7 @@
                       "objID": "e3c8bf2c-c1b5-40b5-8f61-aa2feabc84cb",
                       "type": "LVGLLabelWidget",
                       "left": 683,
-                      "top": 21,
+                      "top": 76,
                       "width": 100,
                       "height": 27,
                       "customInputs": [],
@@ -11802,7 +12259,7 @@
                       "objID": "97365649-298b-4356-821d-112d8c5527a1",
                       "type": "LVGLLabelWidget",
                       "left": 13,
-                      "top": 77,
+                      "top": 133,
                       "width": 94,
                       "height": 27,
                       "customInputs": [],
@@ -11853,7 +12310,7 @@
                       "objID": "7029b0fa-71ae-4f3d-d22e-3d59f9ee7f3f",
                       "type": "LVGLSliderWidget",
                       "left": 168,
-                      "top": 77,
+                      "top": 133,
                       "width": 500,
                       "height": 20,
                       "customInputs": [],
@@ -11870,7 +12327,14 @@
                           "objID": "6c527ab6-07ca-4dd6-8ccd-024a7dab5138",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "2c1c5a6f-e81a-4428-b7f0-cccfb2ddc647",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -11931,7 +12395,7 @@
                       "objID": "9e0da4c7-5d3b-4939-fe8c-88a4086f29e5",
                       "type": "LVGLLabelWidget",
                       "left": 683,
-                      "top": 76,
+                      "top": 133,
                       "width": 100,
                       "height": 27,
                       "customInputs": [],
@@ -12063,7 +12527,9 @@
               "group": "",
               "groupIndex": 0,
               "tabviewPosition": "TOP",
-              "tabviewSize": 60
+              "tabviewSize": 60,
+              "selectedTab": "0",
+              "selectedTabType": "literal"
             },
             {
               "objID": "bae65739-be8c-4cf5-f502-b9b105d36067",
@@ -12118,7 +12584,8 @@
               "pivotY": 0,
               "zoom": 256,
               "angle": 0,
-              "innerAlign": "CENTER"
+              "innerAlign": "CENTER",
+              "sizeMode": "VIRTUAL"
             },
             {
               "objID": "d377ee44-b808-4bd4-fb3e-72214fd04832",
@@ -12310,6 +12777,7 @@
       ],
       "connectionLines": [],
       "localVariables": [],
+      "componentGroups": [],
       "userProperties": [],
       "name": "Settings",
       "left": 0,
@@ -12768,7 +13236,14 @@
                           "objID": "86ff09e7-97b5-4def-c088-cd1f5bc46505",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "298611ed-b87b-4dc1-a92d-28761aef8058",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -12960,7 +13435,14 @@
                           "objID": "a938abdf-06fe-4954-dfc5-2962860b63bc",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "51f678a9-5ac9-40cd-8e3a-fb572e386d8b",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -13152,7 +13634,14 @@
                           "objID": "04c25a62-de94-48f3-964a-ee6ee65238dc",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "4f79bf8a-0169-4434-aa31-455d2a01c3c0",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -13344,7 +13833,14 @@
                           "objID": "9fffe7d4-34f5-4ff9-bb13-36d2d06f34b3",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "fee14d5d-7842-44d9-b7fe-962fd97db9bd",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -13536,7 +14032,14 @@
                           "objID": "77855b13-9f22-4560-f2f0-0fbd15b7d78e",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "d650393a-c487-4bf4-b877-0a43bbf2b794",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -14050,7 +14553,14 @@
                           "objID": "095f079d-ac65-47af-d0f6-5d10751382f4",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "51c04df6-f295-4411-9e6e-41b8f6d3c00f",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -14242,7 +14752,14 @@
                           "objID": "b1198f8b-cc0d-4bb3-9d75-749a49306d06",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "06e1ac51-0ecf-4726-c12e-6692356bb6f4",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -14434,7 +14951,14 @@
                           "objID": "f219549a-d90f-4a06-83da-ab2fe561571b",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "d3c1d1d2-c838-40cd-cc20-ef3464e891fc",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -14626,7 +15150,14 @@
                           "objID": "996b18ca-0d0b-4a36-d57c-90561a567482",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "58f0be4a-2dcd-4e41-99cc-d25b7fa28c14",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -14818,7 +15349,14 @@
                           "objID": "7674b886-cfc1-4b5d-cae1-fb04102ab6a3",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "c99635ac-773d-4527-f943-2b73e20bcb79",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -15322,7 +15860,14 @@
                           "objID": "0b07f131-e8dd-4f90-cb65-8e9b7bcf1d6e",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "1d219ea9-19ea-4da8-865b-299e73c89f60",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -15514,7 +16059,14 @@
                           "objID": "c66d5c87-9d3c-4811-9329-fcc888885427",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "3fa30d57-6c2a-4b50-db52-23dc7b1230cb",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -15706,7 +16258,14 @@
                           "objID": "24932760-50c0-4dd5-d938-061dc230dddf",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "3f932ce0-1ff0-4f43-98a4-511a9f6724a8",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -15898,7 +16457,14 @@
                           "objID": "1f2e5b8e-be2b-4c0a-d929-ff65c8b15e25",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "75f147c7-6171-41bf-83df-418594f1ea12",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -16090,7 +16656,14 @@
                           "objID": "f507f01b-28a1-4947-cbe8-e1cd27a7ac1a",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "23d1f5b2-7291-44b5-b4eb-056e0d2027f8",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -16594,7 +17167,14 @@
                           "objID": "54a37ce0-8b71-4647-b9d2-e95593d4c9b6",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "10d54f47-c149-4323-b6b0-ce34762e6be2",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -16786,7 +17366,14 @@
                           "objID": "42e293be-4792-4945-9330-7d903eac926a",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "81c35375-3322-4cea-9124-94f74ef82e86",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -16978,7 +17565,14 @@
                           "objID": "bbdbc8ad-842d-49ae-bb5e-47f23cf55ebf",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "045fac7f-dde4-4e0d-ba8f-6e7d91b52bff",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -17170,7 +17764,14 @@
                           "objID": "61513737-9dce-4d1a-a92d-42f98efd6e61",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "69aa7877-9c06-46df-c2de-f34490f87a26",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -17362,7 +17963,14 @@
                           "objID": "30a5bf27-28a5-475d-977e-ba3e52c656b7",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "28caddc3-6a59-4f9b-9d51-717016a60d2d",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -17866,7 +18474,14 @@
                           "objID": "bf979fc3-e2d8-4056-c279-10e524e8f988",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "ac89e60a-a814-4604-f326-b24a49b339b1",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -18058,7 +18673,14 @@
                           "objID": "aeb27b24-b409-4074-f196-6a1014bb5b93",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "d5daeab8-2257-4a85-a8c6-85bba4409c00",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -18250,7 +18872,14 @@
                           "objID": "15963c48-8b11-4b4d-c798-d2bd8e60dfa7",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "bff43c13-2f6d-42d6-a40d-2837dd10046e",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -18442,7 +19071,14 @@
                           "objID": "e21529f9-d973-4648-affa-951b4410e68b",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "0fedfba7-c409-4162-8c85-8e47c06b4a13",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -18634,7 +19270,14 @@
                           "objID": "c21de9cc-81b9-41c7-d561-e2e1306a5949",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "1ecaa380-6627-4326-af9d-3b1afce0c626",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -19138,7 +19781,14 @@
                           "objID": "c9a850ac-2a79-4fbb-c1d1-5ecacdaa1a51",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "25b0574e-d454-4bd1-c463-e4280158d14a",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -19330,7 +19980,14 @@
                           "objID": "f7c01ade-c1bb-4cae-93c0-a99cc10cf827",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "a2e2a4cb-e439-4947-8581-4514de83b8b6",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -19522,7 +20179,14 @@
                           "objID": "d50284c3-55ae-445a-fde8-442420daa930",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "7264e209-813f-4bf5-ad40-86d3bb451c90",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -19714,7 +20378,14 @@
                           "objID": "b9c47dc4-7f27-4991-81b8-310795fdb99b",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "a9ff5a22-8524-458f-a1ed-0703994755de",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -19906,7 +20577,14 @@
                           "objID": "74993f5c-654a-4226-a72c-fcea6bc7510f",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "c39ba4d1-2b09-45ee-d197-ac204eb46eba",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -20410,7 +21088,14 @@
                           "objID": "30bd60e2-9a1e-403c-a589-b7c5b68f4e01",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "0873c30e-7a52-4235-fc70-bd7e090fb50f",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -20602,7 +21287,14 @@
                           "objID": "5913b93f-6d44-48c4-eb97-2028e7277884",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "e59d47c0-e3d7-400e-f7c5-2ed7a333ccde",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -20794,7 +21486,14 @@
                           "objID": "fc3e2fc1-a622-471f-8335-ce6d8102b8e6",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "13d7a33d-f430-42f4-8224-af90610f7c35",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -20986,7 +21685,14 @@
                           "objID": "9fb46d51-e9fc-4a70-84be-ed17b893854f",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "437719c1-13dc-406d-80bb-4c79d342518c",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -21178,7 +21884,14 @@
                           "objID": "f875c4f7-b695-4551-b38c-1fe244b0b183",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "becb7f83-5f3a-4066-8eee-50d2de244a86",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -21682,7 +22395,14 @@
                           "objID": "c5e9e4db-1930-48e7-b55f-15d26c6eb0f9",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "9b85d8ae-3f75-4197-ed1a-2e6cedc13295",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -21874,7 +22594,14 @@
                           "objID": "a9417b05-14b4-4c5c-ef25-a452195db538",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "25f1eff9-f106-4657-a2a0-ff29938b016a",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -22066,7 +22793,14 @@
                           "objID": "0c79e159-76c1-467e-b8a5-8d283163b2a7",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "ec11cef5-a968-47d1-a0ac-a598536a2ea7",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -22258,7 +22992,14 @@
                           "objID": "d1046a00-ddfd-488c-bdea-53f6087f1769",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "fd6070f6-2212-4b18-c5e3-95c8d51056e2",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -22450,7 +23191,14 @@
                           "objID": "f976bd0f-47e3-4df0-9595-054982a8a404",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "1be19b65-9382-4ea6-9ab8-6f83979521b0",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -22954,7 +23702,14 @@
                           "objID": "a20c82ab-bd86-48ff-cb4e-0c652e33ce36",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "1e8165cc-a5f9-4223-fb15-3206b33a5fec",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -23146,7 +23901,14 @@
                           "objID": "aea01293-cf09-4e6e-ac1a-04139c1fb3dc",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "5a8a340a-5f0a-4529-f95b-7aaf830c9089",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -23338,7 +24100,14 @@
                           "objID": "ae5172fd-060f-495e-f20a-e145be341529",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "c8a5f305-5e64-45ef-abc2-a89dccf88e5c",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -23530,7 +24299,14 @@
                           "objID": "4ce8b974-c468-4ba6-8b72-eade17528ee2",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "af3b9833-85ca-4e54-b6fa-380ec66a587f",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -23722,7 +24498,14 @@
                           "objID": "34b6a69d-2004-4929-8426-bc191a53130c",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "820042e1-b656-4080-de6d-7d390fa122a7",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -24226,7 +25009,14 @@
                           "objID": "0ee500f4-f806-4ab9-e0af-6f0fb6ef85bc",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "bcd303c7-be7d-4efb-c0e2-d9d1c7d8955b",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -24418,7 +25208,14 @@
                           "objID": "2e19a174-1a00-4797-87be-69f9e5fc9dfe",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "525f346b-62b0-4801-88f2-eb82a08cc9be",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -24610,7 +25407,14 @@
                           "objID": "60f21270-4f27-43e3-e7db-ceacd0246d8a",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "acd2ef0b-68b2-4e76-8b96-86fad707f641",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -24802,7 +25606,14 @@
                           "objID": "d60a866b-6512-4bd6-a1f1-5f19e9ab24dd",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "e1b3a64a-4416-48b6-bc3c-313ec83ab06e",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -24994,7 +25805,14 @@
                           "objID": "f0538888-3c2f-4506-b9c1-e9618567b9b0",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "d4730dfa-994d-4663-f289-1117b6b0a76d",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -25367,7 +26185,14 @@
                           "objID": "96e651dd-466f-451d-ed5f-b4478f46daa7",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "e3c745de-73f0-42b3-f43e-51eaf901937d",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -25559,7 +26384,14 @@
                           "objID": "5a638f58-f032-4145-aa85-68c120a15327",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "c804627c-6fa3-41fe-f10a-4ea3df4443c9",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -25751,7 +26583,14 @@
                           "objID": "b4bb984a-759e-4fc7-9a21-fe2c43c9161d",
                           "eventName": "RELEASED",
                           "handlerType": "action",
-                          "action": "ParameterChanged",
+                          "action": "SliderEvent",
+                          "userData": 0
+                        },
+                        {
+                          "objID": "02f51639-d8b1-4ba4-802c-061fa22676a7",
+                          "eventName": "VALUE_CHANGED",
+                          "handlerType": "action",
+                          "action": "SliderEvent",
                           "userData": 0
                         }
                       ],
@@ -25947,7 +26786,9 @@
               "group": "",
               "groupIndex": 0,
               "tabviewPosition": "TOP",
-              "tabviewSize": 60
+              "tabviewSize": 60,
+              "selectedTab": "0",
+              "selectedTabType": "literal"
             },
             {
               "objID": "d2793565-3886-41e7-f9ca-9582d42a2fea",
@@ -26002,7 +26843,8 @@
               "pivotY": 0,
               "zoom": 256,
               "angle": 0,
-              "innerAlign": "CENTER"
+              "innerAlign": "CENTER",
+              "sizeMode": "VIRTUAL"
             },
             {
               "objID": "46af83d7-4068-425d-e319-48e291286693",
@@ -26193,8 +27035,613 @@
       ],
       "connectionLines": [],
       "localVariables": [],
+      "componentGroups": [],
       "userProperties": [],
       "name": "ValSettings",
+      "left": 0,
+      "top": 0,
+      "width": 800,
+      "height": 480,
+      "isUsedAsUserWidget": false,
+      "createAtStart": true,
+      "deleteOnScreenUnload": false
+    },
+    {
+      "objID": "0eeb9dfb-34ec-4f98-bdbf-0138ed759fac",
+      "components": [
+        {
+          "objID": "bc8823cf-5bf1-4a64-f0af-6055d6f03291",
+          "type": "LVGLScreenWidget",
+          "left": 0,
+          "top": 0,
+          "width": 800,
+          "height": 480,
+          "customInputs": [],
+          "customOutputs": [],
+          "style": {
+            "objID": "3e16c93e-94cb-4b5a-c73b-e5a1b07275b1",
+            "useStyle": "default",
+            "conditionalStyles": [],
+            "childStyles": []
+          },
+          "timeline": [],
+          "eventHandlers": [],
+          "leftUnit": "px",
+          "topUnit": "px",
+          "widthUnit": "px",
+          "heightUnit": "px",
+          "children": [
+            {
+              "objID": "46d90a71-b7c4-4129-8d9a-82ffa0daf619",
+              "type": "LVGLContainerWidget",
+              "left": 0,
+              "top": 0,
+              "width": 800,
+              "height": 480,
+              "customInputs": [],
+              "customOutputs": [],
+              "style": {
+                "objID": "bee8943a-3550-4cd8-a6a0-5db874f735ae",
+                "useStyle": "default",
+                "conditionalStyles": [],
+                "childStyles": []
+              },
+              "timeline": [],
+              "eventHandlers": [],
+              "identifier": "ui_TunerTouchGestureContainer",
+              "leftUnit": "px",
+              "topUnit": "px",
+              "widthUnit": "px",
+              "heightUnit": "px",
+              "children": [
+                {
+                  "objID": "cf50bd8d-7188-4992-a6ce-27b069f1b0a8",
+                  "type": "LVGLPanelWidget",
+                  "left": 0,
+                  "top": 0,
+                  "width": 800,
+                  "height": 51,
+                  "customInputs": [],
+                  "customOutputs": [],
+                  "style": {
+                    "objID": "42d65699-e8a9-4a0c-b99d-44ff0f0cb254",
+                    "useStyle": "default",
+                    "conditionalStyles": [],
+                    "childStyles": []
+                  },
+                  "timeline": [],
+                  "eventHandlers": [],
+                  "identifier": "ui_TunerTopPanel",
+                  "leftUnit": "px",
+                  "topUnit": "px",
+                  "widthUnit": "px",
+                  "heightUnit": "px",
+                  "children": [
+                    {
+                      "objID": "eeabf524-ba1b-43e2-ae6d-28a73b856d7d",
+                      "type": "LVGLLabelWidget",
+                      "left": 110,
+                      "top": -15,
+                      "width": 508,
+                      "height": 38,
+                      "customInputs": [],
+                      "customOutputs": [],
+                      "style": {
+                        "objID": "ad97e3da-b712-4c44-dbcb-ede9a98cc5ec",
+                        "useStyle": "default",
+                        "conditionalStyles": [],
+                        "childStyles": []
+                      },
+                      "timeline": [],
+                      "eventHandlers": [],
+                      "identifier": "ui_TunerHeadingLabel",
+                      "leftUnit": "px",
+                      "topUnit": "px",
+                      "widthUnit": "px",
+                      "heightUnit": "px",
+                      "children": [],
+                      "widgetFlags": "CLICK_FOCUSABLE|GESTURE_BUBBLE|PRESS_LOCK|SNAPPABLE",
+                      "hiddenFlagType": "literal",
+                      "clickableFlagType": "literal",
+                      "flagScrollbarMode": "",
+                      "flagScrollDirection": "",
+                      "scrollSnapX": "",
+                      "scrollSnapY": "",
+                      "checkedStateType": "literal",
+                      "disabledStateType": "literal",
+                      "states": "",
+                      "localStyles": {
+                        "objID": "1f5c4f92-ec23-4771-90a9-a285c399aab5",
+                        "definition": {
+                          "MAIN": {
+                            "DEFAULT": {
+                              "text_color": "#FFFFFF",
+                              "text_font": "MONTSERRAT_34",
+                              "text_align": "CENTER"
+                            }
+                          }
+                        }
+                      },
+                      "group": "",
+                      "groupIndex": 0,
+                      "text": "Tonex Controller",
+                      "textType": "literal",
+                      "longMode": "WRAP",
+                      "recolor": false
+                    },
+                    {
+                      "objID": "7ec40713-22f4-437f-f496-f7d88b371f6d",
+                      "type": "LVGLImageWidget",
+                      "left": -22,
+                      "top": -17,
+                      "width": 132,
+                      "height": 46,
+                      "customInputs": [],
+                      "customOutputs": [],
+                      "style": {
+                        "objID": "9e377b79-d9d1-4e59-fc5f-95bcc052247d",
+                        "useStyle": "default",
+                        "conditionalStyles": [],
+                        "childStyles": []
+                      },
+                      "timeline": [],
+                      "eventHandlers": [],
+                      "identifier": "ui_TunerLogo",
+                      "leftUnit": "px",
+                      "topUnit": "px",
+                      "widthUnit": "content",
+                      "heightUnit": "content",
+                      "children": [],
+                      "widgetFlags": "ADV_HITTEST|CLICK_FOCUSABLE|GESTURE_BUBBLE|PRESS_LOCK|SCROLLABLE|SCROLL_CHAIN_HOR|SCROLL_CHAIN_VER|SCROLL_ELASTIC|SCROLL_MOMENTUM|SCROLL_WITH_ARROW|SNAPPABLE",
+                      "hiddenFlagType": "literal",
+                      "clickableFlagType": "literal",
+                      "flagScrollbarMode": "",
+                      "flagScrollDirection": "",
+                      "scrollSnapX": "",
+                      "scrollSnapY": "",
+                      "checkedStateType": "literal",
+                      "disabledStateType": "literal",
+                      "states": "",
+                      "localStyles": {
+                        "objID": "2f1ff4b3-9c15-4825-b313-9f6176ed218a"
+                      },
+                      "group": "",
+                      "groupIndex": 0,
+                      "image": "smythbuilt",
+                      "setPivot": false,
+                      "pivotX": 0,
+                      "pivotY": 0,
+                      "zoom": 256,
+                      "angle": 0,
+                      "innerAlign": "CENTER",
+                      "sizeMode": "VIRTUAL"
+                    }
+                  ],
+                  "widgetFlags": "CLICK_FOCUSABLE|GESTURE_BUBBLE|PRESS_LOCK|SCROLL_CHAIN_HOR|SCROLL_CHAIN_VER|SCROLL_ELASTIC|SCROLL_MOMENTUM|SCROLL_WITH_ARROW|SNAPPABLE",
+                  "hiddenFlagType": "literal",
+                  "clickableFlag": true,
+                  "clickableFlagType": "literal",
+                  "flagScrollbarMode": "",
+                  "flagScrollDirection": "",
+                  "scrollSnapX": "",
+                  "scrollSnapY": "",
+                  "checkedStateType": "literal",
+                  "disabledStateType": "literal",
+                  "states": "",
+                  "localStyles": {
+                    "objID": "a9927532-6d01-4a86-e13e-59436065837c",
+                    "definition": {
+                      "MAIN": {
+                        "DEFAULT": {
+                          "bg_color": "#2A2A2A",
+                          "radius": 0
+                        }
+                      }
+                    }
+                  },
+                  "group": "",
+                  "groupIndex": 0
+                },
+                {
+                  "objID": "a7ce5b96-d153-4a2e-f70a-d10868cd1dd1",
+                  "type": "LVGLLabelWidget",
+                  "left": 6,
+                  "top": 60,
+                  "width": 789,
+                  "height": 60,
+                  "customInputs": [],
+                  "customOutputs": [],
+                  "style": {
+                    "objID": "5dd47c21-2d1b-44ea-e29d-2b37da1d5653",
+                    "useStyle": "default",
+                    "conditionalStyles": [],
+                    "childStyles": []
+                  },
+                  "timeline": [],
+                  "eventHandlers": [
+                    {
+                      "objID": "ce51feb9-4370-4d1c-fe7e-ed878419489b",
+                      "eventName": "LONG_PRESSED",
+                      "handlerType": "action",
+                      "action": "EnableSkinEdit",
+                      "userData": 0
+                    }
+                  ],
+                  "identifier": "ui_TunerHeading",
+                  "leftUnit": "px",
+                  "topUnit": "px",
+                  "widthUnit": "px",
+                  "heightUnit": "px",
+                  "children": [],
+                  "widgetFlags": "CLICK_FOCUSABLE|GESTURE_BUBBLE|PRESS_LOCK|SCROLLABLE|SCROLL_CHAIN_HOR|SCROLL_CHAIN_VER|SCROLL_ELASTIC|SCROLL_MOMENTUM|SCROLL_WITH_ARROW|SNAPPABLE",
+                  "hiddenFlagType": "literal",
+                  "clickableFlag": true,
+                  "clickableFlagType": "literal",
+                  "flagScrollbarMode": "",
+                  "flagScrollDirection": "",
+                  "scrollSnapX": "",
+                  "scrollSnapY": "",
+                  "checkedStateType": "literal",
+                  "disabledStateType": "literal",
+                  "states": "",
+                  "localStyles": {
+                    "objID": "f52e6474-71ea-42ed-a5d5-1864515eb83e",
+                    "definition": {
+                      "MAIN": {
+                        "SCROLLED": {
+                          "text_font": "MONTSERRAT_14"
+                        },
+                        "DEFAULT": {
+                          "text_color": "D1A60C",
+                          "text_font": "MONTSERRAT_48",
+                          "text_align": "CENTER"
+                        }
+                      }
+                    }
+                  },
+                  "group": "",
+                  "groupIndex": 0,
+                  "text": "Tuner",
+                  "textType": "literal",
+                  "longMode": "DOT",
+                  "recolor": false
+                },
+                {
+                  "objID": "43188d16-a410-4c16-ccf0-5204a35dcd4e",
+                  "type": "LVGLArcWidget",
+                  "left": 224,
+                  "top": 130,
+                  "width": 352,
+                  "height": 350,
+                  "customInputs": [],
+                  "customOutputs": [],
+                  "style": {
+                    "objID": "8803bade-939a-4a4a-9863-c5372373d0ff",
+                    "useStyle": "default",
+                    "conditionalStyles": [],
+                    "childStyles": []
+                  },
+                  "timeline": [],
+                  "eventHandlers": [],
+                  "identifier": "ui_TunerArc",
+                  "leftUnit": "px",
+                  "topUnit": "px",
+                  "widthUnit": "px",
+                  "heightUnit": "px",
+                  "children": [],
+                  "widgetFlags": "CLICK_FOCUSABLE|GESTURE_BUBBLE|PRESS_LOCK|SCROLL_ELASTIC|SCROLL_MOMENTUM|SCROLL_WITH_ARROW|SNAPPABLE",
+                  "hiddenFlagType": "literal",
+                  "clickableFlag": true,
+                  "clickableFlagType": "literal",
+                  "flagScrollbarMode": "",
+                  "flagScrollDirection": "",
+                  "scrollSnapX": "",
+                  "scrollSnapY": "",
+                  "checkedStateType": "literal",
+                  "disabledStateType": "literal",
+                  "states": "",
+                  "localStyles": {
+                    "objID": "d69b1ef2-c314-4ce4-aa7d-ceaac6a77a96",
+                    "definition": {
+                      "MAIN": {
+                        "DEFAULT": {
+                          "arc_width": 25
+                        }
+                      },
+                      "KNOB": {
+                        "DEFAULT": {
+                          "bg_color": "#0cef1c"
+                        }
+                      },
+                      "INDICATOR": {
+                        "DEFAULT": {
+                          "arc_color": "513D2B",
+                          "arc_width": 25
+                        }
+                      }
+                    }
+                  },
+                  "group": "",
+                  "groupIndex": 0,
+                  "useAngle": false,
+                  "rangeMin": -50,
+                  "rangeMinType": "literal",
+                  "rangeMax": 50,
+                  "rangeMaxType": "literal",
+                  "value": 0,
+                  "valueType": "literal",
+                  "previewValue": "25",
+                  "mode": "SYMMETRICAL",
+                  "startAngle": 135,
+                  "startAngleType": "literal",
+                  "previewStartAngle": "135",
+                  "endAngle": 45,
+                  "endAngleType": "literal",
+                  "previewEndAngle": "45",
+                  "bgStartAngle": 135,
+                  "bgStartAngleType": "literal",
+                  "previewBgStartAngle": "135",
+                  "bgEndAngle": 45,
+                  "bgEndAngleType": "literal",
+                  "previewBgEndAngle": "45",
+                  "rotation": 0,
+                  "rotationType": "literal",
+                  "previewRotation": "0"
+                },
+                {
+                  "objID": "33ac8670-a254-46a5-daba-e60be723a47a",
+                  "type": "LVGLLabelWidget",
+                  "left": 325,
+                  "top": 253,
+                  "width": 150,
+                  "height": 52,
+                  "customInputs": [],
+                  "customOutputs": [],
+                  "style": {
+                    "objID": "579037ac-5570-4a42-bb32-b7c516ec9eb4",
+                    "useStyle": "default",
+                    "conditionalStyles": [],
+                    "childStyles": []
+                  },
+                  "timeline": [],
+                  "eventHandlers": [],
+                  "identifier": "ui_TunerNoteLabel",
+                  "leftUnit": "px",
+                  "topUnit": "px",
+                  "widthUnit": "px",
+                  "heightUnit": "content",
+                  "children": [],
+                  "widgetFlags": "CLICK_FOCUSABLE|GESTURE_BUBBLE|PRESS_LOCK|SCROLLABLE|SCROLL_CHAIN_HOR|SCROLL_CHAIN_VER|SCROLL_ELASTIC|SCROLL_MOMENTUM|SCROLL_WITH_ARROW|SNAPPABLE",
+                  "hiddenFlagType": "literal",
+                  "clickableFlagType": "literal",
+                  "flagScrollbarMode": "",
+                  "flagScrollDirection": "",
+                  "scrollSnapX": "",
+                  "scrollSnapY": "",
+                  "checkedStateType": "literal",
+                  "disabledStateType": "literal",
+                  "states": "",
+                  "localStyles": {
+                    "objID": "90f7fefa-7eda-4477-aff4-b677726fb119",
+                    "definition": {
+                      "MAIN": {
+                        "DEFAULT": {
+                          "text_font": "MONTSERRAT_48",
+                          "text_align": "CENTER"
+                        }
+                      }
+                    }
+                  },
+                  "group": "",
+                  "groupIndex": 0,
+                  "text": "--",
+                  "textType": "literal",
+                  "longMode": "WRAP",
+                  "recolor": false
+                },
+                {
+                  "objID": "91428fa1-efdc-40f2-b553-e4805f36c1ee",
+                  "type": "LVGLLabelWidget",
+                  "left": 17,
+                  "top": 387,
+                  "width": 125,
+                  "height": 27,
+                  "customInputs": [],
+                  "customOutputs": [],
+                  "style": {
+                    "objID": "cd9f1f93-f176-4624-869a-e0a76431b0b0",
+                    "useStyle": "default",
+                    "conditionalStyles": [],
+                    "childStyles": []
+                  },
+                  "timeline": [],
+                  "eventHandlers": [],
+                  "identifier": "ui_TunerReferenceHeadingLabel",
+                  "leftUnit": "px",
+                  "topUnit": "px",
+                  "widthUnit": "content",
+                  "heightUnit": "content",
+                  "children": [],
+                  "widgetFlags": "CLICK_FOCUSABLE|GESTURE_BUBBLE|PRESS_LOCK|SCROLLABLE|SCROLL_CHAIN_HOR|SCROLL_CHAIN_VER|SCROLL_ELASTIC|SCROLL_MOMENTUM|SCROLL_WITH_ARROW|SNAPPABLE",
+                  "hiddenFlagType": "literal",
+                  "clickableFlagType": "literal",
+                  "flagScrollbarMode": "",
+                  "flagScrollDirection": "",
+                  "scrollSnapX": "",
+                  "scrollSnapY": "",
+                  "checkedStateType": "literal",
+                  "disabledStateType": "literal",
+                  "states": "",
+                  "localStyles": {
+                    "objID": "258c84b7-dcac-40fa-926d-c0e0811e7b22",
+                    "definition": {
+                      "MAIN": {
+                        "DEFAULT": {
+                          "text_font": "MONTSERRAT_24",
+                          "text_color": "D1A60C"
+                        }
+                      }
+                    }
+                  },
+                  "group": "",
+                  "groupIndex": 0,
+                  "text": "Reference",
+                  "textType": "literal",
+                  "longMode": "WRAP",
+                  "recolor": false
+                },
+                {
+                  "objID": "e9d0a893-27f1-4fef-d10a-0b05387611c9",
+                  "type": "LVGLLabelWidget",
+                  "left": 17,
+                  "top": 417,
+                  "width": 124,
+                  "height": 38,
+                  "customInputs": [],
+                  "customOutputs": [],
+                  "style": {
+                    "objID": "f0d1f016-00c9-4213-a565-b57ebe94f2ad",
+                    "useStyle": "default",
+                    "conditionalStyles": [],
+                    "childStyles": []
+                  },
+                  "timeline": [],
+                  "eventHandlers": [],
+                  "identifier": "ui_TunerReferenceLabel",
+                  "leftUnit": "px",
+                  "topUnit": "px",
+                  "widthUnit": "content",
+                  "heightUnit": "content",
+                  "children": [],
+                  "widgetFlags": "CLICK_FOCUSABLE|GESTURE_BUBBLE|PRESS_LOCK|SCROLLABLE|SCROLL_CHAIN_HOR|SCROLL_CHAIN_VER|SCROLL_ELASTIC|SCROLL_MOMENTUM|SCROLL_WITH_ARROW|SNAPPABLE",
+                  "hiddenFlagType": "literal",
+                  "clickableFlagType": "literal",
+                  "flagScrollbarMode": "",
+                  "flagScrollDirection": "",
+                  "scrollSnapX": "",
+                  "scrollSnapY": "",
+                  "checkedStateType": "literal",
+                  "disabledStateType": "literal",
+                  "states": "",
+                  "localStyles": {
+                    "objID": "c614238c-d491-453b-aeaf-1907e52c645e",
+                    "definition": {
+                      "MAIN": {
+                        "DEFAULT": {
+                          "text_font": "MONTSERRAT_34"
+                        }
+                      }
+                    }
+                  },
+                  "group": "",
+                  "groupIndex": 0,
+                  "text": "440 Hz",
+                  "textType": "literal",
+                  "longMode": "WRAP",
+                  "recolor": false
+                },
+                {
+                  "objID": "a9107b25-8e72-4194-de27-df111d0c7d9a",
+                  "type": "LVGLImageWidget",
+                  "left": 696,
+                  "top": 400,
+                  "width": 87,
+                  "height": 70,
+                  "customInputs": [],
+                  "customOutputs": [],
+                  "style": {
+                    "objID": "6c7899c2-639e-4e53-d8de-6161a40d10f6",
+                    "useStyle": "default",
+                    "conditionalStyles": [],
+                    "childStyles": []
+                  },
+                  "hiddenInEditor": false,
+                  "timeline": [],
+                  "eventHandlers": [
+                    {
+                      "objID": "bff50cf5-af45-4940-ccbb-4ea816edef71",
+                      "eventName": "PRESSED",
+                      "handlerType": "action",
+                      "action": "TunerClose",
+                      "userData": 0
+                    }
+                  ],
+                  "identifier": "ui_TunerOKTick",
+                  "leftUnit": "px",
+                  "topUnit": "px",
+                  "widthUnit": "content",
+                  "heightUnit": "content",
+                  "children": [],
+                  "widgetFlags": "ADV_HITTEST|CLICK_FOCUSABLE|GESTURE_BUBBLE|PRESS_LOCK|SCROLLABLE|SCROLL_CHAIN_HOR|SCROLL_CHAIN_VER|SCROLL_ELASTIC|SCROLL_MOMENTUM|SCROLL_WITH_ARROW|SNAPPABLE",
+                  "hiddenFlag": false,
+                  "hiddenFlagType": "literal",
+                  "clickableFlag": true,
+                  "clickableFlagType": "literal",
+                  "flagScrollbarMode": "",
+                  "flagScrollDirection": "",
+                  "scrollSnapX": "",
+                  "scrollSnapY": "",
+                  "checkedStateType": "literal",
+                  "disabledStateType": "literal",
+                  "states": "",
+                  "localStyles": {
+                    "objID": "8b094a42-303d-40e3-bfb5-f914b84e4979"
+                  },
+                  "group": "",
+                  "groupIndex": 0,
+                  "image": "tick",
+                  "setPivot": false,
+                  "pivotX": 0,
+                  "pivotY": 0,
+                  "zoom": 256,
+                  "angle": 0,
+                  "innerAlign": "CENTER",
+                  "sizeMode": "VIRTUAL"
+                }
+              ],
+              "widgetFlags": "CLICK_FOCUSABLE|PRESS_LOCK|SCROLL_CHAIN_HOR|SCROLL_CHAIN_VER|SCROLL_ELASTIC|SCROLL_MOMENTUM|SCROLL_WITH_ARROW|SNAPPABLE",
+              "hiddenFlagType": "literal",
+              "clickableFlag": true,
+              "clickableFlagType": "literal",
+              "flagScrollbarMode": "",
+              "flagScrollDirection": "",
+              "scrollSnapX": "",
+              "scrollSnapY": "",
+              "checkedStateType": "literal",
+              "disabledStateType": "literal",
+              "states": "",
+              "localStyles": {
+                "objID": "74d08ed5-7394-4089-b19f-594fbea1bec0"
+              },
+              "group": "",
+              "groupIndex": 0
+            }
+          ],
+          "widgetFlags": "CLICKABLE|PRESS_LOCK|CLICK_FOCUSABLE|GESTURE_BUBBLE|SNAPPABLE|SCROLLABLE|SCROLL_ELASTIC|SCROLL_MOMENTUM|SCROLL_CHAIN_HOR|SCROLL_CHAIN_VER",
+          "hiddenFlagType": "literal",
+          "clickableFlag": true,
+          "clickableFlagType": "literal",
+          "checkedStateType": "literal",
+          "disabledStateType": "literal",
+          "states": "",
+          "localStyles": {
+            "objID": "3a48b3b4-9051-488b-df31-41f8d8ee2544",
+            "definition": {
+              "MAIN": {
+                "DEFAULT": {
+                  "bg_color": "#1F1F1F"
+                }
+              }
+            }
+          },
+          "groupIndex": 0
+        }
+      ],
+      "connectionLines": [],
+      "localVariables": [],
+      "componentGroups": [],
+      "userProperties": [],
+      "name": "Tuner",
       "left": 0,
       "top": 0,
       "width": 800,
@@ -27246,6 +28693,15 @@
       "objID": "e3b00160-1e5a-4b98-90f6-7dec343b80b2",
       "name": "cab_disabled",
       "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADwAAABGCAYAAACQRffVAAAACXBIWXMAAAsTAAALEwEAmpwYAAAHZWlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgOS4xLWMwMDEgMTE2LmNhODJhZTQsIDIwMjQvMDIvMjItMjE6NTg6NDEgICAgICAgICI+IDxyZGY6UkRGIHhtbG5zOnJkZj0iaHR0cDovL3d3dy53My5vcmcvMTk5OS8wMi8yMi1yZGYtc3ludGF4LW5zIyI+IDxyZGY6RGVzY3JpcHRpb24gcmRmOmFib3V0PSIiIHhtbG5zOnhtcD0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wLyIgeG1sbnM6ZGM9Imh0dHA6Ly9wdXJsLm9yZy9kYy9lbGVtZW50cy8xLjEvIiB4bWxuczpwaG90b3Nob3A9Imh0dHA6Ly9ucy5hZG9iZS5jb20vcGhvdG9zaG9wLzEuMC8iIHhtbG5zOnhtcE1NPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvbW0vIiB4bWxuczpzdEV2dD0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL3NUeXBlL1Jlc291cmNlRXZlbnQjIiB4bXA6Q3JlYXRvclRvb2w9IkFkb2JlIFBob3Rvc2hvcCAyNC43IChXaW5kb3dzKSIgeG1wOkNyZWF0ZURhdGU9IjIwMjUtMTAtMjVUMTY6NTY6MjUrMTE6MDAiIHhtcDpNb2RpZnlEYXRlPSIyMDI1LTExLTE3VDIxOjA1OjU4KzExOjAwIiB4bXA6TWV0YWRhdGFEYXRlPSIyMDI1LTExLTE3VDIxOjA1OjU4KzExOjAwIiBkYzpmb3JtYXQ9ImltYWdlL3BuZyIgcGhvdG9zaG9wOkNvbG9yTW9kZT0iMyIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDplNjA3ODM4OS1hNDgzLTQyNGYtYTY5Ni1hZGE4ZGM1NmFmYWUiIHhtcE1NOkRvY3VtZW50SUQ9ImFkb2JlOmRvY2lkOnBob3Rvc2hvcDo4NGZiMmUxNi0zNGQwLWVkNGEtYmIwYy02NjU5MWI5ODc4NzAiIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo5NTIwYWE0NS1jNTJlLWUwNGEtYmRkYy0zODg0ZDk4NTJkODciPiA8cGhvdG9zaG9wOkRvY3VtZW50QW5jZXN0b3JzPiA8cmRmOkJhZz4gPHJkZjpsaT54bXAuZGlkOjI1OWYwOGExLTg3MTMtY2Q0Ny04YmNlLWNiOGZkZmM5Y2ExZjwvcmRmOmxpPiA8cmRmOmxpPnhtcC5kaWQ6ZTZlZGFmZjMtNzc5Yi02NjRiLWI2ODctNGZhYWZjY2E1ZjE4PC9yZGY6bGk+IDwvcmRmOkJhZz4gPC9waG90b3Nob3A6RG9jdW1lbnRBbmNlc3RvcnM+IDx4bXBNTTpIaXN0b3J5PiA8cmRmOlNlcT4gPHJkZjpsaSBzdEV2dDphY3Rpb249ImNyZWF0ZWQiIHN0RXZ0Omluc3RhbmNlSUQ9InhtcC5paWQ6OTUyMGFhNDUtYzUyZS1lMDRhLWJkZGMtMzg4NGQ5ODUyZDg3IiBzdEV2dDp3aGVuPSIyMDI1LTEwLTI1VDE2OjU2OjI1KzExOjAwIiBzdEV2dDpzb2Z0d2FyZUFnZW50PSJBZG9iZSBQaG90b3Nob3AgMjQuNyAoV2luZG93cykiLz4gPHJkZjpsaSBzdEV2dDphY3Rpb249InNhdmVkIiBzdEV2dDppbnN0YW5jZUlEPSJ4bXAuaWlkOmQzYmQ0OTkxLWI1MjQtN2E0MS04NWJmLTYzNGVlN2E1YmYzZiIgc3RFdnQ6d2hlbj0iMjAyNS0xMC0yNVQxNzoxNToyMSsxMTowMCIgc3RFdnQ6c29mdHdhcmVBZ2VudD0iQWRvYmUgUGhvdG9zaG9wIDI0LjcgKFdpbmRvd3MpIiBzdEV2dDpjaGFuZ2VkPSIvIi8+IDxyZGY6bGkgc3RFdnQ6YWN0aW9uPSJzYXZlZCIgc3RFdnQ6aW5zdGFuY2VJRD0ieG1wLmlpZDplNjA3ODM4OS1hNDgzLTQyNGYtYTY5Ni1hZGE4ZGM1NmFmYWUiIHN0RXZ0OndoZW49IjIwMjUtMTEtMTdUMjE6MDU6NTgrMTE6MDAiIHN0RXZ0OnNv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",
+      "bpp": 32,
+      "alwaysBuild": false,
+      "lvglBinaryOutputFormat": 3,
+      "lvglDither": false
+    },
+    {
+      "objID": "61648175-8afd-4263-b79e-a5cff79c135a",
+      "name": "tuner",
+      "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEYAAABHCAYAAAC6cjEhAAAACXBIWXMAAAsTAAALEwEAmpwYAAAFymlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgOS4xLWMwMDEgMTE2LmNhODJhZTQsIDIwMjQvMDIvMjItMjE6NTg6NDEgICAgICAgICI+IDxyZGY6UkRGIHhtbG5zOnJkZj0iaHR0cDovL3d3dy53My5vcmcvMTk5OS8wMi8yMi1yZGYtc3ludGF4LW5zIyI+IDxyZGY6RGVzY3JpcHRpb24gcmRmOmFib3V0PSIiIHhtbG5zOnhtcD0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wLyIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0RXZ0PSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VFdmVudCMiIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bXA6Q3JlYXRvclRvb2w9IkFkb2JlIFBob3Rvc2hvcCAyNC43IChXaW5kb3dzKSIgeG1wOkNyZWF0ZURhdGU9IjIwMjYtMDctMzBUMDk6NTU6MTQrMTA6MDAiIHhtcDpNZXRhZGF0YURhdGU9IjIwMjYtMDctMzBUMDk6NTU6MTQrMTA6MDAiIHhtcDpNb2RpZnlEYXRlPSIyMDI2LTA3LTMwVDA5OjU1OjE0KzEwOjAwIiB4bXBNTTpJbnN0YW5jZUlEPSJ4bXAuaWlkOjk5YTg5Y2Y3LTUwZWQtM2U0MS05MmJkLWVjNWY5ZGRmNTE4MyIgeG1wTU06RG9jdW1lbnRJRD0iYWRvYmU6ZG9jaWQ6cGhvdG9zaG9wOmFmYmU5N2UxLTJkY2YtZGE0My05YjRiLWVlM2UwZjkyMWJjYyIgeG1wTU06T3JpZ2luYWxEb2N1bWVudElEPSJ4bXAuZGlkOmQxZWVkOWRhLTgxNzEtMzk0My05OTllLWIyODc0MmE0ZGZhYSIgZGM6Zm9ybWF0PSJpbWFnZS9wbmciIHBob3Rvc2hvcDpDb2xvck1vZGU9IjMiPiA8eG1wTU06SGlzdG9yeT4gPHJkZjpTZXE+IDxyZGY6bGkgc3RFdnQ6YWN0aW9uPSJjcmVhdGVkIiBzdEV2dDppbnN0YW5jZUlEPSJ4bXAuaWlkOmQxZWVkOWRhLTgxNzEtMzk0My05OTllLWIyODc0MmE0ZGZhYSIgc3RFdnQ6d2hlbj0iMjAyNi0wNy0zMFQwOTo1NToxNCsxMDowMCIgc3RFdnQ6c29mdHdhcmVBZ2VudD0iQWRvYmUgUGhvdG9zaG9wIDI0LjcgKFdpbmRvd3MpIi8+IDxyZGY6bGkgc3RFdnQ6YWN0aW9uPSJzYXZlZCIgc3RFdnQ6aW5zdGFuY2VJRD0ieG1wLmlpZDo5OWE4OWNmNy01MGVkLTNlNDEtOTJiZC1lYzVmOWRkZjUxODMiIHN0RXZ0OndoZW49IjIwMjYtMDctMzBUMDk6NTU6MTQrMTA6MDAiIHN0RXZ0OnNvZnR3YXJlQWdlbnQ9IkFkb2JlIFBob3Rvc2hvcCAyNC43IChXaW5kb3dzKSIgc3RFdnQ6Y2hhbmdlZD0iLyIvPiA8L3JkZjpTZXE+IDwveG1wTU06SGlzdG9yeT4gPC9yZGY6RGVzY3JpcHRpb24+IDwvcmRmOlJERj4gPC94OnhtcG1ldGE+IDw/eHBhY2tldCBlbmQ9InIiPz4ojEmVAAAPi0lEQVR42u2be0xW5x3HDzcvWBQUEBUvYPEC3kVR8dJ6acsaY6tptm51M/WPpesf6x9rspgt65atydZl/WOJ2ZbVxpS1a3oTm2LbReptZUiLTC1aUVG84AUQFQURdN/P0/OQw9v3hReBV1g4ycnLe97nPM/v+f6+v+s5hN29e9fpP759hPdD0A9MPzD9wPTgEenv4rPPPtv6d1hYmHPr1i0nOjraGTt2rLlmHfagQYOcpqYmp7Cw0ImPj3caGxvNeO9x48YNZ8aMGX+cPXv22ps3b9YOGDAgesuWLU9VVlZ+xZwcd+7ccSIjI53U1FTzyXfv/RkZGb/LzMx8WvfXDB48OHbr1q3fP3HiRPGQIUParNXS0uJwbeTIkeYsKipyBg4caH67ffu2k5CQYK7rXic8PLyNrJ999lnHwHTmYMHExEQDUn19vRMVFeVvWIqESOHT/T6kk8uM5353Do4Yf4OuX7/uZGdnGzBqa2vvvymhKTSBFgIczT7fO5sjNMPS9lILWCY2GlBgsS9zu8WUvAcLiBVRDQ0N8P6av00h1NChQ52YmBijtYiIiPviyzAjGIvpI7dkbv0bsGSGAx544IFIKfKmHxk7Bwx+Izk5edPo0aPXaJGf69KnFjAYYjWJb8Ck6urqzN9eYLuqvTZU88MariELwMBeFMXnvHnzjF8EHK4JmFfj4uKWFxQUrJWpHcH8OwWMJjCfTKiJZmVlZb3EwmVlZYu0wKegzcIWHA40AmtiY2OdK1euGJ9jQdN5p7uA8QcysrAucnlNbty4cc7ixYvNPmCtxn1HSpsgWX+zY8eOpzC9QEqLDOQz7ORCfBMMuHz58rGSkpK/gDxgVFVVGUcHS6wwLDJixAgTSRjnWTSsp8yHdTAflOkCYNnhHDhwwDl27Jj5XWZ1R6zfvHz58j9oT6vHjBnzqCLjJ4ATtPNVWDQRRgtkJiUlreTawYMHN8t/XLDhGxMDIJ3DdC0OMLk2bNgwIxTfQ3GgEEyIDbphPkzMidP1CBSKAvfv3+988cUXhO/XLl26dFRWMHDKlCnPsEfu96YH7QJz6tQp5+uvv3aE8Ho51Ljq6uqzFy5ceB/zaG5uNg4WUPSZIP+Tv2jRoiIoCihyboYpoShObSQCGORyr/1ErKiSWb+AgiWfMSlkE+trv/zyy82YnPa2Ti5i1oQJE5wHH3wwOGAYrAlltrErScLOnDnzVy14RvQzeQsL4lMEwotixyIJkRbzzWH8jHXKIUnd3UQNkJBNQKUIhIFpaWmbxIxpmDXAkdwJDPbyLyn+nMAajOwQAFYF5WPIDKdPn744JSUl/fz58zi1kvT0dKMVhEADEmSiMtUNmI0o+ud9+/YdAhgAARzyiZ4Gx+vX7KfY/aZ8xzNS7Mjx48c/JTM6jDwwBmDE8qMyoV1S7A8E1pOTJk36u3xQU1CMqamp4WMGnl4LfaWUfw/IlpeXm9/OnTtHCZAtgBIE3E0B+TYMQjt+HG+PHZjEtWvXzImy2LjMveTq1av5mLtYs17+MP7w4cNGdjHImTx5MnsqJjOeOHHigosXLybt2bMnOMasWrUqXNHmIZyszmJRrx4hMKU5c+aQq0TJjL7L5iVEgQT7t7TTGp1s2AxJsScHyyaPHDliGM0pf7h19erVT4slKWJ19vDhw/Pwj4cOHTIgitn5AuglMSVWf0/TuMqggBElR44aNWomCyq6VDzxxBMmiywtLTWFmUBLWrZs2WLyFTGoUHQ0YHByD9oKBWNsXgNDkY9ICDDyO8VSaLnMWR5h+ho53TzGKCIZf6PzrL5XaWysgFsg4PKDAmbv3r3Rzz333AjQPXv27CGb25APcE1mM1maGqrFG+XlP0YofmMMtozDDlW4xoQxEVXwBhw3Mb0puQ/MnTt3ukCYmJuba1IMzO3xxx/H3Buk1Ar5x6mygim6Ply31XYIjDaWTB6AfxMtzxDvcbK0BdCInNlMN/OtkmDl+BWA4TdACRVbOAjXsJRkzioDeZWn/Hf+/PnIMk6MiBdDqhlLYCGqquitkI/BFBMUOAY///zzHTNGWh/l+osmmUUNJoMjJuRxXfaaDDWV0F3NyclptkAQicg0FRWc9uqQ7nbAsKaiosKwgvBNvSZ5D7vmnSS3MEYyViMnIMIs+ZYaV5nDBFZ0UKYkZAfbHEqbb2AimGCTN004FAFoHEmYJls0IkioIpJvM2zBggXGVJAVoOQnG7kuOamoY5AR4ACGDF1jbrjhPlFjEzRNeYfAhPnZGZNYqmqxFjfLbNFid+11OybUwJDYkZQSMRUlW2UBoG/EDY9wy5dvFbbmx4iIyKAYo4Ua3XAbLvYMwr9Yx8t1fa+DGTKXGDEpkgTJvU7abXxNoOKsJw4Sy23btjl5eXnmO3LOmjXL2bBhAxGyRQDdQiZXZjNGMke7yr0m5l8NChhNVu32USLlaOP0eYpNsyALiBWXQV+gJOzevXuAJm41JwCyvdxQHGwW38Zpi0EXgDQ3ml6X+VQjF2PkiI3zpXfsmtIlja8JChhls5X4C90UIfsbIxs9wHXVGcY+5dHLXWrGytkmyNnVwxCoi53T5nRpHJJwLefqTJ06tbUZj28RABkApPOknGsF4ygWlyxZYhQsRY4BIH02KIQ3BwXMzJkz6zX5FW08ThntJNhCCMzPzzceX0gflACNGho/b968h/W9AqAAk98DtDc7bD7ZFoA3a/b2egLdC4uRj81zv9aOkoLmA5QYc075TAtjKGfIkPX7QO1xEmNVHpRrXF1QwCizvSzWlEkL2SRBPFpAOB6R0C7UIpeUQJWpyJwjAZYqydtCRml7NffarrQdQW9/xLZGA5UYmDAMIUXgPlgg/zFOzEjj+/Hjxz8hmuIjYXxBQQFsisvMzIznXoX5A6quG4MCZufOnbeysrL+IxCy9TWNEIdt2ma3Cq96/f1WRkbGHPmTJbqWQibJBmCKBcl3M13p0wRiDFEQn0YBCUPwI2L5jwREIv6lpKTkQ0BDpqVLlzpiD8x6SLcmowQBU0iBHFR1TatBYBSSE2jBZenp6YsRQLQzeQJ+RJPv1rgW/Z2qDPJJ6hB+Azjb/rTaJvx7TYJQ6QmbrSHXdezekGrPuz4ghdu5iTLIqyDg7Nq1i43GKnTnUCaoqn5TMlUmJSUZP2QfrcjXPEwrQkw5qpKgauHChcFV16TSQp+q+oJS6yRNOP/06dP76O+KLcZWxZBiZchvytGuF3Cb9PmeqHkaQKhisXn7VNF3Y968AoYBKGaqtUz3kOs2rLq3Rtgp+E3Os5a0gPu4n/rM9n+06R+L3Zk4WDndf8AUGIWfJDvWvoapsp7LPSoF3hM4V+jjBAUM/RZtvFIb/lgIb1CFulHafF0bvcJvUA/tahN/0phHRNuRsuMhCIngAIfgCEvCJUadsk8oAUqlRYqi2H4EZgOAgNYwVQDCQeLEXSAG6VqqTSIlz+1p06Y12KefyMEasAdfIibEA4b83luSYS/j8DswmrWUBD4ils9FRs39OaWOv6enfk0Jf4K5iCV5AuiO6JYuIVaqoGzVrJvAlcoEKOvnq4g7QkOIEwEwDWyeUw75kJc0Sr7WIDzA0eOheQTVqcnwFRzUXEePHgWgNI2ZjQkwXmZTLnZepATAX3CvjWQoRWu9+tFHH60REzbBEkwbJQGe7g+XX9wIgFLq7uLi4nyARd6gGIN9spC8/YfyK4USLFsR6qdC+X3RtwUtoAG3FqERbrSH4GiO9JyN2BRcG94nQS+IskkIovlyioqKVgjonWyMSMZ4GId2YQ7tAZym1v2Z5okGaNaQKefJBGrxEf7CveY4r01vZw8oBdAAgrkVRXPS0tIehY0nT558xxaUQT9Xsuk8tZAmeEVePlubysZ+dW0z1EN4NsHivtUutszijENoaaRCYP1TrHiB8WSdK1as+Jsc5hpp8jB09m7OnSdMrH05NTX1h4AJ6JrzuhizDf9gZbSRDuA8bRMDNF1Ft/Vgy5Rf8rcYVCz/8xosDfS83e9VHCcnkylf+VjO9H3+lsaa0Bqbx9OjFa9AVgAWQ3CAgU2YjRjzW22sxCaLMtfUxx57bIdA+YXGjNJ9EToj6QNpniXa/Db5rxdt0se6ZWVlr4gx+5nPdgytg/et6pELGVGgm/TxeVFKahLjfi9ZGlESyuX8VnrgL69Yt25dm7ahNjJcgiaPHTv2K1IHew8g4G9YQImUEQL644t8i0jMRU73obVr1+bRtsAMYYHmaEFgfa/SZho0R4I2kchDM7sGPk+gbMvNzX3S9pR9cxnMm+tyzKa1wDjuw1QxF+QRKLFKVhPlEo5Zs7cH7/gE03Zok1mKAbUSutYKZIHx174MlMAhmPzVru3bt+esXLnyHTFltHs/oXu0fMZo1vW2LRAeppSWlr79wQcfrMc8PE8c2wATaB82LXBNpk77qHP31PX3YzwTd7k9IJP6/I033lgohm2Rf6m32bJ9S8G+VMB3pfDH5eM2yB98T9q+bat2T+LYqbcpLFDBjA/pO3huW5TPSoX3jaJ1tjT4K5lRpX3kgtACLVfs2vjuu+9myTS34pxhSijfSb4vLydiIm7/5mB5efnLcqgnrE/S5huVC/1afmELJhzg1bWef17V3c94MAF/FbaNGjhTnCEv9BA5FB3ClGeEWzYQlXjgZ58RkXzZXnOfBYaN2BTbN3LYt67cpwumvsHeZUZhtsdsTYkTf6JwbubjkYeNYv56yqzrvkrWu4GhKAv0SphNAt0mUptN2mSNk1yH0MtY/BKlQ6AAAGAUrgrp3eaHut2U7PPjjrr6wURCWMJGbXHZ3vNrGEh91V1PQCOdXn4EA7bty8Aw2/ftKnP+L16Zt5U1WTjs6oixPQ6MFSiUr30EOqh3MDdYgwneV2Dsuym8qhXKB2ztmRwmReQDHFvQhtTH2LBKq9O+Unq/WWPDPf0g29ELxtF3KzDeUh/m9JZ/ISSf4f1jZKJ9SefO+6Z6SIBp70HY/TQpG5kw73tVWnhXadubI5VNDkPmfEP1Gll3gEOZcC8KDL+XxfrKvyR7WdNZZUZ21n7tk8LebEa+h/1PGH//M9BlYLwFXl8Cxf6/ge9bFN1mSv5e0egrh32btDMZemQglH2drTdv6YvgkAG7TyXuHRhves+EeHbqEP7uKxHJH+PpFdn/YeoojPsFhid0vv6lL4VpfwftVh7rrlq1yjS0OnpPMDIQuu1976sHXUHeBqcC7yhCBQVMT1M8lP/05f5Hzb35mFCGY/ftqCjPmlFOL+gs9obWJs/Pj4vaw/XJa+x4/tu9QSin/+jG6rofmH5g+o9+YII4/geAjkFVVqFeXAAAAABJRU5ErkJggg==",
       "bpp": 32,
       "alwaysBuild": false,
       "lvglBinaryOutputFormat": 3,

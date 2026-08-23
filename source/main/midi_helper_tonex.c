@@ -26,7 +26,6 @@ limitations under the License.
 #include "esp_check.h"
 #include "esp_log.h"
 #include "usb/usb_host.h"
-#include "driver/i2c.h"
 #include "nvs_flash.h"
 #include "esp_vfs.h"
 #include "esp_vfs_fat.h"
@@ -39,6 +38,7 @@ limitations under the License.
 #include "tonex_params.h"
 #include "midi_helper.h"
 #include "midi_helper_tonex.h"
+#include "display.h"
 
 static const char *TAG = "app_midi_helper_tonex";
 
@@ -209,7 +209,29 @@ esp_err_t midi_helper_tonex_adjust_param_via_midi(uint8_t change_num, uint8_t mi
             value = tonex_params_clamp_value(param, value);
         } break;
 
-        // 9 tuner
+        case 9:
+        {
+            // tuner (not supported on all platforms!)
+            if (midi_value == 127)
+            {
+                control_request_tuner(1);
+
+#if CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI
+                UI_SetTunerState(1);
+#endif                
+            }
+            else
+            {
+                control_request_tuner(0);
+
+#if CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI
+                UI_SetTunerState(0);
+#endif                 
+            }
+
+            // no param change needed
+            return ESP_OK;
+        } break;
         
         case 10: 
         {

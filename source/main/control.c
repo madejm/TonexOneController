@@ -86,7 +86,8 @@ enum CommandEvents
     EVENT_SET_CONFIG_ITEM_INT,
     EVENT_SET_CONFIG_ITEM_STRING,
     EVENT_TRIGGER_TAP_TEMPO,
-    EVENT_UPDATE_FOOTSWITCH_LEDS
+    EVENT_UPDATE_FOOTSWITCH_LEDS,
+    EVENT_TUNER_REQUEST
 };
 
 typedef struct
@@ -330,6 +331,15 @@ static uint8_t process_control_command(tControlMessage* message)
                     // send message to USB
                     usb_set_preset(preset);
                 }
+            }
+        } break;
+
+        case EVENT_TUNER_REQUEST:
+        {
+            if (ControlData.USBStatus != 0)
+            {
+                // send message to USB
+                usb_request_tuner(message->Value);
             }
         } break;
 
@@ -970,6 +980,8 @@ static uint8_t process_control_command(tControlMessage* message)
                 {
                     case AMP_MODELLER_TONEX_ONE:        // fallthrough
                     case AMP_MODELLER_TONEX:            // fallthrough
+                    case AMP_MODELLER_TONEX_ONE_PLUS:   // fallthrough
+                    case AMP_MODELLER_TONEX_PLUG:
                     default:
                     {
                         usb_modify_parameter(TONEX_GLOBAL_BPM, ControlData.TapTempo.BPM);
@@ -1036,6 +1048,29 @@ void control_request_preset_up(void)
     if (xQueueSend(control_input_queue, (void*)&message, pdMS_TO_TICKS(CONTROL_QUEUE_WRITE_TIMEOUT)) != pdPASS)
     {
         ESP_LOGE(TAG, "control_request_preset_up queue send failed!");            
+    }
+}
+
+/****************************************************************************
+* NAME:        
+* DESCRIPTION: 
+* PARAMETERS:  
+* RETURN:      
+* NOTES:       
+*****************************************************************************/
+void control_request_tuner(uint8_t state)
+{
+    tControlMessage message;
+
+    ESP_LOGI(TAG, "control_request_tuner");
+
+    message.Event = EVENT_TUNER_REQUEST;
+    message.Value = state;
+
+    // send to queue
+    if (xQueueSend(control_input_queue, (void*)&message, pdMS_TO_TICKS(CONTROL_QUEUE_WRITE_TIMEOUT)) != pdPASS)
+    {
+        ESP_LOGE(TAG, "control_request_tuner queue send failed!");            
     }
 }
 
@@ -2627,7 +2662,9 @@ static void UpdateFootswitchLeds(void)
 
         switch (usb_get_connected_modeller_type())
         {
-            case AMP_MODELLER_TONEX_ONE:
+            case AMP_MODELLER_TONEX_ONE:    // fallthrough
+            case AMP_MODELLER_TONEX_ONE_PLUS:   // fallthrough
+            case AMP_MODELLER_TONEX_PLUG:
             {
                 // tonex one has colour per preset
                 if (tonex_params_colors_get_color(ControlData.PresetIndex, &preset_color) == ESP_OK)
@@ -2686,6 +2723,8 @@ static void UpdateFootswitchLeds(void)
                                 {
                                     case AMP_MODELLER_TONEX_ONE:        // fallthrough
                                     case AMP_MODELLER_TONEX:            // fallthrough
+                                    case AMP_MODELLER_TONEX_ONE_PLUS:   // fallthrough
+                                    case AMP_MODELLER_TONEX_PLUG:
                                     default:
                                     {
                                         switch (param)
@@ -2914,6 +2953,8 @@ esp_err_t control_get_connected_modeller_params_locked_access(tModellerParameter
     {
         case AMP_MODELLER_TONEX_ONE:        // fallthrough
         case AMP_MODELLER_TONEX:            // fallthrough
+        case AMP_MODELLER_TONEX_ONE_PLUS:   // fallthrough
+        case AMP_MODELLER_TONEX_PLUG:
         default:
         {
             return tonex_params_get_locked_access(param_ptr);
@@ -2939,6 +2980,8 @@ esp_err_t control_release_connected_modeller_params_locked_access(void)
     {
         case AMP_MODELLER_TONEX_ONE:        // fallthrough
         case AMP_MODELLER_TONEX:            // fallthrough
+        case AMP_MODELLER_TONEX_ONE_PLUS:   // fallthrough
+        case AMP_MODELLER_TONEX_PLUG:
         default:
         {
             return tonex_params_release_locked_access();
@@ -2949,6 +2992,113 @@ esp_err_t control_release_connected_modeller_params_locked_access(void)
             return valeton_params_release_locked_access();
         } break;
     }
+}
+
+/****************************************************************************
+* NAME:        
+* DESCRIPTION: 
+* PARAMETERS:  
+* RETURN:      
+* NOTES:       
+*****************************************************************************/
+float control_get_note_freq(float a4_ref, int midi_note)
+{
+    // MIDI note 69 = A4
+    return a4_ref * powf(2.0f, (midi_note - 69) / 12.0f);
+}
+
+/****************************************************************************
+* NAME:        
+* DESCRIPTION: 
+* PARAMETERS:  
+* RETURN:      
+* NOTES:       
+*****************************************************************************/
+float control_get_cents(float measured, float target)
+{
+    if (target <= 0.0f || measured <= 0.0f)
+    {
+        return 0.0f;
+    }
+
+    return 1200.0f * log2f(measured / target);
+}
+
+/****************************************************************************
+* NAME:        
+* DESCRIPTION: 
+* PARAMETERS:  
+* RETURN:      
+* NOTES:       
+*****************************************************************************/
+int control_frequency_to_note(float freq, float ref_freq, char *note_name, size_t buflen)
+{
+    static const char* const note_names[] = 
+    {
+        "C", "C#", "D", "D#", "E", "F",
+        "F#", "G", "G#", "A", "A#", "B"
+    };
+
+    if ((freq <= 0.0) || (note_name == NULL) || (buflen < 8))
+    {
+        return -1;
+    }
+
+    // MIDI note number (floating point)
+    float midi = 69.0f + 12.0f * log2(freq / ref_freq);
+
+    // Round to nearest integer note
+    int n = (int)round(midi);
+
+    // Clamp to a reasonable range (MIDI 0–127)
+    if (n < 0) 
+    {
+        n = 0;
+    }
+    
+    if (n > 127) 
+    {
+        n = 127;
+    }
+
+    int octave = (n / 12) - 1;
+    int note_index = n % 12;
+
+    snprintf(note_name, buflen, "%s%d", note_names[note_index], octave);
+    return 0;
+}
+
+/****************************************************************************
+* NAME:        
+* DESCRIPTION: 
+* PARAMETERS:  
+* RETURN:      
+* NOTES:       
+*****************************************************************************/
+int control_get_midi_note_name(uint8_t note, float ref_freq, char *note_name, size_t buflen)
+{
+    static const char* const note_names[] = 
+    {
+        "C", "C#", "D", "D#", "E", "F",
+        "F#", "G", "G#", "A", "A#", "B"
+    };
+
+    if ((note_name == NULL) || (buflen < 8))
+    {
+        return -1;
+    }
+
+    // Clamp to a reasonable range (MIDI 0–127)
+    if (note > 127) 
+    {
+        note = 127;
+    }
+
+    int octave = (note / 12) - 1;
+    int note_index = note % 12;
+
+    snprintf(note_name, buflen, "%s%d", note_names[note_index], octave);
+    return 0;
 }
 
 /****************************************************************************

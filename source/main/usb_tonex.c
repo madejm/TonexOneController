@@ -535,7 +535,7 @@ static esp_err_t usb_tonex_modify_global(uint16_t global_val, float value)
         case TONEX_GLOBAL_TEMPO_SOURCE:
         {
             // modify the tempo source value in state
-            memcpy((void*)&TonexData->Message.PedalData.GlobalConfigData[TonexData->Message.PedalData.GlobalConfigStartOffset + (GLOBAL_CONFIG_INDEX_TEMPO_SOURCE * 5) + 1], (void*)&value, sizeof(float));
+            //todo memcpy((void*)&TonexData->Message.PedalData.GlobalConfigData[TonexData->Message.PedalData.GlobalConfigStartOffset + (GLOBAL_CONFIG_INDEX_TEMPO_SOURCE * 5) + 1], (void*)&value, sizeof(float));
             res = ESP_OK;
         } break;
 
@@ -556,6 +556,13 @@ static esp_err_t usb_tonex_modify_global(uint16_t global_val, float value)
         case TONEX_GLOBAL_MASTER_VOLUME:
         {
             memcpy((void*)&TonexData->Message.PedalData.GlobalConfigData[TonexData->Message.PedalData.GlobalConfigStartOffset + (GLOBAL_CONFIG_INDEX_MAIN_VOLUME * 5) + 1], (void*)&value, sizeof(float));
+            res = ESP_OK;
+        } break;
+
+        case TONEX_GLOBAL_DIRECT_MONITOR:
+        {
+            // modify the direct monitor value in state
+            //unsupported memcpy((void*)&TonexData->Message.PedalData.GlobalConfigData[TonexData->Message.PedalData.GlobalConfigStartOffset + (GLOBAL_CONFIG_INDEX_DIRECT_MONITOR * 5) + 1], (void*)&value, sizeof(float));
             res = ESP_OK;
         } break;
     }
@@ -797,7 +804,7 @@ static TonexStatus usb_tonex_parse_global_config(uint8_t* unframed, uint16_t len
                             {
                                 param_ptr[TONEX_GLOBAL_CABSIM_BYPASS].Value = temp_val;
                             } break;
-
+                            
                             case GLOBAL_CONFIG_INDEX_TEMPO_SOURCE:
                             {
                                 param_ptr[TONEX_GLOBAL_TEMPO_SOURCE].Value = temp_val;
@@ -818,6 +825,12 @@ static TonexStatus usb_tonex_parse_global_config(uint8_t* unframed, uint16_t len
                             {
                                 param_ptr[TONEX_GLOBAL_MASTER_VOLUME].Value = temp_val; 
                             } break;
+
+                            // unsupported
+                            //case GLOBAL_CONFIG_INDEX_DIRECT_MONITOR:
+                            //{
+                            ///    param_ptr[TONEX_GLOBAL_DIRECT_MONITOR].Value = temp_val; 
+                            //} break;
 
                             default:
                             {
@@ -1318,6 +1331,11 @@ void usb_tonex_handle(class_driver_t* driver_obj)
                     case USB_COMMAND_SAVE_PRESET:
                     {
                         // todo - need to send back the entire 32kb+ preset details 
+                    } break;
+
+                    case USB_COMMAND_REQUEST_TUNER:
+                    {
+                        // not supported
                     } break;
                 }
             }

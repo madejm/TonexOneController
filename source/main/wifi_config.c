@@ -27,7 +27,6 @@ limitations under the License.
 #include "esp_check.h"
 #include "esp_log.h"
 #include "usb/usb_host.h"
-#include "driver/i2c.h"
 #include "nvs_flash.h"
 #include "esp_vfs.h"
 #include "esp_vfs_fat.h"
@@ -229,7 +228,7 @@ static void wifi_send_ws_async(const char* payload)
 *****************************************************************************/
 static uint8_t process_wifi_command(tWiFiMessage* message)
 {
-    ESP_LOGI(TAG, "command %d", message->Event);
+    //debug ESP_LOGI(TAG, "command %d", message->Event);
 
     // check what we got
     switch (message->Event)
@@ -244,6 +243,9 @@ static uint8_t process_wifi_command(tWiFiMessage* message)
         {
             // save preset details
             memcpy((void*)pWebConfig->PresetNames[message->Value], (void*)message->Text, MAX_PRESET_NAME_LENGTH - 1);
+
+            // debug
+            //ESP_LOGE(TAG, "Preset sync index %d name, %s", message->Value,  pWebConfig->PresetNames[message->Value]);
         } break;
 
         case EVENT_SYNC_PRESET:
@@ -373,6 +375,8 @@ static void wifi_build_params_json(void)
     {
         case AMP_MODELLER_TONEX_ONE:    // fallthrough
         case AMP_MODELLER_TONEX:        // fallthrough
+        case AMP_MODELLER_TONEX_ONE_PLUS:   // fallthrough
+        case AMP_MODELLER_TONEX_PLUG:
         default:
         {
             // send Tonex params
@@ -2032,10 +2036,13 @@ static void wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t e
 *****************************************************************************/
 static void wifi_init_sta(void)
 {
+    esp_netif_t* sta_netif;
+    char host_name[MAX_MDNS_NAME];
+
     ESP_ERROR_CHECK(esp_netif_init());
 
     ESP_ERROR_CHECK(esp_event_loop_create_default());
-    esp_netif_create_default_wifi_sta();
+    sta_netif = esp_netif_create_default_wifi_sta();
 
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
     ESP_ERROR_CHECK(esp_wifi_init(&cfg));
@@ -2060,12 +2067,18 @@ static void wifi_init_sta(void)
             // However these modes are deprecated and not advisable to be used. Incase your Access point
             // doesn't support WPA2, these mode can be enabled by commenting below line
             .threshold.authmode = WIFI_AUTH_WPA2_PSK,
+            .scan_method = WIFI_ALL_CHANNEL_SCAN        // thanks to user "ft972" for reporting this
         },
     };
 
     // get credentials from config
     control_get_config_item_string(CONFIG_ITEM_WIFI_SSID, pWebConfig->wifi_ssid);
     control_get_config_item_string(CONFIG_ITEM_WIFI_PASSWORD, pWebConfig->wifi_password);
+
+    // use the configured mDNS name as the DHCP hostname as well, so the device
+    // is identifiable in the router instead of appearing as "espressif"    
+    control_get_config_item_string(CONFIG_ITEM_MDNS_NAME, host_name);
+    esp_netif_set_hostname(sta_netif, host_name);
 
     // set SSID and password
     strcpy((char*)wifi_config.sta.ssid, pWebConfig->wifi_ssid);
@@ -2099,7 +2112,6 @@ static void wifi_init_sta(void)
     {
         ESP_LOGE(TAG, "UNEXPECTED EVENT");
     }
-    vEventGroupDelete(s_wifi_event_group);
 }
 
 /****************************************************************************

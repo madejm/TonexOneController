@@ -2,6 +2,8 @@ const AMP_MODELLER_NONE = 0;
 const AMP_MODELLER_TONEX_ONE = 1;
 const AMP_MODELLER_TONEX = 2;
 const AMP_MODELLER_VALETON_GP5 = 3;
+const AMP_MODELLER_TONEX_ONE_PLUS = 4;
+const AMP_MODELLER_TONEX_PLUG = 5;
 
 var gateway = `ws://${window.location.hostname}/ws`;
 var websocket;
@@ -181,6 +183,7 @@ const TONEX_GLOBAL_TEMPO_SOURCE = 113;
 const TONEX_GLOBAL_TUNING_REFERENCE = 114;
 const TONEX_GLOBAL_BYPASS = 115;
 const TONEX_GLOBAL_MASTER_VOLUME = 116;
+const TONEX_GLOBAL_DIRECT_MONITOR = 117;
 
 // valeton params
 const ValetonParameters = {
@@ -956,6 +959,8 @@ function setEffectIcons() {
     {
         case AMP_MODELLER_TONEX_ONE:
         case AMP_MODELLER_TONEX:
+        case AMP_MODELLER_TONEX_ONE_PLUS:
+        case AMP_MODELLER_TONEX_PLUG:    
         default:
         {    
             // noise gate
@@ -1595,6 +1600,8 @@ function processReturnCmd(data) {
             {
                 case AMP_MODELLER_TONEX_ONE:
                 case AMP_MODELLER_TONEX:
+                case AMP_MODELLER_TONEX_ONE_PLUS:
+                case AMP_MODELLER_TONEX_PLUG:
                 default:
                 {    
                     for (var key in data['PARAMS']) {
@@ -2333,7 +2340,7 @@ function processReturnCmd(data) {
                                 configureParamSwitch("gb_tempos", value);
                                 setParamData("gb_tempos", parseInt(key));
                                 break;
-
+                          
                             case TONEX_GLOBAL_TUNING_REFERENCE:
                                 configureParamRange("gb_tref", value, min, max, 1);
                                 setParamData("gb_tref", parseInt(key));
@@ -2347,6 +2354,11 @@ function processReturnCmd(data) {
                             case TONEX_GLOBAL_MASTER_VOLUME:
                                 configureParamRange("gb_vol", value, min, max, 0.1);
                                 setParamData("gb_vol", parseInt(key));
+                                break;
+
+                            case TONEX_GLOBAL_DIRECT_MONITOR:
+                                configureParamSwitch("gb_dirmon", value);
+                                setParamData("gb_dirmon", parseInt(key));
                                 break;
                         }
                     } 
@@ -3617,12 +3629,16 @@ function processReturnCmd(data) {
             // set modeller type
             modellerType = data['MODELLER_TYPE'];
 
+            console.log("Modeller Data: max:", maxPresets, "start:", startPreset, "type:", modellerType);
+
             // enable the relevant menu
             const menuContainer = document.getElementById('nav-items-list');
 
             switch (modellerType) {
                 case AMP_MODELLER_TONEX_ONE:
                 case AMP_MODELLER_TONEX:
+                case AMP_MODELLER_TONEX_ONE_PLUS:
+                case AMP_MODELLER_TONEX_PLUG:                    
                 default:
                     console.log("Setting Tonex menu");
                     menuContainer.innerHTML = DEVICE_MENUS['tonex'];
@@ -4330,6 +4346,8 @@ function globalTempoTap() {
     {
         case AMP_MODELLER_TONEX_ONE:
         case AMP_MODELLER_TONEX:
+        case AMP_MODELLER_TONEX_ONE_PLUS:
+        case AMP_MODELLER_TONEX_PLUG:    
         default:
         {    
             let input = document.getElementById("gb_bpm");
@@ -4432,6 +4450,8 @@ function populateExternalFootswitches() {
     {
         case AMP_MODELLER_TONEX_ONE:
         case AMP_MODELLER_TONEX:
+        case AMP_MODELLER_TONEX_ONE_PLUS:
+        case AMP_MODELLER_TONEX_PLUG:
         default:
         {    
             midi_map = tonexMidiControlChangeAssociations;
@@ -4475,6 +4495,8 @@ function extFSChanged(fx) {
     {
         case AMP_MODELLER_TONEX_ONE:
         case AMP_MODELLER_TONEX:
+        case AMP_MODELLER_TONEX_ONE_PLUS:
+        case AMP_MODELLER_TONEX_PLUG:    
         default:
         {    
             midi_map = tonexMidiControlChangeAssociations;
@@ -4557,6 +4579,8 @@ function getExtFSValue(fs, value) {
     {
         case AMP_MODELLER_TONEX_ONE:
         case AMP_MODELLER_TONEX:
+        case AMP_MODELLER_TONEX_ONE_PLUS:
+        case AMP_MODELLER_TONEX_PLUG:    
         default:
         {    
             midi_map = tonexMidiControlChangeAssociations;
@@ -4594,6 +4618,8 @@ function populateInternalFootswitches() {
     {
         case AMP_MODELLER_TONEX_ONE:
         case AMP_MODELLER_TONEX:
+        case AMP_MODELLER_TONEX_ONE_PLUS:
+        case AMP_MODELLER_TONEX_PLUG:    
         default:
         {    
             midi_map = tonexMidiControlChangeAssociations;
@@ -4637,6 +4663,8 @@ function getIntFSValue(fs, value) {
     {
         case AMP_MODELLER_TONEX_ONE:
         case AMP_MODELLER_TONEX:
+        case AMP_MODELLER_TONEX_ONE_PLUS:
+        case AMP_MODELLER_TONEX_PLUG:    
         default:
         {    
             midi_map = tonexMidiControlChangeAssociations;
@@ -4874,6 +4902,8 @@ function updateEffectsChainIcons() {
     {
         case AMP_MODELLER_TONEX_ONE:
         case AMP_MODELLER_TONEX:
+        case AMP_MODELLER_TONEX_ONE_PLUS:
+        case AMP_MODELLER_TONEX_PLUG:    
         default:
         {    
             const icons = [

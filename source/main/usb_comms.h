@@ -26,6 +26,8 @@ extern "C" {
 #define IK_MULTIMEDIA_USB_VENDOR        0x1963
 #define TONEX_ONE_PRODUCT_ID            0x00D1
 #define TONEX_PRODUCT_ID                0x0068
+#define TONEX_ONE_PLUS_PRODUCT_ID       0x00EB
+#define TONEX_PLUG_PRODUCT_ID           0x00D5
 
 #define VALETON_USB_VENDOR              0x84EF
 #define VALETON_GP5_PRODUCT_ID          0x0184
@@ -37,7 +39,9 @@ enum AmpModellers
     AMP_MODELLER_NONE,
     AMP_MODELLER_TONEX_ONE,
     AMP_MODELLER_TONEX,     // full size pedal with 3 footswitches
-    AMP_MODELLER_VALETON_GP5
+    AMP_MODELLER_VALETON_GP5,
+    AMP_MODELLER_TONEX_ONE_PLUS,
+    AMP_MODELLER_TONEX_PLUG,
 };
 
 enum USB_Commands
@@ -47,7 +51,8 @@ enum USB_Commands
     USB_COMMAND_LOAD_PRESET_TO_SLOT_A,
     USB_COMMAND_LOAD_PRESET_TO_SLOT_B,
     USB_COMMAND_SAVE_PRESET,
-    USB_COMMAND_SET_AB_SLOTS
+    USB_COMMAND_SET_AB_SLOTS,
+    USB_COMMAND_REQUEST_TUNER
 };
 
 typedef struct 
@@ -77,6 +82,7 @@ void usb_save_preset(void);
 uint8_t usb_get_max_presets_for_connected_modeller(void);
 uint8_t usb_get_first_preset_index_for_connected_modeller(void);
 uint8_t usb_get_connected_modeller_type(void);
+void usb_request_tuner(uint8_t state);
 
 #ifdef __cplusplus
 } /*extern "C"*/

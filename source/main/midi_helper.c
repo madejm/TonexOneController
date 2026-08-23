@@ -26,7 +26,6 @@ limitations under the License.
 #include "esp_check.h"
 #include "esp_log.h"
 #include "usb/usb_host.h"
-#include "driver/i2c.h"
 #include "nvs_flash.h"
 #include "esp_vfs.h"
 #include "esp_vfs_fat.h"
@@ -94,6 +93,8 @@ esp_err_t midi_helper_adjust_param_via_midi(uint8_t change_num, uint8_t midi_val
     {
         case AMP_MODELLER_TONEX_ONE:        // fallthrough
         case AMP_MODELLER_TONEX:            // fallthrough
+        case AMP_MODELLER_TONEX_ONE_PLUS:   // fallthrough
+        case AMP_MODELLER_TONEX_PLUG:
         default:
         {
             return midi_helper_tonex_adjust_param_via_midi(change_num, midi_value);
@@ -119,6 +120,8 @@ uint16_t midi_helper_get_param_for_change_num(uint8_t change_num, uint8_t midi_v
     {
         case AMP_MODELLER_TONEX_ONE:        // fallthrough
         case AMP_MODELLER_TONEX:            // fallthrough
+        case AMP_MODELLER_TONEX_ONE_PLUS:   // fallthrough
+        case AMP_MODELLER_TONEX_PLUG:
         default:
         {
             return midi_helper_tonex_get_param_for_change_num(change_num, midi_value_1, midi_value_2);

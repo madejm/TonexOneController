@@ -49,7 +49,6 @@ limitations under the License.
 #include "esp_mac.h"
 #include "esp_crc.h"
 #include "esp_now.h"
-#include "driver/i2c.h"
 #include "soc/lldesc.h"
 #include "esp_lcd_touch_ft6336.h"
 #include "esp_lcd_touch_cst816s.h"
@@ -205,6 +204,8 @@ __attribute__((unused)) void platform_get_icon_coords(int16_t* dest, uint8_t max
     {
         case AMP_MODELLER_TONEX_ONE:    // fallthrough
         case AMP_MODELLER_TONEX:        // fallthrough    
+        case AMP_MODELLER_TONEX_ONE_PLUS:   // fallthrough
+        case AMP_MODELLER_TONEX_PLUG:
         default:
         {
             // Tonex
