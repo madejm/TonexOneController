@@ -8,10 +8,10 @@
   "configurePresets": [
     {
       "name": "WS169",
-      "binaryDir": "${sourceDir}/build_ws169",
+      "binaryDir": "build_ws169",
       "cacheVariables": {
         "SDKCONFIG_DEFAULTS": "sdkconfig.defaults;sdkconfig.ws169",
-        "SDKCONFIG": "${sourceDir}/build_ws169/sdkconfig"
+        "SDKCONFIG": "build_ws169/sdkconfig"
       },
       "vendor": {
         "espressif/vscode-esp-idf": {
@@ -29,10 +29,10 @@
     },
     {
       "name": "WS169Land",
-      "binaryDir": "${sourceDir}/build_ws169land",
+      "binaryDir": "build_ws169land",
       "cacheVariables": {
         "SDKCONFIG_DEFAULTS": "sdkconfig.defaults;sdkconfig.ws169land",
-        "SDKCONFIG": "${sourceDir}/build_ws169land/sdkconfig"
+        "SDKCONFIG": "build_ws169land/sdkconfig"
       },
       "vendor": {
         "espressif/vscode-esp-idf": {
@@ -50,10 +50,10 @@
     },
     {
       "name": "WS169TOUCH",
-      "binaryDir": "${sourceDir}/build_ws169t",
+      "binaryDir": "build_ws169t",
       "cacheVariables": {
         "SDKCONFIG_DEFAULTS": "sdkconfig.defaults;sdkconfig.ws169t",
-        "SDKCONFIG": "${sourceDir}/build_ws169t/sdkconfig"
+        "SDKCONFIG": "build_ws169t/sdkconfig"
       },
       "vendor": {
         "espressif/vscode-esp-idf": {
@@ -71,10 +71,10 @@
     },
     {
       "name": "WS169TOUCHLand",
-      "binaryDir": "${sourceDir}/build_ws169tland",
+      "binaryDir": "build_ws169tland",
       "cacheVariables": {
         "SDKCONFIG_DEFAULTS": "sdkconfig.defaults;sdkconfig.ws169tland",
-        "SDKCONFIG": "${sourceDir}/build_ws169tland/sdkconfig"
+        "SDKCONFIG": "build_ws169tland/sdkconfig"
       },
       "vendor": {
         "espressif/vscode-esp-idf": {
@@ -92,10 +92,10 @@
     },
     {
       "name": "WS43B",
-      "binaryDir": "${sourceDir}/build_ws43b",
+      "binaryDir": "build_ws43b",
       "cacheVariables": {
         "SDKCONFIG_DEFAULTS": "sdkconfig.defaults;sdkconfig.ws43B",
-        "SDKCONFIG": "${sourceDir}/build_ws43b/sdkconfig"
+        "SDKCONFIG": "build_ws43b/sdkconfig"
       },
       "vendor": {
         "espressif/vscode-esp-idf": {
@@ -113,10 +113,10 @@
     },
     {
       "name": "WS35B",
-      "binaryDir": "${sourceDir}/build_ws35b",
+      "binaryDir": "build_ws35b",
       "cacheVariables": {
         "SDKCONFIG_DEFAULTS": "sdkconfig.defaults;sdkconfig.ws35b",
-        "SDKCONFIG": "${sourceDir}/build_ws35b/sdkconfig"
+        "SDKCONFIG": "build_ws35b/sdkconfig"
       },
       "vendor": {
         "espressif/vscode-esp-idf": {
@@ -134,10 +134,10 @@
     },
     {
       "name": "JC3248W",
-      "binaryDir": "${sourceDir}/build_jc3248w",
+      "binaryDir": "build_jc3248w",
       "cacheVariables": {
         "SDKCONFIG_DEFAULTS": "sdkconfig.defaults;sdkconfig.jc3248w",
-        "SDKCONFIG": "${sourceDir}/build_jc3248w/sdkconfig"
+        "SDKCONFIG": "build_jc3248w/sdkconfig"
       },
       "vendor": {
         "espressif/vscode-esp-idf": {
@@ -155,10 +155,10 @@
     },
     {
       "name": "WSZERO",
-      "binaryDir": "${sourceDir}/build_wszero",
+      "binaryDir": "build_wszero",
       "cacheVariables": {
         "SDKCONFIG_DEFAULTS": "sdkconfig.defaults;sdkconfig.wszero",
-        "SDKCONFIG": "${sourceDir}/build_wszero/sdkconfig"
+        "SDKCONFIG": "build_wszero/sdkconfig"
       },
       "vendor": {
         "espressif/vscode-esp-idf": {
@@ -176,10 +176,10 @@
     },
     {
       "name": "DEVKITC_N8R2",
-      "binaryDir": "${sourceDir}/build_devkitc_N8R2",
+      "binaryDir": "build_devkitc_N8R2",
       "cacheVariables": {
         "SDKCONFIG_DEFAULTS": "sdkconfig.defaults;sdkconfig.devkitc_N8R2",
-        "SDKCONFIG": "${sourceDir}/build_devkitc_N8R2/sdkconfig"
+        "SDKCONFIG": "build_devkitc_N8R2/sdkconfig"
       },
       "vendor": {
         "espressif/vscode-esp-idf": {
@@ -197,10 +197,10 @@
     },
     {
       "name": "DEVKITC_N16R8",
-      "binaryDir": "${sourceDir}/build_devkitc_N16R8",
+      "binaryDir": "build_devkitc_N16R8",
       "cacheVariables": {
         "SDKCONFIG_DEFAULTS": "sdkconfig.defaults;sdkconfig.devkitc_N16R8",
-        "SDKCONFIG": "${sourceDir}/build_devkitc_N16R8/sdkconfig"
+        "SDKCONFIG": "build_devkitc_N16R8/sdkconfig"
       },
       "vendor": {
         "espressif/vscode-esp-idf": {
@@ -218,10 +218,10 @@
     },
     {
       "name": "M5AtomS3R",
-      "binaryDir": "${sourceDir}/build_m5atoms3r",
+      "binaryDir": "build_m5atoms3r",
       "cacheVariables": {
         "SDKCONFIG_DEFAULTS": "sdkconfig.defaults;sdkconfig.m5atoms3r",
-        "SDKCONFIG": "${sourceDir}/build_m5atoms3r/sdkconfig"
+        "SDKCONFIG": "build_m5atoms3r/sdkconfig"
       },
       "vendor": {
         "espressif/vscode-esp-idf": {
@@ -239,10 +239,10 @@
     },
     {
       "name": "LGTDisplayS3",
-      "binaryDir": "${sourceDir}/build_lgtdisps3",
+      "binaryDir": "build_lgtdisps3",
       "cacheVariables": {
         "SDKCONFIG_DEFAULTS": "sdkconfig.defaults;sdkconfig.lgtdisps3",
-        "SDKCONFIG": "${sourceDir}/build_lgtdisps3/sdkconfig"
+        "SDKCONFIG": "build_lgtdisps3/sdkconfig"
       },
       "vendor": {
         "espressif/vscode-esp-idf": {
@@ -260,10 +260,10 @@
     },
     {
       "name": "WS19Touch",
-      "binaryDir": "${sourceDir}/build_ws19t",
+      "binaryDir": "build_ws19t",
       "cacheVariables": {
         "SDKCONFIG_DEFAULTS": "sdkconfig.defaults;sdkconfig.ws19t",
-        "SDKCONFIG": "${sourceDir}/build_ws19t/sdkconfig"
+        "SDKCONFIG": "build_ws19t/sdkconfig"
       },
       "vendor": {
         "espressif/vscode-esp-idf": {
@@ -281,10 +281,10 @@
     },
     {
       "name": "WS7_43",
-      "binaryDir": "${sourceDir}/build_ws7_43",
+      "binaryDir": "build_ws7_43",
       "cacheVariables": {
         "SDKCONFIG_DEFAULTS": "sdkconfig.defaults;sdkconfig.ws43devonly",
-        "SDKCONFIG": "${sourceDir}/build_ws7_43/sdkconfig"
+        "SDKCONFIG": "build_ws7_43/sdkconfig"
       },
       "vendor": {
         "espressif/vscode-esp-idf": {
@@ -302,10 +302,10 @@
     },
     {
       "name": "PirateMini",
-      "binaryDir": "${sourceDir}/build_pirate169",
+      "binaryDir": "build_pirate169",
       "cacheVariables": {
         "SDKCONFIG_DEFAULTS": "sdkconfig.defaults;sdkconfig.pirate169",
-        "SDKCONFIG": "${sourceDir}/build_pirate169/sdkconfig"
+        "SDKCONFIG": "build_pirate169/sdkconfig"
       },
       "vendor": {
         "espressif/vscode-esp-idf": {
@@ -323,10 +323,10 @@
     },
     {
       "name": "PiratePlus",
-      "binaryDir": "${sourceDir}/build_pirate169land",
+      "binaryDir": "build_pirate169land",
       "cacheVariables": {
         "SDKCONFIG_DEFAULTS": "sdkconfig.defaults;sdkconfig.pirate169land",
-        "SDKCONFIG": "${sourceDir}/build_pirate169land/sdkconfig"
+        "SDKCONFIG": "build_pirate169land/sdkconfig"
       },
       "vendor": {
         "espressif/vscode-esp-idf": {
@@ -344,10 +344,10 @@
     },
     {
       "name": "PirateZERO",
-      "binaryDir": "${sourceDir}/build_piratezero",
+      "binaryDir": "build_piratezero",
       "cacheVariables": {
         "SDKCONFIG_DEFAULTS": "sdkconfig.defaults;sdkconfig.piratezero",
-        "SDKCONFIG": "${sourceDir}/build_piratezero/sdkconfig"
+        "SDKCONFIG": "build_piratezero/sdkconfig"
       },
       "vendor": {
         "espressif/vscode-esp-idf": {
@@ -365,10 +365,10 @@
     },
     {
       "name": "Pirate43B",
-      "binaryDir": "${sourceDir}/build_pirate43B",
+      "binaryDir": "build_pirate43B",
       "cacheVariables": {
         "SDKCONFIG_DEFAULTS": "sdkconfig.defaults;sdkconfig.pirate43B",
-        "SDKCONFIG": "${sourceDir}/build_pirate43B/sdkconfig"
+        "SDKCONFIG": "build_pirate43B/sdkconfig"
       },
       "vendor": {
         "espressif/vscode-esp-idf": {
@@ -386,10 +386,10 @@
     },
     {
       "name": "PirateMiniV2",
-      "binaryDir": "${sourceDir}/build_pirateminiv2",
+      "binaryDir": "build_pirateminiv2",
       "cacheVariables": {
         "SDKCONFIG_DEFAULTS": "sdkconfig.defaults;sdkconfig.pirateminiv2",
-        "SDKCONFIG": "${sourceDir}/build_pirateminiv2/sdkconfig"
+        "SDKCONFIG": "build_pirateminiv2/sdkconfig"
       },
       "vendor": {
         "espressif/vscode-esp-idf": {
@@ -407,10 +407,10 @@
     },
     {
       "name": "PiratePlusV2",
-      "binaryDir": "${sourceDir}/build_pirateplusv2",
+      "binaryDir": "build_pirateplusv2",
       "cacheVariables": {
         "SDKCONFIG_DEFAULTS": "sdkconfig.defaults;sdkconfig.pirateplusv2",
-        "SDKCONFIG": "${sourceDir}/build_pirateplusv2/sdkconfig"
+        "SDKCONFIG": "build_pirateplusv2/sdkconfig"
       },
       "vendor": {
         "espressif/vscode-esp-idf": {
@@ -428,10 +428,10 @@
     },
     {
       "name": "PiratePro",
-      "binaryDir": "${sourceDir}/build_piratepro",
+      "binaryDir": "build_piratepro",
       "cacheVariables": {
         "SDKCONFIG_DEFAULTS": "sdkconfig.defaults;sdkconfig.piratepro",
-        "SDKCONFIG": "${sourceDir}/build_piratepro/sdkconfig"
+        "SDKCONFIG": "build_piratepro/sdkconfig"
       },
       "vendor": {
         "espressif/vscode-esp-idf": {
@@ -449,10 +449,10 @@
     },
     {
       "name": "PirateMaxV2",
-      "binaryDir": "${sourceDir}/build_piratemax35",
+      "binaryDir": "build_piratemax35",
       "cacheVariables": {
         "SDKCONFIG_DEFAULTS": "sdkconfig.defaults;sdkconfig.piratemax35",
-        "SDKCONFIG": "${sourceDir}/build_piratemax35/sdkconfig"
+        "SDKCONFIG": "build_piratemax35/sdkconfig"
       },
       "vendor": {
         "espressif/vscode-esp-idf": {
