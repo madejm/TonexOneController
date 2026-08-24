@@ -2,38 +2,28 @@ name: ESP-IDF Build
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
   pull_request:
-    branches:
-      - main
-  workflow_dispatch:  # Allows manual triggering from the Actions page
-
-env:
-  JSON_CONFIG_FILE: "source/esp_idf_project_configuration.json"
+    branches: [main]
+  workflow_dispatch:
 
 jobs:
   extract-config:
     runs-on: ubuntu-latest
     outputs:
-      platforms: ${{ steps.extract-platforms.outputs.platforms }}
+      platforms: ${{ steps.extract.outputs.platforms }}
     steps:
-      - run: env | sort
-
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           sparse-checkout: |
-            ${{ env.JSON_CONFIG_FILE }}
+            source/CMakePresets.json
           sparse-checkout-cone-mode: false
 
-      - run: find . -type f
-
-      - run: which jq && jq --version
-
-      - name: Extract the keys (platform names) from the JSON file
-        id: extract-platforms
-        run: echo "platforms=$(jq -c 'keys' ${{ env.JSON_CONFIG_FILE }})" | tee -a ${GITHUB_OUTPUT}
+      - name: Extract preset names
+        id: extract
+        run: |
+          platforms=$(jq -c '[.configurePresets[].name]' source/CMakePresets.json)
+          echo "platforms=$platforms" | tee -a $GITHUB_OUTPUT
 
   build:
     name: Build ${{ matrix.platform }}
@@ -45,13 +35,9 @@ jobs:
         platform: ${{ fromJson(needs.extract-config.outputs.platforms) }}
 
     steps:
-      - run: env | sort
-
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           clean: true
-          # submodules: 'recursive'
           sparse-checkout: |
             source/
 
@@ -61,32 +47,29 @@ jobs:
           key: ${{ github.job }}-${{ matrix.platform }}
           evict-old-files: 'job'
 
-      - run: find . -type f -and -not -path './.git/*' -not -path './.ccache/*'
-
-      - run: which jq && jq --version
-
-      - name: Set SDKCONFIG_DEFAULTS for ${{ matrix.platform }}
-        run: echo "SDKCONFIG_DEFAULTS=$(jq -r '.${{ matrix.platform }}.build.sdkconfigDefaults | join(";")' ${{ env.JSON_CONFIG_FILE }})" | tee -a ${GITHUB_ENV:?}
-
-      - run: env | sort
-
       - name: esp-idf build
         uses: espressif/esp-idf-ci-action@v1
         with:
           path: 'source'
-          esp_idf_version: v6.0.2 # optional, default is latest
-          target: esp32s3 # optional, default is esp32
-          extra_docker_args: "-v ./.ccache:/root/.ccache -e CCACHE_DIR=/root/.ccache -e SDKCONFIG_DEFAULTS"
+          esp_idf_version: v6.0.2
+          target: esp32s3
+          extra_docker_args: >-
+            -v ./.ccache:/root/.ccache
+            -e CCACHE_DIR=/root/.ccache
+            -e IDF_PRESET=${{ matrix.platform }}
           command: "idf.py build"
 
-      - run: find ./source/build -type f
-
-      - run: ccache --print-stat
+      # Each preset has its own binaryDir (e.g. build_ws169)
+      - name: Show build output
+        run: |
+          echo "Looking for build_* directories:"
+          ls -d source/build_* 2>/dev/null || true
+          find source -name '*.bin' 2>/dev/null || true
 
       - uses: actions/upload-artifact@v4
         with:
           name: build-${{ matrix.platform }}
           path: |
-            source/build/**/*.bin
-            source/build/flasher_args.json
+            source/build_*/**/*.bin
+            source/build_*/flasher_args.json
           if-no-files-found: error
