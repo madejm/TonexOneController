@@ -109,15 +109,12 @@ enum UIElements
     UI_ELEMENT_USB_STATUS,
     UI_ELEMENT_BT_STATUS,
     UI_ELEMENT_WIFI_STATUS,
+    UI_ELEMENT_WIFI_ENABLED,
     UI_ELEMENT_PRESET_NAME,
     UI_ELEMENT_BANK_INDEX,
-    UI_ELEMENT_PRESET_BUTTON,
     UI_ELEMENT_AMP_SKIN,
     UI_ELEMENT_ALT_BUTTON,
     UI_ELEMENT_FS_BUTTONS,
-    // UI_ELEMENT_PRESET_FS6_BUTTON,
-    // UI_ELEMENT_PRESET_FS7_BUTTON,
-    // UI_ELEMENT_PRESET_FS9_BUTTON,
     UI_ELEMENT_PRESET_DESCRIPTION,
     UI_ELEMENT_PARAMETERS,
     UI_ELEMENT_TOAST,
@@ -132,7 +129,6 @@ enum UIAction
     // UI_ACTION_SET_AMP_SKIN_SLOT,
     // UI_ACTION_SET_PRESET_BUTTON_SELECTED,
     UI_ACTION_SET_ALT_BUTTON,
-    // UI_ACTION_SET_FS_BUTTON,
     UI_ACTION_NONE = 0xFF
 };
 
@@ -465,18 +461,6 @@ void action_fs_button_clicked(uint32_t buttonIndex)
     }
 }
 
-void action_preset1_clicked(lv_event_t * e) {
-    control_request_preset_in_bank_index(0);
-}
-void action_preset2_clicked(lv_event_t * e) {
-    control_request_preset_in_bank_index(1);
-}
-void action_preset3_clicked(lv_event_t * e) {
-    control_request_preset_in_bank_index(2);
-}
-void action_preset4_clicked(lv_event_t * e) {
-    control_request_preset_in_bank_index(3);
-}
 void action_previous_bank_clicked(lv_event_t * e)
 {
     control_request_bank_down();
@@ -491,27 +475,51 @@ void action_tap_tempo_clicked(lv_event_t * e)
 }
 void action_fs1_clicked(lv_event_t * e)
 {
-    action_fs_button_clicked(0);
+    if (ui_AltMode) {
+        action_fs_button_clicked(0);
+    } else {
+        control_request_preset_in_bank_index(0);
+    }
 }
 void action_fs2_clicked(lv_event_t * e)
 {
-    action_fs_button_clicked(1);
+    if (ui_AltMode) {
+        action_fs_button_clicked(1);
+    } else {
+        control_request_preset_in_bank_index(1);
+    }
 }
 void action_fs3_clicked(lv_event_t * e)
 {
-    action_fs_button_clicked(2);
+    if (ui_AltMode) {
+        action_fs_button_clicked(2);
+    } else {
+        control_request_preset_in_bank_index(2);
+    }
 }
 void action_fs4_clicked(lv_event_t * e)
 {
-    action_fs_button_clicked(3);
+    if (ui_AltMode) {
+        action_fs_button_clicked(3);
+    } else {
+        control_request_preset_in_bank_index(3);
+    }
 }
 void action_fs5_clicked(lv_event_t * e)
 {
-    action_fs_button_clicked(4);
+    if (ui_AltMode) {
+        action_fs_button_clicked(4);
+    } else {
+        control_request_bank_down();
+    }
 }
 void action_fs6_clicked(lv_event_t * e)
 {
-    action_fs_button_clicked(5);
+    if (ui_AltMode) {
+        action_fs_button_clicked(5);
+    } else {
+        control_request_bank_up();
+    }
 }
 void action_fs7_clicked(lv_event_t * e)
 {
@@ -524,6 +532,23 @@ void action_fs8_clicked(lv_event_t * e)
 void action_alt_button_clicked(lv_event_t * e)
 {
     footswitches_switch_alt_mode();
+}
+
+void action_wifi(lv_event_t * e) {
+    lv_tabview_set_act(objects.ui_settings_tab_view, lv_obj_get_index(objects.ui_wi_fi_tab), LV_ANIM_OFF);
+    action_show_settings_page(e);
+}
+
+void action_usb(lv_event_t * e) {
+    lv_tabview_set_act(objects.ui_settings_tab_view, lv_obj_get_index(objects.ui_usb_tab), LV_ANIM_OFF);
+    action_show_settings_page(e);
+}
+
+void action_usb_flash(lv_event_t * e) {
+}
+
+void action_wi_fi_enabled_changed(lv_event_t * e) {
+    lv_obj_t *wifi_switch = lv_event_get_target(e);
 }
 #endif //CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
 
@@ -909,16 +934,17 @@ static void updatePresetListSelection()
 {
     uint8_t pageStart = preset_list_page * PRESET_LIST_PRESETS_PER_PAGE;
     uint8_t selectedPreset = control_get_current_preset_mapped_index();
-    lv_obj_set_style_outline_opa(objects.ui_preset_list_button_0, (selectedPreset == (pageStart + 0) ? 255 : 0), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_outline_opa(objects.ui_preset_list_button_1, (selectedPreset == (pageStart + 1) ? 255 : 0), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_outline_opa(objects.ui_preset_list_button_2, (selectedPreset == (pageStart + 2) ? 255 : 0), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_outline_opa(objects.ui_preset_list_button_3, (selectedPreset == (pageStart + 3) ? 255 : 0), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_outline_opa(objects.ui_preset_list_button_4, (selectedPreset == (pageStart + 4) ? 255 : 0), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_outline_opa(objects.ui_preset_list_button_5, (selectedPreset == (pageStart + 5) ? 255 : 0), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_outline_opa(objects.ui_preset_list_button_6, (selectedPreset == (pageStart + 6) ? 255 : 0), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_outline_opa(objects.ui_preset_list_button_7, (selectedPreset == (pageStart + 7) ? 255 : 0), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_outline_opa(objects.ui_preset_list_button_8, (selectedPreset == (pageStart + 8) ? 255 : 0), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_outline_opa(objects.ui_preset_list_button_9, (selectedPreset == (pageStart + 9) ? 255 : 0), LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    lv_obj_set_checked(objects.ui_preset_list_button_0, selectedPreset == (pageStart + 0));
+    lv_obj_set_checked(objects.ui_preset_list_button_1, selectedPreset == (pageStart + 1));
+    lv_obj_set_checked(objects.ui_preset_list_button_2, selectedPreset == (pageStart + 2));
+    lv_obj_set_checked(objects.ui_preset_list_button_3, selectedPreset == (pageStart + 3));
+    lv_obj_set_checked(objects.ui_preset_list_button_4, selectedPreset == (pageStart + 4));
+    lv_obj_set_checked(objects.ui_preset_list_button_5, selectedPreset == (pageStart + 5));
+    lv_obj_set_checked(objects.ui_preset_list_button_6, selectedPreset == (pageStart + 6));
+    lv_obj_set_checked(objects.ui_preset_list_button_7, selectedPreset == (pageStart + 7));
+    lv_obj_set_checked(objects.ui_preset_list_button_8, selectedPreset == (pageStart + 8));
+    lv_obj_set_checked(objects.ui_preset_list_button_9, selectedPreset == (pageStart + 9));
 }
 
 static inline void lv_label_set_preset_name(lv_obj_t* label, uint8_t index)
@@ -928,6 +954,12 @@ static inline void lv_label_set_preset_name(lv_obj_t* label, uint8_t index)
     control_get_preset_name(index, name);
     snprintf(text, sizeof(text), "%u: %s", index + usb_get_first_preset_index_for_connected_modeller(), name);
     lv_label_set_text(label, text);
+}
+
+static inline void lv_panel_set_preset_color(lv_obj_t* colorPanel, uint8_t index)
+{
+    uint32_t color = get_preset_color(index);
+    lv_obj_set_style_outline_color(colorPanel, lv_color_hex(color), LV_PART_MAIN | LV_STATE_DEFAULT);
 }
 
 static void updatePresetListNames()
@@ -944,6 +976,17 @@ static void updatePresetListNames()
     lv_label_set_preset_name(objects.ui_preset_list_label_7, pageStart + 7);
     lv_label_set_preset_name(objects.ui_preset_list_label_8, pageStart + 8);
     lv_label_set_preset_name(objects.ui_preset_list_label_9, pageStart + 9);
+
+    lv_panel_set_preset_color(objects.ui_preset_list_color_0, pageStart + 0);
+    lv_panel_set_preset_color(objects.ui_preset_list_color_1, pageStart + 1);
+    lv_panel_set_preset_color(objects.ui_preset_list_color_2, pageStart + 2);
+    lv_panel_set_preset_color(objects.ui_preset_list_color_3, pageStart + 3);
+    lv_panel_set_preset_color(objects.ui_preset_list_color_4, pageStart + 4);
+    lv_panel_set_preset_color(objects.ui_preset_list_color_5, pageStart + 5);
+    lv_panel_set_preset_color(objects.ui_preset_list_color_6, pageStart + 6);
+    lv_panel_set_preset_color(objects.ui_preset_list_color_7, pageStart + 7);
+    lv_panel_set_preset_color(objects.ui_preset_list_color_8, pageStart + 8);
+    lv_panel_set_preset_color(objects.ui_preset_list_color_9, pageStart + 9);
 }
 
 /****************************************************************************
@@ -1170,147 +1213,185 @@ void action_preset_list_keyboard_ok(lv_event_t * e)
 }
 
 #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
-static void setFSButton(
+static void setFSSmallButton(
     uint32_t buttonIndex,
-    uint32_t color,
+    lv_color_t color,
     FxSelectedValueIndex_t selectedValueIndex,
-    const char *effect,
-    const char *value1,
-    const char *value2,
-    bool alt,
+    const char *title,
     bool visible
 ) {
-    lv_obj_t *button;
-    lv_obj_t *nameLabel;
-    lv_obj_t *onLabel;
-    lv_obj_t *offLabel;
     lv_obj_t *smallButton;
     lv_obj_t *smallLabel;
 
     switch (buttonIndex) {
         case 0:
-            button =      alt ? objects.ui_effect_button1_alt    : NULL;
-            nameLabel =   alt ? objects.ui_effect_label1_alt     : NULL;
-            onLabel =     alt ? objects.ui_effect_label1_alt_on  : NULL;
-            offLabel =    alt ? objects.ui_effect_label1_alt_off : NULL;
-            smallButton = alt ? objects.ui_effect_button_small1  : NULL;
-            smallLabel =  alt ? objects.ui_effect_label_small1   : NULL;
+            smallButton = objects.ui_effect_button_small1;
+            smallLabel =  objects.ui_effect_label_small1;
             break;
         case 1:
-            button =      alt ? objects.ui_effect_button2_alt    : NULL;
-            nameLabel =   alt ? objects.ui_effect_label2_alt     : NULL;
-            onLabel =     alt ? objects.ui_effect_label2_alt_on  : NULL;
-            offLabel =    alt ? objects.ui_effect_label2_alt_off : NULL;
-            smallButton = alt ? objects.ui_effect_button_small2  : NULL;
-            smallLabel =  alt ? objects.ui_effect_label_small2   : NULL;
+            smallButton = objects.ui_effect_button_small2;
+            smallLabel =  objects.ui_effect_label_small2;
             break;
         case 2:
-            button =      alt ? objects.ui_effect_button3_alt    : NULL;
-            nameLabel =   alt ? objects.ui_effect_label3_alt     : NULL;
-            onLabel =     alt ? objects.ui_effect_label3_alt_on  : NULL;
-            offLabel =    alt ? objects.ui_effect_label3_alt_off : NULL;
-            smallButton = alt ? objects.ui_effect_button_small3  : NULL;
-            smallLabel =  alt ? objects.ui_effect_label_small3   : NULL;
+            smallButton = objects.ui_effect_button_small3;
+            smallLabel =  objects.ui_effect_label_small3;
             break;
         case 3:
-            button =      alt ? objects.ui_effect_button4_alt    : NULL;
-            nameLabel =   alt ? objects.ui_effect_label4_alt     : NULL;
-            onLabel =     alt ? objects.ui_effect_label4_alt_on  : NULL;
-            offLabel =    alt ? objects.ui_effect_label4_alt_off : NULL;
-            smallButton = alt ? objects.ui_effect_button_small4  : NULL;
-            smallLabel =  alt ? objects.ui_effect_label_small4   : NULL;
+            smallButton = objects.ui_effect_button_small4;
+            smallLabel =  objects.ui_effect_label_small4;
             break;
         case 4:
-            button =      alt ? objects.ui_effect_button5_alt    : NULL;
-            nameLabel =   alt ? objects.ui_effect_label5_alt     : NULL;
-            onLabel =     alt ? objects.ui_effect_label5_alt_on  : NULL;
-            offLabel =    alt ? objects.ui_effect_label5_alt_off : NULL;
-            smallButton = alt ? objects.ui_effect_button_small5  : objects.ui_effect_button_small5_alt;
-            smallLabel =  alt ? objects.ui_effect_label_small5   : objects.ui_effect_label_small5_alt;
+            smallButton = objects.ui_effect_button_small5;
+            smallLabel =  objects.ui_effect_label_small5;
             break;
         case 5:
-            button =      alt ? objects.ui_effect_button6_alt    : NULL;
-            nameLabel =   alt ? objects.ui_effect_label6_alt     : NULL;
-            onLabel =     alt ? objects.ui_effect_label6_alt_on  : NULL;
-            offLabel =    alt ? objects.ui_effect_label6_alt_off : NULL;
-            smallButton = alt ? objects.ui_effect_button_small6  : objects.ui_effect_button_small6_alt;
-            smallLabel =  alt ? objects.ui_effect_label_small6   : objects.ui_effect_label_small6_alt;
+            smallButton = objects.ui_effect_button_small6;
+            smallLabel =  objects.ui_effect_label_small6;
             break;
         case 6:
-            button =      alt ? objects.ui_effect_button7_alt    : objects.ui_effect_button7;
-            nameLabel =   alt ? objects.ui_effect_label7_alt     : objects.ui_effect_label7;
-            onLabel =     alt ? objects.ui_effect_label7_alt_on  : objects.ui_effect_label7_on;
-            offLabel =    alt ? objects.ui_effect_label7_alt_off : objects.ui_effect_label7_off;
-            smallButton = alt ? objects.ui_effect_button_small7  : objects.ui_effect_button_small7_alt;
-            smallLabel =  alt ? objects.ui_effect_label_small7   : objects.ui_effect_label_small7_alt;
+            smallButton = objects.ui_effect_button_small7;
+            smallLabel =  objects.ui_effect_label_small7;
             break;
         case 7:
-            button =      alt ? objects.ui_effect_button8_alt    : objects.ui_effect_button8;
-            nameLabel =   alt ? objects.ui_effect_label8_alt     : objects.ui_effect_label8;
-            onLabel =     alt ? objects.ui_effect_label8_alt_on  : objects.ui_effect_label8_on;
-            offLabel =    alt ? objects.ui_effect_label8_alt_off : objects.ui_effect_label8_off;
-            smallButton = alt ? objects.ui_effect_button_small8  : objects.ui_effect_button_small8_alt;
-            smallLabel =  alt ? objects.ui_effect_label_small8   : objects.ui_effect_label_small8_alt;
+            smallButton = objects.ui_effect_button_small8;
+            smallLabel =  objects.ui_effect_label_small8;
             break;
         default:
             return;
     }
 
-    lv_color_t colorHex = lv_color_hex(color);
-
     if (visible) {
-        if (button != NULL) {
-            lv_obj_set_style_opa(button, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-            lv_obj_add_flag(button, LV_OBJ_FLAG_CLICKABLE); 
-        }
-        if (smallButton != NULL) {
-            lv_obj_set_style_opa(smallButton, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-        }
+        lv_obj_set_style_opa(smallButton, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     } else {
-        if (button != NULL) {
-            lv_obj_set_style_opa(button, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-            lv_obj_clear_flag(button, LV_OBJ_FLAG_CLICKABLE);
-        }
-        if (smallButton != NULL) {
-            lv_obj_set_style_opa(smallButton, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-        }
+        lv_obj_set_style_opa(smallButton, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
         return;
     }
 
-    if (nameLabel != NULL) {
-        lv_label_set_text(nameLabel, effect);
-    }
-    if (smallButton != NULL) {
-        lv_label_set_text(smallLabel, effect);
-    }
-    if (button != NULL) {
-        lv_obj_set_style_bg_color(button, colorHex, LV_PART_MAIN | LV_STATE_DEFAULT);
-        lv_obj_set_style_bg_color(button, colorHex, LV_PART_MAIN | LV_STATE_CHECKED);
-    }
-    if (smallButton != NULL) {
-        lv_obj_set_style_bg_color(smallButton, colorHex, LV_PART_MAIN | LV_STATE_DEFAULT);
-        lv_obj_set_style_bg_color(smallButton, colorHex, LV_PART_MAIN | LV_STATE_CHECKED);
-    }
+    lv_label_set_text(smallLabel, title);
+    lv_obj_set_style_bg_color(smallButton, color, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(smallButton, color, LV_PART_MAIN | LV_STATE_CHECKED);
 
     if (selectedValueIndex == FX_SELECTED_VALUE_2) {
-        if (button != NULL) {
-            lv_obj_add_state(button, LV_STATE_CHECKED);
-        }
-        if (smallButton != NULL) {
-            lv_obj_add_state(smallButton, LV_STATE_CHECKED);
+        lv_obj_add_state(smallButton, LV_STATE_CHECKED);
+    } else {
+        lv_obj_clear_state(smallButton, LV_STATE_CHECKED);
+    }
+}
+
+static void setFSBigButton(
+    uint32_t buttonIndex,
+    lv_color_t color,
+    FxSelectedValueIndex_t selectedValueIndex,
+    const char *title,
+    const char *index,
+    const char *value1,
+    const char *value2,
+    bool visible
+) {
+    lv_obj_t *button;
+    lv_obj_t *nameLabel;
+    lv_obj_t *indexLabel;
+    lv_obj_t *onLabel;
+    lv_obj_t *offLabel;
+
+    switch (buttonIndex) {
+        case 0:
+            button =      objects.ui_effect_button1;
+            nameLabel =   objects.ui_effect_label1;
+            indexLabel =  objects.ui_preset_index1;
+            onLabel =     objects.ui_effect_label1_on;
+            offLabel =    objects.ui_effect_label1_off;
+            break;
+        case 1:
+            button =      objects.ui_effect_button2;
+            nameLabel =   objects.ui_effect_label2;
+            indexLabel =  objects.ui_preset_index2;
+            onLabel =     objects.ui_effect_label2_on;
+            offLabel =    objects.ui_effect_label2_off;
+            break;
+        case 2:
+            button =      objects.ui_effect_button3;
+            nameLabel =   objects.ui_effect_label3;
+            indexLabel =  objects.ui_preset_index3;
+            onLabel =     objects.ui_effect_label3_on;
+            offLabel =    objects.ui_effect_label3_off;
+            break;
+        case 3:
+            button =      objects.ui_effect_button4;
+            nameLabel =   objects.ui_effect_label4;
+            indexLabel =  objects.ui_preset_index4;
+            onLabel =     objects.ui_effect_label4_on;
+            offLabel =    objects.ui_effect_label4_off;
+            break;
+        case 4:
+            button =      objects.ui_effect_button5;
+            nameLabel =   objects.ui_effect_label5;
+            indexLabel =  NULL;
+            onLabel =     objects.ui_effect_label5_on;
+            offLabel =    objects.ui_effect_label5_off;
+            break;
+        case 5:
+            button =      objects.ui_effect_button6;
+            nameLabel =   objects.ui_effect_label6;
+            indexLabel =  NULL;
+            onLabel =     objects.ui_effect_label6_on;
+            offLabel =    objects.ui_effect_label6_off;
+            break;
+        case 6:
+            button =      objects.ui_effect_button7;
+            nameLabel =   objects.ui_effect_label7;
+            indexLabel =  NULL;
+            onLabel =     objects.ui_effect_label7_on;
+            offLabel =    objects.ui_effect_label7_off;
+            break;
+        case 7:
+            button =      objects.ui_effect_button8;
+            nameLabel =   objects.ui_effect_label8;
+            indexLabel =  NULL;
+            onLabel =     objects.ui_effect_label8_on;
+            offLabel =    objects.ui_effect_label8_off;
+            break;
+        default:
+            return;
+    }
+
+    if (visible) {
+        lv_obj_set_style_opa(button, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+        lv_obj_add_flag(button, LV_OBJ_FLAG_CLICKABLE);
+    } else {
+        lv_obj_set_style_opa(button, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+        lv_obj_clear_flag(button, LV_OBJ_FLAG_CLICKABLE);
+        return;
+    }
+
+    lv_label_set_text(nameLabel, title);
+    lv_obj_set_style_bg_color(button, color, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(button, color, LV_PART_MAIN | LV_STATE_CHECKED);
+
+    if (selectedValueIndex == FX_SELECTED_VALUE_2) {
+        lv_obj_add_state(button, LV_STATE_CHECKED);
+
+        if (indexLabel != NULL) {
+            lv_obj_add_state(indexLabel, LV_STATE_CHECKED);
         }
     } else {
-        if (button != NULL) {
-            lv_obj_clear_state(button, LV_STATE_CHECKED);
-        }
-        if (smallButton != NULL) {
-            lv_obj_clear_state(smallButton, LV_STATE_CHECKED);
+        lv_obj_clear_state(button, LV_STATE_CHECKED);
+
+        if (indexLabel != NULL) {
+            lv_obj_clear_state(indexLabel, LV_STATE_CHECKED);
         }
     }
 
-    if (button == NULL) {
-        return;
+    if (indexLabel != NULL) {
+        if (index != NULL) {
+            lv_label_set_text(indexLabel, index);
+            lv_obj_set_style_text_color(indexLabel, color, LV_PART_MAIN | LV_STATE_DEFAULT);
+            lv_obj_clear_flag(indexLabel, LV_OBJ_FLAG_HIDDEN);
+        } else {
+            lv_obj_add_flag(indexLabel, LV_OBJ_FLAG_HIDDEN);
+        }
     }
+
     if (value1 != NULL) {
         lv_label_set_text(offLabel, value1);
         lv_obj_clear_flag(offLabel, LV_OBJ_FLAG_HIDDEN);
@@ -1328,14 +1409,14 @@ static void setFSButton(
     switch (selectedValueIndex) {
         case FX_SELECTED_VALUE_NONE: {
             lv_obj_set_style_opa(offLabel, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-            lv_obj_set_style_text_color(offLabel, colorHex, LV_PART_MAIN | LV_STATE_DEFAULT);
-            lv_obj_set_style_text_color(onLabel, colorHex, LV_PART_MAIN | LV_STATE_DEFAULT);
+            lv_obj_set_style_text_color(offLabel, color, LV_PART_MAIN | LV_STATE_DEFAULT);
+            lv_obj_set_style_text_color(onLabel, color, LV_PART_MAIN | LV_STATE_DEFAULT);
         } break;
 
         case FX_SELECTED_VALUE_1: {
             lv_obj_set_style_opa(offLabel, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
             lv_obj_set_style_text_color(offLabel, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
-            lv_obj_set_style_text_color(onLabel, colorHex, LV_PART_MAIN | LV_STATE_DEFAULT);
+            lv_obj_set_style_text_color(onLabel, color, LV_PART_MAIN | LV_STATE_DEFAULT);
         } break;
 
         case FX_SELECTED_VALUE_2: {
@@ -1354,96 +1435,149 @@ static void updateFSButtons() {
 
     for (uint32_t buttonIndex = 0; buttonIndex < MAX_EXTERNAL_EFFECT_FOOTSWITCHES; buttonIndex++)
     {
-        for (int a = 0; a <= 1; a++)
+        for (int s = 0; s <= 1; s++)
         {
-            bool alt = a ? true : false;
-
-            if (!alt && buttonIndex < 4) {
-                continue;
-            }
-
+            bool small = s ? true : false;
             bool didSet = false;
+            
+            // if
+            // small == false, ui_AltMode == false
+            // or
+            // small == true,  ui_AltMode == true
+            bool alt = small == ui_AltMode;
 
-            for (uint32_t item = 0; item < MAX_EXTERNAL_EFFECT_FOOTSWITCHES; item++)
-            {
-                tExternalFootswitchEffectConfig config;
-                
-                control_get_config_item_external_fs_config(item, alt, &config);
+            if (alt && buttonIndex < 6) {
+                FxSelectedValueIndex_t selectedValueIndex = FX_SELECTED_VALUE_NONE;
+                uint32_t color;
+                char *name = NULL;
+                const char *presetIndex = NULL;
 
-                if (config.Switch != buttonIndex) {
-                    continue;
+                if (buttonIndex < 4) {
+                    bool isInCurrentBank = (ui_PresetIndex/4) == ui_BankIndex;
+                    uint16_t selectedPresetButtonIndex = ui_PresetIndex % 4;
+                    bool selected = isInCurrentBank && selectedPresetButtonIndex == buttonIndex;
+                    
+                    uint8_t presetIndexValue = ui_BankIndex * 4 + buttonIndex;
+                //     // selectedValueIndex = control_get_current_preset_index() == presetIndexValue ? FX_SELECTED_VALUE_2 : FX_SELECTED_VALUE_1;
+                    selectedValueIndex = selected ? FX_SELECTED_VALUE_2 : FX_SELECTED_VALUE_1;
+                    
+                    const char *indexFormat = "%d";
+                    switch (buttonIndex) {
+                        case 0: indexFormat = "%dA"; break;
+                        case 1: indexFormat = "%dB"; break;
+                        case 2: indexFormat = "%dC"; break;
+                        case 3: indexFormat = "%dD"; break;
+                        default: break;
+                    }
+                    sprintf(buffer1, indexFormat, ui_BankIndex + 1);
+                    presetIndex = buffer1;
+
+                    control_get_preset_name(presetIndexValue, buffer2);
+                    name = buffer2;
+
+                    color = get_preset_color(presetIndexValue);
+                } else {
+                    name = buttonIndex == 4 ? "↓" : "↑";
+                    color = theme_colors[THEME_ID_DEFAULT][COLOR_ID_DEFAULT_GRAY];
                 }
 
-                TonexParameter_t param = midi_helper_get_param_for_change_num(config.CC, config.Value_1, config.Value_2);
-
-                if (param == TONEX_UNKNOWN) {
-                    break;
-                }
-                
-                ParamType_t type;
-                FxSelectedValueIndex_t selectedValueIndex;
-                MidiValue_t CC;
-
-                if (fx_handler_helper_get_values(&param, config, &type, &selectedValueIndex, &CC) != ESP_OK) {
-                    break;
+                if (small) {
+                    setFSSmallButton(buttonIndex, lv_color_hex(color), selectedValueIndex, name, true);
+                } else {
+                    setFSBigButton(buttonIndex, lv_color_hex(color), selectedValueIndex, name, presetIndex, NULL, NULL, true);
                 }
 
-                tModellerParameter *param_ptr;
-
-                if (tonex_params_get_locked_access(&param_ptr) != ESP_OK) {
-                    break;
-                }
-
-                tModellerParameter param_entry = param_ptr[param];
-                // // float paramValue = param_entry.Value;
-                uint32_t color = 0x000000;
-                const char *name = NULL;
-                const char *value1 = NULL;
-                const char *value2 = NULL;
-
-                switch (type) {
-                    case MODELLER_PARAM_TYPE_SWITCH: {
-                    } break;
-
-                    case MODELLER_PARAM_TYPE_SELECT: {
-                    } break;
-
-                    case MODELLER_PARAM_TYPE_RANGE: {
-                //         float value_1 = midi_helper_scale_midi_to_float(param, config.Value_1);
-                //         float value_2 = midi_helper_scale_midi_to_float(param, config.Value_2);
-                //         if ((param_entry.Max - param_entry.Min) > 10.0f) {
-                //             sprintf(buffer1, "%.0f", value_1);
-                //             sprintf(buffer2, "%.0f", value_2);
-                //         } else {
-                //             sprintf(buffer1, "%.1f", value_1);
-                //             sprintf(buffer2, "%.1f", value_2);
-                //         }
-                //         value1 = buffer1;
-                //         value2 = buffer2;
-                    } break;
-                }
-
-                tonex_params_get_ui_style(
-                    param,
-                    config.Value_1,
-                    config.Value_2,
-                    &color,
-                    &name,
-                    &value1,
-                    &value2,
-                    param_ptr
-                );
-                tonex_params_release_locked_access();
-
-                setFSButton(buttonIndex, color, selectedValueIndex, name, value1, value2, alt, true);
-
-                // done, break for loop and go to next buttonIndex
                 didSet = true;
-                break;
+            } else {
+                for (uint32_t item = 0; item < MAX_EXTERNAL_EFFECT_FOOTSWITCHES; item++)
+                {
+                    tExternalFootswitchEffectConfig config;
+                    
+                    control_get_config_item_external_fs_config(item, !alt, &config);
+
+                    if (config.Switch != buttonIndex) {
+                        continue;
+                    }
+
+                    TonexParameter_t param = midi_helper_get_param_for_change_num(config.CC, config.Value_1, config.Value_2);
+
+                    if (param == TONEX_UNKNOWN) {
+                        break;
+                    }
+                    
+                    ParamType_t type;
+                    FxSelectedValueIndex_t selectedValueIndex;
+                    MidiValue_t CC;
+
+                    if (fx_handler_helper_get_values(&param, config, &type, &selectedValueIndex, &CC) != ESP_OK) {
+                        break;
+                    }
+
+                    tModellerParameter *param_ptr;
+
+                    if (tonex_params_get_locked_access(&param_ptr) != ESP_OK) {
+                        break;
+                    }
+
+                    tModellerParameter param_entry = param_ptr[param];
+                    // // float paramValue = param_entry.Value;
+                    uint32_t color = 0x000000;
+                    const char *name = NULL;
+                    const char *value1 = NULL;
+                    const char *value2 = NULL;
+
+                    switch (type) {
+                        case MODELLER_PARAM_TYPE_SWITCH: {
+                        } break;
+
+                        case MODELLER_PARAM_TYPE_SELECT: {
+                        } break;
+
+                        case MODELLER_PARAM_TYPE_RANGE: {
+                    //         float value_1 = midi_helper_scale_midi_to_float(param, config.Value_1);
+                    //         float value_2 = midi_helper_scale_midi_to_float(param, config.Value_2);
+                    //         if ((param_entry.Max - param_entry.Min) > 10.0f) {
+                    //             sprintf(buffer1, "%.0f", value_1);
+                    //             sprintf(buffer2, "%.0f", value_2);
+                    //         } else {
+                    //             sprintf(buffer1, "%.1f", value_1);
+                    //             sprintf(buffer2, "%.1f", value_2);
+                    //         }
+                    //         value1 = buffer1;
+                    //         value2 = buffer2;
+                        } break;
+                    }
+
+                    tonex_params_get_ui_style(
+                        param,
+                        config.Value_1,
+                        config.Value_2,
+                        &color,
+                        &name,
+                        &value1,
+                        &value2,
+                        param_ptr
+                    );
+                    tonex_params_release_locked_access();
+
+                    if (small) {
+                        setFSSmallButton(buttonIndex, lv_color_hex(color), selectedValueIndex, name, true);
+                    } else {
+                        setFSBigButton(buttonIndex, lv_color_hex(color), selectedValueIndex, name, NULL, value1, value2, true);
+                    }
+
+                    // done, break for loop and go to next buttonIndex
+                    didSet = true;
+                    break;
+                }
             }
 
             if (!didSet) {
-                setFSButton(buttonIndex, 0, FX_SELECTED_VALUE_NONE, NULL, NULL, NULL, alt, false);
+                if (small) {
+                    setFSSmallButton(buttonIndex, lv_color_hex(0), FX_SELECTED_VALUE_NONE, NULL, false);
+                } else {
+                    setFSBigButton(buttonIndex, lv_color_hex(0), FX_SELECTED_VALUE_NONE, NULL, NULL, NULL, NULL, false);
+                }
             }
         }
     }
@@ -1684,6 +1818,27 @@ void UI_SetWiFiStatus(uint8_t state)
 }
 
 /****************************************************************************
+* NAME:
+* DESCRIPTION:
+* PARAMETERS:
+* RETURN:
+* NOTES:
+*****************************************************************************/
+void UI_SetWiFiEnabled(uint8_t state)
+{
+    tUIUpdate ui_update;
+
+    ui_update.ElementID = UI_ELEMENT_WIFI_ENABLED;
+    ui_update.Action = UI_ACTION_SET_STATE;
+    ui_update.Value = state;
+
+    if (xQueueSend(ui_update_queue, (void*)&ui_update, 0) != pdPASS)
+    {
+        ESP_LOGE(TAG, "UI Update queue send failed!");
+    }
+}
+
+/****************************************************************************
 * NAME:        
 * DESCRIPTION: 
 * PARAMETERS:  
@@ -1750,24 +1905,6 @@ void UI_SetBankIndex(uint16_t index)
     ui_update.ElementID = UI_ELEMENT_BANK_INDEX;
     ui_update.Action = UI_ACTION_SET_STATE;
     ui_update.State = index;
-
-    // send to queue
-    if (xQueueSend(ui_update_queue, (void*)&ui_update, 0) != pdPASS)
-    {
-        ESP_LOGE(TAG, "UI Update queue send failed!");            
-    }
-}
-
-void UI_SetPresetButton(uint16_t index, uint32_t color, char *name)
-{
-    tUIUpdate ui_update;
-
-    // build command
-    ui_update.ElementID = UI_ELEMENT_PRESET_BUTTON;
-    ui_update.Action = UI_ACTION_SET_STATE;
-    ui_update.State = index;
-    ui_update.Value = color;
-    strncpy(ui_update.Text, name, MAX_UI_TEXT - 1);
 
     // send to queue
     if (xQueueSend(ui_update_queue, (void*)&ui_update, 0) != pdPASS)
@@ -2040,88 +2177,6 @@ void updateIconOrder(void)
         } break;
     }
 }
-
-#if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
-/****************************************************************************
-* NAME:        
-* DESCRIPTION: 
-* PARAMETERS:  
-* RETURN:      
-* NOTES:       
-*****************************************************************************/
-void update_selected_preset_button()
-{
-    switch (usb_get_connected_modeller_type())
-    {
-        case AMP_MODELLER_TONEX_ONE:        // fallthrough
-        case AMP_MODELLER_TONEX:            // fallthrough
-        default:
-        {
-            // tonex_update_selected_preset_button();
-            bool isInCurrentBank = (ui_PresetIndex/4) == ui_BankIndex;
-            uint16_t selectedPresetButtonIndex = ui_PresetIndex % 4;
-            
-            char buf[6];
-            switch (selectedPresetButtonIndex) {
-                case 0: sprintf(buf, "%dA", ui_PresetIndex/4 + 1); break;
-                case 1: sprintf(buf, "%dB", ui_PresetIndex/4 + 1); break;
-                case 2: sprintf(buf, "%dC", ui_PresetIndex/4 + 1); break;
-                case 3: sprintf(buf, "%dD", ui_PresetIndex/4 + 1); break;
-            }
-            lv_label_set_text(objects.ui_preset_number_label, buf);
-
-            bool selected1 = /*!ui_AltMode &&*/ isInCurrentBank && selectedPresetButtonIndex == 0;
-            bool selected2 = /*!ui_AltMode &&*/ isInCurrentBank && selectedPresetButtonIndex == 1;
-            bool selected3 = /*!ui_AltMode &&*/ isInCurrentBank && selectedPresetButtonIndex == 2;
-            bool selected4 = /*!ui_AltMode &&*/ isInCurrentBank && selectedPresetButtonIndex == 3;
-
-            if (selected1) {
-                lv_obj_add_state(objects.ui_preset_button1, LV_STATE_CHECKED);
-                lv_obj_add_state(objects.ui_effect_button_small1_alt, LV_STATE_CHECKED);
-                lv_obj_add_state(objects.ui_preset_index1, LV_STATE_CHECKED);
-            } else {
-                lv_obj_clear_state(objects.ui_preset_button1, LV_STATE_CHECKED);
-                lv_obj_clear_state(objects.ui_effect_button_small1_alt, LV_STATE_CHECKED);
-                lv_obj_clear_state(objects.ui_preset_index1, LV_STATE_CHECKED);
-            }
-            
-            if (selected2) {
-                lv_obj_add_state(objects.ui_preset_button2, LV_STATE_CHECKED);
-                lv_obj_add_state(objects.ui_effect_button_small2_alt, LV_STATE_CHECKED);
-                lv_obj_add_state(objects.ui_preset_index2, LV_STATE_CHECKED);
-            } else {
-                lv_obj_clear_state(objects.ui_preset_button2, LV_STATE_CHECKED);
-                lv_obj_clear_state(objects.ui_effect_button_small2_alt, LV_STATE_CHECKED);
-                lv_obj_clear_state(objects.ui_preset_index2, LV_STATE_CHECKED);
-            }
-            
-            if (selected3) {
-                lv_obj_add_state(objects.ui_preset_button3, LV_STATE_CHECKED);
-                lv_obj_add_state(objects.ui_effect_button_small3_alt, LV_STATE_CHECKED);
-                lv_obj_add_state(objects.ui_preset_index3, LV_STATE_CHECKED);
-            } else {
-                lv_obj_clear_state(objects.ui_preset_button3, LV_STATE_CHECKED);
-                lv_obj_clear_state(objects.ui_effect_button_small3_alt, LV_STATE_CHECKED);
-                lv_obj_clear_state(objects.ui_preset_index3, LV_STATE_CHECKED);
-            }
-            
-            if (selected4) {
-                lv_obj_add_state(objects.ui_preset_button4, LV_STATE_CHECKED);
-                lv_obj_add_state(objects.ui_effect_button_small4_alt, LV_STATE_CHECKED);
-                lv_obj_add_state(objects.ui_preset_index4, LV_STATE_CHECKED);
-            } else {
-                lv_obj_clear_state(objects.ui_preset_button4, LV_STATE_CHECKED);
-                lv_obj_clear_state(objects.ui_effect_button_small4_alt, LV_STATE_CHECKED);
-                lv_obj_clear_state(objects.ui_preset_index4, LV_STATE_CHECKED);
-            }
-        } break;
-
-        case AMP_MODELLER_VALETON_GP5:
-        {
-        } break;
-    }
-}
-#endif //CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
 #endif //CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI
 
 /****************************************************************************
@@ -2200,9 +2255,26 @@ static  __attribute__((unused)) uint8_t update_ui_element(tUIUpdate* update)
         case UI_ELEMENT_WIFI_STATUS:
         {
             #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
-            element_1 = objects.ui_wi_fi_button;
+            // The custom home button represents WiFi power, not client connection state.
+            element_1 = NULL;
             #else
             element_1 = objects.ui_wi_fi_status_conn;
+            #endif
+        } break;
+
+        case UI_ELEMENT_WIFI_ENABLED:
+        {
+            #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+            if (update->Value == 0)
+            {
+                lv_obj_clear_state(objects.ui_wi_fi_switch, LV_STATE_CHECKED);
+            }
+            else
+            {
+                lv_obj_add_state(objects.ui_wi_fi_switch, LV_STATE_CHECKED);
+            }
+
+            element_1 = objects.ui_wi_fi_button;
             #endif
         } break;
 
@@ -2211,7 +2283,7 @@ static  __attribute__((unused)) uint8_t update_ui_element(tUIUpdate* update)
             element_1 = objects.ui_preset_heading_label;
             ui_PresetIndex = update->Value;
 #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
-            update_selected_preset_button();
+            updateFSButtons();
 #endif //CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
         } break;
 
@@ -2219,56 +2291,6 @@ static  __attribute__((unused)) uint8_t update_ui_element(tUIUpdate* update)
         {
 #if CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI
             element_1 = objects.ui_bank_value_label;
-#endif
-        } break;
-
-        case UI_ELEMENT_PRESET_BUTTON:
-        {
-#if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
-            lv_obj_t *button = NULL;
-            lv_obj_t *label = NULL;
-            lv_obj_t *indexLabel = NULL;
-            lv_obj_t *buttonSmall = NULL;
-            lv_obj_t *labelSmall = NULL;
-
-            switch (update->State) {
-                case 0: {
-                    button = objects.ui_preset_button1;
-                    label = objects.ui_preset_label1;
-                    indexLabel = objects.ui_preset_index1;
-                    buttonSmall = objects.ui_effect_button_small1_alt;
-                    labelSmall = objects.ui_effect_label_small1_alt;
-                } break;
-                case 1: {
-                    button = objects.ui_preset_button2;
-                    label = objects.ui_preset_label2;
-                    indexLabel = objects.ui_preset_index2;
-                    buttonSmall = objects.ui_effect_button_small2_alt;
-                    labelSmall = objects.ui_effect_label_small2_alt;
-                } break;
-                case 2: {
-                    button = objects.ui_preset_button3;
-                    label = objects.ui_preset_label3;
-                    indexLabel = objects.ui_preset_index3;
-                    buttonSmall = objects.ui_effect_button_small3_alt;
-                    labelSmall = objects.ui_effect_label_small3_alt;
-                } break;
-                case 3: {
-                    button = objects.ui_preset_button4;
-                    label = objects.ui_preset_label4;
-                    indexLabel = objects.ui_preset_index4;
-                    buttonSmall = objects.ui_effect_button_small4_alt;
-                    labelSmall = objects.ui_effect_label_small4_alt;
-                } break;
-            }
-
-            lv_obj_set_style_bg_color(button, lv_color_hex(update->Value), LV_PART_MAIN | LV_STATE_DEFAULT);
-            lv_obj_set_style_bg_color(button, lv_color_hex(update->Value), LV_PART_MAIN | LV_STATE_CHECKED);
-            lv_obj_set_style_bg_color(buttonSmall, lv_color_hex(update->Value), LV_PART_MAIN | LV_STATE_DEFAULT);
-            lv_obj_set_style_bg_color(buttonSmall, lv_color_hex(update->Value), LV_PART_MAIN | LV_STATE_CHECKED);
-            lv_obj_set_style_text_color(indexLabel, lv_color_hex(update->Value), LV_PART_MAIN | LV_STATE_DEFAULT);
-            lv_label_set_text(label, update->Text);
-            lv_label_set_text(labelSmall, update->Text);
 #endif
         } break;
 
@@ -2488,17 +2510,7 @@ static  __attribute__((unused)) uint8_t update_ui_element(tUIUpdate* update)
                 lv_label_set_text(objects.ui_bank_value_label, buf);
                 ui_BankIndex = update->State;
 #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
-
-                sprintf(buf, "%dA", update->State + 1);
-                lv_label_set_text(objects.ui_preset_index1, buf);
-                sprintf(buf, "%dB", update->State + 1);
-                lv_label_set_text(objects.ui_preset_index2, buf);
-                sprintf(buf, "%dC", update->State + 1);
-                lv_label_set_text(objects.ui_preset_index3, buf);
-                sprintf(buf, "%dD", update->State + 1);
-                lv_label_set_text(objects.ui_preset_index4, buf);
-                
-                update_selected_preset_button();
+                updateFSButtons();
 #endif //CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM  
             }
 #endif //CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI  
@@ -2532,41 +2544,13 @@ static  __attribute__((unused)) uint8_t update_ui_element(tUIUpdate* update)
 
             if (ui_AltMode) {
                 lv_obj_add_state(objects.ui_alt_button, LV_STATE_CHECKED);
-                lv_obj_add_flag(objects.ui_effect_chain_container, LV_OBJ_FLAG_HIDDEN);
-                lv_obj_add_flag(objects.ui_buttons_regular, LV_OBJ_FLAG_HIDDEN);
-                lv_obj_clear_flag(objects.ui_buttons_alt, LV_OBJ_FLAG_HIDDEN);
-                lv_obj_set_width(objects.ui_preset_heading_label, 226);
             } else {
                 lv_obj_clear_state(objects.ui_alt_button, LV_STATE_CHECKED);
-                lv_obj_clear_flag(objects.ui_effect_chain_container, LV_OBJ_FLAG_HIDDEN);
-                lv_obj_clear_flag(objects.ui_buttons_regular, LV_OBJ_FLAG_HIDDEN);
-                lv_obj_add_flag(objects.ui_buttons_alt, LV_OBJ_FLAG_HIDDEN);
-                lv_obj_set_width(objects.ui_preset_heading_label, 276);
             }
 
             updateFSButtons();
 #endif   
         } break;
-
-//         case UI_ACTION_SET_FS_BUTTON:
-//         {
-// #if CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI
-//             lv_label_set_text(element_1, update->Text);
-
-//             lv_obj_set_style_bg_color(element_1, lv_color_hex(update->Value), LV_PART_MAIN | LV_STATE_DEFAULT);
-//             lv_obj_set_style_border_color(element_1, lv_color_hex(update->Value), LV_PART_MAIN | LV_STATE_DEFAULT);
-
-//             if (update->State == true) {
-//                 lv_obj_set_style_text_color(element_1, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
-//                 lv_obj_set_style_bg_opa(element_1, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
-//                 lv_obj_set_style_border_opa(element_1, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-//             } else {
-//                 lv_obj_set_style_text_color(element_1, lv_color_hex(update->Value), LV_PART_MAIN | LV_STATE_DEFAULT);
-//                 lv_obj_set_style_bg_opa(element_1, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-//                 lv_obj_set_style_border_opa(element_1, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
-//             }
-// #endif   
-//         } break;
 
         case UI_ACTION_SET_LABEL_TEXT:
         {

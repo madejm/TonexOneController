@@ -285,43 +285,6 @@ static void DumpUserConfig(void);
 static uint8_t MigrateUserData(void);
 static void UpdateFootswitchLeds(void);
 
-#if CONFIG_TONEX_CONTROLLER_HAS_DISPLAY
-/****************************************************************************
-* NAME:        
-* DESCRIPTION: 
-* PARAMETERS:  
-* RETURN:      
-* NOTES:       
-*****************************************************************************/
-static void update_bank_ui()
-{
-    uint8_t presetIndex1 = ControlData.ConfigData.PresetOrderMappingConfig.PresetOrder[ControlData.BankIndex * 4];
-    uint8_t presetIndex2 = ControlData.ConfigData.PresetOrderMappingConfig.PresetOrder[ControlData.BankIndex * 4 + 1];
-    uint8_t presetIndex3 = ControlData.ConfigData.PresetOrderMappingConfig.PresetOrder[ControlData.BankIndex * 4 + 2];
-    uint8_t presetIndex4 = ControlData.ConfigData.PresetOrderMappingConfig.PresetOrder[ControlData.BankIndex * 4 + 3];
-
-    uint32_t presetColor1;
-    uint32_t presetColor2;
-    uint32_t presetColor3;
-    uint32_t presetColor4;
-    tonex_params_colors_get_color(presetIndex1, &presetColor1);
-    tonex_params_colors_get_color(presetIndex2, &presetColor2);
-    tonex_params_colors_get_color(presetIndex3, &presetColor3);
-    tonex_params_colors_get_color(presetIndex4, &presetColor4);
-
-    char *presetName1 = ControlData.PresetNames[presetIndex1];
-    char *presetName2 = ControlData.PresetNames[presetIndex2];
-    char *presetName3 = ControlData.PresetNames[presetIndex3];
-    char *presetName4 = ControlData.PresetNames[presetIndex4];
-
-    UI_SetBankIndex(ControlData.BankIndex);
-    UI_SetPresetButton(0, presetColor1, presetName1);
-    UI_SetPresetButton(1, presetColor2, presetName2);
-    UI_SetPresetButton(2, presetColor3, presetName3);
-    UI_SetPresetButton(3, presetColor4, presetName4);
-}
-#endif
-
 /****************************************************************************
 * NAME:        
 * DESCRIPTION: 
@@ -444,7 +407,7 @@ static uint8_t process_control_command(tControlMessage* message)
 #if CONFIG_TONEX_CONTROLLER_HAS_DISPLAY
             // update UI
             ControlData.BankIndex = message->Value;
-            update_bank_ui();
+            UI_SetBankIndex(ControlData.BankIndex);
 #endif
         } break;
 
@@ -525,7 +488,6 @@ static uint8_t process_control_command(tControlMessage* message)
 #if CONFIG_TONEX_CONTROLLER_HAS_DISPLAY
             // update UI
             UI_SetAmpSkin(ControlData.ConfigData.SkinConfig.SkinIndex[ControlData.PresetIndex]);
-            update_bank_ui();
 #endif                 
         } break;
 

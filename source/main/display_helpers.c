@@ -24,6 +24,14 @@
        __typeof__ (val) _val = (val); \
        _val < _mi ? _mi : (_val > _ma ? _ma : _val); })
 
+void lv_obj_set_checked(lv_obj_t * obj, bool checked) {
+    if (checked) {
+        lv_obj_add_state(obj, LV_STATE_CHECKED);
+    } else {
+        lv_obj_clear_state(obj, LV_STATE_CHECKED);
+    }
+}
+
 typedef struct {
     const char *format;
     float defaultValue;
@@ -276,5 +284,15 @@ void customize_ui() {
     lv_helper_create_arc_gesture(objects.ui_volume_slider,               objects.ui_volume_value,               "%1.0f", 1.0f, 5);
 
     eq_canvas_setup();
+}
+
+uint32_t get_preset_color(uint16_t index)
+{
+    uint8_t *preset_order = control_get_preset_order();
+    uint8_t preset_index = preset_order[index];
+    
+    uint32_t color = 0x000000;
+    tonex_params_colors_get_color(preset_index, &color);
+    return color;
 }
 #endif

@@ -78,26 +78,13 @@ limitations under the License.
 #include "LP5562.h"
 #include "tonex_params.h"
 #include "platform_common.h"
+#include "display_helpers.h"
 
 static const char __attribute__((unused)) *TAG = "app_display_tonex";
 
 #if CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI          
     static lv_obj_t* edit_object = NULL;
 #endif 
-
-#if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
-#define LV_SLIDER_SET_RANGE(obj, min, max) lv_arc_set_range(obj, min, max)
-#define LV_SLIDER_SET_VALUE(obj, val) lv_arc_set_value(obj, val)
-#define LV_SLIDER_GET_VALUE(obj) lv_arc_get_value(obj)
-#define FRMT(fmt, unit) fmt
-#define FRMT_NS(fmt, unit) fmt
-#else
-#define LV_SLIDER_SET_RANGE(obj, min, max) lv_slider_set_range(obj, min, max)
-#define LV_SLIDER_SET_VALUE(obj, val) lv_slider_set_value(obj, val, LV_ANIM_OFF)
-#define LV_SLIDER_GET_VALUE(obj) lv_slider_get_value(obj)
-#define FRMT(fmt, unit) fmt " " unit
-#define FRMT_NS(fmt, unit) fmt unit
-#endif
 
 /****************************************************************************
 * NAME:        

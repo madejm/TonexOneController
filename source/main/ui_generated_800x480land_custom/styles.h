@@ -20,6 +20,12 @@ lv_style_t *get_style_button_basic_MAIN_PRESSED();
 void add_style_button_basic(lv_obj_t *obj);
 void remove_style_button_basic(lv_obj_t *obj);
 
+// Style: Button Highlighted
+lv_style_t *get_style_button_highlighted_MAIN_DEFAULT();
+lv_style_t *get_style_button_highlighted_MAIN_PRESSED();
+void add_style_button_highlighted(lv_obj_t *obj);
+void remove_style_button_highlighted(lv_obj_t *obj);
+
 // Style: Button Preset List Options
 lv_style_t *get_style_button_preset_list_options_MAIN_DEFAULT();
 lv_style_t *get_style_button_preset_list_options_MAIN_PRESSED();
@@ -45,6 +51,13 @@ lv_style_t *get_style_button_preset_MAIN_PRESSED();
 lv_style_t *get_style_button_preset_MAIN_CHECKED();
 void add_style_button_preset(lv_obj_t *obj);
 void remove_style_button_preset(lv_obj_t *obj);
+
+// Style: Button Effect
+lv_style_t *get_style_button_effect_MAIN_DEFAULT();
+lv_style_t *get_style_button_effect_MAIN_PRESSED();
+lv_style_t *get_style_button_effect_MAIN_CHECKED();
+void add_style_button_effect(lv_obj_t *obj);
+void remove_style_button_effect(lv_obj_t *obj);
 
 // Style: Label Preset Name
 lv_style_t *get_style_label_preset_name_MAIN_DEFAULT();
@@ -91,6 +104,7 @@ void remove_style_arc_settings(lv_obj_t *obj);
 
 // Style: Button Preset List
 lv_style_t *get_style_button_preset_list_MAIN_DEFAULT();
+lv_style_t *get_style_button_preset_list_MAIN_CHECKED();
 void add_style_button_preset_list(lv_obj_t *obj);
 void remove_style_button_preset_list(lv_obj_t *obj);
 
@@ -154,6 +168,23 @@ lv_style_t *get_style_dropdown_list_sub_settings_SELECTED_DEFAULT();
 lv_style_t *get_style_dropdown_list_sub_settings_SELECTED_CHECKED();
 void add_style_dropdown_list_sub_settings(lv_obj_t *obj);
 void remove_style_dropdown_list_sub_settings(lv_obj_t *obj);
+
+// Style: Textarea Settings
+lv_style_t *get_style_textarea_settings_MAIN_DEFAULT();
+lv_style_t *get_style_textarea_settings_TEXTAREA_PLACEHOLDER_DEFAULT();
+void add_style_textarea_settings(lv_obj_t *obj);
+void remove_style_textarea_settings(lv_obj_t *obj);
+
+// Style: Checkbox Settings
+lv_style_t *get_style_checkbox_settings_INDICATOR_DEFAULT();
+lv_style_t *get_style_checkbox_settings_INDICATOR_CHECKED();
+void add_style_checkbox_settings(lv_obj_t *obj);
+void remove_style_checkbox_settings(lv_obj_t *obj);
+
+// Style: Panel Preset List Color
+lv_style_t *get_style_panel_preset_list_color_MAIN_DEFAULT();
+void add_style_panel_preset_list_color(lv_obj_t *obj);
+void remove_style_panel_preset_list_color(lv_obj_t *obj);
 
 #ifdef __cplusplus
 }

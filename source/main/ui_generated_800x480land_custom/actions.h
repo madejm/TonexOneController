@@ -17,20 +17,13 @@ extern void action_gesture(lv_event_t * e);
 extern void action_value_clicked(lv_event_t * e);
 extern void action_value_keyboard_ok(lv_event_t * e);
 extern void action_alt_button_clicked(lv_event_t * e);
-extern void action_fs6_clicked(lv_event_t * e);
-extern void action_fs7_clicked(lv_event_t * e);
-extern void action_fs5_clicked(lv_event_t * e);
-extern void action_fs0_clicked(lv_event_t * e);
 extern void action_fs1_clicked(lv_event_t * e);
 extern void action_fs2_clicked(lv_event_t * e);
 extern void action_fs3_clicked(lv_event_t * e);
 extern void action_fs4_clicked(lv_event_t * e);
-extern void action_previous_bank_clicked(lv_event_t * e);
-extern void action_next_bank_clicked(lv_event_t * e);
-extern void action_preset1_clicked(lv_event_t * e);
-extern void action_preset2_clicked(lv_event_t * e);
-extern void action_preset3_clicked(lv_event_t * e);
-extern void action_preset4_clicked(lv_event_t * e);
+extern void action_fs6_clicked(lv_event_t * e);
+extern void action_fs7_clicked(lv_event_t * e);
+extern void action_fs5_clicked(lv_event_t * e);
 extern void action_tap_tempo_clicked(lv_event_t * e);
 extern void action_close_presets_page(lv_event_t * e);
 extern void action_preset_list_select(lv_event_t * e);
@@ -50,6 +43,10 @@ extern void action_open_controller_page_clicked(lv_event_t * e);
 extern void action_controller_keyboard_ok(lv_event_t * e);
 extern void action_wifi_password_hidden_clicked(lv_event_t * e);
 extern void action_fs8_clicked(lv_event_t * e);
+extern void action_wifi(lv_event_t * e);
+extern void action_usb(lv_event_t * e);
+extern void action_usb_flash(lv_event_t * e);
+extern void action_wi_fi_enabled_changed(lv_event_t * e);
 
 #ifdef __cplusplus
 }
