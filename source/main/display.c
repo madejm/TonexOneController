@@ -550,6 +550,7 @@ void action_usb_flash(lv_event_t * e) {
 
 void action_wi_fi_enabled_changed(lv_event_t * e) {
     lv_obj_t *wifi_switch = lv_event_get_target(e);
+    wifi_config_set_enabled(lv_obj_has_state(wifi_switch, LV_STATE_CHECKED));
 }
 #endif //CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
 
@@ -716,6 +717,17 @@ void action_show_settings_page(lv_event_t * e)
     lv_textarea_set_text(objects.ui_wifi_ssid_textarea, WifiSSID);
     lv_textarea_set_text(objects.ui_wifi_password_textarea, WifiPassword);
     lv_textarea_set_text(objects.ui_mdns_name_textarea, MDNSName);
+
+#if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+    if (wifi_config_is_enabled())
+    {
+        lv_obj_add_state(objects.ui_wi_fi_switch, LV_STATE_CHECKED);
+    }
+    else
+    {
+        lv_obj_clear_state(objects.ui_wi_fi_switch, LV_STATE_CHECKED);
+    }
+#endif
 
     switch (usb_get_connected_modeller_type())
     {

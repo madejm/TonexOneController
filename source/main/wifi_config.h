@@ -31,6 +31,8 @@ typedef enum
 
 void wifi_config_init(void);
 bool wifi_config_ready(void);
+bool wifi_config_is_enabled(void);
+void wifi_config_set_enabled(bool enabled);
 void wifi_handle_ble_json(const char *payload);
 
 // threadsafe API

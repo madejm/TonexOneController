@@ -86,6 +86,7 @@ static httpd_config_t http_config = HTTPD_DEFAULT_CONFIG();
 static EventGroupHandle_t s_wifi_event_group;
 static QueueHandle_t wifi_input_queue;
 static volatile bool wifi_json_ready = false;
+static volatile bool wifi_enabled = false;
 static uint8_t presetIndexes[MAX_SUPPORTED_PRESETS];
 
 typedef esp_err_t (*wifi_json_sender_t)(void *ctx, const char *payload);
@@ -109,6 +110,7 @@ static void wifi_process_ble_json_command(const char* payload);
 static esp_err_t wifi_send_ws_json(void *ctx, const char *payload);
 static esp_err_t wifi_send_ble_json_response(void *ctx, const char *payload);
 static void wifi_process_json_command(const char *payload, wifi_json_sender_t send_response, void *send_ctx, const char *source);
+static esp_err_t http_server_init(void);
 
 typedef enum: uint8_t
 {
@@ -117,7 +119,8 @@ typedef enum: uint8_t
     EVENT_SYNC_PRESET_NAME,
     EVENT_SYNC_PRESET,
     EVENT_SYNC_CONFIG,
-    EVENT_SYNC_LOG
+    EVENT_SYNC_LOG,
+    EVENT_SET_ENABLED
 } WiFiEvent;
 
 typedef struct
@@ -445,6 +448,35 @@ static uint8_t process_wifi_command(tWiFiMessage* message)
             memcpy((void*)pWebConfig->Log, (void*)message->Text, MAX_TEXT_LENGTH - 1);
             wifi_build_log_json();
             wifi_send_ws_async(pWebConfig->TempBuffer);
+        } break;
+
+        case EVENT_SET_ENABLED:
+        {
+            if (message->Value && !wifi_enabled)
+            {
+                s_retry_num = 0;
+                client_connected = 0;
+                wifi_connect_status = 0;
+                xEventGroupClearBits(s_wifi_event_group, WIFI_CONNECTED_BIT | WIFI_FAIL_BIT);
+
+                esp_err_t err = esp_wifi_start();
+                if (err == ESP_OK)
+                {
+                    wifi_enabled = true;
+                    http_server_init();
+                    UI_SetWiFiEnabled(1);
+                    ESP_LOGI(TAG, "WiFi enabled");
+                }
+                else
+                {
+                    UI_SetWiFiEnabled(0);
+                    ESP_LOGE(TAG, "Failed to enable WiFi: %s", esp_err_to_name(err));
+                }
+            }
+            else if (!message->Value && wifi_enabled)
+            {
+                wifi_kill_all();
+            }
         } break;
     }
 
@@ -2145,6 +2177,7 @@ static esp_err_t stop_webserver(void)
     if (http_server != NULL)
     {
         httpd_stop(http_server);
+        http_server = NULL;
     }
 
     return ESP_OK;
@@ -2229,7 +2262,8 @@ static void wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t e
         client_connected = 0;
         control_set_wifi_status(0);
 
-        if (control_get_config_item_int(CONFIG_ITEM_WIFI_MODE) == WIFI_MODE_ACCESS_POINT_TIMED)
+        if (wifi_enabled &&
+            (control_get_config_item_int(CONFIG_ITEM_WIFI_MODE) == WIFI_MODE_ACCESS_POINT_TIMED))
         {
             ESP_LOGI(TAG, "Wifi config stopping");
             wifi_kill_all();
@@ -2332,6 +2366,8 @@ static void wifi_init_sta(void)
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
     ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config));
     ESP_ERROR_CHECK(esp_wifi_start());
+    wifi_enabled = true;
+    UI_SetWiFiEnabled(1);
 
     ESP_LOGI(TAG, "wifi_init_sta finished.");
 
@@ -2357,7 +2393,6 @@ static void wifi_init_sta(void)
     {
         ESP_LOGE(TAG, "UNEXPECTED EVENT");
     }
-    vEventGroupDelete(s_wifi_event_group);
 }
 
 /****************************************************************************
@@ -2410,6 +2445,8 @@ static void wifi_init_softap(void)
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_AP));
     ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_AP, &wifi_config));
     ESP_ERROR_CHECK(esp_wifi_start());
+    wifi_enabled = true;
+    UI_SetWiFiEnabled(1);
 
     ESP_LOGI(TAG, "wifi_init_softap finished. SSID:%s channel:%d", wifi_config.sta.ssid, ESP_WIFI_CHANNEL);
 }
@@ -2463,8 +2500,27 @@ static void wifi_kill_all(void)
 {
     ESP_LOGI(TAG, "Wifi config stopping");
     stop_webserver();
-    vTaskDelay(pdMS_TO_TICKS(5000));
-    esp_wifi_stop();
+    wifi_enabled = false;
+    esp_err_t err = esp_wifi_stop();
+    if (err != ESP_OK)
+    {
+        wifi_enabled = true;
+        http_server_init();
+        UI_SetWiFiEnabled(1);
+        ESP_LOGE(TAG, "Failed to disable WiFi: %s", esp_err_to_name(err));
+        return;
+    }
+
+    if (LocaterData.sock >= 0)
+    {
+        close(LocaterData.sock);
+        LocaterData.sock = -1;
+    }
+
+    client_connected = 0;
+    wifi_connect_status = 0;
+    control_set_wifi_status(0);
+    UI_SetWiFiEnabled(0);
 }
 
 /****************************************************************************
@@ -2680,6 +2736,12 @@ static void wifi_config_task(void *arg)
         {
             // process it
             process_wifi_command(&message);
+
+            if ((message.Event == EVENT_SET_ENABLED) && message.Value && wifi_enabled)
+            {
+                wifi_kill_checked = 0;
+                tick_timer = xTaskGetTickCount();
+            }
         }
 
         // check locater timer
@@ -2721,4 +2783,28 @@ bool wifi_config_ready(void)
     return wifi_json_ready &&
            (pWebConfig != NULL) &&
            (wifi_input_queue != NULL);
+}
+
+bool wifi_config_is_enabled(void)
+{
+    return wifi_enabled;
+}
+
+void wifi_config_set_enabled(bool enabled)
+{
+    tWiFiMessage message = {
+        .Event = EVENT_SET_ENABLED,
+        .Value = enabled ? 1 : 0,
+    };
+
+    if (wifi_input_queue == NULL)
+    {
+        ESP_LOGW(TAG, "WiFi power request before queue ready");
+        return;
+    }
+
+    if (xQueueSend(wifi_input_queue, &message, pdMS_TO_TICKS(WIFI_QUEUE_WRITE_TIMEOUT)) != pdPASS)
+    {
+        ESP_LOGE(TAG, "WiFi power request queue send failed!");
+    }
 }
