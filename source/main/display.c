@@ -545,6 +545,7 @@ void action_usb(lv_event_t * e) {
 }
 
 void action_usb_flash(lv_event_t * e) {
+    usb_enter_download_mode();
 }
 
 void action_wi_fi_enabled_changed(lv_event_t * e) {

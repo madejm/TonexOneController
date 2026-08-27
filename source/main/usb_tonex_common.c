@@ -366,6 +366,7 @@ void tonex_common_release_memory(void)
     if (PreallocatedMemory != NULL)
     {
         heap_caps_free(PreallocatedMemory);
+        PreallocatedMemory = NULL;
     }
 
     // debug

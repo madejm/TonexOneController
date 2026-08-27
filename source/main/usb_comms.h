@@ -65,6 +65,7 @@ typedef struct
 } tUSBMessage;
 
 void init_usb_comms(void);
+void usb_enter_download_mode(void);
 
 // thread safe public API
 void usb_set_preset(uint32_t preset);

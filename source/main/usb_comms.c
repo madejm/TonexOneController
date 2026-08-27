@@ -40,6 +40,9 @@ limitations under the License.
 #include "usb/usb_host.h"
 #include "driver/i2c.h"
 #include "esp_task_wdt.h"
+#include "hal/usb_serial_jtag_ll.h"
+#include "soc/soc.h"
+#include "soc/rtc_cntl_reg.h"
 #include "usb_comms.h"
 #include "usb/cdc_acm_host.h"
 #include "usb_tonex_common.h"
@@ -68,6 +71,51 @@ static TaskHandle_t daemon_task_hdl;
 static TaskHandle_t class_driver_task_hdl;
 static uint8_t AmpModellerType = AMP_MODELLER_NONE;
 static QueueHandle_t usb_input_queue;
+static SemaphoreHandle_t usb_signaling_sem;
+
+typedef enum
+{
+    USB_COMMS_STOPPED,
+    USB_COMMS_STARTING,
+    USB_COMMS_RUNNING,
+    USB_COMMS_STOPPING,
+} usb_comms_state_t;
+
+static volatile usb_comms_state_t usb_comms_state = USB_COMMS_STOPPED;
+static volatile bool usb_stop_requested;
+static volatile bool usb_host_installed;
+static volatile bool usb_download_mode_requested;
+
+/****************************************************************************
+* NAME:        enable_usb_serial_jtag
+* DESCRIPTION: Return the shared internal PHY to USB Serial/JTAG and force a
+*              clean re-enumeration on the connected computer.
+*****************************************************************************/
+static void enable_usb_serial_jtag(void)
+{
+    int __DECLARE_RCC_ATOMIC_ENV __attribute__((unused));
+
+    usb_serial_jtag_ll_enable_bus_clock(true);
+    usb_serial_jtag_ll_phy_enable_external(false);
+
+    // Toggle the pad after mapping the internal PHY to USB Serial/JTAG so the
+    // computer sees a real disconnect followed by a clean device attachment.
+    usb_serial_jtag_ll_phy_enable_pad(false);
+    vTaskDelay(pdMS_TO_TICKS(20));
+    usb_serial_jtag_ll_phy_enable_pad(true);
+}
+
+/****************************************************************************
+* NAME:        restart_in_usb_download_mode
+* DESCRIPTION: Restart into ROM download mode after USB Host has released the
+*              shared PHY.
+*****************************************************************************/
+static void restart_in_usb_download_mode(void)
+{
+    enable_usb_serial_jtag();
+    REG_WRITE(RTC_CNTL_OPTION1_REG, RTC_CNTL_FORCE_DOWNLOAD_BOOT);
+    esp_restart();
+}
 
 /****************************************************************************
 * NAME:        
@@ -141,13 +189,30 @@ void class_driver_task(void *arg)
 
     if (err != ESP_OK)
     {
-        ESP_LOGI(TAG, "usb_host_client_register() failed!");   
+        ESP_LOGE(TAG, "usb_host_client_register() failed: %s", esp_err_to_name(err));
+        usb_stop_requested = true;
+        class_driver_task_hdl = NULL;
+        usb_host_lib_unblock();
+        vTaskDelete(NULL);
     }
 
     driver_obj.actions = CLASS_DRIVER_ACTION_NONE;
 
     while (!exit) 
     {
+        if (usb_stop_requested)
+        {
+            if (driver_obj.dev_hdl != NULL)
+            {
+                driver_obj.actions = CLASS_DRIVER_ACTION_CLOSE_DEV;
+            }
+            else
+            {
+                exit = 1;
+                continue;
+            }
+        }
+
         if (driver_obj.actions == CLASS_DRIVER_ACTION_NONE)
         {
             // Call the client event handler function - no waiting
@@ -278,6 +343,11 @@ void class_driver_task(void *arg)
 
             //exit = 1;
             driver_obj.actions &= ~CLASS_DRIVER_ACTION_CLOSE_DEV;
+
+            if (usb_stop_requested)
+            {
+                exit = 1;
+            }
         }
 
         // handle device
@@ -308,7 +378,9 @@ void class_driver_task(void *arg)
     }
 
     usb_host_client_deregister(driver_obj.client_hdl);
+    class_driver_task_hdl = NULL;
     ESP_LOGI(TAG, "USB thread exit");
+    vTaskDelete(NULL);
 }
 
 /****************************************************************************
@@ -352,14 +424,10 @@ static void host_lib_daemon_task(void *arg)
     // to initialise the USB port before we try to enumerate the bus
     vTaskDelay(500); 
 
-    //Create the USB class driver task
-    xTaskCreatePinnedToCore(class_driver_task,
-                            "class",
-                            (3 * 1024), 
-                            (void*)signaling_sem,
-                            USB_CLASS_TASK_PRIORITY,
-                            &class_driver_task_hdl,
-                            0);
+    if (usb_stop_requested)
+    {
+        goto cleanup;
+    }
 
     usb_host_config_t host_config = {
         .skip_phy_setup = false,
@@ -372,8 +440,21 @@ static void host_lib_daemon_task(void *arg)
     err = usb_host_install(&host_config);
     if (err != ESP_OK)
     {
-        ESP_LOGI(TAG, "usb_host_install() failed!");   
+        ESP_LOGE(TAG, "usb_host_install() failed: %s", esp_err_to_name(err));
+        goto cleanup;
     }
+
+    usb_host_installed = true;
+    usb_comms_state = USB_COMMS_RUNNING;
+
+    //Create the USB class driver task
+    xTaskCreatePinnedToCore(class_driver_task,
+                            "class",
+                            (3 * 1024),
+                            (void*)signaling_sem,
+                            USB_CLASS_TASK_PRIORITY,
+                            &class_driver_task_hdl,
+                            0);
 
     // Signal to the class driver task that the host library is installed
     xSemaphoreGive(signaling_sem);
@@ -381,7 +462,8 @@ static void host_lib_daemon_task(void *arg)
     //Short delay to let client task spin up
     vTaskDelay(10); 
 
-    while (1) 
+    bool wait_for_all_free = false;
+    while (!usb_stop_requested || class_driver_task_hdl != NULL)
     {
         uint32_t event_flags;
         
@@ -396,17 +478,77 @@ static void host_lib_daemon_task(void *arg)
         {
             if (event_flags & USB_HOST_LIB_EVENT_FLAGS_NO_CLIENTS) 
             {
-                //has_clients = false;
+                if (usb_host_device_free_all() == ESP_OK)
+                {
+                    wait_for_all_free = false;
+                }
+                else
+                {
+                    wait_for_all_free = true;
+                }
             }
             
             if (event_flags & USB_HOST_LIB_EVENT_FLAGS_ALL_FREE) 
             {
-                //has_devices = false;
+                wait_for_all_free = false;
             }
         }
 
         vTaskDelay(pdMS_TO_TICKS(5));
     }
+
+    while (wait_for_all_free)
+    {
+        uint32_t event_flags;
+        err = usb_host_lib_handle_events(portMAX_DELAY, &event_flags);
+        if (err == ESP_OK && (event_flags & USB_HOST_LIB_EVENT_FLAGS_ALL_FREE))
+        {
+            wait_for_all_free = false;
+        }
+    }
+
+    err = usb_host_uninstall();
+    if (err != ESP_OK)
+    {
+        ESP_LOGE(TAG, "usb_host_uninstall() failed: %s", esp_err_to_name(err));
+    }
+    else
+    {
+        usb_host_installed = false;
+
+        if (!usb_download_mode_requested)
+        {
+            // USB Host maps the internal PHY to USB OTG. Return it to USB Serial/JTAG.
+            enable_usb_serial_jtag();
+            ESP_LOGI(TAG, "USB Serial/JTAG enabled");
+        }
+    }
+
+cleanup:
+    tonex_common_release_memory();
+
+    if (usb_input_queue != NULL)
+    {
+        vQueueDelete(usb_input_queue);
+        usb_input_queue = NULL;
+    }
+
+    if (usb_signaling_sem != NULL)
+    {
+        vSemaphoreDelete(usb_signaling_sem);
+        usb_signaling_sem = NULL;
+    }
+
+    daemon_task_hdl = NULL;
+    usb_comms_state = USB_COMMS_STOPPED;
+    ESP_LOGI(TAG, "USB communications stopped");
+
+    if (usb_download_mode_requested)
+    {
+        restart_in_usb_download_mode();
+    }
+
+    vTaskDelete(NULL);
 }
 
 /****************************************************************************
@@ -637,14 +779,38 @@ uint8_t usb_get_connected_modeller_type(void)
 *****************************************************************************/
 void init_usb_comms(void)
 {
+    if (usb_comms_state != USB_COMMS_STOPPED)
+    {
+        return;
+    }
+
+    usb_comms_state = USB_COMMS_STARTING;
+    usb_stop_requested = false;
+
     // init USB
-    SemaphoreHandle_t signaling_sem = xSemaphoreCreateBinary();
+    usb_signaling_sem = xSemaphoreCreateBinary();
 
     // create queue for commands from other threads
     usb_input_queue = xQueueCreate(10, sizeof(tUSBMessage));
     if (usb_input_queue == NULL)
     {
         ESP_LOGE(TAG, "Failed to create usb input queue!");
+    }
+
+    if (usb_signaling_sem == NULL || usb_input_queue == NULL)
+    {
+        if (usb_input_queue != NULL)
+        {
+            vQueueDelete(usb_input_queue);
+            usb_input_queue = NULL;
+        }
+        if (usb_signaling_sem != NULL)
+        {
+            vSemaphoreDelete(usb_signaling_sem);
+            usb_signaling_sem = NULL;
+        }
+        usb_comms_state = USB_COMMS_STOPPED;
+        return;
     }
 
     // reserve DMA capable large contiguous memory blocks
@@ -654,8 +820,47 @@ void init_usb_comms(void)
     xTaskCreatePinnedToCore(host_lib_daemon_task,
                             "daemon",
                             (3 * 1024), 
-                            (void*)signaling_sem,
+                            (void*)usb_signaling_sem,
                             USB_DAEMON_TASK_PRIORITY,
                             &daemon_task_hdl,
                             0);
+}
+
+/****************************************************************************
+* NAME:        deinit_usb_comms
+* DESCRIPTION: Ask both USB Host tasks to release the shared USB PHY.
+*****************************************************************************/
+static void deinit_usb_comms(void)
+{
+    if (usb_comms_state == USB_COMMS_STOPPED || usb_comms_state == USB_COMMS_STOPPING)
+    {
+        return;
+    }
+
+    usb_comms_state = USB_COMMS_STOPPING;
+    usb_stop_requested = true;
+
+    if (usb_host_installed)
+    {
+        usb_host_lib_unblock();
+    }
+}
+
+/****************************************************************************
+* NAME:        usb_enter_download_mode
+* DESCRIPTION: Reboot directly into the ESP32-S3 ROM USB flashing mode.
+*****************************************************************************/
+void usb_enter_download_mode(void)
+{
+    ESP_LOGI(TAG, "Preparing ROM USB download mode");
+    usb_download_mode_requested = true;
+
+    if (usb_comms_state == USB_COMMS_STOPPED)
+    {
+        restart_in_usb_download_mode();
+    }
+    else
+    {
+        deinit_usb_comms();
+    }
 }
