@@ -33,7 +33,6 @@ extern void action_preset_list_next(lv_event_t * e);
 extern void action_preset_list_options(lv_event_t * e);
 extern void action_preset_list_insert_clicked(lv_event_t * e);
 extern void action_preset_list_swap_clicked(lv_event_t * e);
-extern void action_preset_list_keyboard_ok(lv_event_t * e);
 extern void action_close_controller_page(lv_event_t * e);
 extern void action_save_wifi_settings(lv_event_t * e);
 extern void action_edit_wifi_ssid_clicked(lv_event_t * e);
@@ -47,6 +46,9 @@ extern void action_wifi(lv_event_t * e);
 extern void action_usb(lv_event_t * e);
 extern void action_usb_flash(lv_event_t * e);
 extern void action_wi_fi_enabled_changed(lv_event_t * e);
+extern void action_preset_list_color(lv_event_t * e);
+extern void action_preset_list_dialog_close(lv_event_t * e);
+extern void action_preset_list_cancel(lv_event_t * e);
 
 #ifdef __cplusplus
 }

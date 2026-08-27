@@ -665,6 +665,111 @@ static esp_err_t usb_tonex_one_modify_global(uint16_t global_val, float value)
     return res;
 }
 
+static bool usb_tonex_one_color_value_needs_escape(uint8_t value)
+{
+    static const uint8_t escapedValues[] = {
+        0xFF,
+        0x9F,
+        0xBF,
+        0xC7,
+        0xA2, 0xA3, 0xA4, 0xA5
+    };
+
+    for (uint8_t index = 0; index < sizeof(escapedValues); index++)
+    {
+        if (escapedValues[index] == value)
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+static esp_err_t usb_tonex_one_modify_preset_color(uint16_t preset_index, uint32_t color)
+{
+    uint8_t* state_data = TonexData->Message.PedalData.StateData;
+    uint16_t state_length = TonexData->Message.PedalData.StateDataLength;
+    uint16_t data_offset = TONEX_STATE_OFFSET_START_COLORS;
+
+    if ((data_offset + 2 > state_length)
+     || (state_data[data_offset] != 0xBA)
+     || (state_data[data_offset + 1] != MAX_PRESETS_TONEX_ONE)
+     || (preset_index >= MAX_PRESETS_TONEX_ONE))
+    {
+        ESP_LOGE(TAG, "Invalid preset color list or preset index %d", (int)preset_index);
+        return ESP_FAIL;
+    }
+
+    data_offset += 2; // skip `ba 14` list header
+
+    for (uint16_t current_index = 0; current_index <= preset_index; current_index++)
+    {
+        if ((data_offset + 2 > state_length)
+         || (state_data[data_offset] != 0xB9)
+         || (state_data[data_offset + 1] != 0x03))
+        {
+            ESP_LOGE(TAG, "Invalid color sublist at preset index %d", (int)current_index);
+            return ESP_FAIL;
+        }
+
+        data_offset += 2; // skip `b9 03` list header
+        uint16_t old_color_start = data_offset;
+
+        for (uint8_t component = 0; component < 3; component++)
+        {
+            if (data_offset >= state_length)
+            {
+                return ESP_FAIL;
+            }
+
+            data_offset += state_data[data_offset] == 0x80 ? 2 : 1;
+            if (data_offset > state_length)
+            {
+                return ESP_FAIL;
+            }
+        }
+
+        if (current_index == preset_index)
+        {
+            uint8_t color_values[] = {
+                (uint8_t)(color >> 16),
+                (uint8_t)(color >> 8),
+                (uint8_t)color
+            };
+            uint8_t encoded_color[6];
+            uint8_t encoded_length = 0;
+
+            for (uint8_t component = 0; component < 3; component++)
+            {
+                if (usb_tonex_one_color_value_needs_escape(color_values[component]))
+                {
+                    encoded_color[encoded_length++] = 0x80;
+                }
+                encoded_color[encoded_length++] = color_values[component];
+            }
+
+            uint8_t old_length = data_offset - old_color_start;
+            uint16_t new_state_length = state_length - old_length + encoded_length;
+            if (new_state_length > MAX_STATE_DATA)
+            {
+                ESP_LOGE(TAG, "Preset color update exceeds state data buffer");
+                return ESP_FAIL;
+            }
+
+            memmove(&state_data[old_color_start + encoded_length],
+                    &state_data[data_offset],
+                    state_length - data_offset);
+            memcpy(&state_data[old_color_start], encoded_color, encoded_length);
+            TonexData->Message.PedalData.StateDataLength = new_state_length;
+
+            return ESP_OK;
+        }
+    }
+
+    return ESP_FAIL;
+}
+
 /****************************************************************************
 * NAME:        
 * DESCRIPTION: 
@@ -1462,6 +1567,14 @@ void usb_tonex_one_handle(class_driver_t* driver_obj)
                     case USB_COMMAND_SAVE_PRESET:
                     {
                         // Tonex One uses auto save, nothing needed
+                    } break;
+
+                    case USB_COMMAND_SET_COLOR:
+                    {
+                        if (usb_tonex_one_modify_preset_color(message.Payload, message.Payload1Temp) == ESP_OK)
+                        {
+                            usb_tonex_one_set_active_slot(TonexData->Message.CurrentSlot);
+                        }
                     } break;
                 }
             }

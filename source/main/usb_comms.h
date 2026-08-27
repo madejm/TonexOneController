@@ -23,6 +23,8 @@ limitations under the License.
 extern "C" {
 #endif
 
+#include "usb/usb_host.h"
+
 #define IK_MULTIMEDIA_USB_VENDOR        0x1963
 #define TONEX_ONE_PRODUCT_ID            0x00D1
 #define TONEX_PRODUCT_ID                0x0068
@@ -46,7 +48,8 @@ enum USB_Commands
     USB_COMMAND_MODIFY_PARAMETER,
     USB_COMMAND_LOAD_PRESET_TO_SLOT_A,
     USB_COMMAND_LOAD_PRESET_TO_SLOT_B,
-    USB_COMMAND_SAVE_PRESET
+    USB_COMMAND_SAVE_PRESET,
+    USB_COMMAND_SET_COLOR
 };
 
 typedef struct 
@@ -61,6 +64,7 @@ typedef struct
 {
     uint8_t Command;
     uint32_t Payload;
+    uint32_t Payload1Temp;
     float PayloadFloat;
 } tUSBMessage;
 
@@ -73,6 +77,7 @@ void usb_modify_parameter(uint16_t index, float value);
 void usb_load_preset_to_slot_a(uint32_t preset);
 void usb_load_preset_to_slot_b(uint32_t preset);
 void usb_save_preset(void);
+void usb_set_preset_color(uint16_t preset_index, uint32_t color);
 uint8_t usb_get_max_presets_for_connected_modeller(void);
 uint8_t usb_get_first_preset_index_for_connected_modeller(void);
 uint8_t usb_get_connected_modeller_type(void);

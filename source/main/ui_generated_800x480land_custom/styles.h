@@ -186,6 +186,12 @@ lv_style_t *get_style_panel_preset_list_color_MAIN_DEFAULT();
 void add_style_panel_preset_list_color(lv_obj_t *obj);
 void remove_style_panel_preset_list_color(lv_obj_t *obj);
 
+// Style: Button Settings Color
+lv_style_t *get_style_button_settings_color_MAIN_DEFAULT();
+lv_style_t *get_style_button_settings_color_MAIN_CHECKED();
+void add_style_button_settings_color(lv_obj_t *obj);
+void remove_style_button_settings_color(lv_obj_t *obj);
+
 #ifdef __cplusplus
 }
 #endif

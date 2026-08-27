@@ -83,6 +83,7 @@ limitations under the License.
 #include "footswitches.h"
 #include "fx_handler_helper.h"
 #include "display_helpers.h"
+#include "display_preset_list.h"
 
 static const char *TAG = "app_display";
 
@@ -176,18 +177,6 @@ static uint8_t __attribute__((unused)) touch_data_ready_to_read = 0;
 #endif
 
 #if CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI
-typedef enum
-{
-    PRESET_LIST_INSERT_MODE_INSERT,
-    PRESET_LIST_INSERT_MODE_SWAP
-} PresetListInsertMode_t;
-
-static PresetListInsertMode_t preset_list_insert_mode = PRESET_LIST_INSERT_MODE_INSERT;
-static int16_t preset_list_insert_index = -1;
-
-#define PRESET_LIST_PRESETS_PER_PAGE 10
-static uint8_t preset_list_page = 0;
-
 static lv_obj_t* controll_settings_edit_element = NULL;
 
 #if !CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
@@ -943,289 +932,25 @@ void action_parameter_changed(lv_event_t * e)
     }
 }
 
-static void updatePresetListSelection()
-{
-    uint8_t pageStart = preset_list_page * PRESET_LIST_PRESETS_PER_PAGE;
-    uint8_t selectedPreset = control_get_current_preset_mapped_index();
-
-    lv_obj_set_checked(objects.ui_preset_list_button_0, selectedPreset == (pageStart + 0));
-    lv_obj_set_checked(objects.ui_preset_list_button_1, selectedPreset == (pageStart + 1));
-    lv_obj_set_checked(objects.ui_preset_list_button_2, selectedPreset == (pageStart + 2));
-    lv_obj_set_checked(objects.ui_preset_list_button_3, selectedPreset == (pageStart + 3));
-    lv_obj_set_checked(objects.ui_preset_list_button_4, selectedPreset == (pageStart + 4));
-    lv_obj_set_checked(objects.ui_preset_list_button_5, selectedPreset == (pageStart + 5));
-    lv_obj_set_checked(objects.ui_preset_list_button_6, selectedPreset == (pageStart + 6));
-    lv_obj_set_checked(objects.ui_preset_list_button_7, selectedPreset == (pageStart + 7));
-    lv_obj_set_checked(objects.ui_preset_list_button_8, selectedPreset == (pageStart + 8));
-    lv_obj_set_checked(objects.ui_preset_list_button_9, selectedPreset == (pageStart + 9));
-}
-
-static inline void lv_label_set_preset_name(lv_obj_t* label, uint8_t index)
-{
-    char name[MAX_PRESET_NAME_LENGTH];
-    char text[MAX_PRESET_NAME_LENGTH + 8];
-    control_get_preset_name(index, name);
-    snprintf(text, sizeof(text), "%u: %s", index + usb_get_first_preset_index_for_connected_modeller(), name);
-    lv_label_set_text(label, text);
-}
-
-static inline void lv_panel_set_preset_color(lv_obj_t* colorPanel, uint8_t index)
-{
-    uint32_t color = get_preset_color(index);
-    lv_obj_set_style_outline_color(colorPanel, lv_color_hex(color), LV_PART_MAIN | LV_STATE_DEFAULT);
-}
-
-static void updatePresetListNames()
-{
-    uint8_t pageStart = preset_list_page * PRESET_LIST_PRESETS_PER_PAGE;
-
-    lv_label_set_preset_name(objects.ui_preset_list_label_0, pageStart + 0);
-    lv_label_set_preset_name(objects.ui_preset_list_label_1, pageStart + 1);
-    lv_label_set_preset_name(objects.ui_preset_list_label_2, pageStart + 2);
-    lv_label_set_preset_name(objects.ui_preset_list_label_3, pageStart + 3);
-    lv_label_set_preset_name(objects.ui_preset_list_label_4, pageStart + 4);
-    lv_label_set_preset_name(objects.ui_preset_list_label_5, pageStart + 5);
-    lv_label_set_preset_name(objects.ui_preset_list_label_6, pageStart + 6);
-    lv_label_set_preset_name(objects.ui_preset_list_label_7, pageStart + 7);
-    lv_label_set_preset_name(objects.ui_preset_list_label_8, pageStart + 8);
-    lv_label_set_preset_name(objects.ui_preset_list_label_9, pageStart + 9);
-
-    lv_panel_set_preset_color(objects.ui_preset_list_color_0, pageStart + 0);
-    lv_panel_set_preset_color(objects.ui_preset_list_color_1, pageStart + 1);
-    lv_panel_set_preset_color(objects.ui_preset_list_color_2, pageStart + 2);
-    lv_panel_set_preset_color(objects.ui_preset_list_color_3, pageStart + 3);
-    lv_panel_set_preset_color(objects.ui_preset_list_color_4, pageStart + 4);
-    lv_panel_set_preset_color(objects.ui_preset_list_color_5, pageStart + 5);
-    lv_panel_set_preset_color(objects.ui_preset_list_color_6, pageStart + 6);
-    lv_panel_set_preset_color(objects.ui_preset_list_color_7, pageStart + 7);
-    lv_panel_set_preset_color(objects.ui_preset_list_color_8, pageStart + 8);
-    lv_panel_set_preset_color(objects.ui_preset_list_color_9, pageStart + 9);
-}
-
-/****************************************************************************
-* NAME:        
-* DESCRIPTION: 
-* PARAMETERS:  
-* RETURN:      
-* NOTES:       
-*****************************************************************************/
-void action_open_presets_page(lv_event_t * e)
-{
-    ESP_LOGI(TAG, "action_open_presets_page");
-
-    updatePresetListSelection();
-    updatePresetListNames();
-    lv_scr_load_anim(objects.presets, LV_SCR_LOAD_ANIM_FADE_IN, 0, 0, false);
-}
-
-/****************************************************************************
-* NAME:        
-* DESCRIPTION: 
-* PARAMETERS:  
-* RETURN:      
-* NOTES:       
-*****************************************************************************/
-void action_close_presets_page(lv_event_t * e)
-{
-    ESP_LOGI(TAG, "action_close_presets_page");
-
-    lv_scr_load_anim(objects.screen1, LV_SCR_LOAD_ANIM_FADE_IN, 0, 0, false);
-}
-
-/****************************************************************************
-* NAME:        
-* DESCRIPTION: 
-* PARAMETERS:  
-* RETURN:      
-* NOTES:       
-*****************************************************************************/
-void action_preset_list_select(lv_event_t * e)
-{
-    ESP_LOGI(TAG, "action_preset_list_select");
-
-    uint8_t button_index = (uint8_t)(intptr_t)lv_event_get_user_data(e);
-    uint8_t preset_index = button_index + preset_list_page * PRESET_LIST_PRESETS_PER_PAGE;
-    lv_scr_load_anim(objects.screen1, LV_SCR_LOAD_ANIM_FADE_IN, 0, 0, false);
-    control_request_preset_index(preset_index);
-}
-
-/****************************************************************************
-* NAME:        
-* DESCRIPTION: 
-* PARAMETERS:  
-* RETURN:      
-* NOTES:       
-*****************************************************************************/
-void action_preset_list_previous(lv_event_t * e)
-{
-    ESP_LOGI(TAG, "action_preset_list_previous");
-
-    if (preset_list_page == 0) {
-        preset_list_page = usb_get_max_presets_for_connected_modeller() / PRESET_LIST_PRESETS_PER_PAGE - 1;
-    } else {
-        preset_list_page -= 1;
-    }
-    updatePresetListSelection();
-    updatePresetListNames();
-}
-
-/****************************************************************************
-* NAME:        
-* DESCRIPTION: 
-* PARAMETERS:  
-* RETURN:      
-* NOTES:       
-*****************************************************************************/
-void action_preset_list_next(lv_event_t * e)
-{
-    ESP_LOGI(TAG, "action_preset_list_next");
-
-    if (preset_list_page == (usb_get_max_presets_for_connected_modeller() / PRESET_LIST_PRESETS_PER_PAGE - 1)) {
-        preset_list_page = 0;
-    } else {
-        preset_list_page += 1;
-    }
-    updatePresetListSelection();
-    updatePresetListNames();
-}
-
-/****************************************************************************
-* NAME:        
-* DESCRIPTION: 
-* PARAMETERS:  
-* RETURN:      
-* NOTES:       
-*****************************************************************************/
-void action_preset_list_options(lv_event_t * e)
-{
-    ESP_LOGI(TAG, "action_preset_list_options");
-
-    uint8_t buttonIndex = (intptr_t)lv_event_get_user_data(e);
-    preset_list_insert_index = preset_list_page * PRESET_LIST_PRESETS_PER_PAGE + buttonIndex;
-
-    lv_textarea_set_text(objects.ui_preset_list_dialog_number_entry, "");
-    
-    lv_label_set_preset_name(objects.ui_preset_list_dialog_name, preset_list_insert_index);
-
-    lv_obj_clear_flag(objects.ui_preset_list_dialog, LV_OBJ_FLAG_HIDDEN);
-}
-
-/****************************************************************************
-* NAME:        
-* DESCRIPTION: 
-* PARAMETERS:  
-* RETURN:      
-* NOTES:       
-*****************************************************************************/
-void action_preset_list_insert_clicked(lv_event_t * e)
-{
-    ESP_LOGI(TAG, "action_preset_list_insert_clicked");
-
-    if (lv_obj_has_state(objects.ui_preset_list_dialog_button_insert, LV_STATE_CHECKED)) {
-        preset_list_insert_mode = PRESET_LIST_INSERT_MODE_SWAP;
-        lv_obj_add_state(objects.ui_preset_list_dialog_button_swap, LV_STATE_CHECKED);
-    } else {
-        preset_list_insert_mode = PRESET_LIST_INSERT_MODE_INSERT;
-        lv_obj_clear_state(objects.ui_preset_list_dialog_button_swap, LV_STATE_CHECKED);
-    }
-}
-
-/****************************************************************************
-* NAME:        
-* DESCRIPTION: 
-* PARAMETERS:  
-* RETURN:      
-* NOTES:       
-*****************************************************************************/
-void action_preset_list_swap_clicked(lv_event_t * e)
-{
-    ESP_LOGI(TAG, "action_preset_list_swap_clicked");
-
-    if (lv_obj_has_state(objects.ui_preset_list_dialog_button_swap, LV_STATE_CHECKED)) {
-        preset_list_insert_mode = PRESET_LIST_INSERT_MODE_INSERT;
-        lv_obj_add_state(objects.ui_preset_list_dialog_button_insert, LV_STATE_CHECKED);
-    } else {
-        preset_list_insert_mode = PRESET_LIST_INSERT_MODE_SWAP;
-        lv_obj_clear_state(objects.ui_preset_list_dialog_button_insert, LV_STATE_CHECKED);
-    }
-}
-
-/****************************************************************************
-* NAME:        
-* DESCRIPTION: 
-* PARAMETERS:  
-* RETURN:      
-* NOTES:       
-*****************************************************************************/
-void action_preset_list_keyboard_ok(lv_event_t * e)
-{
-    lv_event_code_t event_code = lv_event_get_code(e);
-
-    if (event_code == LV_EVENT_READY) 
-    {
-        ESP_LOGI(TAG, "action_preset_list_keyboard_ok");
-   
-        if (preset_list_insert_index > -1)
-        {
-            char* text = (char*)lv_textarea_get_text(objects.ui_preset_list_dialog_number_entry);
-            int value = atoi(text);
-            uint8_t presetsCount = usb_get_max_presets_for_connected_modeller();
-
-            if (value > 0 && value <= presetsCount)
-            {
-                uint8_t newPresetSlot = value - 1;
-                uint8_t newPresetOrder[MAX_SUPPORTED_PRESETS];
-                memcpy(newPresetOrder, control_get_preset_order(), MAX_SUPPORTED_PRESETS);
-                
-                switch (preset_list_insert_mode)
-                {
-                    case PRESET_LIST_INSERT_MODE_INSERT:
-                    {
-                        uint8_t movedValue = newPresetOrder[preset_list_insert_index];
-
-                        if (preset_list_insert_index < newPresetSlot)
-                        {
-                            // Shift left
-                            for (uint8_t i = preset_list_insert_index; i < newPresetSlot; i++)
-                            {
-                                newPresetOrder[i] = newPresetOrder[i + 1];
-                            }
-                        }
-                        else if (preset_list_insert_index > newPresetSlot)
-                        {
-                            // Shift right
-                            for (uint8_t i = preset_list_insert_index; i > newPresetSlot; i--)
-                            {
-                                newPresetOrder[i] = newPresetOrder[i - 1];
-                            }
-                        }
-                        newPresetOrder[newPresetSlot] = movedValue;
-                    } break;
-
-                    case PRESET_LIST_INSERT_MODE_SWAP:
-                    {
-                        uint8_t temp = newPresetOrder[preset_list_insert_index];
-                        newPresetOrder[preset_list_insert_index] = newPresetOrder[newPresetSlot];
-                        newPresetOrder[newPresetSlot] = temp;
-                    } break;
-
-                    default:
-                        break;
-                }
-
-                control_set_preset_order(newPresetOrder);
-                control_save_user_data(0);
-                wifi_request_sync(WIFI_SYNC_TYPE_CONFIG, NULL, NULL);
-                updatePresetListSelection();
-                updatePresetListNames();
-            }
-            preset_list_insert_index = -1;
-        }
-        lv_obj_add_flag(objects.ui_preset_list_dialog, LV_OBJ_FLAG_HIDDEN);
-    }
-}
-
 #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+static void updatePresetNumberLabel()
+{
+    const char *letter = "";
+    switch (ui_PresetIndex % 4) {
+        case 0: letter = "A"; break;
+        case 1: letter = "B"; break;
+        case 2: letter = "C"; break;
+        case 3: letter = "D"; break;
+        default: break;
+    }
+    
+    lv_label_set_text(objects.ui_preset_letter_label, letter);
+
+    char buff[3];
+    sprintf(buff, "%d", (ui_PresetIndex / 4) + 1);
+    lv_label_set_text(objects.ui_preset_number_label, buff);
+}
+
 static void setFSSmallButton(
     uint32_t buttonIndex,
     lv_color_t color,
@@ -1594,6 +1319,9 @@ static void updateFSButtons() {
             }
         }
     }
+
+    uint32_t presetColor = get_preset_color(ui_PresetIndex);
+    lv_obj_set_style_text_color(objects.ui_preset_letter_label, lv_color_hex(presetColor), LV_PART_MAIN | LV_STATE_DEFAULT);
 }
 
 /****************************************************************************
@@ -2296,6 +2024,7 @@ static  __attribute__((unused)) uint8_t update_ui_element(tUIUpdate* update)
             element_1 = objects.ui_preset_heading_label;
             ui_PresetIndex = update->Value;
 #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+            updatePresetNumberLabel();
             updateFSButtons();
 #endif //CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
         } break;
@@ -2382,6 +2111,10 @@ static  __attribute__((unused)) uint8_t update_ui_element(tUIUpdate* update)
             updateIconOrder();
 #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
             updateFSButtons();
+
+            if (lv_scr_act() == objects.presets) {
+                updatePresetListColors();
+            }
 #endif //CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
 #endif //CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI
         } break;

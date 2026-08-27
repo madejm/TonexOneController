@@ -37,4 +37,4 @@ void wifi_handle_ble_json(const char *payload);
 
 // threadsafe API
 void wifi_request_sync(WiFiSyncType type, void* arg1, void* arg2);
-void wifi_log_msg(char* arg1);
+void wifi_log_msg(const char *format, ...);

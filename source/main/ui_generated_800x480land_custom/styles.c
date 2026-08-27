@@ -1547,6 +1547,63 @@ void remove_style_panel_preset_list_color(lv_obj_t *obj) {
 };
 
 //
+// Style: Button Settings Color
+//
+
+void init_style_button_settings_color_MAIN_DEFAULT(lv_style_t *style) {
+    lv_style_set_pad_top(style, 8);
+    lv_style_set_pad_bottom(style, 8);
+    lv_style_set_pad_left(style, 8);
+    lv_style_set_pad_right(style, 8);
+    lv_style_set_radius(style, 22);
+    lv_style_set_min_width(style, 44);
+    lv_style_set_max_width(style, 44);
+    lv_style_set_min_height(style, 44);
+    lv_style_set_max_height(style, 44);
+    lv_style_set_text_color(style, lv_color_hex(0x000000));
+    lv_style_set_text_opa(style, 0);
+};
+
+lv_style_t *get_style_button_settings_color_MAIN_DEFAULT() {
+    static lv_style_t *style;
+    if (!style) {
+        style = (lv_style_t *)lv_mem_alloc(sizeof(lv_style_t));
+        lv_style_init(style);
+        init_style_button_settings_color_MAIN_DEFAULT(style);
+    }
+    return style;
+};
+
+void init_style_button_settings_color_MAIN_CHECKED(lv_style_t *style) {
+    lv_style_set_text_opa(style, 255);
+    lv_style_set_text_color(style, lv_color_hex(0x000000));
+    lv_style_set_pad_top(style, 11);
+    lv_style_set_pad_right(style, 10);
+};
+
+lv_style_t *get_style_button_settings_color_MAIN_CHECKED() {
+    static lv_style_t *style;
+    if (!style) {
+        style = (lv_style_t *)lv_mem_alloc(sizeof(lv_style_t));
+        lv_style_init(style);
+        init_style_button_settings_color_MAIN_CHECKED(style);
+    }
+    return style;
+};
+
+void add_style_button_settings_color(lv_obj_t *obj) {
+    (void)obj;
+    lv_obj_add_style(obj, get_style_button_settings_color_MAIN_DEFAULT(), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_add_style(obj, get_style_button_settings_color_MAIN_CHECKED(), LV_PART_MAIN | LV_STATE_CHECKED);
+};
+
+void remove_style_button_settings_color(lv_obj_t *obj) {
+    (void)obj;
+    lv_obj_remove_style(obj, get_style_button_settings_color_MAIN_DEFAULT(), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_remove_style(obj, get_style_button_settings_color_MAIN_CHECKED(), LV_PART_MAIN | LV_STATE_CHECKED);
+};
+
+//
 //
 //
 
@@ -1583,6 +1640,7 @@ void add_style(lv_obj_t *obj, int32_t styleIndex) {
         add_style_textarea_settings,
         add_style_checkbox_settings,
         add_style_panel_preset_list_color,
+        add_style_button_settings_color,
     };
     add_style_funcs[styleIndex](obj);
 }
@@ -1620,6 +1678,7 @@ void remove_style(lv_obj_t *obj, int32_t styleIndex) {
         remove_style_textarea_settings,
         remove_style_checkbox_settings,
         remove_style_panel_preset_list_color,
+        remove_style_button_settings_color,
     };
     remove_style_funcs[styleIndex](obj);
 }

@@ -1648,6 +1648,8 @@ function configureParam(id, visible, labelText = null) {
 function processReturnCmd(data) {
     switch (data['CMD'])
     {
+        case 'LOG':
+            console.log("📝 " + data['LOG']);
         case 'GETPARAMS':
             console.log("Got Params");
 

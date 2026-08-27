@@ -205,6 +205,15 @@ typedef enum
     TONEX_CONTROLLER_LAST,
 } TonexParameter_t;
 
+typedef struct {
+    uint32_t rawColor;
+    uint32_t realColor;
+} tTonexPresetColorMapping;
+
+#define TONEX_COLORS_COUNT 21
+
+extern const tTonexPresetColorMapping TonexColorMap[TONEX_COLORS_COUNT];
+
 typedef struct
 {
     uint8_t red;
@@ -221,6 +230,7 @@ float tonex_params_clamp_value(TonexParameter_t param_index, float value);
 
 esp_err_t tonex_params_colors_get_locked_access(tTonexPresetColor** color_ptr);
 esp_err_t tonex_params_colors_get_color(uint16_t preset_index, uint32_t* preset_color);
+esp_err_t tonex_params_colors_get_color_raw(uint16_t preset_index, uint32_t* preset_color);
 
 void tonex_params_get_ui_style(
     TonexParameter_t param,

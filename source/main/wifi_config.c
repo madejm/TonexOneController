@@ -483,9 +483,16 @@ static uint8_t process_wifi_command(tWiFiMessage* message)
     return 1;
 }
 
-void wifi_log_msg(char* arg1)
+void wifi_log_msg(const char *format, ...)
 {
-    wifi_request_sync(WIFI_SYNC_TYPE_LOG, arg1, 0);
+    char buffer[MAX_TEXT_LENGTH];
+
+    va_list args;
+    va_start(args, format);
+    vsnprintf(buffer, sizeof(buffer), format, args);
+    va_end(args);
+
+    wifi_request_sync(WIFI_SYNC_TYPE_LOG, buffer, 0);
 }
 
 /****************************************************************************

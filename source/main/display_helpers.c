@@ -286,13 +286,27 @@ void customize_ui() {
     eq_canvas_setup();
 }
 
-uint32_t get_preset_color(uint16_t index)
+static uint32_t get_preset_color_raw_or_real(uint16_t index, bool real)
 {
     uint8_t *preset_order = control_get_preset_order();
     uint8_t preset_index = preset_order[index];
     
     uint32_t color = 0x000000;
-    tonex_params_colors_get_color(preset_index, &color);
+    if (real) {
+        tonex_params_colors_get_color(preset_index, &color);
+    } else {
+        tonex_params_colors_get_color_raw(preset_index, &color);
+    }
     return color;
+}
+
+uint32_t get_preset_color_raw(uint16_t index)
+{
+    return get_preset_color_raw_or_real(index, false);
+}
+
+uint32_t get_preset_color(uint16_t index)
+{
+    return get_preset_color_raw_or_real(index, true);
 }
 #endif

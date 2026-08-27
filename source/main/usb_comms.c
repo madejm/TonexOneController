@@ -701,6 +701,35 @@ void usb_save_preset(void)
 * RETURN:      
 * NOTES:       
 *****************************************************************************/
+void usb_set_preset_color(uint16_t preset_index, uint32_t color)
+{
+    tUSBMessage message;
+
+    if (usb_input_queue == NULL)
+    {
+        ESP_LOGE(TAG, "usb_set_preset_color queue null");            
+    }
+    else
+    {
+        message.Command = USB_COMMAND_SET_COLOR;
+        message.Payload = preset_index;
+        message.Payload1Temp = color;
+
+        // send to queue
+        if (xQueueSend(usb_input_queue, (void*)&message, 0) != pdPASS)
+        {
+            ESP_LOGE(TAG, "usb_set_preset_color queue send failed!");            
+        }
+    }
+}
+
+/****************************************************************************
+* NAME:        
+* DESCRIPTION: 
+* PARAMETERS:  
+* RETURN:      
+* NOTES:       
+*****************************************************************************/
 uint8_t usb_get_max_presets_for_connected_modeller(void)
 {
     uint8_t max = MAX_PRESETS_TONEX_ONE;

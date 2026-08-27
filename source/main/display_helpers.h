@@ -26,6 +26,7 @@ void lv_obj_set_checked(lv_obj_t * obj, bool checked);
 
 #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
 void customize_ui();
+uint32_t get_preset_color_raw(uint16_t index);
 uint32_t get_preset_color(uint16_t index);
 #endif
 

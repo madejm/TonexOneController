@@ -195,14 +195,7 @@ static tModellerParameter TonexParameters[TONEX_CONTROLLER_LAST] =
 
 static tTonexPresetColor TonexPresetColors[MAX_SUPPORTED_PRESETS];
 
-typedef struct {
-    uint32_t rawColor;
-    uint32_t realColor;
-} tTonexPresetColorMapping;
-
-#define COLORS_COUNT 21
-
-const tTonexPresetColorMapping TonexColorMap[COLORS_COUNT] = {
+const tTonexPresetColorMapping TonexColorMap[TONEX_COLORS_COUNT] = {
     {0xFF0000, 0xff0619}, // red
     {0xFF3F00, 0xe75116}, // orange
     {0x9FFF00, 0xffe12a}, // yellow
@@ -665,7 +658,7 @@ esp_err_t tonex_params_colors_get_locked_access(tTonexPresetColor** color_ptr)
 * RETURN:      
 * NOTES:       
 *****************************************************************************/
-esp_err_t tonex_params_colors_get_color(uint16_t preset_index, uint32_t* preset_color)
+static esp_err_t tonex_params_colors_get_color_raw_or_real(uint16_t preset_index, uint32_t* preset_color, bool real)
 {
     // take mutex
     if (xSemaphoreTake(ParamMutex, pdMS_TO_TICKS(PARAM_MUTEX_TIMEOUT)) == pdTRUE)
@@ -673,11 +666,13 @@ esp_err_t tonex_params_colors_get_color(uint16_t preset_index, uint32_t* preset_
         tTonexPresetColor color = TonexPresetColors[preset_index];
         *preset_color = (color.red << 16) | (color.green << 8) | color.blue;
 
-        for (uint8_t index = 0; index < COLORS_COUNT; index++) {
-            tTonexPresetColorMapping mapping = TonexColorMap[index];
-            if (mapping.rawColor == *preset_color) {
-                *preset_color = mapping.realColor;
-                break;
+        if (real) {
+            for (uint8_t index = 0; index < TONEX_COLORS_COUNT; index++) {
+                tTonexPresetColorMapping mapping = TonexColorMap[index];
+                if (mapping.rawColor == *preset_color) {
+                    *preset_color = mapping.realColor;
+                    break;
+                }
             }
         }
 
@@ -692,6 +687,16 @@ esp_err_t tonex_params_colors_get_color(uint16_t preset_index, uint32_t* preset_
     }
 
     return ESP_FAIL;
+}
+
+esp_err_t tonex_params_colors_get_color_raw(uint16_t preset_index, uint32_t* preset_color)
+{
+    return tonex_params_colors_get_color_raw_or_real(preset_index, preset_color, false);
+}
+
+esp_err_t tonex_params_colors_get_color(uint16_t preset_index, uint32_t* preset_color)
+{
+    return tonex_params_colors_get_color_raw_or_real(preset_index, preset_color, true);
 }
 
 /****************************************************************************
