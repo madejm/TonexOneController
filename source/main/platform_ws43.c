@@ -131,13 +131,13 @@ static uint8_t GT911CalcChecksum(uint8_t* buf, uint16_t len)
 }
 
 /****************************************************************************
-* NAME:        
-* DESCRIPTION: 
-* PARAMETERS:  
-* RETURN:      
+* NAME:        InitIOExpander
+* DESCRIPTION: Initialize the onboard IO expander in output mode
+* PARAMETERS:  I2C bus and mutex
+* RETURN:      ESP_OK if the expander is ready for output
 * NOTES:       
 *****************************************************************************/
-static void InitIOExpander(i2c_master_bus_handle_t bus_handle, SemaphoreHandle_t I2CMutex)
+static esp_err_t InitIOExpander(i2c_master_bus_handle_t bus_handle, SemaphoreHandle_t I2CMutex)
 {
     // init IO expander
     if (CH422G_init(bus_handle, I2CMutex) == ESP_OK)
@@ -147,6 +147,7 @@ static void InitIOExpander(i2c_master_bus_handle_t bus_handle, SemaphoreHandle_t
         if (CH422G_set_io_mode(1) == ESP_OK)
         {
             ESP_LOGI(TAG, "Onboard IO Expander init OK");
+            return ESP_OK;
         }
         else
         {
@@ -157,6 +158,36 @@ static void InitIOExpander(i2c_master_bus_handle_t bus_handle, SemaphoreHandle_t
     {
         ESP_LOGE(TAG, "Failed to init Onboard IO expander!");
     }
+
+    return ESP_FAIL;
+}
+
+/****************************************************************************
+* NAME:        ResetLCD
+* DESCRIPTION: Reset the physical LCD controller through the IO expander
+* PARAMETERS:
+* RETURN:
+* NOTES:       esp_lcd_panel_reset() only resets the ESP RGB peripheral
+*****************************************************************************/
+static void ResetLCD(void)
+{
+    ESP_LOGI(TAG, "Reset LCD controller");
+
+    if (CH422G_write_output(LCD_RESET, 0) != ESP_OK)
+    {
+        ESP_LOGE(TAG, "Failed to assert LCD reset");
+        return;
+    }
+
+    vTaskDelay(pdMS_TO_TICKS(100));
+
+    if (CH422G_write_output(LCD_RESET, 1) != ESP_OK)
+    {
+        ESP_LOGE(TAG, "Failed to release LCD reset");
+        return;
+    }
+
+    vTaskDelay(pdMS_TO_TICKS(100));
 }
 
 /****************************************************************************
@@ -288,7 +319,10 @@ void platform_init(i2c_master_bus_handle_t bus_handle, SemaphoreHandle_t I2CMute
 
     // init onboard IO expander
     ESP_LOGI(TAG, "Init Onboard IO Expander");
-    InitIOExpander(bus_handle, I2CMutex);
+    if (InitIOExpander(bus_handle, I2CMutex) == ESP_OK)
+    {
+        ResetLCD();
+    }
 
 #if DISPLAY_PIN_NUM_BK_LIGHT >= 0
     ESP_LOGI(TAG, "Turn off LCD backlight");
@@ -340,8 +374,8 @@ void platform_init(i2c_master_bus_handle_t bus_handle, SemaphoreHandle_t I2CMute
             .hsync_back_porch  = 8,
             .hsync_front_porch = 8,
             .vsync_pulse_width = 4,
-            .vsync_back_porch  = 50,   // these 2 values critical. Too small gets ghosting/flicker at higher pixel clock values
-            .vsync_front_porch = 50,       
+            .vsync_back_porch  = 45,   // these 2 values critical. Too small gets ghosting/flicker at higher pixel clock values
+            .vsync_front_porch = 45,
             .flags = {
                 .hsync_idle_low   = 0,
                 .vsync_idle_low   = 0,
