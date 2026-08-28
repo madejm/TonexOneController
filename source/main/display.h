@@ -48,6 +48,7 @@ void UI_SetUSBStatus(uint8_t state);
 void UI_SetBTStatus(uint8_t state);
 void UI_SetWiFiStatus(uint8_t state);
 void UI_SetWiFiEnabled(uint8_t state);
+void UI_SetWiFiClientConnected(uint8_t state);
 void UI_SetPresetLabel(uint16_t index, char* name);
 void UI_SetBankIndex(uint16_t index);
 void UI_SetAmpSkin(uint16_t index);

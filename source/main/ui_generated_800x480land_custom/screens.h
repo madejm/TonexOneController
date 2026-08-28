@@ -258,6 +258,7 @@ typedef struct _objects_t {
     lv_obj_t *obj42;
     lv_obj_t *ui_wi_fi_switch;
     lv_obj_t *ui_usb_tab;
+    lv_obj_t *ui_usb_reboot_button;
     lv_obj_t *ui_usb_flash_button;
     lv_obj_t *obj43;
     lv_obj_t *ui_controller_dialog;

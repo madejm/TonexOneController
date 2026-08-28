@@ -876,6 +876,15 @@ static void deinit_usb_comms(void)
 }
 
 /****************************************************************************
+* NAME:        usb_reboot
+* DESCRIPTION: Reboot.
+*****************************************************************************/
+void usb_reboot(void)
+{
+    esp_restart();
+}
+
+/****************************************************************************
 * NAME:        usb_enter_download_mode
 * DESCRIPTION: Reboot directly into the ESP32-S3 ROM USB flashing mode.
 *****************************************************************************/

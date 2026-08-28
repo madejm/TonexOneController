@@ -204,7 +204,7 @@ const tTonexPresetColorMapping TonexColorMap[TONEX_COLORS_COUNT] = {
     {0x00FFFF, 0x009dfc}, // azure
     {0x0000FF, 0x0044fb}, // blue
     {0x2F00FF, 0x6c64fb}, // purple
-    {0xFF00FF, 0x845083}, // magenta
+    {0xFF00FF, 0xff25c8}, // magenta
     {0xBFBFBF, 0xff8bfc}, // pink
     {0x110000, 0x871218}, // dark red
     {0x111100, 0x7a3616}, // dark orange

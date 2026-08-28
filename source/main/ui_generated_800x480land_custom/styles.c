@@ -1562,6 +1562,13 @@ void init_style_button_settings_color_MAIN_DEFAULT(lv_style_t *style) {
     lv_style_set_max_height(style, 44);
     lv_style_set_text_color(style, lv_color_hex(0x000000));
     lv_style_set_text_opa(style, 0);
+    lv_style_set_border_color(style, lv_color_hex(0x000000));
+    lv_style_set_border_opa(style, 255);
+    lv_style_set_border_width(style, 2);
+    lv_style_set_outline_color(style, lv_color_hex(0xffffff));
+    lv_style_set_outline_opa(style, 0);
+    lv_style_set_outline_pad(style, -1);
+    lv_style_set_outline_width(style, 2);
 };
 
 lv_style_t *get_style_button_settings_color_MAIN_DEFAULT() {
@@ -1579,6 +1586,8 @@ void init_style_button_settings_color_MAIN_CHECKED(lv_style_t *style) {
     lv_style_set_text_color(style, lv_color_hex(0x000000));
     lv_style_set_pad_top(style, 11);
     lv_style_set_pad_right(style, 10);
+    lv_style_set_outline_opa(style, 255);
+    lv_style_set_border_width(style, 4);
 };
 
 lv_style_t *get_style_button_settings_color_MAIN_CHECKED() {

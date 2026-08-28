@@ -1365,8 +1365,10 @@ uint8_t tonex_update_ui_parameters(void)
                     lv_label_set_text(objects.ui_amplifier_presense_value, value_string);       
                     
                     // set user data for later use
-                    lv_obj_set_user_data(objects.ui_amplifier_presense_value, (void*)(uintptr_t)TONEX_PARAM_MODEL_PRESENCE);                                        
-                    eq_canvas_update_presence_gain(param_entry->Value);
+                    lv_obj_set_user_data(objects.ui_amplifier_presense_value, (void*)(uintptr_t)TONEX_PARAM_MODEL_PRESENCE);      
+                    
+                    float presence_gain = (param_ptr[TONEX_PARAM_MODEL_AMP_ENABLE].Value == 0.0f) ? 5.0f : param_entry->Value;
+                    eq_canvas_update_presence_gain(presence_gain);
                 } break;
 
                 //case TONEX_PARAM_CABINET_UNKNOWN:
@@ -1389,8 +1391,10 @@ uint8_t tonex_update_ui_parameters(void)
                     lv_label_set_text(objects.ui_amplifier_depth_value, value_string);          
                     
                     // set user data for later use
-                    lv_obj_set_user_data(objects.ui_amplifier_depth_value, (void*)(uintptr_t)TONEX_PARAM_MODEL_DEPTH);                                        
-                    eq_canvas_update_depth_gain(param_entry->Value);
+                    lv_obj_set_user_data(objects.ui_amplifier_depth_value, (void*)(uintptr_t)TONEX_PARAM_MODEL_DEPTH);     
+                    
+                    float depth_gain = (param_ptr[TONEX_PARAM_MODEL_AMP_ENABLE].Value == 0.0f) ? 5.0f : param_entry->Value;
+                    eq_canvas_update_depth_gain(depth_gain);
                 } break;
 
                 case TONEX_PARAM_VIR_RESO:

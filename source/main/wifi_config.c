@@ -2255,21 +2255,29 @@ static esp_err_t http_server_init(void)
 *****************************************************************************/
 static void wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data)
 {
-    if (event_id == WIFI_EVENT_AP_STACONNECTED) 
+    if ((event_base == WIFI_EVENT) && (event_id == WIFI_EVENT_AP_STACONNECTED))
     {
         wifi_event_ap_staconnected_t* event = (wifi_event_ap_staconnected_t*) event_data;
         ESP_LOGI(TAG, "station "MACSTR" join, AID=%d", MAC2STR(event->mac), event->aid);
-        client_connected = 1;
+        if (client_connected < MAX_STA_CONN)
+        {
+            client_connected++;
+        }
+        UI_SetWiFiClientConnected(1);
         control_set_wifi_status(1);
     } 
-    else if (event_id == WIFI_EVENT_AP_STADISCONNECTED) 
+    else if ((event_base == WIFI_EVENT) && (event_id == WIFI_EVENT_AP_STADISCONNECTED))
     {
         wifi_event_ap_stadisconnected_t* event = (wifi_event_ap_stadisconnected_t*) event_data;
         ESP_LOGI(TAG, "station "MACSTR" leave, AID=%d", MAC2STR(event->mac), event->aid);
-        client_connected = 0;
-        control_set_wifi_status(0);
+        if (client_connected > 0)
+        {
+            client_connected--;
+        }
+        UI_SetWiFiClientConnected(client_connected > 0);
+        control_set_wifi_status(client_connected > 0);
 
-        if (wifi_enabled &&
+        if ((client_connected == 0) && wifi_enabled &&
             (control_get_config_item_int(CONFIG_ITEM_WIFI_MODE) == WIFI_MODE_ACCESS_POINT_TIMED))
         {
             ESP_LOGI(TAG, "Wifi config stopping");
@@ -2526,6 +2534,7 @@ static void wifi_kill_all(void)
 
     client_connected = 0;
     wifi_connect_status = 0;
+    UI_SetWiFiClientConnected(0);
     control_set_wifi_status(0);
     UI_SetWiFiEnabled(0);
 }

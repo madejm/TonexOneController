@@ -1166,7 +1166,7 @@ void create_screen_screen1() {
                                             lv_obj_set_style_align(obj, LV_ALIGN_TOP_LEFT, LV_PART_MAIN | LV_STATE_DEFAULT);
                                             lv_obj_set_style_layout(obj, LV_LAYOUT_FLEX, LV_PART_MAIN | LV_STATE_DEFAULT);
                                             lv_obj_set_style_flex_flow(obj, LV_FLEX_FLOW_ROW, LV_PART_MAIN | LV_STATE_DEFAULT);
-                                            lv_obj_set_style_pad_column(obj, -1, LV_PART_MAIN | LV_STATE_DEFAULT);
+                                            lv_obj_set_style_pad_column(obj, -3, LV_PART_MAIN | LV_STATE_DEFAULT);
                                             {
                                                 lv_obj_t *parent_obj = obj;
                                                 {
@@ -1202,7 +1202,7 @@ void create_screen_screen1() {
                                             lv_obj_t *obj = lv_label_create(parent_obj);
                                             objects.ui_preset_heading_label = obj;
                                             lv_obj_set_pos(obj, 0, 0);
-                                            lv_obj_set_size(obj, 235, 70);
+                                            lv_obj_set_size(obj, 234, 70);
                                             lv_obj_set_style_text_font(obj, &lv_font_montserrat_14, LV_PART_MAIN | LV_STATE_SCROLLED);
                                             lv_obj_set_style_text_color(obj, lv_color_hex(0xffffff), LV_PART_MAIN | LV_STATE_DEFAULT);
                                             lv_obj_set_style_text_font(obj, &ui_font_ibm_36, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -1214,7 +1214,7 @@ void create_screen_screen1() {
                                 }
                                 {
                                     lv_obj_t *obj = lv_obj_create(parent_obj);
-                                    lv_obj_set_pos(obj, 0, 72);
+                                    lv_obj_set_pos(obj, 0, 71);
                                     lv_obj_set_size(obj, LV_PCT(100), LV_SIZE_CONTENT);
                                     lv_obj_set_style_pad_left(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
                                     lv_obj_set_style_pad_top(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -4984,10 +4984,30 @@ void create_screen_settings() {
                             lv_obj_set_style_border_width(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
                             add_style_container_sub_settings(obj);
                             lv_obj_set_style_flex_flow(obj, LV_FLEX_FLOW_COLUMN, LV_PART_MAIN | LV_STATE_DEFAULT);
-                            lv_obj_set_style_flex_main_place(obj, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_PART_MAIN | LV_STATE_DEFAULT);
+                            lv_obj_set_style_flex_main_place(obj, LV_FLEX_ALIGN_SPACE_EVENLY, LV_PART_MAIN | LV_STATE_DEFAULT);
                             lv_obj_set_style_flex_cross_place(obj, LV_FLEX_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
                             {
                                 lv_obj_t *parent_obj = obj;
+                                {
+                                    // ui_USBRebootButton
+                                    lv_obj_t *obj = lv_btn_create(parent_obj);
+                                    objects.ui_usb_reboot_button = obj;
+                                    lv_obj_set_pos(obj, 0, 0);
+                                    lv_obj_set_size(obj, LV_SIZE_CONTENT, 50);
+                                    lv_obj_add_event_cb(obj, action_usb_reboot, LV_EVENT_PRESSED, (void *)0);
+                                    add_style_button_highlighted(obj);
+                                    lv_obj_set_style_bg_color(obj, lv_color_hex(theme_colors[active_theme_index][2]), LV_PART_MAIN | LV_STATE_DEFAULT);
+                                    lv_obj_set_style_border_color(obj, lv_color_hex(theme_colors[active_theme_index][2]), LV_PART_MAIN | LV_STATE_DEFAULT);
+                                    {
+                                        lv_obj_t *parent_obj = obj;
+                                        {
+                                            lv_obj_t *obj = lv_label_create(parent_obj);
+                                            lv_obj_set_pos(obj, 0, 0);
+                                            lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
+                                            lv_label_set_text_static(obj, "Soft reboot");
+                                        }
+                                    }
+                                }
                                 {
                                     // ui_USBFlashButton
                                     lv_obj_t *obj = lv_btn_create(parent_obj);
@@ -6426,7 +6446,7 @@ void create_screen_presets() {
                                                             lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
                                                             lv_obj_add_event_cb(obj, action_preset_list_color, LV_EVENT_PRESSED, (void *)8);
                                                             add_style_button_settings_color(obj);
-                                                            lv_obj_set_style_bg_color(obj, lv_color_hex(0x845083), LV_PART_MAIN | LV_STATE_DEFAULT);
+                                                            lv_obj_set_style_bg_color(obj, lv_color_hex(0xff25c8), LV_PART_MAIN | LV_STATE_DEFAULT);
                                                             {
                                                                 lv_obj_t *parent_obj = obj;
                                                                 {
@@ -6854,6 +6874,8 @@ void change_color_theme(uint32_t theme_index) {
         lv_obj_set_style_border_color(objects.obj2, lv_color_hex(theme_colors[theme_index][2]), LV_PART_ITEMS | LV_STATE_CHECKED);
         lv_obj_set_style_arc_color(objects.ui_eq_canvas, lv_color_hex(theme_colors[theme_index][2]), LV_PART_MAIN | LV_STATE_DEFAULT);
         lv_obj_set_style_bg_color(objects.ui_eq_canvas, lv_color_hex(theme_colors[theme_index][1]), LV_PART_MAIN | LV_STATE_DEFAULT);
+        lv_obj_set_style_bg_color(objects.ui_usb_reboot_button, lv_color_hex(theme_colors[theme_index][2]), LV_PART_MAIN | LV_STATE_DEFAULT);
+        lv_obj_set_style_border_color(objects.ui_usb_reboot_button, lv_color_hex(theme_colors[theme_index][2]), LV_PART_MAIN | LV_STATE_DEFAULT);
         lv_obj_set_style_line_color(objects.obj43, lv_color_hex(theme_colors[theme_index][0]), LV_PART_MAIN | LV_STATE_DEFAULT);
     }
     {

@@ -243,6 +243,8 @@ static void lv_helper_create_arc_gesture_c(
 
 #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
 void customize_ui() {
+    lv_obj_set_style_bg_opa(objects.ui_wi_fi_button, 255, LV_PART_MAIN | LV_STATE_USER_1);
+
     lv_helper_create_arc_gesture(objects.ui_noise_gate_threshold_slider, objects.ui_noise_gate_threshold_value, "%1.0f", 1.0f, -100);
     lv_helper_create_arc_gesture(objects.ui_noise_gate_release_slider,   objects.ui_noise_gate_release_value,   "%1.0f", 1.0f, 20);
     lv_helper_create_arc_gesture(objects.ui_noise_gate_depth_slider,     objects.ui_noise_gate_depth_value,     "%1.0f", 1.0f, 60);

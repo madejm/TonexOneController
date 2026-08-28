@@ -111,6 +111,7 @@ enum UIElements
     UI_ELEMENT_BT_STATUS,
     UI_ELEMENT_WIFI_STATUS,
     UI_ELEMENT_WIFI_ENABLED,
+    UI_ELEMENT_WIFI_CLIENT_CONNECTED,
     UI_ELEMENT_PRESET_NAME,
     UI_ELEMENT_BANK_INDEX,
     UI_ELEMENT_AMP_SKIN,
@@ -531,6 +532,10 @@ void action_wifi(lv_event_t * e) {
 void action_usb(lv_event_t * e) {
     lv_tabview_set_act(objects.ui_settings_tab_view, lv_obj_get_index(objects.ui_usb_tab), LV_ANIM_OFF);
     action_show_settings_page(e);
+}
+
+void action_usb_reboot(lv_event_t * e) {
+    usb_reboot();
 }
 
 void action_usb_flash(lv_event_t * e) {
@@ -1580,6 +1585,27 @@ void UI_SetWiFiEnabled(uint8_t state)
 }
 
 /****************************************************************************
+* NAME:
+* DESCRIPTION:
+* PARAMETERS:
+* RETURN:
+* NOTES:
+*****************************************************************************/
+void UI_SetWiFiClientConnected(uint8_t state)
+{
+    tUIUpdate ui_update;
+
+    ui_update.ElementID = UI_ELEMENT_WIFI_CLIENT_CONNECTED;
+    ui_update.Action = UI_ACTION_SET_STATE;
+    ui_update.Value = state;
+
+    if (xQueueSend(ui_update_queue, (void*)&ui_update, 0) != pdPASS)
+    {
+        ESP_LOGE(TAG, "UI Update queue send failed!");
+    }
+}
+
+/****************************************************************************
 * NAME:        
 * DESCRIPTION: 
 * PARAMETERS:  
@@ -1996,7 +2022,7 @@ static  __attribute__((unused)) uint8_t update_ui_element(tUIUpdate* update)
         case UI_ELEMENT_WIFI_STATUS:
         {
             #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
-            // The custom home button represents WiFi power, not client connection state.
+            // Power and AP-client state are displayed separately on the custom button.
             element_1 = NULL;
             #else
             element_1 = objects.ui_wi_fi_status_conn;
@@ -2017,6 +2043,22 @@ static  __attribute__((unused)) uint8_t update_ui_element(tUIUpdate* update)
 
             element_1 = objects.ui_wi_fi_button;
             #endif
+        } break;
+
+        case UI_ELEMENT_WIFI_CLIENT_CONNECTED:
+        {
+            #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+            if (update->Value == 0)
+            {
+                lv_obj_clear_state(objects.ui_wi_fi_button, LV_STATE_USER_1);
+            }
+            else
+            {
+                lv_obj_add_state(objects.ui_wi_fi_button, LV_STATE_USER_1);
+            }
+            #endif
+
+            element_1 = NULL;
         } break;
 
         case UI_ELEMENT_PRESET_NAME:

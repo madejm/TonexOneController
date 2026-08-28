@@ -49,6 +49,7 @@ extern void action_wi_fi_enabled_changed(lv_event_t * e);
 extern void action_preset_list_color(lv_event_t * e);
 extern void action_preset_list_dialog_close(lv_event_t * e);
 extern void action_preset_list_cancel(lv_event_t * e);
+extern void action_usb_reboot(lv_event_t * e);
 
 #ifdef __cplusplus
 }
