@@ -144,6 +144,19 @@ For more information about the firmware development and customisation, refer to 
 - https://github.com/vit3k/tonex_controller for great work on reverse engineering the Tonex One USB protocol
 
 ## Firmware Release Notes <a name="release_notes"></a>
+V2.5.0.2 beta 1
+- Update to ESP-IDF 6.0.2 framework
+- Update to latest Managed Components
+- Added support for Tonex One Plus, including LCD tuner interface for large screen devices 
+- Direct monitoring setting now configurable via LCD/Web
+- New method handling LCD parameter sliders, where changes are sent after a short time of no movement, without needing to remove the finger from the slider
+- Fixed bug where pressing green tick during user text editing would not save the text
+- Fixed issue where swiping on the user text keyboard would change presets
+- Migrated to CmakePresets for project management
+- Some initial code for the Tonex Plug, but incomplete and untested
+- Improvements to client WiFi scanning for cases where multiple access points are present
+
+
 V2.0.4.2
 - Minor update for bug fixes and some small features
 - Fixed issue with GP5 on 4.3B, where long press of the NS icon would not jump to the settings page. Thanks to freelender for reporting.
