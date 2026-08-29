@@ -490,7 +490,7 @@ static esp_err_t usb_tonex_plug_set_preset_in_slot(uint16_t preset, Slot newSlot
     }
 
     // make sure direct monitoring is on so sound not muted from USB connection
-    TonexData->Message.PedalData.StateData[TonexData->Message.PedalData.StateDataLength - TONEX_STATE_OFFSET_END_DIRECT_MONITOR] = 1;
+    //Removed now, allowing config from UI   TonexData->Message.PedalData.StateData[TonexData->Message.PedalData.StateDataLength - TONEX_STATE_OFFSET_END_DIRECT_MONITOR] = 1;
 
     // check if setting same preset twice will set bypass
     if (control_get_config_item_int(CONFIG_ITEM_TOGGLE_BYPASS))
@@ -587,7 +587,7 @@ static esp_err_t usb_tonex_plug_set_ab_slots(uint16_t preset_a, uint16_t preset_
     message[7] = (len >> 8) & 0xFF;
 
     // make sure direct monitoring is on so sound not muted from USB connection
-    TonexData->Message.PedalData.StateData[len - TONEX_STATE_OFFSET_END_DIRECT_MONITOR] = 1;
+    //Removed now, allowing config from UI    TonexData->Message.PedalData.StateData[len - TONEX_STATE_OFFSET_END_DIRECT_MONITOR] = 1;
 
     // set both slot presets
     TonexData->Message.PedalData.StateData[len - TONEX_STATE_OFFSET_END_SLOT_A_PRESET] = preset_a;

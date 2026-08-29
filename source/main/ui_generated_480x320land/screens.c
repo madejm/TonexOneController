@@ -272,7 +272,7 @@ void create_screen_screen1() {
                     lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
                     lv_img_set_src(obj, &img_tuner);
                     lv_obj_add_event_cb(obj, action_tuner_pressed, LV_EVENT_CLICKED, (void *)0);
-                    lv_obj_add_flag(obj, LV_OBJ_FLAG_HIDDEN);
+                    lv_obj_add_flag(obj, LV_OBJ_FLAG_HIDDEN|LV_OBJ_FLAG_CLICKABLE);
                 }
                 {
                     // ui_BottomPanelTonex
