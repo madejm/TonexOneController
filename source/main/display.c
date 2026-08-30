@@ -84,6 +84,7 @@ limitations under the License.
 #include "fx_handler_helper.h"
 #include "display_helpers.h"
 #include "display_preset_list.h"
+#include "display_settings.h"
 
 static const char *TAG = "app_display";
 
@@ -121,6 +122,7 @@ enum UIElements
     UI_ELEMENT_PARAMETERS,
     UI_ELEMENT_TOAST,
     UI_ELEMENT_PRESET_LIST,
+    UI_ELEMENT_SETTINGS_CLIPBOARD,
 };
 
 enum UIAction
@@ -1657,6 +1659,22 @@ __attribute__((unused)) void UI_ShowToast(char* text)
     }
 }
 
+void UI_SettingsCopied(Clipboard_t type)
+{
+    tUIUpdate ui_update;
+
+    // build command
+    ui_update.ElementID = UI_ELEMENT_SETTINGS_CLIPBOARD;
+    ui_update.Action = UI_ACTION_NONE;
+    ui_update.Value = type;
+
+    // send to queue
+    if (xQueueSend(ui_update_queue, (void*)&ui_update, 0) != pdPASS)
+    {
+        ESP_LOGE(TAG, "UI Update queue send failed!");            
+    }
+}
+
 /****************************************************************************
 * NAME:        
 * DESCRIPTION: 
@@ -2164,6 +2182,11 @@ static  __attribute__((unused)) uint8_t update_ui_element(tUIUpdate* update)
         case UI_ELEMENT_TOAST:
         {
             ui_show_toast(update->Text);
+        } break;
+
+        case UI_ELEMENT_SETTINGS_CLIPBOARD:
+        {
+            updateSettingsClipboard(update->Value);
         } break;
 
         case UI_ELEMENT_PRESET_LIST:

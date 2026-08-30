@@ -33,6 +33,7 @@ extern "C" {
 #include "esp_lcd_gc9107.h"
 #include "esp_lcd_sh8601.h"
 #include "esp_intr_alloc.h"
+#include "usb_comms.h"
 
 
 void display_init(i2c_master_bus_handle_t bus_handle, SemaphoreHandle_t I2CMutex, lv_disp_drv_t* pdisp_drv);
@@ -58,6 +59,7 @@ void UI_SetAltMode(bool altMode);
 void UI_SetPresetDescription(char* text);
 void UI_RefreshParameterValues(void);
 void UI_ShowToast(char* text);
+void UI_SettingsCopied(Clipboard_t type);
 
 #ifdef __cplusplus
 } /*extern "C"*/

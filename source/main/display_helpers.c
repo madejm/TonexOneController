@@ -32,8 +32,76 @@ void lv_obj_set_checked(lv_obj_t * obj, bool checked) {
     }
 }
 
+void lv_obj_set_disabled(lv_obj_t * obj, bool disabled) {
+    if (disabled) {
+        lv_obj_add_state(obj, LV_STATE_DISABLED);
+    } else {
+        lv_obj_clear_state(obj, LV_STATE_DISABLED);
+    }
+}
+
+const TonexParamFormatValues_t ParamFormats = {
+    .GATE_THRESHOLD =       { .format = "%1.0f", .multiplier = 1.0f  },
+    .GATE_RELEASE =         { .format = "%1.0f", .multiplier = 1.0f  },
+    .GATE_DEPTH =           { .format = "%1.0f", .multiplier = 1.0f  },
+
+    .COMPRESSOR_THRESHOLD = { .format = "%1.1f", .multiplier = 2.0f  },
+    .COMPRESSOR_GAIN =      { .format = "%1.0f", .multiplier = 1.0f  },
+    .COMPRESSOR_ATTACK =    { .format = "%1.0f", .multiplier = 1.0f  },
+
+    .AMP_GAIN =             { .format = "%1.1f", .multiplier = 10.0f },
+    .AMP_VOLUME =           { .format = "%1.1f", .multiplier = 10.0f },
+    .AMP_DEPTH =            { .format = "%1.1f", .multiplier = 10.0f },
+    .AMP_PRESENCE =         { .format = "%1.1f", .multiplier = 10.0f },
+
+    .EQ_BASS_FREQ =         { .format = "%1.0f", .multiplier = 0.2f  },
+    .EQ_BASS =              { .format = "%1.1f", .multiplier = 10.0f },
+    .EQ_MID_FREQ =          { .format = "%1.0f", .multiplier = 0.02f },
+    .EQ_MID_Q =             { .format = "%1.2f", .multiplier = 20.0f },
+    .EQ_MID =               { .format = "%1.1f", .multiplier = 10.0f },
+    .EQ_TREBLE_FREQ =       { .format = "%1.0f", .multiplier = 0.01f },
+    .EQ_TREBLE =            { .format = "%1.1f", .multiplier = 10.0f },
+    
+    .CHORUS_RATE =          { .format = "%1.2f", .multiplier = 50.0f },
+    .CHORUS_DEPTH =         { .format = "%1.0f", .multiplier = 1.0f  },
+    .CHORUS_LEVEL =         { .format = "%1.1f", .multiplier = 10.0f },
+
+    .TREMOLO_RATE =         { .format = "%1.1f", .multiplier = 10.0f },
+    .TREMOLO_SHAPE =        { .format = "%1.1f", .multiplier = 10.0f },
+    .TREMOLO_SPREAD =       { .format = "%1.0f", .multiplier = 1.0f  },
+    .TREMOLO_LEVEL =        { .format = "%1.1f", .multiplier = 10.0f },
+
+    .PHASER_RATE =          { .format = "%1.2f", .multiplier = 50.0f },
+    .PHASER_DEPTH =         { .format = "%1.0f", .multiplier = 1.0f  },
+    .PHASER_LEVEL =         { .format = "%1.1f", .multiplier = 10.0f },
+
+    .FLANGER_RATE =         { .format = "%1.2f", .multiplier = 50.0f },
+    .FLANGER_DEPTH =        { .format = "%1.0f", .multiplier = 1.0f  },
+    .FLANGER_FEEDBACK =     { .format = "%1.0f", .multiplier = 1.0f  },
+    .FLANGER_LEVEL =        { .format = "%1.1f", .multiplier = 10.0f },
+
+    .ROTARY_SPEED =         { .format = "%1.0f", .multiplier = 0.2f  },
+    .ROTARY_RADIUS =        { .format = "%1.0f", .multiplier = 0.2f  },
+    .ROTARY_SPREAD =        { .format = "%1.0f", .multiplier = 1.0f  },
+    .ROTARY_LEVEL =         { .format = "%1.1f", .multiplier = 10.0f },
+
+    .DELAY_TIME =           { .format = "%1.0f", .multiplier = 0.1f  },
+    .DELAY_MIX =            { .format = "%1.0f", .multiplier = 1.0f  },
+    .DELAY_FEEDBACK =       { .format = "%1.0f", .multiplier = 1.0f  },
+
+    .REVERB_TIME =          { .format = "%1.1f", .multiplier = 2.0f  },
+    .REVERB_PREDELAY =      { .format = "%1.0f", .multiplier = 0.1f  },
+    .REVERB_COLOR =         { .format = "%1.0f", .multiplier = 1.0f  },
+    .REVERB_MIX =           { .format = "%1.0f", .multiplier = 1.0f  },
+
+    .BPM =                  { .format = "%1.0f", .multiplier = 1.0f  },
+    .INPUT_TRIM =           { .format = "%1.1f", .multiplier = 10.0f },
+    .TUNING_REF =           { .format = "%1.0f", .multiplier = 1.0f  },
+    .MASTER =               { .format = "%1.1f", .multiplier = 10.0f },
+};
+
 typedef struct {
-    const char *format;
+    TonexParamFormat_t format;
     float defaultValue;
 } format_data_t;
 
@@ -42,7 +110,6 @@ typedef format_data_t (*format_cb_t)(lv_obj_t *);
 typedef struct {
     lv_obj_t * arc;
     lv_obj_t * label;
-    float multiplier;
     format_data_t format_data;
     format_cb_t format_cb;
 } drag_data_t;
@@ -63,38 +130,38 @@ static format_data_t mod_format_cb(lv_obj_t *label)
 
     switch (param_index)
     {
-        case TONEX_PARAM_MODULATION_CHORUS_RATE:      return (format_data_t){ .format = "%1.1f", .defaultValue = 0.5 };
-        case TONEX_PARAM_MODULATION_CHORUS_DEPTH:     return (format_data_t){ .format = "%1.0f", .defaultValue = 50 };
-        case TONEX_PARAM_MODULATION_CHORUS_LEVEL:     return (format_data_t){ .format = "%1.1f", .defaultValue = 7.5 };
+        case TONEX_PARAM_MODULATION_CHORUS_RATE:      return (format_data_t){ .format = ParamFormats.CHORUS_RATE,      .defaultValue = 0.5 };
+        case TONEX_PARAM_MODULATION_CHORUS_DEPTH:     return (format_data_t){ .format = ParamFormats.CHORUS_DEPTH,     .defaultValue = 50 };
+        case TONEX_PARAM_MODULATION_CHORUS_LEVEL:     return (format_data_t){ .format = ParamFormats.CHORUS_LEVEL,     .defaultValue = 7.5 };
 
-        case TONEX_PARAM_MODULATION_TREMOLO_RATE:     return (format_data_t){ .format = "%1.1f", .defaultValue = 6.5 };
-        case TONEX_PARAM_MODULATION_TREMOLO_SHAPE:    return (format_data_t){ .format = "%1.1f", .defaultValue = 0 };
-        case TONEX_PARAM_MODULATION_TREMOLO_SPREAD:   return (format_data_t){ .format = "%1.0f", .defaultValue = 0 };
-        case TONEX_PARAM_MODULATION_TREMOLO_LEVEL:    return (format_data_t){ .format = "%1.1f", .defaultValue = 6 };
+        case TONEX_PARAM_MODULATION_TREMOLO_RATE:     return (format_data_t){ .format = ParamFormats.TREMOLO_RATE,     .defaultValue = 6.5 };
+        case TONEX_PARAM_MODULATION_TREMOLO_SHAPE:    return (format_data_t){ .format = ParamFormats.TREMOLO_SHAPE,    .defaultValue = 0 };
+        case TONEX_PARAM_MODULATION_TREMOLO_SPREAD:   return (format_data_t){ .format = ParamFormats.TREMOLO_SPREAD,   .defaultValue = 0 };
+        case TONEX_PARAM_MODULATION_TREMOLO_LEVEL:    return (format_data_t){ .format = ParamFormats.TREMOLO_LEVEL,    .defaultValue = 6 };
 
-        case TONEX_PARAM_MODULATION_PHASER_RATE:      return (format_data_t){ .format = "%1.1f", .defaultValue = 0.5 };
-        case TONEX_PARAM_MODULATION_PHASER_DEPTH:     return (format_data_t){ .format = "%1.0f", .defaultValue = 50 };
-        case TONEX_PARAM_MODULATION_PHASER_LEVEL:     return (format_data_t){ .format = "%1.1f", .defaultValue = 7.5 };
+        case TONEX_PARAM_MODULATION_PHASER_RATE:      return (format_data_t){ .format = ParamFormats.PHASER_RATE,      .defaultValue = 0.5 };
+        case TONEX_PARAM_MODULATION_PHASER_DEPTH:     return (format_data_t){ .format = ParamFormats.PHASER_DEPTH,     .defaultValue = 50 };
+        case TONEX_PARAM_MODULATION_PHASER_LEVEL:     return (format_data_t){ .format = ParamFormats.PHASER_LEVEL,     .defaultValue = 7.5 };
 
-        case TONEX_PARAM_MODULATION_FLANGER_RATE:     return (format_data_t){ .format = "%1.1f", .defaultValue = 0.5 };
-        case TONEX_PARAM_MODULATION_FLANGER_DEPTH:    return (format_data_t){ .format = "%1.0f", .defaultValue = 50 };
-        case TONEX_PARAM_MODULATION_FLANGER_FEEDBACK: return (format_data_t){ .format = "%1.0f", .defaultValue = 25 };
-        case TONEX_PARAM_MODULATION_FLANGER_LEVEL:    return (format_data_t){ .format = "%1.1f", .defaultValue = 7.5 };
+        case TONEX_PARAM_MODULATION_FLANGER_RATE:     return (format_data_t){ .format = ParamFormats.FLANGER_RATE,     .defaultValue = 0.5 };
+        case TONEX_PARAM_MODULATION_FLANGER_DEPTH:    return (format_data_t){ .format = ParamFormats.FLANGER_DEPTH,    .defaultValue = 50 };
+        case TONEX_PARAM_MODULATION_FLANGER_FEEDBACK: return (format_data_t){ .format = ParamFormats.FLANGER_FEEDBACK, .defaultValue = 25 };
+        case TONEX_PARAM_MODULATION_FLANGER_LEVEL:    return (format_data_t){ .format = ParamFormats.FLANGER_LEVEL,    .defaultValue = 7.5 };
 
-        case TONEX_PARAM_MODULATION_ROTARY_SPEED:     return (format_data_t){ .format = "%1.0f", .defaultValue = 360 };
-        case TONEX_PARAM_MODULATION_ROTARY_RADIUS:    return (format_data_t){ .format = "%1.0f", .defaultValue = 120 };
-        case TONEX_PARAM_MODULATION_ROTARY_SPREAD:    return (format_data_t){ .format = "%1.0f", .defaultValue = 50 };
-        case TONEX_PARAM_MODULATION_ROTARY_LEVEL:     return (format_data_t){ .format = "%1.1f", .defaultValue = 5 };
+        case TONEX_PARAM_MODULATION_ROTARY_SPEED:     return (format_data_t){ .format = ParamFormats.ROTARY_SPEED,     .defaultValue = 360 };
+        case TONEX_PARAM_MODULATION_ROTARY_RADIUS:    return (format_data_t){ .format = ParamFormats.ROTARY_RADIUS,    .defaultValue = 120 };
+        case TONEX_PARAM_MODULATION_ROTARY_SPREAD:    return (format_data_t){ .format = ParamFormats.ROTARY_SPREAD,    .defaultValue = 50 };
+        case TONEX_PARAM_MODULATION_ROTARY_LEVEL:     return (format_data_t){ .format = ParamFormats.ROTARY_LEVEL,     .defaultValue = 5 };
 
-        default:                                      return (format_data_t){ .format = "%1.0f", .defaultValue = 5 };
+        default:                         return (format_data_t){ .format = { .format = "%1.0f", .multiplier = 1.0f },  .defaultValue = 5 };
     }
 }
 
 static void label_set_value(drag_data_t * data, int32_t value)
 {
-    const char *format = drag_data_get_format(data).format;
+    format_data_t format = drag_data_get_format(data);
     char buf[20];
-    sprintf(buf, format, ((float)value) / data->multiplier);
+    sprintf(buf, format.format.format, ((float)value) / format.format.multiplier);
     lv_label_set_text(data->label, buf);
 }
 
@@ -148,10 +215,11 @@ static void arc_reset_cb(lv_event_t * e)
     }
 
     drag_data_t * data = lv_event_get_user_data(e);
-    float defaultValue = drag_data_get_format(data).defaultValue;
+    format_data_t format = drag_data_get_format(data);
+    int16_t value = (int16_t)(format.defaultValue * format.format.multiplier);
 
-    lv_arc_set_value(data->arc, (int16_t)(defaultValue * data->multiplier));
-    label_set_value(data,       (int16_t)(defaultValue * data->multiplier));
+    lv_arc_set_value(data->arc, value);
+    label_set_value(data, value);
     lv_event_send(data->arc, LV_EVENT_VALUE_CHANGED, NULL);
 }
 
@@ -164,7 +232,6 @@ static void drag_delete_cb(lv_event_t *e)
 static void lv_helper_create_arc_gesture_data(
     lv_obj_t *arc,
     lv_obj_t *label,
-    float multiplier,
     drag_data_t *data
 ) {
     lv_obj_t * parent = lv_obj_get_parent(arc);
@@ -209,81 +276,77 @@ static void lv_helper_create_arc_gesture_data(
 static void lv_helper_create_arc_gesture(
     lv_obj_t *arc,
     lv_obj_t *label,
-    const char *format,
-    float multiplier,
+    TonexParamFormat_t format,
     float defaultValue
 ) {
     drag_data_t *data = lv_mem_alloc(sizeof(drag_data_t));
     data->arc = arc;
     data->label = label;
-    data->multiplier = multiplier;
 
     data->format_data.format = format;
     data->format_data.defaultValue = defaultValue;
     data->format_cb = NULL;
     
-    lv_helper_create_arc_gesture_data(arc, label, multiplier, data);
+    lv_helper_create_arc_gesture_data(arc, label, data);
 }
 
 static void lv_helper_create_arc_gesture_c(
     lv_obj_t *arc,
     lv_obj_t *label,
-    float multiplier,
     format_cb_t format_cb
 ) {
     drag_data_t *data = lv_mem_alloc(sizeof(drag_data_t));
     data->arc = arc;
     data->label = label;
-    data->multiplier = multiplier;
 
     data->format_cb = format_cb;
     
-    lv_helper_create_arc_gesture_data(arc, label, multiplier, data);
+    lv_helper_create_arc_gesture_data(arc, label, data);
 }
 
 #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
 void customize_ui() {
     lv_obj_set_style_bg_opa(objects.ui_wi_fi_button, 255, LV_PART_MAIN | LV_STATE_USER_1);
 
-    lv_helper_create_arc_gesture(objects.ui_noise_gate_threshold_slider, objects.ui_noise_gate_threshold_value, "%1.0f", 1.0f, -100);
-    lv_helper_create_arc_gesture(objects.ui_noise_gate_release_slider,   objects.ui_noise_gate_release_value,   "%1.0f", 1.0f, 20);
-    lv_helper_create_arc_gesture(objects.ui_noise_gate_depth_slider,     objects.ui_noise_gate_depth_value,     "%1.0f", 1.0f, 60);
+    lv_helper_create_arc_gesture(objects.ui_noise_gate_threshold_slider, objects.ui_noise_gate_threshold_value, ParamFormats.GATE_THRESHOLD,      -100);
+    lv_helper_create_arc_gesture(objects.ui_noise_gate_release_slider,   objects.ui_noise_gate_release_value,   ParamFormats.GATE_RELEASE,          20);
+    lv_helper_create_arc_gesture(objects.ui_noise_gate_depth_slider,     objects.ui_noise_gate_depth_value,     ParamFormats.GATE_DEPTH,            60);
 
-    lv_helper_create_arc_gesture(objects.ui_compressor_threshold_slider, objects.ui_compressor_threshold_value, "%1.1f", 1.0f, 0);
-    lv_helper_create_arc_gesture(objects.ui_compressor_gain_slider,      objects.ui_compressor_gain_value,      "%1.0f", 1.0f, -8);
-    lv_helper_create_arc_gesture(objects.ui_compressor_attack_slider,    objects.ui_compressor_attack_value,    "%1.0f", 1.0f, 5);
+    lv_helper_create_arc_gesture(objects.ui_compressor_threshold_slider, objects.ui_compressor_threshold_value, ParamFormats.COMPRESSOR_THRESHOLD,   0);
+    lv_helper_create_arc_gesture(objects.ui_compressor_gain_slider,      objects.ui_compressor_gain_value,      ParamFormats.COMPRESSOR_GAIN,       -8);
+    lv_helper_create_arc_gesture(objects.ui_compressor_attack_slider,    objects.ui_compressor_attack_value,    ParamFormats.COMPRESSOR_ATTACK,      5);
 
-    lv_helper_create_arc_gesture(objects.ui_amplifier_gain_slider,       objects.ui_amplifier_gain_value,       "%1.1f", 10.0f, 5);
-    lv_helper_create_arc_gesture(objects.ui_amplifier_volume_slider,     objects.ui_amplifier_volume_value,     "%1.1f", 10.0f, 5);
-    lv_helper_create_arc_gesture(objects.ui_amplifier_depth_slider,      objects.ui_amplifier_depth_value,      "%1.1f", 10.0f, 5);
-    lv_helper_create_arc_gesture(objects.ui_amplifier_presense_slider,   objects.ui_amplifier_presense_value,   "%1.1f", 10.0f, 5);
+    lv_helper_create_arc_gesture(objects.ui_amplifier_gain_slider,       objects.ui_amplifier_gain_value,       ParamFormats.AMP_GAIN,               5);
+    lv_helper_create_arc_gesture(objects.ui_amplifier_volume_slider,     objects.ui_amplifier_volume_value,     ParamFormats.AMP_VOLUME,             5);
+    lv_helper_create_arc_gesture(objects.ui_amplifier_depth_slider,      objects.ui_amplifier_depth_value,      ParamFormats.AMP_DEPTH,              5);
+    lv_helper_create_arc_gesture(objects.ui_amplifier_presense_slider,   objects.ui_amplifier_presense_value,   ParamFormats.AMP_PRESENCE,           5);
 
-    lv_helper_create_arc_gesture(objects.ui_eq_bass_freq_slider,         objects.ui_eq_bass_freq_value,         "%1.0f", 1.0f,  300);
-    lv_helper_create_arc_gesture(objects.ui_eq_bass_slider,              objects.ui_eq_bass_value,              "%1.1f", 10.0f, 5);
-    lv_helper_create_arc_gesture(objects.ui_eq_mid_freq_slider,          objects.ui_eq_mid_freq_value,          "%1.0f", 1.0f,  750);
-    lv_helper_create_arc_gesture(objects.ui_eq_mid_qslider,              objects.ui_eq_mid_qvalue,              "%1.1f", 10.0f, 0.7);
-    lv_helper_create_arc_gesture(objects.ui_eq_mid_slider,               objects.ui_eq_mid_value,               "%1.1f", 10.0f, 5);
-    lv_helper_create_arc_gesture(objects.ui_eq_treble_freq_slider,       objects.ui_eq_treble_freq_value,       "%1.0f", 1.0f,  2000);
-    lv_helper_create_arc_gesture(objects.ui_eq_treble_slider,            objects.ui_eq_treble_value,            "%1.1f", 10.0f, 5);
+    lv_helper_create_arc_gesture(objects.ui_eq_bass_freq_slider,         objects.ui_eq_bass_freq_value,         ParamFormats.EQ_BASS_FREQ,         300);
+    lv_helper_create_arc_gesture(objects.ui_eq_bass_slider,              objects.ui_eq_bass_value,              ParamFormats.EQ_BASS,                5);
+    lv_helper_create_arc_gesture(objects.ui_eq_mid_freq_slider,          objects.ui_eq_mid_freq_value,          ParamFormats.EQ_MID_FREQ,          750);
+    lv_helper_create_arc_gesture(objects.ui_eq_mid_qslider,              objects.ui_eq_mid_qvalue,              ParamFormats.EQ_MID_Q,             0.7);
+    lv_helper_create_arc_gesture(objects.ui_eq_mid_slider,               objects.ui_eq_mid_value,               ParamFormats.EQ_MID,                 5);
+    lv_helper_create_arc_gesture(objects.ui_eq_treble_freq_slider,       objects.ui_eq_treble_freq_value,       ParamFormats.EQ_TREBLE_FREQ,      2000);
+    lv_helper_create_arc_gesture(objects.ui_eq_treble_slider,            objects.ui_eq_treble_value,            ParamFormats.EQ_TREBLE,              5);
 
-    lv_helper_create_arc_gesture_c(objects.ui_modulation_param1_slider,  objects.ui_modulation_param1_value,    1.0f, mod_format_cb);
-    lv_helper_create_arc_gesture_c(objects.ui_modulation_param2_slider,  objects.ui_modulation_param2_value,    1.0f, mod_format_cb);
-    lv_helper_create_arc_gesture_c(objects.ui_modulation_param3_slider,  objects.ui_modulation_param3_value,    1.0f, mod_format_cb);
-    lv_helper_create_arc_gesture_c(objects.ui_modulation_param4_slider,  objects.ui_modulation_param4_value,    1.0f, mod_format_cb);
+    lv_helper_create_arc_gesture(objects.ui_delay_ts_slider,             objects.ui_delay_ts_value,             ParamFormats.DELAY_TIME,           350);
+    lv_helper_create_arc_gesture(objects.ui_delay_mix_slider,            objects.ui_delay_mix_value,            ParamFormats.DELAY_MIX,             50);
+    lv_helper_create_arc_gesture(objects.ui_delay_feedback_slider,       objects.ui_delay_feedback_value,       ParamFormats.DELAY_FEEDBACK,        20);
 
-    lv_helper_create_arc_gesture(objects.ui_delay_ts_slider,             objects.ui_delay_ts_value,             "%1.0f", 1.0f, 350);
-    lv_helper_create_arc_gesture(objects.ui_delay_mix_slider,            objects.ui_delay_mix_value,            "%1.0f", 1.0f, 50);
-    lv_helper_create_arc_gesture(objects.ui_delay_feedback_slider,       objects.ui_delay_feedback_value,       "%1.0f", 1.0f, 20);
+    lv_helper_create_arc_gesture(objects.ui_reverb_time_slider,          objects.ui_reverb_time_value,          ParamFormats.REVERB_TIME,            5);
+    lv_helper_create_arc_gesture(objects.ui_reverb_predelay_slider,      objects.ui_reverb_predelay_value,      ParamFormats.REVERB_PREDELAY,        0);
+    lv_helper_create_arc_gesture(objects.ui_reverb_color_slider,         objects.ui_reverb_color_value,         ParamFormats.REVERB_COLOR,           0);
+    lv_helper_create_arc_gesture(objects.ui_reverb_mix_slider,           objects.ui_reverb_mix_value,           ParamFormats.REVERB_MIX,            30);
 
-    lv_helper_create_arc_gesture(objects.ui_reverb_time_slider,          objects.ui_reverb_time_value,          "%1.1f", 1.0f, 5);
-    lv_helper_create_arc_gesture(objects.ui_reverb_predelay_slider,      objects.ui_reverb_predelay_value,      "%1.0f", 1.0f, 0);
-    lv_helper_create_arc_gesture(objects.ui_reverb_color_slider,         objects.ui_reverb_color_value,         "%1.0f", 1.0f, 0);
-    lv_helper_create_arc_gesture(objects.ui_reverb_mix_slider,           objects.ui_reverb_mix_value,           "%1.0f", 1.0f, 30);
+    lv_helper_create_arc_gesture(objects.ui_bpm_slider,                  objects.ui_bpm_value,                  ParamFormats.BPM,                  120);
+    lv_helper_create_arc_gesture(objects.ui_input_trim_slider,           objects.ui_input_trim_value,           ParamFormats.INPUT_TRIM,             0);
+    lv_helper_create_arc_gesture(objects.ui_tuning_reference_slider,     objects.ui_tuning_reference_value,     ParamFormats.TUNING_REF,           440);
+    lv_helper_create_arc_gesture(objects.ui_volume_slider,               objects.ui_volume_value,               ParamFormats.MASTER,                 5);
 
-    lv_helper_create_arc_gesture(objects.ui_bpm_slider,                  objects.ui_bpm_value,                  "%1.0f", 1.0f, 120);
-    lv_helper_create_arc_gesture(objects.ui_input_trim_slider,           objects.ui_input_trim_value,           "%1.0f", 1.0f, 0);
-    lv_helper_create_arc_gesture(objects.ui_tuning_reference_slider,     objects.ui_tuning_reference_value,     "%1.0f", 1.0f, 440);
-    lv_helper_create_arc_gesture(objects.ui_volume_slider,               objects.ui_volume_value,               "%1.0f", 1.0f, 5);
+    lv_helper_create_arc_gesture_c(objects.ui_modulation_param1_slider,  objects.ui_modulation_param1_value,    mod_format_cb);
+    lv_helper_create_arc_gesture_c(objects.ui_modulation_param2_slider,  objects.ui_modulation_param2_value,    mod_format_cb);
+    lv_helper_create_arc_gesture_c(objects.ui_modulation_param3_slider,  objects.ui_modulation_param3_value,    mod_format_cb);
+    lv_helper_create_arc_gesture_c(objects.ui_modulation_param4_slider,  objects.ui_modulation_param4_value,    mod_format_cb);
 
     eq_canvas_setup();
 }

@@ -135,6 +135,53 @@ void remove_style_button_basic(lv_obj_t *obj) {
 };
 
 //
+// Style: Button Secondary
+//
+
+void init_style_button_secondary_MAIN_DEFAULT(lv_style_t *style) {
+    init_style_button_basic_MAIN_DEFAULT(style);
+    
+    lv_style_set_bg_color(style, lv_color_hex(theme_colors[active_theme_index][1]));
+};
+
+lv_style_t *get_style_button_secondary_MAIN_DEFAULT() {
+    static lv_style_t *style;
+    if (!style) {
+        style = (lv_style_t *)lv_mem_alloc(sizeof(lv_style_t));
+        lv_style_init(style);
+        init_style_button_secondary_MAIN_DEFAULT(style);
+    }
+    return style;
+};
+
+void init_style_button_secondary_MAIN_PRESSED(lv_style_t *style) {
+    init_style_button_basic_MAIN_PRESSED(style);
+    
+};
+
+lv_style_t *get_style_button_secondary_MAIN_PRESSED() {
+    static lv_style_t *style;
+    if (!style) {
+        style = (lv_style_t *)lv_mem_alloc(sizeof(lv_style_t));
+        lv_style_init(style);
+        init_style_button_secondary_MAIN_PRESSED(style);
+    }
+    return style;
+};
+
+void add_style_button_secondary(lv_obj_t *obj) {
+    (void)obj;
+    lv_obj_add_style(obj, get_style_button_secondary_MAIN_DEFAULT(), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_add_style(obj, get_style_button_secondary_MAIN_PRESSED(), LV_PART_MAIN | LV_STATE_PRESSED);
+};
+
+void remove_style_button_secondary(lv_obj_t *obj) {
+    (void)obj;
+    lv_obj_remove_style(obj, get_style_button_secondary_MAIN_DEFAULT(), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_remove_style(obj, get_style_button_secondary_MAIN_PRESSED(), LV_PART_MAIN | LV_STATE_PRESSED);
+};
+
+//
 // Style: Button Highlighted
 //
 
@@ -1621,6 +1668,7 @@ void add_style(lv_obj_t *obj, int32_t styleIndex) {
     static const AddStyleFunc add_style_funcs[] = {
         add_style_button_selectable,
         add_style_button_basic,
+        add_style_button_secondary,
         add_style_button_highlighted,
         add_style_button_preset_list_options,
         add_style_button_chain,
@@ -1659,6 +1707,7 @@ void remove_style(lv_obj_t *obj, int32_t styleIndex) {
     static const RemoveStyleFunc remove_style_funcs[] = {
         remove_style_button_selectable,
         remove_style_button_basic,
+        remove_style_button_secondary,
         remove_style_button_highlighted,
         remove_style_button_preset_list_options,
         remove_style_button_chain,

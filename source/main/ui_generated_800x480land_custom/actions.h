@@ -50,6 +50,14 @@ extern void action_preset_list_color(lv_event_t * e);
 extern void action_preset_list_dialog_close(lv_event_t * e);
 extern void action_preset_list_cancel(lv_event_t * e);
 extern void action_usb_reboot(lv_event_t * e);
+extern void action_settings_copy_reverb(lv_event_t * e);
+extern void action_settings_copy_gate(lv_event_t * e);
+extern void action_settings_copy_compressor(lv_event_t * e);
+extern void action_settings_copy_amp(lv_event_t * e);
+extern void action_settings_paste(lv_event_t * e);
+extern void action_settings_copy_eq(lv_event_t * e);
+extern void action_settings_copy_delay(lv_event_t * e);
+extern void action_settings_copy_modulation(lv_event_t * e);
 
 #ifdef __cplusplus
 }

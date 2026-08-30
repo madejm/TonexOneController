@@ -20,6 +20,12 @@ lv_style_t *get_style_button_basic_MAIN_PRESSED();
 void add_style_button_basic(lv_obj_t *obj);
 void remove_style_button_basic(lv_obj_t *obj);
 
+// Style: Button Secondary
+lv_style_t *get_style_button_secondary_MAIN_DEFAULT();
+lv_style_t *get_style_button_secondary_MAIN_PRESSED();
+void add_style_button_secondary(lv_obj_t *obj);
+void remove_style_button_secondary(lv_obj_t *obj);
+
 // Style: Button Highlighted
 lv_style_t *get_style_button_highlighted_MAIN_DEFAULT();
 lv_style_t *get_style_button_highlighted_MAIN_PRESSED();

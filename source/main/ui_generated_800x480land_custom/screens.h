@@ -111,6 +111,7 @@ typedef struct _objects_t {
     lv_obj_t *ui_noise_gate_switch;
     lv_obj_t *obj4;
     lv_obj_t *ui_noise_gate_post_switch;
+    lv_obj_t *ui_settings_paste_gate;
     lv_obj_t *obj5;
     lv_obj_t *ui_noise_gate_threshold_slider;
     lv_obj_t *ui_noise_gate_threshold_value;
@@ -125,6 +126,7 @@ typedef struct _objects_t {
     lv_obj_t *ui_compressor_enable_switch;
     lv_obj_t *obj9;
     lv_obj_t *ui_compressor_post_switch;
+    lv_obj_t *ui_settings_paste_compressor;
     lv_obj_t *obj10;
     lv_obj_t *ui_compressor_threshold_slider;
     lv_obj_t *ui_compressor_threshold_value;
@@ -139,6 +141,7 @@ typedef struct _objects_t {
     lv_obj_t *ui_amp_enable_switch;
     lv_obj_t *obj14;
     lv_obj_t *ui_cabinet_model_dropdown;
+    lv_obj_t *ui_settings_paste_amp;
     lv_obj_t *obj15;
     lv_obj_t *ui_amplifier_gain_slider;
     lv_obj_t *ui_amplifier_gain_value;
@@ -165,6 +168,7 @@ typedef struct _objects_t {
     lv_obj_t *ui_eq_treble_value;
     lv_obj_t *ui_amplifier_presense_slider;
     lv_obj_t *ui_amplifier_presense_value;
+    lv_obj_t *ui_settings_paste_eq;
     lv_obj_t *ui_eq_post_switch;
     lv_obj_t *ui_modulation_tab;
     lv_obj_t *obj17;
@@ -175,6 +179,7 @@ typedef struct _objects_t {
     lv_obj_t *ui_modulation_sync_switch;
     lv_obj_t *obj20;
     lv_obj_t *ui_modulation_model_dropdown;
+    lv_obj_t *ui_settings_paste_modulation;
     lv_obj_t *ui_modulation_param1_label;
     lv_obj_t *ui_modulation_param1_slider;
     lv_obj_t *ui_modulation_param1_value;
@@ -203,6 +208,7 @@ typedef struct _objects_t {
     lv_obj_t *ui_delay_ping_pong_switch;
     lv_obj_t *obj25;
     lv_obj_t *ui_delay_model_dropdown;
+    lv_obj_t *ui_settings_paste_delay;
     lv_obj_t *obj26;
     lv_obj_t *ui_delay_ts_slider;
     lv_obj_t *ui_delay_ts_value;
@@ -220,6 +226,7 @@ typedef struct _objects_t {
     lv_obj_t *ui_reverb_post_switch;
     lv_obj_t *obj31;
     lv_obj_t *ui_reverb_model_dropdown;
+    lv_obj_t *ui_settings_paste_reverb;
     lv_obj_t *obj32;
     lv_obj_t *ui_reverb_time_slider;
     lv_obj_t *ui_reverb_time_value;

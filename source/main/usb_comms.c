@@ -723,6 +723,47 @@ void usb_set_preset_color(uint16_t preset_index, uint32_t color)
     }
 }
 
+void usb_copy_settings(Clipboard_t type)
+{
+    tUSBMessage message;
+
+    if (usb_input_queue == NULL)
+    {
+        ESP_LOGE(TAG, "usb_copy_settings queue null");            
+    }
+    else
+    {
+        message.Command = USB_COMMAND_COPY_SETTINGS;
+        message.Payload = type;
+
+        // send to queue
+        if (xQueueSend(usb_input_queue, (void*)&message, 0) != pdPASS)
+        {
+            ESP_LOGE(TAG, "usb_copy_settings queue send failed!");            
+        }
+    }
+}
+
+void usb_paste_settings()
+{
+    tUSBMessage message;
+
+    if (usb_input_queue == NULL)
+    {
+        ESP_LOGE(TAG, "usb_paste_settings queue null");            
+    }
+    else
+    {
+        message.Command = USB_COMMAND_PASTE_SETTINGS;
+
+        // send to queue
+        if (xQueueSend(usb_input_queue, (void*)&message, 0) != pdPASS)
+        {
+            ESP_LOGE(TAG, "usb_paste_settings queue send failed!");            
+        }
+    }
+}
+
 /****************************************************************************
 * NAME:        
 * DESCRIPTION: 

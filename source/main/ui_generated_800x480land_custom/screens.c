@@ -1753,7 +1753,7 @@ void create_screen_settings() {
                                 {
                                     lv_obj_t *obj = lv_obj_create(parent_obj);
                                     lv_obj_set_pos(obj, 0, 0);
-                                    lv_obj_set_size(obj, 300, 45);
+                                    lv_obj_set_size(obj, LV_SIZE_CONTENT, 45);
                                     lv_obj_set_style_pad_left(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
                                     lv_obj_set_style_pad_top(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
                                     lv_obj_set_style_pad_right(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -1761,6 +1761,46 @@ void create_screen_settings() {
                                     lv_obj_set_style_bg_opa(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
                                     lv_obj_set_style_border_width(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
                                     lv_obj_set_style_radius(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+                                    lv_obj_set_style_layout(obj, LV_LAYOUT_FLEX, LV_PART_MAIN | LV_STATE_DEFAULT);
+                                    lv_obj_set_style_pad_column(obj, 12, LV_PART_MAIN | LV_STATE_DEFAULT);
+                                    {
+                                        lv_obj_t *parent_obj = obj;
+                                        {
+                                            lv_obj_t *obj = lv_btn_create(parent_obj);
+                                            lv_obj_set_pos(obj, 0, 0);
+                                            lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_PCT(100));
+                                            lv_obj_add_event_cb(obj, action_settings_copy_gate, LV_EVENT_PRESSED, (void *)0);
+                                            add_style_button_secondary(obj);
+                                            {
+                                                lv_obj_t *parent_obj = obj;
+                                                {
+                                                    lv_obj_t *obj = lv_label_create(parent_obj);
+                                                    lv_obj_set_pos(obj, 0, 0);
+                                                    lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
+                                                    lv_label_set_text_static(obj, "Copy");
+                                                }
+                                            }
+                                        }
+                                        {
+                                            // ui_SettingsPasteGate
+                                            lv_obj_t *obj = lv_btn_create(parent_obj);
+                                            objects.ui_settings_paste_gate = obj;
+                                            lv_obj_set_pos(obj, 0, 0);
+                                            lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_PCT(100));
+                                            lv_obj_add_event_cb(obj, action_settings_paste, LV_EVENT_PRESSED, (void *)0);
+                                            lv_obj_add_state(obj, LV_STATE_DISABLED);
+                                            add_style_button_secondary(obj);
+                                            {
+                                                lv_obj_t *parent_obj = obj;
+                                                {
+                                                    lv_obj_t *obj = lv_label_create(parent_obj);
+                                                    lv_obj_set_pos(obj, 0, 0);
+                                                    lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
+                                                    lv_label_set_text_static(obj, "Paste");
+                                                }
+                                            }
+                                        }
+                                    }
                                 }
                                 {
                                     lv_obj_t *obj = lv_obj_create(parent_obj);
@@ -2066,7 +2106,7 @@ void create_screen_settings() {
                                 {
                                     lv_obj_t *obj = lv_obj_create(parent_obj);
                                     lv_obj_set_pos(obj, 0, 0);
-                                    lv_obj_set_size(obj, 300, 45);
+                                    lv_obj_set_size(obj, LV_SIZE_CONTENT, 45);
                                     lv_obj_set_style_pad_left(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
                                     lv_obj_set_style_pad_top(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
                                     lv_obj_set_style_pad_right(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -2074,6 +2114,46 @@ void create_screen_settings() {
                                     lv_obj_set_style_bg_opa(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
                                     lv_obj_set_style_border_width(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
                                     lv_obj_set_style_radius(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+                                    lv_obj_set_style_layout(obj, LV_LAYOUT_FLEX, LV_PART_MAIN | LV_STATE_DEFAULT);
+                                    lv_obj_set_style_pad_column(obj, 12, LV_PART_MAIN | LV_STATE_DEFAULT);
+                                    {
+                                        lv_obj_t *parent_obj = obj;
+                                        {
+                                            lv_obj_t *obj = lv_btn_create(parent_obj);
+                                            lv_obj_set_pos(obj, 0, 0);
+                                            lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_PCT(100));
+                                            lv_obj_add_event_cb(obj, action_settings_copy_compressor, LV_EVENT_PRESSED, (void *)0);
+                                            add_style_button_secondary(obj);
+                                            {
+                                                lv_obj_t *parent_obj = obj;
+                                                {
+                                                    lv_obj_t *obj = lv_label_create(parent_obj);
+                                                    lv_obj_set_pos(obj, 0, 0);
+                                                    lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
+                                                    lv_label_set_text_static(obj, "Copy");
+                                                }
+                                            }
+                                        }
+                                        {
+                                            // ui_SettingsPasteCompressor
+                                            lv_obj_t *obj = lv_btn_create(parent_obj);
+                                            objects.ui_settings_paste_compressor = obj;
+                                            lv_obj_set_pos(obj, 0, 0);
+                                            lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_PCT(100));
+                                            lv_obj_add_event_cb(obj, action_settings_paste, LV_EVENT_PRESSED, (void *)0);
+                                            lv_obj_add_state(obj, LV_STATE_DISABLED);
+                                            add_style_button_secondary(obj);
+                                            {
+                                                lv_obj_t *parent_obj = obj;
+                                                {
+                                                    lv_obj_t *obj = lv_label_create(parent_obj);
+                                                    lv_obj_set_pos(obj, 0, 0);
+                                                    lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
+                                                    lv_label_set_text_static(obj, "Paste");
+                                                }
+                                            }
+                                        }
+                                    }
                                 }
                                 {
                                     lv_obj_t *obj = lv_obj_create(parent_obj);
@@ -2352,7 +2432,7 @@ void create_screen_settings() {
                                     lv_obj_set_style_radius(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
                                     lv_obj_set_style_layout(obj, LV_LAYOUT_FLEX, LV_PART_MAIN | LV_STATE_DEFAULT);
                                     lv_obj_set_style_flex_flow(obj, LV_FLEX_FLOW_ROW, LV_PART_MAIN | LV_STATE_DEFAULT);
-                                    lv_obj_set_style_flex_main_place(obj, LV_FLEX_ALIGN_SPACE_AROUND, LV_PART_MAIN | LV_STATE_DEFAULT);
+                                    lv_obj_set_style_flex_main_place(obj, LV_FLEX_ALIGN_SPACE_EVENLY, LV_PART_MAIN | LV_STATE_DEFAULT);
                                     {
                                         lv_obj_t *parent_obj = obj;
                                         {
@@ -2396,6 +2476,58 @@ void create_screen_settings() {
                                                         {
                                                             lv_obj_t *obj = lv_dropdown_get_list(parent_obj);
                                                             add_style_dropdown_list_sub_settings(obj);
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        {
+                                            lv_obj_t *obj = lv_obj_create(parent_obj);
+                                            lv_obj_set_pos(obj, 0, 0);
+                                            lv_obj_set_size(obj, LV_SIZE_CONTENT, 45);
+                                            lv_obj_set_style_pad_left(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+                                            lv_obj_set_style_pad_top(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+                                            lv_obj_set_style_pad_right(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+                                            lv_obj_set_style_pad_bottom(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+                                            lv_obj_set_style_bg_opa(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+                                            lv_obj_set_style_border_width(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+                                            lv_obj_set_style_radius(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+                                            lv_obj_set_style_layout(obj, LV_LAYOUT_FLEX, LV_PART_MAIN | LV_STATE_DEFAULT);
+                                            lv_obj_set_style_pad_column(obj, 12, LV_PART_MAIN | LV_STATE_DEFAULT);
+                                            {
+                                                lv_obj_t *parent_obj = obj;
+                                                {
+                                                    lv_obj_t *obj = lv_btn_create(parent_obj);
+                                                    lv_obj_set_pos(obj, 0, 0);
+                                                    lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_PCT(100));
+                                                    lv_obj_add_event_cb(obj, action_settings_copy_amp, LV_EVENT_PRESSED, (void *)0);
+                                                    add_style_button_secondary(obj);
+                                                    {
+                                                        lv_obj_t *parent_obj = obj;
+                                                        {
+                                                            lv_obj_t *obj = lv_label_create(parent_obj);
+                                                            lv_obj_set_pos(obj, 0, 0);
+                                                            lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
+                                                            lv_label_set_text_static(obj, "Copy");
+                                                        }
+                                                    }
+                                                }
+                                                {
+                                                    // ui_SettingsPasteAmp
+                                                    lv_obj_t *obj = lv_btn_create(parent_obj);
+                                                    objects.ui_settings_paste_amp = obj;
+                                                    lv_obj_set_pos(obj, 0, 0);
+                                                    lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_PCT(100));
+                                                    lv_obj_add_event_cb(obj, action_settings_paste, LV_EVENT_PRESSED, (void *)0);
+                                                    lv_obj_add_state(obj, LV_STATE_DISABLED);
+                                                    add_style_button_secondary(obj);
+                                                    {
+                                                        lv_obj_t *parent_obj = obj;
+                                                        {
+                                                            lv_obj_t *obj = lv_label_create(parent_obj);
+                                                            lv_obj_set_pos(obj, 0, 0);
+                                                            lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
+                                                            lv_label_set_text_static(obj, "Paste");
                                                         }
                                                     }
                                                 }
@@ -2893,31 +3025,85 @@ void create_screen_settings() {
                                     lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
                                     lv_obj_set_style_pad_left(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
                                     lv_obj_set_style_pad_top(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+                                    lv_obj_set_style_pad_right(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
                                     lv_obj_set_style_pad_bottom(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
                                     lv_obj_set_style_bg_opa(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
                                     lv_obj_set_style_border_width(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
                                     lv_obj_set_style_radius(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-                                    lv_obj_clear_flag(obj, LV_OBJ_FLAG_SCROLLABLE);
                                     lv_obj_set_style_layout(obj, LV_LAYOUT_FLEX, LV_PART_MAIN | LV_STATE_DEFAULT);
-                                    lv_obj_set_style_flex_flow(obj, LV_FLEX_FLOW_ROW, LV_PART_MAIN | LV_STATE_DEFAULT);
+                                    lv_obj_set_style_flex_flow(obj, LV_FLEX_FLOW_COLUMN, LV_PART_MAIN | LV_STATE_DEFAULT);
                                     lv_obj_set_style_flex_cross_place(obj, LV_FLEX_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
-                                    lv_obj_set_style_pad_right(obj, 4, LV_PART_MAIN | LV_STATE_DEFAULT);
+                                    lv_obj_set_style_pad_row(obj, 14, LV_PART_MAIN | LV_STATE_DEFAULT);
                                     {
                                         lv_obj_t *parent_obj = obj;
                                         {
-                                            lv_obj_t *obj = lv_label_create(parent_obj);
+                                            lv_obj_t *obj = lv_btn_create(parent_obj);
                                             lv_obj_set_pos(obj, 0, 0);
-                                            lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
-                                            lv_label_set_text_static(obj, "Post");
+                                            lv_obj_set_size(obj, LV_SIZE_CONTENT, 45);
+                                            lv_obj_add_event_cb(obj, action_settings_copy_eq, LV_EVENT_PRESSED, (void *)0);
+                                            add_style_button_secondary(obj);
+                                            {
+                                                lv_obj_t *parent_obj = obj;
+                                                {
+                                                    lv_obj_t *obj = lv_label_create(parent_obj);
+                                                    lv_obj_set_pos(obj, 0, 0);
+                                                    lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
+                                                    lv_label_set_text_static(obj, "Copy");
+                                                }
+                                            }
                                         }
                                         {
-                                            // ui_EQPostSwitch
-                                            lv_obj_t *obj = lv_switch_create(parent_obj);
-                                            objects.ui_eq_post_switch = obj;
-                                            lv_obj_set_pos(obj, 437, 68);
+                                            // ui_SettingsPasteEQ
+                                            lv_obj_t *obj = lv_btn_create(parent_obj);
+                                            objects.ui_settings_paste_eq = obj;
+                                            lv_obj_set_pos(obj, 0, 0);
+                                            lv_obj_set_size(obj, LV_SIZE_CONTENT, 45);
+                                            lv_obj_add_event_cb(obj, action_settings_paste, LV_EVENT_PRESSED, (void *)0);
+                                            lv_obj_add_state(obj, LV_STATE_DISABLED);
+                                            add_style_button_secondary(obj);
+                                            {
+                                                lv_obj_t *parent_obj = obj;
+                                                {
+                                                    lv_obj_t *obj = lv_label_create(parent_obj);
+                                                    lv_obj_set_pos(obj, 0, 0);
+                                                    lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
+                                                    lv_label_set_text_static(obj, "Paste");
+                                                }
+                                            }
+                                        }
+                                        {
+                                            lv_obj_t *obj = lv_obj_create(parent_obj);
+                                            lv_obj_set_pos(obj, 0, 0);
                                             lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
-                                            lv_obj_add_event_cb(obj, action_parameter_changed, LV_EVENT_RELEASED, (void *)0);
-                                            add_style_switch_dark(obj);
+                                            lv_obj_set_style_pad_left(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+                                            lv_obj_set_style_pad_top(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+                                            lv_obj_set_style_pad_bottom(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+                                            lv_obj_set_style_bg_opa(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+                                            lv_obj_set_style_border_width(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+                                            lv_obj_set_style_radius(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+                                            lv_obj_clear_flag(obj, LV_OBJ_FLAG_SCROLLABLE);
+                                            lv_obj_set_style_layout(obj, LV_LAYOUT_FLEX, LV_PART_MAIN | LV_STATE_DEFAULT);
+                                            lv_obj_set_style_flex_flow(obj, LV_FLEX_FLOW_ROW, LV_PART_MAIN | LV_STATE_DEFAULT);
+                                            lv_obj_set_style_flex_cross_place(obj, LV_FLEX_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
+                                            lv_obj_set_style_pad_right(obj, 4, LV_PART_MAIN | LV_STATE_DEFAULT);
+                                            {
+                                                lv_obj_t *parent_obj = obj;
+                                                {
+                                                    lv_obj_t *obj = lv_label_create(parent_obj);
+                                                    lv_obj_set_pos(obj, 0, 0);
+                                                    lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
+                                                    lv_label_set_text_static(obj, "Post");
+                                                }
+                                                {
+                                                    // ui_EQPostSwitch
+                                                    lv_obj_t *obj = lv_switch_create(parent_obj);
+                                                    objects.ui_eq_post_switch = obj;
+                                                    lv_obj_set_pos(obj, 437, 68);
+                                                    lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
+                                                    lv_obj_add_event_cb(obj, action_parameter_changed, LV_EVENT_RELEASED, (void *)0);
+                                                    add_style_switch_dark(obj);
+                                                }
+                                            }
                                         }
                                     }
                                 }
@@ -3086,7 +3272,7 @@ void create_screen_settings() {
                                     lv_obj_set_style_radius(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
                                     lv_obj_set_style_layout(obj, LV_LAYOUT_FLEX, LV_PART_MAIN | LV_STATE_DEFAULT);
                                     lv_obj_set_style_flex_flow(obj, LV_FLEX_FLOW_ROW, LV_PART_MAIN | LV_STATE_DEFAULT);
-                                    lv_obj_set_style_flex_main_place(obj, LV_FLEX_ALIGN_SPACE_AROUND, LV_PART_MAIN | LV_STATE_DEFAULT);
+                                    lv_obj_set_style_flex_main_place(obj, LV_FLEX_ALIGN_SPACE_EVENLY, LV_PART_MAIN | LV_STATE_DEFAULT);
                                     {
                                         lv_obj_t *parent_obj = obj;
                                         {
@@ -3130,6 +3316,58 @@ void create_screen_settings() {
                                                         {
                                                             lv_obj_t *obj = lv_dropdown_get_list(parent_obj);
                                                             add_style_dropdown_list_sub_settings(obj);
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        {
+                                            lv_obj_t *obj = lv_obj_create(parent_obj);
+                                            lv_obj_set_pos(obj, 0, 0);
+                                            lv_obj_set_size(obj, LV_SIZE_CONTENT, 45);
+                                            lv_obj_set_style_pad_left(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+                                            lv_obj_set_style_pad_top(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+                                            lv_obj_set_style_pad_right(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+                                            lv_obj_set_style_pad_bottom(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+                                            lv_obj_set_style_bg_opa(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+                                            lv_obj_set_style_border_width(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+                                            lv_obj_set_style_radius(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+                                            lv_obj_set_style_layout(obj, LV_LAYOUT_FLEX, LV_PART_MAIN | LV_STATE_DEFAULT);
+                                            lv_obj_set_style_pad_column(obj, 12, LV_PART_MAIN | LV_STATE_DEFAULT);
+                                            {
+                                                lv_obj_t *parent_obj = obj;
+                                                {
+                                                    lv_obj_t *obj = lv_btn_create(parent_obj);
+                                                    lv_obj_set_pos(obj, 0, 0);
+                                                    lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_PCT(100));
+                                                    lv_obj_add_event_cb(obj, action_settings_copy_modulation, LV_EVENT_PRESSED, (void *)0);
+                                                    add_style_button_secondary(obj);
+                                                    {
+                                                        lv_obj_t *parent_obj = obj;
+                                                        {
+                                                            lv_obj_t *obj = lv_label_create(parent_obj);
+                                                            lv_obj_set_pos(obj, 0, 0);
+                                                            lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
+                                                            lv_label_set_text_static(obj, "Copy");
+                                                        }
+                                                    }
+                                                }
+                                                {
+                                                    // ui_SettingsPasteModulation
+                                                    lv_obj_t *obj = lv_btn_create(parent_obj);
+                                                    objects.ui_settings_paste_modulation = obj;
+                                                    lv_obj_set_pos(obj, 0, 0);
+                                                    lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_PCT(100));
+                                                    lv_obj_add_event_cb(obj, action_settings_paste, LV_EVENT_PRESSED, (void *)0);
+                                                    lv_obj_add_state(obj, LV_STATE_DISABLED);
+                                                    add_style_button_secondary(obj);
+                                                    {
+                                                        lv_obj_t *parent_obj = obj;
+                                                        {
+                                                            lv_obj_t *obj = lv_label_create(parent_obj);
+                                                            lv_obj_set_pos(obj, 0, 0);
+                                                            lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
+                                                            lv_label_set_text_static(obj, "Paste");
                                                         }
                                                     }
                                                 }
@@ -3626,7 +3864,7 @@ void create_screen_settings() {
                                     lv_obj_set_style_radius(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
                                     lv_obj_set_style_layout(obj, LV_LAYOUT_FLEX, LV_PART_MAIN | LV_STATE_DEFAULT);
                                     lv_obj_set_style_flex_flow(obj, LV_FLEX_FLOW_ROW, LV_PART_MAIN | LV_STATE_DEFAULT);
-                                    lv_obj_set_style_flex_main_place(obj, LV_FLEX_ALIGN_SPACE_AROUND, LV_PART_MAIN | LV_STATE_DEFAULT);
+                                    lv_obj_set_style_flex_main_place(obj, LV_FLEX_ALIGN_SPACE_EVENLY, LV_PART_MAIN | LV_STATE_DEFAULT);
                                     {
                                         lv_obj_t *parent_obj = obj;
                                         {
@@ -3670,6 +3908,58 @@ void create_screen_settings() {
                                                         {
                                                             lv_obj_t *obj = lv_dropdown_get_list(parent_obj);
                                                             add_style_dropdown_list_sub_settings(obj);
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        {
+                                            lv_obj_t *obj = lv_obj_create(parent_obj);
+                                            lv_obj_set_pos(obj, 0, 0);
+                                            lv_obj_set_size(obj, LV_SIZE_CONTENT, 45);
+                                            lv_obj_set_style_pad_left(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+                                            lv_obj_set_style_pad_top(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+                                            lv_obj_set_style_pad_right(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+                                            lv_obj_set_style_pad_bottom(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+                                            lv_obj_set_style_bg_opa(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+                                            lv_obj_set_style_border_width(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+                                            lv_obj_set_style_radius(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+                                            lv_obj_set_style_layout(obj, LV_LAYOUT_FLEX, LV_PART_MAIN | LV_STATE_DEFAULT);
+                                            lv_obj_set_style_pad_column(obj, 12, LV_PART_MAIN | LV_STATE_DEFAULT);
+                                            {
+                                                lv_obj_t *parent_obj = obj;
+                                                {
+                                                    lv_obj_t *obj = lv_btn_create(parent_obj);
+                                                    lv_obj_set_pos(obj, 0, 0);
+                                                    lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_PCT(100));
+                                                    lv_obj_add_event_cb(obj, action_settings_copy_delay, LV_EVENT_PRESSED, (void *)0);
+                                                    add_style_button_secondary(obj);
+                                                    {
+                                                        lv_obj_t *parent_obj = obj;
+                                                        {
+                                                            lv_obj_t *obj = lv_label_create(parent_obj);
+                                                            lv_obj_set_pos(obj, 0, 0);
+                                                            lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
+                                                            lv_label_set_text_static(obj, "Copy");
+                                                        }
+                                                    }
+                                                }
+                                                {
+                                                    // ui_SettingsPasteDelay
+                                                    lv_obj_t *obj = lv_btn_create(parent_obj);
+                                                    objects.ui_settings_paste_delay = obj;
+                                                    lv_obj_set_pos(obj, 0, 0);
+                                                    lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_PCT(100));
+                                                    lv_obj_add_event_cb(obj, action_settings_paste, LV_EVENT_PRESSED, (void *)0);
+                                                    lv_obj_add_state(obj, LV_STATE_DISABLED);
+                                                    add_style_button_secondary(obj);
+                                                    {
+                                                        lv_obj_t *parent_obj = obj;
+                                                        {
+                                                            lv_obj_t *obj = lv_label_create(parent_obj);
+                                                            lv_obj_set_pos(obj, 0, 0);
+                                                            lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
+                                                            lv_label_set_text_static(obj, "Paste");
                                                         }
                                                     }
                                                 }
@@ -4024,7 +4314,7 @@ void create_screen_settings() {
                                     lv_obj_set_style_radius(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
                                     lv_obj_set_style_layout(obj, LV_LAYOUT_FLEX, LV_PART_MAIN | LV_STATE_DEFAULT);
                                     lv_obj_set_style_flex_flow(obj, LV_FLEX_FLOW_ROW, LV_PART_MAIN | LV_STATE_DEFAULT);
-                                    lv_obj_set_style_flex_main_place(obj, LV_FLEX_ALIGN_SPACE_AROUND, LV_PART_MAIN | LV_STATE_DEFAULT);
+                                    lv_obj_set_style_flex_main_place(obj, LV_FLEX_ALIGN_SPACE_EVENLY, LV_PART_MAIN | LV_STATE_DEFAULT);
                                     {
                                         lv_obj_t *parent_obj = obj;
                                         {
@@ -4068,6 +4358,58 @@ void create_screen_settings() {
                                                         {
                                                             lv_obj_t *obj = lv_dropdown_get_list(parent_obj);
                                                             add_style_dropdown_list_sub_settings(obj);
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        {
+                                            lv_obj_t *obj = lv_obj_create(parent_obj);
+                                            lv_obj_set_pos(obj, 0, 0);
+                                            lv_obj_set_size(obj, LV_SIZE_CONTENT, 45);
+                                            lv_obj_set_style_pad_left(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+                                            lv_obj_set_style_pad_top(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+                                            lv_obj_set_style_pad_right(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+                                            lv_obj_set_style_pad_bottom(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+                                            lv_obj_set_style_bg_opa(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+                                            lv_obj_set_style_border_width(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+                                            lv_obj_set_style_radius(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+                                            lv_obj_set_style_layout(obj, LV_LAYOUT_FLEX, LV_PART_MAIN | LV_STATE_DEFAULT);
+                                            lv_obj_set_style_pad_column(obj, 12, LV_PART_MAIN | LV_STATE_DEFAULT);
+                                            {
+                                                lv_obj_t *parent_obj = obj;
+                                                {
+                                                    lv_obj_t *obj = lv_btn_create(parent_obj);
+                                                    lv_obj_set_pos(obj, 0, 0);
+                                                    lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_PCT(100));
+                                                    lv_obj_add_event_cb(obj, action_settings_copy_reverb, LV_EVENT_PRESSED, (void *)0);
+                                                    add_style_button_secondary(obj);
+                                                    {
+                                                        lv_obj_t *parent_obj = obj;
+                                                        {
+                                                            lv_obj_t *obj = lv_label_create(parent_obj);
+                                                            lv_obj_set_pos(obj, 0, 0);
+                                                            lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
+                                                            lv_label_set_text_static(obj, "Copy");
+                                                        }
+                                                    }
+                                                }
+                                                {
+                                                    // ui_SettingsPasteReverb
+                                                    lv_obj_t *obj = lv_btn_create(parent_obj);
+                                                    objects.ui_settings_paste_reverb = obj;
+                                                    lv_obj_set_pos(obj, 0, 0);
+                                                    lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_PCT(100));
+                                                    lv_obj_add_event_cb(obj, action_settings_paste, LV_EVENT_PRESSED, (void *)0);
+                                                    lv_obj_add_state(obj, LV_STATE_DISABLED);
+                                                    add_style_button_secondary(obj);
+                                                    {
+                                                        lv_obj_t *parent_obj = obj;
+                                                        {
+                                                            lv_obj_t *obj = lv_label_create(parent_obj);
+                                                            lv_obj_set_pos(obj, 0, 0);
+                                                            lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
+                                                            lv_label_set_text_static(obj, "Paste");
                                                         }
                                                     }
                                                 }
@@ -6893,8 +7235,10 @@ void change_color_theme(uint32_t theme_index) {
     lv_style_set_bg_color(get_style_button_basic_MAIN_DEFAULT(), lv_color_hex(theme_colors[theme_index][0]));
     lv_style_set_bg_color(get_style_button_preset_list_options_MAIN_DEFAULT(), lv_color_hex(theme_colors[theme_index][0]));
     lv_style_set_bg_color(get_style_button_basic_MAIN_PRESSED(), lv_color_hex(theme_colors[theme_index][1]));
+    lv_style_set_bg_color(get_style_button_secondary_MAIN_PRESSED(), lv_color_hex(theme_colors[theme_index][1]));
     lv_style_set_bg_color(get_style_button_highlighted_MAIN_PRESSED(), lv_color_hex(theme_colors[theme_index][1]));
     lv_style_set_bg_color(get_style_button_preset_list_options_MAIN_PRESSED(), lv_color_hex(theme_colors[theme_index][1]));
+    lv_style_set_bg_color(get_style_button_secondary_MAIN_DEFAULT(), lv_color_hex(theme_colors[theme_index][1]));
     lv_style_set_bg_color(get_style_button_highlighted_MAIN_DEFAULT(), lv_color_hex(theme_colors[theme_index][2]));
     lv_style_set_border_color(get_style_button_highlighted_MAIN_DEFAULT(), lv_color_hex(theme_colors[theme_index][2]));
     lv_style_set_bg_color(get_style_container_preset_small_MAIN_DEFAULT(), lv_color_hex(theme_colors[theme_index][1]));
