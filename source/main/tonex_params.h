@@ -236,6 +236,7 @@ void tonex_params_get_ui_style(
     TonexParameter_t param,
     uint8_t paramValue1,
     uint8_t paramValue2,
+    bool shorten,
     uint32_t *color,
     char const **name,
     char const **value1,

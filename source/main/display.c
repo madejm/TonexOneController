@@ -963,6 +963,8 @@ static void setFSSmallButton(
     lv_color_t color,
     FxSelectedValueIndex_t selectedValueIndex,
     const char *title,
+    const char *value1,
+    const char *value2,
     bool visible
 ) {
     lv_obj_t *smallButton;
@@ -1012,15 +1014,39 @@ static void setFSSmallButton(
         return;
     }
 
-    lv_label_set_text(smallLabel, title);
     lv_obj_set_style_bg_color(smallButton, color, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_color(smallButton, color, LV_PART_MAIN | LV_STATE_CHECKED);
 
-    if (selectedValueIndex == FX_SELECTED_VALUE_2) {
-        lv_obj_add_state(smallButton, LV_STATE_CHECKED);
-    } else {
-        lv_obj_clear_state(smallButton, LV_STATE_CHECKED);
+    char buffer[MAX_UI_TEXT];
+    sprintf(buffer, "%s", title);
+
+    switch (selectedValueIndex) {
+        case FX_SELECTED_VALUE_NONE: {
+            lv_obj_clear_state(smallButton, LV_STATE_CHECKED);
+
+            if (value1 != NULL) {
+                sprintf(buffer + strlen(buffer), " ?");
+            }
+        } break;
+
+        case FX_SELECTED_VALUE_1: {
+            lv_obj_clear_state(smallButton, LV_STATE_CHECKED);
+
+            if (value1 != NULL) {
+                sprintf(buffer + strlen(buffer), " %s", value1);
+            }
+        } break;
+
+        case FX_SELECTED_VALUE_2: {
+            lv_obj_add_state(smallButton, LV_STATE_CHECKED);
+
+            if (value2 != NULL) {
+                sprintf(buffer + strlen(buffer), " %s", value2);
+            }
+        } break;
     }
+
+    lv_label_set_text(smallLabel, buffer);
 }
 
 static void setFSBigButton(
@@ -1227,7 +1253,7 @@ static void updateFSButtons() {
                 }
 
                 if (small) {
-                    setFSSmallButton(buttonIndex, lv_color_hex(color), selectedValueIndex, name, true);
+                    setFSSmallButton(buttonIndex, lv_color_hex(color), selectedValueIndex, name, NULL, NULL, true);
                 } else {
                     setFSBigButton(buttonIndex, lv_color_hex(color), selectedValueIndex, name, presetIndex, NULL, NULL, true);
                 }
@@ -1271,32 +1297,11 @@ static void updateFSButtons() {
                     const char *value1 = NULL;
                     const char *value2 = NULL;
 
-                    switch (type) {
-                        case MODELLER_PARAM_TYPE_SWITCH: {
-                        } break;
-
-                        case MODELLER_PARAM_TYPE_SELECT: {
-                        } break;
-
-                        case MODELLER_PARAM_TYPE_RANGE: {
-                    //         float value_1 = midi_helper_scale_midi_to_float(param, config.Value_1);
-                    //         float value_2 = midi_helper_scale_midi_to_float(param, config.Value_2);
-                    //         if ((param_entry.Max - param_entry.Min) > 10.0f) {
-                    //             sprintf(buffer1, "%.0f", value_1);
-                    //             sprintf(buffer2, "%.0f", value_2);
-                    //         } else {
-                    //             sprintf(buffer1, "%.1f", value_1);
-                    //             sprintf(buffer2, "%.1f", value_2);
-                    //         }
-                    //         value1 = buffer1;
-                    //         value2 = buffer2;
-                        } break;
-                    }
-
                     tonex_params_get_ui_style(
                         param,
                         config.Value_1,
                         config.Value_2,
+                        small,
                         &color,
                         &name,
                         &value1,
@@ -1305,8 +1310,35 @@ static void updateFSButtons() {
                     );
                     tonex_params_release_locked_access();
 
+                    switch (type) {
+                        case MODELLER_PARAM_TYPE_SWITCH:
+                        case MODELLER_PARAM_TYPE_SELECT:
+                            break;
+
+                        case MODELLER_PARAM_TYPE_RANGE: {
+                            switch (param) {
+                                case TONEX_GLOBAL_BPM:
+                                    break;
+
+                                default: {
+                                    float value_1 = midi_helper_scale_midi_to_float(param, config.Value_1);
+                                    float value_2 = midi_helper_scale_midi_to_float(param, config.Value_2);
+                                    if ((param_entry.Max - param_entry.Min) > 10.0f) {
+                                        sprintf(buffer1, "%.0f", value_1);
+                                        sprintf(buffer2, "%.0f", value_2);
+                                    } else {
+                                        sprintf(buffer1, "%.1f", value_1);
+                                        sprintf(buffer2, "%.1f", value_2);
+                                    }
+                                    value1 = buffer1;
+                                    value2 = buffer2;
+                                } break;
+                            }
+                        } break;
+                    }
+
                     if (small) {
-                        setFSSmallButton(buttonIndex, lv_color_hex(color), selectedValueIndex, name, true);
+                        setFSSmallButton(buttonIndex, lv_color_hex(color), selectedValueIndex, name, value1, value2, true);
                     } else {
                         setFSBigButton(buttonIndex, lv_color_hex(color), selectedValueIndex, name, NULL, value1, value2, true);
                     }
@@ -1319,7 +1351,7 @@ static void updateFSButtons() {
 
             if (!didSet) {
                 if (small) {
-                    setFSSmallButton(buttonIndex, lv_color_hex(0), FX_SELECTED_VALUE_NONE, NULL, false);
+                    setFSSmallButton(buttonIndex, lv_color_hex(0), FX_SELECTED_VALUE_NONE, NULL, NULL, NULL, false);
                 } else {
                     setFSBigButton(buttonIndex, lv_color_hex(0), FX_SELECTED_VALUE_NONE, NULL, NULL, NULL, NULL, false);
                 }
@@ -1494,6 +1526,58 @@ bool display_lvgl_lock(int timeout_ms)
 void display_lvgl_unlock(void)
 {
     xSemaphoreGiveRecursive(lvgl_mux);
+}
+
+/****************************************************************************
+* NAME:        UI_ShowScreen1IfNeeded
+* DESCRIPTION: Returns to the main screen when another screen is active
+* PARAMETERS:
+* RETURN:      true when a different screen was closed
+* NOTES:       Thread-safe API for callers outside the display task
+*****************************************************************************/
+bool UI_ShowScreen1IfNeeded(void)
+{
+#if CONFIG_TONEX_CONTROLLER_HAS_DISPLAY
+    bool screen_changed = false;
+
+    if (display_lvgl_lock(-1))
+    {
+        lv_obj_t* active_screen = lv_scr_act();
+
+        if ((objects.screen1 != NULL) && (active_screen != objects.screen1))
+        {
+#if CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI
+            if (active_screen == objects.settings)
+            {
+                action_close_settings_page(NULL);
+            }
+#if !CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+            else if (active_screen == objects.val_settings)
+            {
+                action_close_settings_page(NULL);
+            }
+#endif
+            else if (active_screen == objects.presets)
+            {
+                action_close_presets_page(NULL);
+            }
+            else
+            {
+                lv_scr_load_anim(objects.screen1, LV_SCR_LOAD_ANIM_FADE_IN, 0, 0, false);
+            }
+#else
+            lv_scr_load_anim(objects.screen1, LV_SCR_LOAD_ANIM_FADE_IN, 0, 0, false);
+#endif
+            screen_changed = true;
+        }
+
+        display_lvgl_unlock();
+    }
+
+    return screen_changed;
+#else
+    return false;
+#endif
 }
 
 /****************************************************************************

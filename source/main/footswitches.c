@@ -49,6 +49,7 @@ limitations under the License.
 
 #define FOOTSWITCH_TASK_STACK_SIZE          (3 * 1024)
 #define FOOTSWITCH_SAMPLE_COUNT             5       // 20 msec per sample
+#define FOOTSWITCH_LONG_PRESS_TIME_US        (1000 * 1000)
 #define BUTTON_FACTORY_RESET_TIME           400    // * approx 20 msec
 
 enum FootswitchStates
@@ -113,6 +114,11 @@ typedef struct
     tFootswitchEffectHandler OnboardFootswitchEffectHandler[MAX_INTERNAL_EFFECT_FOOTSWITCHES];
     tFootswitchEffectHandler OnboardFootswitchAltEffectHandler[MAX_INTERNAL_EFFECT_FOOTSWITCHES];
     bool footswitch_alt_mode;
+    uint16_t external_pressed_mask;
+    int64_t external_press_started_us;
+    uint32_t external_press_started_tick;
+    bool external_press_alt_mode;
+    bool external_long_press_handled;
 } tFootswitchControl;
 
 typedef struct
@@ -147,6 +153,17 @@ static const __attribute__((unused)) tFootswitchLayoutEntry FootswitchLayouts[FO
     {12,   10,  0x0400,   0x0800},            // FOOTSWITCH_LAYOUT_2X6B
     {4,    4,   0x0000,   0x0000},            // FOOTSWITCH_LAYOUT_1X4_BINARY
 };
+
+static void footswitch_toggle_alt_mode(void)
+{
+    if (UI_ShowScreen1IfNeeded())
+    {
+        return;
+    }
+
+    FootswitchControl.footswitch_alt_mode = !FootswitchControl.footswitch_alt_mode;
+    UI_SetAltMode(FootswitchControl.footswitch_alt_mode);
+}
 
 /****************************************************************************
 * NAME:        
@@ -664,8 +681,7 @@ static void footswitch_handle_effects(tFootswitchHandler* handler, tFootswitchEf
 
                                 if (param == TONEX_CONTROLLER_FOOTSWITCH_ALT_MODE)
                                 {
-                                    FootswitchControl.footswitch_alt_mode = !FootswitchControl.footswitch_alt_mode;
-                                    UI_SetAltMode(FootswitchControl.footswitch_alt_mode);
+                                    footswitch_toggle_alt_mode();
                                 }
                                 else if (fx_handler_helper_get_values(&param, fx_handler[loop].config, &type, &selected_value_index, &CC) == ESP_OK)
                                 {                                        
@@ -699,6 +715,336 @@ static void footswitch_handle_effects(tFootswitchHandler* handler, tFootswitchEf
                 }
             }
         } break;
+    }
+}
+
+/****************************************************************************
+* NAME:        footswitch_execute_external_effects
+* DESCRIPTION: Executes external effect actions matching the captured switches
+* PARAMETERS:  pressed_mask - switches involved in the press
+*              alt_mode - selects the normal or alternate effect configuration
+* RETURN:
+* NOTES:
+*****************************************************************************/
+static void footswitch_execute_external_effects(uint16_t pressed_mask, bool alt_mode, uint32_t tap_tempo_tick)
+{
+    tFootswitchEffectHandler* fx_handler = alt_mode ?
+        FootswitchControl.ExternalFootswitchAltEffectHandler :
+        FootswitchControl.ExternalFootswitchEffectHandler;
+
+    for (uint8_t loop = 0; loop < MAX_EXTERNAL_EFFECT_FOOTSWITCHES; loop++)
+    {
+        uint8_t switch_index = fx_handler[loop].config.Switch;
+
+        if ((switch_index == SWITCH_NOT_USED) || (switch_index >= 16) ||
+            ((pressed_mask & (1U << switch_index)) == 0))
+        {
+            continue;
+        }
+
+        bool is_tap_tempo = (usb_get_connected_modeller_type() == AMP_MODELLER_VALETON_GP5) ?
+            (fx_handler[loop].config.CC == 119) :
+            (fx_handler[loop].config.CC == 10);
+
+        if (is_tap_tempo)
+        {
+            ESP_LOGI(TAG, "Footswitch Tap Tempo action");
+            control_trigger_tap_tempo_at(tap_tempo_tick);
+            break;
+        }
+
+        TonexParameter_t param = midi_helper_get_param_for_change_num(
+            fx_handler[loop].config.CC,
+            fx_handler[loop].config.Value_1,
+            fx_handler[loop].config.Value_2);
+
+        ESP_LOGI(TAG, "Footswitch FX action. Index %d. Param %d", (int)loop, (int)param);
+
+        if (param == TONEX_CONTROLLER_FOOTSWITCH_ALT_MODE)
+        {
+            footswitch_toggle_alt_mode();
+        }
+        else if (param != TONEX_UNKNOWN)
+        {
+            MidiValue_t CC;
+            ParamType_t type;
+            FxSelectedValueIndex_t selected_value_index;
+
+            if (fx_handler_helper_get_values(&param, fx_handler[loop].config, &type, &selected_value_index, &CC) == ESP_OK)
+            {
+                fx_handler_helper_update_parameter(param, fx_handler[loop].config, type, selected_value_index, CC);
+            }
+        }
+
+        // Match the existing effect handler: the first configuration assigned
+        // to a pressed switch owns the action.
+        break;
+    }
+}
+
+/****************************************************************************
+* NAME:        footswitch_external_effect_is_tap_tempo
+* DESCRIPTION: Checks whether the first matching effect action is tap tempo
+* PARAMETERS:  pressed_mask - switches involved in the press
+*              alt_mode - selects the normal or alternate effect configuration
+* RETURN:      true when the action is tap tempo
+* NOTES:
+*****************************************************************************/
+static bool footswitch_external_effect_is_tap_tempo(uint16_t pressed_mask, bool alt_mode)
+{
+    tFootswitchEffectHandler* fx_handler = alt_mode ?
+        FootswitchControl.ExternalFootswitchAltEffectHandler :
+        FootswitchControl.ExternalFootswitchEffectHandler;
+
+    for (uint8_t loop = 0; loop < MAX_EXTERNAL_EFFECT_FOOTSWITCHES; loop++)
+    {
+        uint8_t switch_index = fx_handler[loop].config.Switch;
+
+        if ((switch_index == SWITCH_NOT_USED) || (switch_index >= 16) ||
+            ((pressed_mask & (1U << switch_index)) == 0))
+        {
+            continue;
+        }
+
+        if (usb_get_connected_modeller_type() == AMP_MODELLER_VALETON_GP5)
+        {
+            return (fx_handler[loop].config.CC == 119);
+        }
+
+        return (fx_handler[loop].config.CC == 10);
+    }
+
+    return false;
+}
+
+/****************************************************************************
+* NAME:        footswitch_external_effect_is_alt_mode
+* DESCRIPTION: Checks whether the first matching effect action toggles alt mode
+* PARAMETERS:  pressed_mask - switches involved in the press
+*              alt_mode - selects the normal or alternate effect configuration
+* RETURN:      true when the action toggles alt mode
+* NOTES:
+*****************************************************************************/
+static bool footswitch_external_effect_is_alt_mode(uint16_t pressed_mask, bool alt_mode)
+{
+    tFootswitchEffectHandler* fx_handler = alt_mode ?
+        FootswitchControl.ExternalFootswitchAltEffectHandler :
+        FootswitchControl.ExternalFootswitchEffectHandler;
+
+    for (uint8_t loop = 0; loop < MAX_EXTERNAL_EFFECT_FOOTSWITCHES; loop++)
+    {
+        uint8_t switch_index = fx_handler[loop].config.Switch;
+
+        if ((switch_index == SWITCH_NOT_USED) || (switch_index >= 16) ||
+            ((pressed_mask & (1U << switch_index)) == 0))
+        {
+            continue;
+        }
+
+        return ((usb_get_connected_modeller_type() != AMP_MODELLER_VALETON_GP5) &&
+                (fx_handler[loop].config.CC == 126));
+    }
+
+    return false;
+}
+
+/****************************************************************************
+* NAME:        footswitch_execute_external_presets
+* DESCRIPTION: Executes an external preset or bank action
+* PARAMETERS:  pressed_mask - switches involved in the press
+* RETURN:
+* NOTES:
+*****************************************************************************/
+static void footswitch_execute_external_presets(uint16_t pressed_mask)
+{
+    tFootswitchHandler* handler = &FootswitchControl.Handlers[FOOTSWITCH_HANDLER_EXTERNAL_PRESETS];
+    tFootswitchMessage message = {0};
+
+    switch (FootswitchControl.external_switch_mode)
+    {
+        case FOOTSWITCH_LAYOUT_1X2:
+        {
+            if (pressed_mask == 0x0001)
+            {
+                control_request_preset_down();
+            }
+            else if (pressed_mask == 0x0002)
+            {
+                control_request_preset_up();
+            }
+        } break;
+
+        case FOOTSWITCH_LAYOUT_1X4_BINARY:
+        {
+            control_request_preset_index(pressed_mask & 0x000F);
+        } break;
+
+        case FOOTSWITCH_LAYOUT_1X3:   // fallthrough
+        case FOOTSWITCH_LAYOUT_1X4:   // fallthrough
+        case FOOTSWITCH_LAYOUT_1X5A:  // fallthrough
+        case FOOTSWITCH_LAYOUT_1X5B:  // fallthrough
+        case FOOTSWITCH_LAYOUT_1X6A:  // fallthrough
+        case FOOTSWITCH_LAYOUT_1X6B:  // fallthrough
+        case FOOTSWITCH_LAYOUT_1X7A:  // fallthrough
+        case FOOTSWITCH_LAYOUT_1X7B:  // fallthrough
+        case FOOTSWITCH_LAYOUT_2X3:   // fallthrough
+        case FOOTSWITCH_LAYOUT_2X4:   // fallthrough
+        case FOOTSWITCH_LAYOUT_2X5A:  // fallthrough
+        case FOOTSWITCH_LAYOUT_2X5B:  // fallthrough
+        case FOOTSWITCH_LAYOUT_2X6A:  // fallthrough
+        case FOOTSWITCH_LAYOUT_2X6B:
+        {
+            tFootswitchLayoutEntry* layout = (tFootswitchLayoutEntry*)&FootswitchLayouts[FootswitchControl.external_switch_mode];
+            uint16_t used_mask = (1U << layout->total_switches) - 1;
+            pressed_mask &= used_mask;
+
+            if (pressed_mask == layout->bank_down_switch_mask)
+            {
+                message.Event = FOOTSWITCH_EVENT_BANK_DOWN;
+                process_footswitch_command(&message);
+            }
+            else if (pressed_mask == layout->bank_up_switch_mask)
+            {
+                message.Event = FOOTSWITCH_EVENT_BANK_UP;
+                process_footswitch_command(&message);
+            }
+            else if (pressed_mask != 0)
+            {
+                uint8_t preset_offset = 0;
+
+                for (uint8_t loop = 1; loop < layout->presets_per_bank; loop++)
+                {
+                    if ((pressed_mask & (1U << loop)) != 0)
+                    {
+                        preset_offset = loop;
+                        break;
+                    }
+                }
+
+                control_request_preset_index((handler->current_bank * layout->presets_per_bank) + preset_offset);
+            }
+        } break;
+
+        case FOOTSWITCH_LAYOUT_DISABLED:
+        default:
+        {
+            // No preset action configured.
+        } break;
+    }
+}
+
+/****************************************************************************
+* NAME:        footswitch_handle_external_release
+* DESCRIPTION: Defers short external footswitch actions until release. Long
+*              presses execute the opposite alt-mode action at the threshold.
+* PARAMETERS:
+* RETURN:
+* NOTES:
+*****************************************************************************/
+static void footswitch_handle_external_release(void)
+{
+    uint16_t pressed_mask;
+    uint16_t actionable_mask = 0;
+
+    if (footswitch_read_multiple_offboard(&pressed_mask) != ESP_OK)
+    {
+        return;
+    }
+
+    if (FootswitchControl.external_switch_mode < FOOTSWITCH_LAYOUT_LAST)
+    {
+        tFootswitchLayoutEntry* layout = (tFootswitchLayoutEntry*)&FootswitchLayouts[FootswitchControl.external_switch_mode];
+        actionable_mask = (1U << layout->total_switches) - 1;
+    }
+
+    for (uint8_t loop = 0; loop < MAX_EXTERNAL_EFFECT_FOOTSWITCHES; loop++)
+    {
+        uint8_t switch_index = FootswitchControl.ExternalFootswitchEffectHandler[loop].config.Switch;
+
+        if ((switch_index != SWITCH_NOT_USED) && (switch_index < 16))
+        {
+            actionable_mask |= (1U << switch_index);
+        }
+    }
+
+    // The SX1509 read includes all pins, including pins not used by the current
+    // footswitch configuration.
+    pressed_mask &= actionable_mask;
+
+    if (pressed_mask != 0)
+    {
+        if (FootswitchControl.external_pressed_mask == 0)
+        {
+            FootswitchControl.external_press_started_us = esp_timer_get_time();
+            FootswitchControl.external_press_started_tick = xTaskGetTickCount();
+            FootswitchControl.external_press_alt_mode = FootswitchControl.footswitch_alt_mode;
+            FootswitchControl.external_long_press_handled = false;
+        }
+
+        // Keep every switch involved so bank chords still work when their
+        // individual switches are pressed or released a few milliseconds apart.
+        FootswitchControl.external_pressed_mask |= pressed_mask;
+
+        if (!FootswitchControl.external_long_press_handled &&
+            footswitch_external_effect_is_alt_mode(
+                FootswitchControl.external_pressed_mask,
+                FootswitchControl.external_press_alt_mode))
+        {
+            footswitch_execute_external_effects(
+                FootswitchControl.external_pressed_mask,
+                FootswitchControl.external_press_alt_mode,
+                FootswitchControl.external_press_started_tick);
+            FootswitchControl.external_long_press_handled = true;
+        }
+
+        if (!FootswitchControl.external_long_press_handled &&
+            ((esp_timer_get_time() - FootswitchControl.external_press_started_us) >= FOOTSWITCH_LONG_PRESS_TIME_US))
+        {
+            bool action_alt_mode = !FootswitchControl.external_press_alt_mode;
+
+            // A held tap-tempo switch must not contribute a delayed tap and
+            // distort the interval measured between intentional quick taps.
+            if (!footswitch_external_effect_is_tap_tempo(FootswitchControl.external_pressed_mask, action_alt_mode))
+            {
+                if (!action_alt_mode)
+                {
+                    footswitch_execute_external_presets(FootswitchControl.external_pressed_mask);
+                }
+
+                footswitch_execute_external_effects(
+                    FootswitchControl.external_pressed_mask,
+                    action_alt_mode,
+                    FootswitchControl.external_press_started_tick);
+            }
+
+            FootswitchControl.external_long_press_handled = true;
+        }
+
+        return;
+    }
+
+    if (FootswitchControl.external_pressed_mask != 0)
+    {
+        if (!FootswitchControl.external_long_press_handled)
+        {
+            bool action_alt_mode = FootswitchControl.external_press_alt_mode;
+
+            if (!action_alt_mode)
+            {
+                footswitch_execute_external_presets(FootswitchControl.external_pressed_mask);
+            }
+
+            footswitch_execute_external_effects(
+                FootswitchControl.external_pressed_mask,
+                action_alt_mode,
+                FootswitchControl.external_press_started_tick);
+        }
+
+        FootswitchControl.external_pressed_mask = 0;
+        FootswitchControl.external_long_press_handled = false;
+
+        // Ignore contact bounce after the release action has been dispatched.
+        vTaskDelay(pdMS_TO_TICKS(100));
     }
 }
 
@@ -833,91 +1179,61 @@ void footswitch_task(void *arg)
         // did we find an IO expander on boot?
         if (FootswitchControl.io_expander_ok)
         {
-            if (!FootswitchControl.footswitch_alt_mode)
+            // Binary mode represents a continuously held four-bit value rather
+            // than momentary presses, so retain its existing level-driven path.
+            if (FootswitchControl.external_switch_mode == FOOTSWITCH_LAYOUT_1X4_BINARY)
             {
-                switch (FootswitchControl.external_switch_mode) 
+                if (!FootswitchControl.footswitch_alt_mode)
                 {
-                    case FOOTSWITCH_LAYOUT_1X2:
-                    {
-                        // run dual mode next/previous
-                        footswitch_handle_dual_mode(&FootswitchControl.Handlers[FOOTSWITCH_HANDLER_EXTERNAL_PRESETS]);
-                    } break;
-
-                    case FOOTSWITCH_LAYOUT_1X4_BINARY:
-                    {
-                        // run 4 switch binary mode
-                        footswitch_handle_quad_binary(&FootswitchControl.Handlers[FOOTSWITCH_HANDLER_EXTERNAL_PRESETS]);
-                    } break;
-
-                    case FOOTSWITCH_LAYOUT_1X3:   // fallthrough
-                    case FOOTSWITCH_LAYOUT_1X4:   // fallthrough
-                    case FOOTSWITCH_LAYOUT_1X5A:  // fallthrough
-                    case FOOTSWITCH_LAYOUT_1X5B:  // fallthrough
-                    case FOOTSWITCH_LAYOUT_1X6A:  // fallthrough
-                    case FOOTSWITCH_LAYOUT_1X6B:  // fallthrough
-                    case FOOTSWITCH_LAYOUT_1X7A:  // fallthrough
-                    case FOOTSWITCH_LAYOUT_1X7B:  // fallthrough
-                    case FOOTSWITCH_LAYOUT_2X3:   // fallthrough
-                    case FOOTSWITCH_LAYOUT_2X4:   // fallthrough
-                    case FOOTSWITCH_LAYOUT_2X5A:  // fallthrough
-                    case FOOTSWITCH_LAYOUT_2X5B:  // fallthrough
-                    case FOOTSWITCH_LAYOUT_2X6A:  // fallthrough
-                    case FOOTSWITCH_LAYOUT_2X6B:
-                    {
-                        // handle external footswitches as banked
-                        footswitch_handle_banked(&FootswitchControl.Handlers[FOOTSWITCH_HANDLER_EXTERNAL_PRESETS], (tFootswitchLayoutEntry*)&FootswitchLayouts[FootswitchControl.external_switch_mode]);
-                    } break;
-            
-                    case FOOTSWITCH_LAYOUT_DISABLED:
-                    default:
-                    {
-                        // nothing to do
-                    } break;
+                    footswitch_handle_quad_binary(&FootswitchControl.Handlers[FOOTSWITCH_HANDLER_EXTERNAL_PRESETS]);
                 }
+
+                footswitch_handle_effects(
+                    &FootswitchControl.Handlers[FOOTSWITCH_HANDLER_EXTERNAL_EFFECTS],
+                    FootswitchControl.footswitch_alt_mode ? FootswitchControl.ExternalFootswitchAltEffectHandler : FootswitchControl.ExternalFootswitchEffectHandler,
+                    MAX_EXTERNAL_EFFECT_FOOTSWITCHES
+                );
             }
-            
-            // handle effects switching
-            footswitch_handle_effects(
-                &FootswitchControl.Handlers[FOOTSWITCH_HANDLER_EXTERNAL_EFFECTS],
-                FootswitchControl.footswitch_alt_mode ? FootswitchControl.ExternalFootswitchAltEffectHandler : FootswitchControl.ExternalFootswitchEffectHandler,
-                MAX_EXTERNAL_EFFECT_FOOTSWITCHES
-            );
-        }
-
-#if !CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43DEVONLY  
-        // Binary footswitch modes always hold button states, so can't check for reset
-        if ((FootswitchControl.onboard_switch_mode != FOOTSWITCH_LAYOUT_1X4_BINARY) && 
-            (FootswitchControl.external_switch_mode != FOOTSWITCH_LAYOUT_1X4_BINARY))
-        {
-            // check for button held for data reset
-            if (FOOTSWITCH_1 != -1)
+            else
             {
-                if (footswitch_read_single_onboard(0, &value) == ESP_OK)
-                {
-                    if (value == 1)
-                    {        
-                        reset_timer++;
-
-                        // debug
-                        //ESP_LOGI(TAG, "Reset timer: %d", (int)reset_timer);  
-
-                        if (reset_timer > BUTTON_FACTORY_RESET_TIME)
-                        {
-                            ESP_LOGI(TAG, "Config Reset to default");  
-                            control_set_default_config(); 
-
-                            // save and reboot
-                            control_save_user_data(1);
-                        }
-                    }
-                    else
-                    {
-                        reset_timer = 0;
-                    }
-                }
+                footswitch_handle_external_release();
             }
         }
-#endif 
+
+// #if !CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43DEVONLY  
+//         // Binary footswitch modes always hold button states, so can't check for reset
+//         if ((FootswitchControl.onboard_switch_mode != FOOTSWITCH_LAYOUT_1X4_BINARY) && 
+//             (FootswitchControl.external_switch_mode != FOOTSWITCH_LAYOUT_1X4_BINARY))
+//         {
+//             // check for button held for data reset
+//             if (FOOTSWITCH_1 != -1)
+//             {
+//                 if (footswitch_read_single_onboard(0, &value) == ESP_OK)
+//                 {
+//                     if (value == 1)
+//                     {        
+//                         reset_timer++;
+
+//                         // debug
+//                         //ESP_LOGI(TAG, "Reset timer: %d", (int)reset_timer);  
+
+//                         if (reset_timer > BUTTON_FACTORY_RESET_TIME)
+//                         {
+//                             ESP_LOGI(TAG, "Config Reset to default");  
+//                             control_set_default_config(); 
+
+//                             // save and reboot
+//                             control_save_user_data(1);
+//                         }
+//                     }
+//                     else
+//                     {
+//                         reset_timer = 0;
+//                     }
+//                 }
+//             }
+//         }
+// #endif 
 
         tFootswitchMessage message;
         // check for any input messages
@@ -943,8 +1259,7 @@ static uint8_t process_footswitch_command(tFootswitchMessage* message)
     {
         case FOOTSWITCH_EVENT_SWITCH_ALT_MODE:
         {
-            FootswitchControl.footswitch_alt_mode = !FootswitchControl.footswitch_alt_mode;
-            UI_SetAltMode(FootswitchControl.footswitch_alt_mode);
+            footswitch_toggle_alt_mode();
             return 0;
         } break;
 

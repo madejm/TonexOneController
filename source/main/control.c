@@ -1237,7 +1237,7 @@ static uint8_t process_control_command(tControlMessage* message)
 
         case EVENT_TRIGGER_TAP_TEMPO:
         {
-            uint32_t current_time = xTaskGetTickCount(); 
+            uint32_t current_time = message->Value;
             uint32_t last_time_delta = current_time - ControlData.TapTempo.Times[0];
 
             // debug
@@ -1688,11 +1688,24 @@ void control_set_amp_skin_index(uint32_t status)
 ****************************************************************************/
 void control_trigger_tap_tempo(void)
 {
-    tControlMessage message;
+    control_trigger_tap_tempo_at(xTaskGetTickCount());
+}
+
+/****************************************************************************
+* NAME:
+* DESCRIPTION:
+* PARAMETERS:
+* RETURN:      none
+* NOTES:       none
+****************************************************************************/
+void control_trigger_tap_tempo_at(uint32_t tick_count)
+{
+    tControlMessage message = {0};
 
     ESP_LOGI(TAG, "control_trigger_tap_tempo");
 
     message.Event = EVENT_TRIGGER_TAP_TEMPO;
+    message.Value = tick_count;
 
     // send to queue
     if (xQueueSend(control_input_queue, (void*)&message, pdMS_TO_TICKS(CONTROL_QUEUE_WRITE_TIMEOUT)) != pdPASS)

@@ -39,6 +39,11 @@ esp_err_t fx_handler_helper_get_values(TonexParameter_t *param, tExternalFootswi
                 *param = TONEX_PARAM_DELAY_DIGITAL_TIME;
                 *CC = 5;
                 break;
+            case TONEX_PARAM_DELAY_TAPE_MODE:
+                // change param to digital mode
+                *param = TONEX_PARAM_DELAY_DIGITAL_MODE;
+                *CC = 7;
+                break;
             default:
                 break;
         }
@@ -55,6 +60,11 @@ esp_err_t fx_handler_helper_get_values(TonexParameter_t *param, tExternalFootswi
                 // change param to tape time
                 *param = TONEX_PARAM_DELAY_TAPE_TIME;
                 *CC = 92;
+                break;
+            case TONEX_PARAM_DELAY_DIGITAL_MODE:
+                // change param to tape mode
+                *param = TONEX_PARAM_DELAY_TAPE_MODE;
+                *CC = 94;
                 break;
             default:
                 break;

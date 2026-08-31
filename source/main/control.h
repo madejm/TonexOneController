@@ -383,6 +383,7 @@ void control_sync_preset_name(uint16_t index, char* name);
 void control_sync_preset_details(uint16_t index, char* name);
 void control_set_user_text(char* text);
 void control_trigger_tap_tempo(void);
+void control_trigger_tap_tempo_at(uint32_t tick_count);
 void control_set_preset_order(uint8_t* order);
 uint8_t* control_get_preset_order(void);
 void control_set_pc_map(uint8_t* map);

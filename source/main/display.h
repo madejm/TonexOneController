@@ -56,6 +56,7 @@ void UI_SetAmpSkin(uint16_t index);
 void UI_UpdatePresetList();
 void UI_UpdateFSButtons();
 void UI_SetAltMode(bool altMode);
+bool UI_ShowScreen1IfNeeded(void);
 void UI_SetPresetDescription(char* text);
 void UI_RefreshParameterValues(void);
 void UI_ShowToast(char* text);

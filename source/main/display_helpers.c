@@ -8,6 +8,9 @@
 #include "eq_canvas.h"
 #include "tonex_params.h"
 
+#define CANVAS_ARC_DRAG_UPDATE_PERIOD_MS 750
+#define CANVAS_ARC_IDLE_UPDATE_DELAY_MS  150
+
 #define max(a,b) \
     ({ __typeof__ (a) _a = (a); \
        __typeof__ (b) _b = (b); \
@@ -100,9 +103,12 @@ const TonexParamFormatValues_t ParamFormats = {
     .MASTER =               { .format = "%1.1f", .multiplier = 10.0f },
 };
 
+typedef void (*UpdateCanvas)(float value);
+
 typedef struct {
     TonexParamFormat_t format;
     float defaultValue;
+    UpdateCanvas update_canvas;
 } format_data_t;
 
 typedef format_data_t (*format_cb_t)(lv_obj_t *);
@@ -112,6 +118,8 @@ typedef struct {
     lv_obj_t * label;
     format_data_t format_data;
     format_cb_t format_cb;
+    uint32_t last_canvas_update_tick;
+    lv_timer_t * canvas_idle_timer;
 } drag_data_t;
 
 static format_data_t drag_data_get_format(drag_data_t *data)
@@ -157,12 +165,27 @@ static format_data_t mod_format_cb(lv_obj_t *label)
     }
 }
 
-static void label_set_value(drag_data_t * data, int32_t value)
+static void label_set_value(drag_data_t * data, int32_t value, bool notify_canvas)
 {
     format_data_t format = drag_data_get_format(data);
+    float result = ((float)value) / format.format.multiplier;
     char buf[20];
-    sprintf(buf, format.format.format, ((float)value) / format.format.multiplier);
+    sprintf(buf, format.format.format, result);
     lv_label_set_text(data->label, buf);
+
+    UpdateCanvas update_canvas = format.update_canvas;
+    if (notify_canvas && update_canvas != NULL) {
+        update_canvas(result);
+    }
+}
+
+static void canvas_idle_timer_cb(lv_timer_t * timer)
+{
+    drag_data_t * data = timer->user_data;
+
+    lv_timer_pause(timer);
+    data->last_canvas_update_tick = lv_tick_get();
+    label_set_value(data, lv_arc_get_value(data->arc), true);
 }
 
 static int32_t arc_drag_accumulator = 0;
@@ -187,25 +210,49 @@ static void arc_drag_cb(lv_event_t * e)
     arc_drag_accumulator %= 400;
 
     if (delta) {
+        uint32_t now = lv_tick_get();
+        if (!arc_dragging) {
+            data->last_canvas_update_tick = now;
+        }
         arc_dragging = true;
 
         int32_t rawValue = lv_arc_get_value(arc) + delta;
         // int32_t value = max(minValue, min(rawValue, maxValue));
         int32_t value = clamp(minValue, maxValue, rawValue);
+        bool update_canvas = lv_tick_elaps(data->last_canvas_update_tick)
+            >= CANVAS_ARC_DRAG_UPDATE_PERIOD_MS;
+
+        if (update_canvas) {
+            data->last_canvas_update_tick = now;
+        }
+
+        if (data->canvas_idle_timer != NULL) {
+            lv_timer_reset(data->canvas_idle_timer);
+            lv_timer_resume(data->canvas_idle_timer);
+        }
+
         lv_arc_set_value(arc, value);
-        label_set_value(data, value);
+        label_set_value(data, value, update_canvas);
         lv_event_send(arc, LV_EVENT_VALUE_CHANGED, NULL);
     }
 }
 
 static void drag_released_cb(lv_event_t * e)
 {
+    drag_data_t * data = lv_event_get_user_data(e);
+
     arc_drag_accumulator = 0;
     arc_dragging = false;
+    data->last_canvas_update_tick = 0;
 
-    lv_obj_t * arc = lv_event_get_user_data(e);
+    if (data->canvas_idle_timer != NULL) {
+        lv_timer_pause(data->canvas_idle_timer);
+    }
 
-    lv_event_send(arc, LV_EVENT_RELEASED, NULL);
+    /* Always send the final dragged value to the canvas. */
+    label_set_value(data, lv_arc_get_value(data->arc), true);
+
+    lv_event_send(data->arc, LV_EVENT_RELEASED, NULL);
 }
 
 static void arc_reset_cb(lv_event_t * e)
@@ -219,13 +266,19 @@ static void arc_reset_cb(lv_event_t * e)
     int16_t value = (int16_t)(format.defaultValue * format.format.multiplier);
 
     lv_arc_set_value(data->arc, value);
-    label_set_value(data, value);
+    label_set_value(data, value, true);
     lv_event_send(data->arc, LV_EVENT_VALUE_CHANGED, NULL);
 }
 
 static void drag_delete_cb(lv_event_t *e)
 {
     drag_data_t *data = lv_event_get_user_data(e);
+
+    if (data->canvas_idle_timer != NULL) {
+        lv_timer_del(data->canvas_idle_timer);
+        data->canvas_idle_timer = NULL;
+    }
+
     lv_mem_free(data);
 }
 
@@ -270,7 +323,39 @@ static void lv_helper_create_arc_gesture_data(
     lv_obj_add_event_cb(drag, arc_drag_cb, LV_EVENT_PRESSING, data);
     lv_obj_add_event_cb(drag, drag_delete_cb, LV_EVENT_DELETE, data);
     lv_obj_add_event_cb(drag, arc_reset_cb, LV_EVENT_LONG_PRESSED, data);
-    lv_obj_add_event_cb(drag, drag_released_cb, LV_EVENT_RELEASED, arc);
+    lv_obj_add_event_cb(drag, drag_released_cb, LV_EVENT_RELEASED, data);
+}
+
+static void lv_helper_create_arc_gesture_canv(
+    lv_obj_t *arc,
+    lv_obj_t *label,
+    TonexParamFormat_t format,
+    float defaultValue,
+    UpdateCanvas update_canvas
+) {
+    drag_data_t *data = lv_mem_alloc(sizeof(drag_data_t));
+    data->arc = arc;
+    data->label = label;
+
+    data->format_data.format = format;
+    data->format_data.defaultValue = defaultValue;
+    data->format_data.update_canvas = update_canvas;
+    data->format_cb = NULL;
+    data->last_canvas_update_tick = 0;
+    data->canvas_idle_timer = NULL;
+
+    if (update_canvas != NULL) {
+        data->canvas_idle_timer = lv_timer_create(
+            canvas_idle_timer_cb,
+            CANVAS_ARC_IDLE_UPDATE_DELAY_MS,
+            data
+        );
+        if (data->canvas_idle_timer != NULL) {
+            lv_timer_pause(data->canvas_idle_timer);
+        }
+    }
+    
+    lv_helper_create_arc_gesture_data(arc, label, data);
 }
 
 static void lv_helper_create_arc_gesture(
@@ -279,18 +364,16 @@ static void lv_helper_create_arc_gesture(
     TonexParamFormat_t format,
     float defaultValue
 ) {
-    drag_data_t *data = lv_mem_alloc(sizeof(drag_data_t));
-    data->arc = arc;
-    data->label = label;
-
-    data->format_data.format = format;
-    data->format_data.defaultValue = defaultValue;
-    data->format_cb = NULL;
-    
-    lv_helper_create_arc_gesture_data(arc, label, data);
+    lv_helper_create_arc_gesture_canv(
+        arc,
+        label,
+        format,
+        defaultValue,
+        NULL
+    );
 }
 
-static void lv_helper_create_arc_gesture_c(
+static void lv_helper_create_arc_gesture_cb(
     lv_obj_t *arc,
     lv_obj_t *label,
     format_cb_t format_cb
@@ -299,54 +382,72 @@ static void lv_helper_create_arc_gesture_c(
     data->arc = arc;
     data->label = label;
 
+    data->format_data.update_canvas = NULL;
     data->format_cb = format_cb;
+    data->last_canvas_update_tick = 0;
+    data->canvas_idle_timer = NULL;
     
     lv_helper_create_arc_gesture_data(arc, label, data);
 }
 
 #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+
+static void eq_canvas_update_presence_gain_opt(float value)
+{
+    if (lv_obj_has_state(objects.ui_amp_enable_switch, LV_STATE_CHECKED)) {
+        eq_canvas_update_presence_gain(value);
+    }
+}
+
+static void eq_canvas_update_depth_gain_opt(float value)
+{
+    if (lv_obj_has_state(objects.ui_amp_enable_switch, LV_STATE_CHECKED)) {
+        eq_canvas_update_depth_gain(value);
+    }
+}
+
 void customize_ui() {
     lv_obj_set_style_bg_opa(objects.ui_wi_fi_button, 255, LV_PART_MAIN | LV_STATE_USER_1);
 
-    lv_helper_create_arc_gesture(objects.ui_noise_gate_threshold_slider, objects.ui_noise_gate_threshold_value, ParamFormats.GATE_THRESHOLD,      -100);
-    lv_helper_create_arc_gesture(objects.ui_noise_gate_release_slider,   objects.ui_noise_gate_release_value,   ParamFormats.GATE_RELEASE,          20);
-    lv_helper_create_arc_gesture(objects.ui_noise_gate_depth_slider,     objects.ui_noise_gate_depth_value,     ParamFormats.GATE_DEPTH,            60);
+    lv_helper_create_arc_gesture(objects.ui_noise_gate_threshold_slider,    objects.ui_noise_gate_threshold_value, ParamFormats.GATE_THRESHOLD,      -100);
+    lv_helper_create_arc_gesture(objects.ui_noise_gate_release_slider,      objects.ui_noise_gate_release_value,   ParamFormats.GATE_RELEASE,          20);
+    lv_helper_create_arc_gesture(objects.ui_noise_gate_depth_slider,        objects.ui_noise_gate_depth_value,     ParamFormats.GATE_DEPTH,            60);
 
-    lv_helper_create_arc_gesture(objects.ui_compressor_threshold_slider, objects.ui_compressor_threshold_value, ParamFormats.COMPRESSOR_THRESHOLD,   0);
-    lv_helper_create_arc_gesture(objects.ui_compressor_gain_slider,      objects.ui_compressor_gain_value,      ParamFormats.COMPRESSOR_GAIN,       -8);
-    lv_helper_create_arc_gesture(objects.ui_compressor_attack_slider,    objects.ui_compressor_attack_value,    ParamFormats.COMPRESSOR_ATTACK,      5);
+    lv_helper_create_arc_gesture(objects.ui_compressor_threshold_slider,    objects.ui_compressor_threshold_value, ParamFormats.COMPRESSOR_THRESHOLD,   0);
+    lv_helper_create_arc_gesture(objects.ui_compressor_gain_slider,         objects.ui_compressor_gain_value,      ParamFormats.COMPRESSOR_GAIN,       -8);
+    lv_helper_create_arc_gesture(objects.ui_compressor_attack_slider,       objects.ui_compressor_attack_value,    ParamFormats.COMPRESSOR_ATTACK,      5);
 
-    lv_helper_create_arc_gesture(objects.ui_amplifier_gain_slider,       objects.ui_amplifier_gain_value,       ParamFormats.AMP_GAIN,               5);
-    lv_helper_create_arc_gesture(objects.ui_amplifier_volume_slider,     objects.ui_amplifier_volume_value,     ParamFormats.AMP_VOLUME,             5);
-    lv_helper_create_arc_gesture(objects.ui_amplifier_depth_slider,      objects.ui_amplifier_depth_value,      ParamFormats.AMP_DEPTH,              5);
-    lv_helper_create_arc_gesture(objects.ui_amplifier_presense_slider,   objects.ui_amplifier_presense_value,   ParamFormats.AMP_PRESENCE,           5);
+    lv_helper_create_arc_gesture(objects.ui_amplifier_gain_slider,          objects.ui_amplifier_gain_value,       ParamFormats.AMP_GAIN,               5);
+    lv_helper_create_arc_gesture(objects.ui_amplifier_volume_slider,        objects.ui_amplifier_volume_value,     ParamFormats.AMP_VOLUME,             5);
+    lv_helper_create_arc_gesture_canv(objects.ui_amplifier_depth_slider,    objects.ui_amplifier_depth_value,      ParamFormats.AMP_DEPTH,              5, eq_canvas_update_depth_gain_opt);
+    lv_helper_create_arc_gesture_canv(objects.ui_amplifier_presense_slider, objects.ui_amplifier_presense_value,   ParamFormats.AMP_PRESENCE,           5, eq_canvas_update_presence_gain_opt);
 
-    lv_helper_create_arc_gesture(objects.ui_eq_bass_freq_slider,         objects.ui_eq_bass_freq_value,         ParamFormats.EQ_BASS_FREQ,         300);
-    lv_helper_create_arc_gesture(objects.ui_eq_bass_slider,              objects.ui_eq_bass_value,              ParamFormats.EQ_BASS,                5);
-    lv_helper_create_arc_gesture(objects.ui_eq_mid_freq_slider,          objects.ui_eq_mid_freq_value,          ParamFormats.EQ_MID_FREQ,          750);
-    lv_helper_create_arc_gesture(objects.ui_eq_mid_qslider,              objects.ui_eq_mid_qvalue,              ParamFormats.EQ_MID_Q,             0.7);
-    lv_helper_create_arc_gesture(objects.ui_eq_mid_slider,               objects.ui_eq_mid_value,               ParamFormats.EQ_MID,                 5);
-    lv_helper_create_arc_gesture(objects.ui_eq_treble_freq_slider,       objects.ui_eq_treble_freq_value,       ParamFormats.EQ_TREBLE_FREQ,      2000);
-    lv_helper_create_arc_gesture(objects.ui_eq_treble_slider,            objects.ui_eq_treble_value,            ParamFormats.EQ_TREBLE,              5);
+    lv_helper_create_arc_gesture_canv(objects.ui_eq_bass_freq_slider,       objects.ui_eq_bass_freq_value,         ParamFormats.EQ_BASS_FREQ,         300, eq_canvas_update_bass_frequency);
+    lv_helper_create_arc_gesture_canv(objects.ui_eq_bass_slider,            objects.ui_eq_bass_value,              ParamFormats.EQ_BASS,                5, eq_canvas_update_bass_gain);
+    lv_helper_create_arc_gesture_canv(objects.ui_eq_mid_freq_slider,        objects.ui_eq_mid_freq_value,          ParamFormats.EQ_MID_FREQ,          750, eq_canvas_update_mid_frequency);
+    lv_helper_create_arc_gesture_canv(objects.ui_eq_mid_qslider,            objects.ui_eq_mid_qvalue,              ParamFormats.EQ_MID_Q,             0.7, eq_canvas_update_mid_q);
+    lv_helper_create_arc_gesture_canv(objects.ui_eq_mid_slider,             objects.ui_eq_mid_value,               ParamFormats.EQ_MID,                 5, eq_canvas_update_mid_gain);
+    lv_helper_create_arc_gesture_canv(objects.ui_eq_treble_freq_slider,     objects.ui_eq_treble_freq_value,       ParamFormats.EQ_TREBLE_FREQ,      2000, eq_canvas_update_treble_frequency);
+    lv_helper_create_arc_gesture_canv(objects.ui_eq_treble_slider,          objects.ui_eq_treble_value,            ParamFormats.EQ_TREBLE,              5, eq_canvas_update_treble_gain);
 
-    lv_helper_create_arc_gesture(objects.ui_delay_ts_slider,             objects.ui_delay_ts_value,             ParamFormats.DELAY_TIME,           350);
-    lv_helper_create_arc_gesture(objects.ui_delay_mix_slider,            objects.ui_delay_mix_value,            ParamFormats.DELAY_MIX,             50);
-    lv_helper_create_arc_gesture(objects.ui_delay_feedback_slider,       objects.ui_delay_feedback_value,       ParamFormats.DELAY_FEEDBACK,        20);
+    lv_helper_create_arc_gesture(objects.ui_delay_ts_slider,                objects.ui_delay_ts_value,             ParamFormats.DELAY_TIME,           350);
+    lv_helper_create_arc_gesture(objects.ui_delay_mix_slider,               objects.ui_delay_mix_value,            ParamFormats.DELAY_MIX,             50);
+    lv_helper_create_arc_gesture(objects.ui_delay_feedback_slider,          objects.ui_delay_feedback_value,       ParamFormats.DELAY_FEEDBACK,        20);
 
-    lv_helper_create_arc_gesture(objects.ui_reverb_time_slider,          objects.ui_reverb_time_value,          ParamFormats.REVERB_TIME,            5);
-    lv_helper_create_arc_gesture(objects.ui_reverb_predelay_slider,      objects.ui_reverb_predelay_value,      ParamFormats.REVERB_PREDELAY,        0);
-    lv_helper_create_arc_gesture(objects.ui_reverb_color_slider,         objects.ui_reverb_color_value,         ParamFormats.REVERB_COLOR,           0);
-    lv_helper_create_arc_gesture(objects.ui_reverb_mix_slider,           objects.ui_reverb_mix_value,           ParamFormats.REVERB_MIX,            30);
+    lv_helper_create_arc_gesture(objects.ui_reverb_time_slider,             objects.ui_reverb_time_value,          ParamFormats.REVERB_TIME,            5);
+    lv_helper_create_arc_gesture(objects.ui_reverb_predelay_slider,         objects.ui_reverb_predelay_value,      ParamFormats.REVERB_PREDELAY,        0);
+    lv_helper_create_arc_gesture(objects.ui_reverb_color_slider,            objects.ui_reverb_color_value,         ParamFormats.REVERB_COLOR,           0);
+    lv_helper_create_arc_gesture(objects.ui_reverb_mix_slider,              objects.ui_reverb_mix_value,           ParamFormats.REVERB_MIX,            30);
 
-    lv_helper_create_arc_gesture(objects.ui_bpm_slider,                  objects.ui_bpm_value,                  ParamFormats.BPM,                  120);
-    lv_helper_create_arc_gesture(objects.ui_input_trim_slider,           objects.ui_input_trim_value,           ParamFormats.INPUT_TRIM,             0);
-    lv_helper_create_arc_gesture(objects.ui_tuning_reference_slider,     objects.ui_tuning_reference_value,     ParamFormats.TUNING_REF,           440);
-    lv_helper_create_arc_gesture(objects.ui_volume_slider,               objects.ui_volume_value,               ParamFormats.MASTER,                 5);
+    lv_helper_create_arc_gesture(objects.ui_bpm_slider,                     objects.ui_bpm_value,                  ParamFormats.BPM,                  120);
+    lv_helper_create_arc_gesture(objects.ui_input_trim_slider,              objects.ui_input_trim_value,           ParamFormats.INPUT_TRIM,             0);
+    lv_helper_create_arc_gesture(objects.ui_tuning_reference_slider,        objects.ui_tuning_reference_value,     ParamFormats.TUNING_REF,           440);
+    lv_helper_create_arc_gesture(objects.ui_volume_slider,                  objects.ui_volume_value,               ParamFormats.MASTER,                 5);
 
-    lv_helper_create_arc_gesture_c(objects.ui_modulation_param1_slider,  objects.ui_modulation_param1_value,    mod_format_cb);
-    lv_helper_create_arc_gesture_c(objects.ui_modulation_param2_slider,  objects.ui_modulation_param2_value,    mod_format_cb);
-    lv_helper_create_arc_gesture_c(objects.ui_modulation_param3_slider,  objects.ui_modulation_param3_value,    mod_format_cb);
-    lv_helper_create_arc_gesture_c(objects.ui_modulation_param4_slider,  objects.ui_modulation_param4_value,    mod_format_cb);
+    lv_helper_create_arc_gesture_cb(objects.ui_modulation_param1_slider,    objects.ui_modulation_param1_value,    mod_format_cb);
+    lv_helper_create_arc_gesture_cb(objects.ui_modulation_param2_slider,    objects.ui_modulation_param2_value,    mod_format_cb);
+    lv_helper_create_arc_gesture_cb(objects.ui_modulation_param3_slider,    objects.ui_modulation_param3_value,    mod_format_cb);
+    lv_helper_create_arc_gesture_cb(objects.ui_modulation_param4_slider,    objects.ui_modulation_param4_value,    mod_format_cb);
 
     eq_canvas_setup();
 }

@@ -219,16 +219,25 @@ const tTonexPresetColorMapping TonexColorMap[TONEX_COLORS_COUNT] = {
     {0x000000, 0x595959}, // grey
 };
 
-const char *Style_ReverbModels[6] = {
+static const char *Style_ReverbModels[] = {
     "SPRING 1", "SPRING 2", "SPRING 3", "SPRING 4", "ROOM", "PLATE"
 };
-const char *Style_ModModels[5] = {
+static const char *Style_ReverbModels_Short[] = {
+    "SPR 1", "SPR 2", "SPR 3", "SPR 4", "ROOM", "PLATE"
+};
+static const char *Style_ModModels[] = {
     "CHORUS", "TREMOLO", "PHASER", "FLANGER", "ROTARY"
 };
-const char *Style_DelayModels[2] = {
+static const char *Style_ModModels_Short[] = {
+    "CHOR", "TREM", "PHAS", "FLAN", "ROT"
+};
+static const char *Style_DelayModels[] = {
     "DIGITAL", "TAPE"
 };
-const char *Style_DelayTimeSignatures[18] = {
+static const char *Style_DelayModels_Short[] = {
+    "DIG", "TAPE"
+};
+static const char *Style_DelayTimeSignatures[] = {
     "1/32",
     "1/32 D",
     "1/32 T",
@@ -249,7 +258,7 @@ const char *Style_DelayTimeSignatures[18] = {
     "1/1 T"
 };
 
-const char *Style_CabinetTypes[3] = {
+const char *Style_CabinetTypes[] = {
     "OFF", "VIR", "MODEL"
 };
 
@@ -257,6 +266,7 @@ void tonex_params_get_ui_style(
     TonexParameter_t param,
     uint8_t paramValue1,
     uint8_t paramValue2,
+    bool shorten,
     uint32_t *color,
     char const **name,
     char const **value1,
@@ -264,7 +274,6 @@ void tonex_params_get_ui_style(
     const tModellerParameter *allParameters
 ) {
     if (param >= TONEX_GLOBAL_BPM) {
-        // *color = 0xD1A60C;
         *color = theme_colors[THEME_ID_DEFAULT][COLOR_ID_DEFAULT_GRAY];
         
         switch (param) {
@@ -278,9 +287,9 @@ void tonex_params_get_ui_style(
                 *name = "CABSIM";
                 break;
             case TONEX_GLOBAL_TEMPO_SOURCE:
-                *name = "TEMPO";
-                *value1 = "GLOBAL";
-                *value2 = "PRESET";
+                *name = shorten ? "TEMP" : "TEMPO";
+                *value1 = shorten ? "GLOB" : "GLOBAL";
+                *value2 = shorten ? "PRES" : "PRESET";
                 break;
             case TONEX_GLOBAL_TUNING_REFERENCE:
                 *name = "TUNING";
@@ -300,32 +309,48 @@ void tonex_params_get_ui_style(
         }
     } else if (param >= TONEX_PARAM_DELAY_POST) {
         *color = theme_colors[THEME_ID_DEFAULT][COLOR_ID_DELAY];
-        *name = "DELAY";
 
         switch (param) {
             case TONEX_PARAM_DELAY_POST:
+                *name = shorten ? "DLY" : "DELAY";
                 *value1 = "PRE";
                 *value2 = "POST";
                 break;
             case TONEX_PARAM_DELAY_ENABLE:
+                *name = "DELAY";
                 break;
             case TONEX_PARAM_DELAY_MODEL:
-                *value1 = Style_DelayModels[paramValue1];
-                *value2 = Style_DelayModels[paramValue2];
+                *name = shorten ? "DLY" : "DELAY";
+                *value1 = (shorten ? Style_DelayModels_Short : Style_DelayModels)[paramValue1];
+                *value2 = (shorten ? Style_DelayModels_Short : Style_DelayModels)[paramValue2];
+                break;
+            case TONEX_PARAM_DELAY_DIGITAL_SYNC:
+            case TONEX_PARAM_DELAY_TAPE_SYNC:
+                *name = shorten ? "DLY SNC" : "DELAY SYNC";
                 break;
             case TONEX_PARAM_DELAY_DIGITAL_TS:
             case TONEX_PARAM_DELAY_TAPE_TS:
+                *name = shorten ? "DLY" : "DELAY";
                 *value1 = Style_DelayTimeSignatures[paramValue1];
                 *value2 = Style_DelayTimeSignatures[paramValue2];
                 break;
             case TONEX_PARAM_DELAY_DIGITAL_TIME:
             case TONEX_PARAM_DELAY_TAPE_TIME:
-                *name = "DELAY TIME";
+                *name = shorten ? "DLY" : "DELAY TIME";
+                break;
+            case TONEX_PARAM_DELAY_DIGITAL_FEEDBACK:
+            case TONEX_PARAM_DELAY_TAPE_FEEDBACK:
+                *name = shorten ? "DLY FBCK" : "DELAY FEEDBACK";
                 break;
             case TONEX_PARAM_DELAY_DIGITAL_MODE:
             case TONEX_PARAM_DELAY_TAPE_MODE:
-                *value1 = "NORMAL";
-                *value2 = "PING PONG";
+                *name = shorten ? "DLY" : "DELAY";
+                *value1 = shorten ? "NORM" : "NORMAL";
+                *value2 = shorten ? "PPNG" : "PING PONG";
+                break;
+            case TONEX_PARAM_DELAY_DIGITAL_MIX:
+            case TONEX_PARAM_DELAY_TAPE_MIX:
+                *name = shorten ? "DLY MX" : "DELAY MIX";
                 break;
             default:
                 *name = "DELAY ?";
@@ -333,41 +358,102 @@ void tonex_params_get_ui_style(
         }
     } else if (param >= TONEX_PARAM_MODULATION_POST) {
         *color = theme_colors[THEME_ID_DEFAULT][COLOR_ID_MODULATION];
-        *name = Style_ModModels[(uint8_t)allParameters[TONEX_PARAM_MODULATION_MODEL].Value];
+        uint8_t modIndex = (uint8_t)allParameters[TONEX_PARAM_MODULATION_MODEL].Value;
 
         switch (param) {
             case TONEX_PARAM_MODULATION_POST:
+                *name = (shorten ? Style_ModModels_Short : Style_ModModels)[modIndex];
                 *value1 = "PRE";
                 *value2 = "POST";
                 break;
             case TONEX_PARAM_MODULATION_ENABLE:
+                *name = Style_ModModels[modIndex];
                 break;
             case TONEX_PARAM_MODULATION_MODEL:
                 *name = "MOD";
-                *value1 = Style_ModModels[paramValue1];
-                *value2 = Style_ModModels[paramValue2];
+                *value1 = (shorten ? Style_ModModels_Short : Style_ModModels)[paramValue1];
+                *value2 = (shorten ? Style_ModModels_Short : Style_ModModels)[paramValue2];
                 break;
-            case TONEX_PARAM_MODULATION_TREMOLO_LEVEL:
-                *name = "TREM LVL";
-                break;
+            case TONEX_PARAM_MODULATION_CHORUS_SYNC:      *name = shorten ? "CHOR SNC" : "CHORUS SYNC";      break;
+            case TONEX_PARAM_MODULATION_CHORUS_TS:        *name = shorten ? "CHOR TS"  : "CHORUS TS";        break;
+            case TONEX_PARAM_MODULATION_CHORUS_RATE:      *name = shorten ? "CHOR RAT" : "CHORUS RATE";      break;
+            case TONEX_PARAM_MODULATION_CHORUS_DEPTH:     *name = shorten ? "CHOR DEP" : "CHORUS DEPTH";     break;
+            case TONEX_PARAM_MODULATION_CHORUS_LEVEL:     *name = shorten ? "CHOR LVL" : "CHORUS LEVEL";     break;
+            case TONEX_PARAM_MODULATION_TREMOLO_SYNC:     *name = shorten ? "TREM SNC" : "TREMOLO SYNC";     break;
+            case TONEX_PARAM_MODULATION_TREMOLO_TS:       *name = shorten ? "TREM TS"  : "TREMOLO TS";       break;
+            case TONEX_PARAM_MODULATION_TREMOLO_RATE:     *name = shorten ? "TREM RAT" : "TREMOLO RATE";     break;
+            case TONEX_PARAM_MODULATION_TREMOLO_SHAPE:    *name = shorten ? "TREM SHA" : "TREMOLO SHAPE";    break;
+            case TONEX_PARAM_MODULATION_TREMOLO_SPREAD:   *name = shorten ? "TREM SPR" : "TREMOLO SPREAD";   break;
+            case TONEX_PARAM_MODULATION_TREMOLO_LEVEL:    *name = shorten ? "TREM LVL" : "TREMOLO LEVEL";    break;
+            case TONEX_PARAM_MODULATION_PHASER_SYNC:      *name = shorten ? "PHAS SNC" : "PHASER_SYNC";      break;
+            case TONEX_PARAM_MODULATION_PHASER_TS:        *name = shorten ? "PHAS TS"  : "PHASER_TS";        break;
+            case TONEX_PARAM_MODULATION_PHASER_RATE:      *name = shorten ? "PHAS RAT" : "PHASER_RATE";      break;
+            case TONEX_PARAM_MODULATION_PHASER_DEPTH:     *name = shorten ? "PHAS DEP" : "PHASER_DEPTH";     break;
+            case TONEX_PARAM_MODULATION_PHASER_LEVEL:     *name = shorten ? "PHAS LVL" : "PHASER_LEVEL";     break;
+            case TONEX_PARAM_MODULATION_FLANGER_SYNC:     *name = shorten ? "FLAN SNC" : "FLANGER SYNC";     break;
+            case TONEX_PARAM_MODULATION_FLANGER_TS:       *name = shorten ? "FLAN TS"  : "FLANGER TS";       break;
+            case TONEX_PARAM_MODULATION_FLANGER_RATE:     *name = shorten ? "FLAN RAT" : "FLANGER RATE";     break;
+            case TONEX_PARAM_MODULATION_FLANGER_DEPTH:    *name = shorten ? "FLAN DEP" : "FLANGER DEPTH";    break;
+            case TONEX_PARAM_MODULATION_FLANGER_FEEDBACK: *name = shorten ? "FLAN FDK" : "FLANGER FEEDBACK"; break;
+            case TONEX_PARAM_MODULATION_FLANGER_LEVEL:    *name = shorten ? "FLAN LVL" : "FLANGER LEVEL";    break;
+            case TONEX_PARAM_MODULATION_ROTARY_SYNC:      *name = shorten ? "ROT SNC"  : "ROTARY SYNC";      break;
+            case TONEX_PARAM_MODULATION_ROTARY_TS:        *name = shorten ? "ROT TS"   : "ROTARY TS";        break;
+            case TONEX_PARAM_MODULATION_ROTARY_SPEED:     *name = shorten ? "ROT SPD"  : "ROTARY SPEED";     break;
+            case TONEX_PARAM_MODULATION_ROTARY_RADIUS:    *name = shorten ? "ROT RAD"  : "ROTARY RADIUS";    break;
+            case TONEX_PARAM_MODULATION_ROTARY_SPREAD:    *name = shorten ? "ROT SPR"  : "ROTARY SPREAD";    break;
+            case TONEX_PARAM_MODULATION_ROTARY_LEVEL:     *name = shorten ? "ROT LVL"  : "ROTARY LEVEL";     break;
             default:
                 *name = "MOD ?";
                 break;
         }
     } else if (param >= TONEX_PARAM_REVERB_POSITION) {
         *color = theme_colors[THEME_ID_DEFAULT][COLOR_ID_REVERB];
-        *name = "REVERB";
 
         switch (param) {
             case TONEX_PARAM_REVERB_POSITION:
+                *name = shorten ? "REV" : "REVERB";
                 *value1 = "PRE";
                 *value2 = "POST";
                 break;
             case TONEX_PARAM_REVERB_ENABLE:
+                *name = "REVERB";
                 break;
             case TONEX_PARAM_REVERB_MODEL:
-                *value1 = Style_ReverbModels[paramValue1];
-                *value2 = Style_ReverbModels[paramValue2];
+                *name = shorten ? "REV" : "REVERB";
+                *value1 = (shorten ? Style_ReverbModels_Short : Style_ReverbModels)[paramValue1];
+                *value2 = (shorten ? Style_ReverbModels_Short : Style_ReverbModels)[paramValue2];
+                break;
+            case TONEX_PARAM_REVERB_SPRING1_TIME:
+            case TONEX_PARAM_REVERB_SPRING2_TIME:
+            case TONEX_PARAM_REVERB_SPRING3_TIME:
+            case TONEX_PARAM_REVERB_SPRING4_TIME:
+            case TONEX_PARAM_REVERB_ROOM_TIME:
+            case TONEX_PARAM_REVERB_PLATE_TIME:
+                *name = shorten ? "REV T" : "REVERB TIME";
+                break;
+            case TONEX_PARAM_REVERB_SPRING1_PREDELAY:
+            case TONEX_PARAM_REVERB_SPRING2_PREDELAY:
+            case TONEX_PARAM_REVERB_SPRING3_PREDELAY:
+            case TONEX_PARAM_REVERB_SPRING4_PREDELAY:
+            case TONEX_PARAM_REVERB_ROOM_PREDELAY:
+            case TONEX_PARAM_REVERB_PLATE_PREDELAY:
+                *name = shorten ? "REV PRDL" : "REVERB PREDELAY";
+                break;
+            case TONEX_PARAM_REVERB_SPRING1_COLOR:
+            case TONEX_PARAM_REVERB_SPRING2_COLOR:
+            case TONEX_PARAM_REVERB_SPRING3_COLOR:
+            case TONEX_PARAM_REVERB_SPRING4_COLOR:
+            case TONEX_PARAM_REVERB_ROOM_COLOR:
+            case TONEX_PARAM_REVERB_PLATE_COLOR:
+                *name = shorten ? "REV COL" : "REVERB COLOR";
+                break;
+            case TONEX_PARAM_REVERB_SPRING1_MIX:
+            case TONEX_PARAM_REVERB_SPRING2_MIX:
+            case TONEX_PARAM_REVERB_SPRING3_MIX:
+            case TONEX_PARAM_REVERB_SPRING4_MIX:
+            case TONEX_PARAM_REVERB_ROOM_MIX:
+            case TONEX_PARAM_REVERB_PLATE_MIX:
+                *name = shorten ? "REV MX" : "REVERB MIX";
                 break;
             default:
                 *name = "REVERB ?";
@@ -375,11 +461,10 @@ void tonex_params_get_ui_style(
         }
     } else if (param >= TONEX_PARAM_MODEL_PRESENCE) {
         *color = theme_colors[THEME_ID_DEFAULT][COLOR_ID_AMPLIFIER];
-        *name = "AMP";
 
         switch (param) {
             case TONEX_PARAM_MODEL_GAIN:
-                *name = "PRESENCE";
+                *name = shorten ? "PRES" : "PRESENCE";
                 break;
             case TONEX_PARAM_MODEL_VOLUME:
                 *name = "DEPTH";
@@ -390,10 +475,10 @@ void tonex_params_get_ui_style(
         }
     } else if (param >= TONEX_PARAM_CABINET_UNKNOWN) {
         *color = theme_colors[THEME_ID_DEFAULT][COLOR_ID_CABINET];
-        *name = "CAB";
 
         switch (param) {
             case TONEX_PARAM_CABINET_TYPE:
+                *name = "CAB";
                 *value1 = Style_CabinetTypes[paramValue1];
                 *value2 = Style_CabinetTypes[paramValue2];
                 break;
@@ -403,16 +488,16 @@ void tonex_params_get_ui_style(
         }
     } else if (param >= TONEX_PARAM_MODEL_AMP_ENABLE) {
         *color = theme_colors[THEME_ID_DEFAULT][COLOR_ID_AMPLIFIER];
-        *name = "AMP";
 
         switch (param) {
             case TONEX_PARAM_MODEL_AMP_ENABLE:
+                *name = "AMP";
                 break;
             case TONEX_PARAM_MODEL_GAIN:
                 *name = "GAIN";
                 break;
             case TONEX_PARAM_MODEL_VOLUME:
-                *name = "VOLUME";
+                *name = shorten ? "VOL" : "VOLUME";
                 break;
             case TONEX_PARAM_MODEX_MIX:
                 *name = "MIX";
@@ -423,10 +508,10 @@ void tonex_params_get_ui_style(
         }
     } else if (param >= TONEX_PARAM_EQ_POST) {
         *color = theme_colors[THEME_ID_DEFAULT][COLOR_ID_DEFAULT_GRAY];
-        *name = "EQ";
 
         switch (param) {
             case TONEX_PARAM_EQ_POST:
+                *name = "EQ";
                 *value1 = "PRE";
                 *value2 = "POST";
                 break;
@@ -436,14 +521,15 @@ void tonex_params_get_ui_style(
         }
     } else if (param >= TONEX_PARAM_COMP_POST) {
         *color = theme_colors[THEME_ID_DEFAULT][COLOR_ID_COMPRESSOR];
-        *name = "COMP";
 
         switch (param) {
             case TONEX_PARAM_COMP_POST:
+                *name = "COMP";
                 *value1 = "PRE";
                 *value2 = "POST";
                 break;
             case TONEX_PARAM_COMP_ENABLE:
+                *name = "COMP";
                 break;
             case TONEX_PARAM_COMP_THRESHOLD:
                 *name = "COMP TRSH";
@@ -460,14 +546,15 @@ void tonex_params_get_ui_style(
         }
     } else { // param >= TONEX_PARAM_NOISE_GATE_POST
         *color = theme_colors[THEME_ID_DEFAULT][COLOR_ID_NOISE_GATE];
-        *name = "GATE";
 
         switch (param) {
             case TONEX_PARAM_NOISE_GATE_POST:
+                *name = "GATE";
                 *value1 = "PRE";
                 *value2 = "POST";
                 break;
             case TONEX_PARAM_NOISE_GATE_ENABLE:
+                *name = "GATE";
                 break;
             case TONEX_PARAM_NOISE_GATE_THRESHOLD:
                 *name = "GATE TRSH";
