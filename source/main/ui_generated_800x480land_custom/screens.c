@@ -1464,6 +1464,7 @@ void create_screen_screen1() {
                                                                 { 40, 40 }
                                                             };
                                                             lv_line_set_points(obj, line_points, 2);
+                                                            lv_obj_add_flag(obj, LV_OBJ_FLAG_HIDDEN);
                                                             lv_obj_set_style_align(obj, LV_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
                                                             lv_obj_set_style_line_width(obj, 4, LV_PART_MAIN | LV_STATE_DEFAULT);
                                                             lv_obj_set_style_line_rounded(obj, true, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -1516,7 +1517,7 @@ void create_screen_screen1() {
                                                             objects.ui_icon_image_mod = obj;
                                                             lv_obj_set_pos(obj, 0, 0);
                                                             lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
-                                                            lv_img_set_src(obj, &img_mod_chorus);
+                                                            lv_img_set_src(obj, &img_mod_phaser);
                                                             lv_obj_set_style_align(obj, LV_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
                                                         }
                                                     }
@@ -1541,7 +1542,7 @@ void create_screen_screen1() {
                                                             objects.ui_icon_image_delay = obj;
                                                             lv_obj_set_pos(obj, 0, 0);
                                                             lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
-                                                            lv_img_set_src(obj, &img_delay_digital);
+                                                            lv_img_set_src(obj, &img_delay_tape);
                                                             lv_obj_set_style_align(obj, LV_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
                                                         }
                                                     }
