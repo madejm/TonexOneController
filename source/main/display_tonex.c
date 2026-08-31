@@ -1539,6 +1539,42 @@ uint8_t tonex_update_ui_parameters(void)
                 case TONEX_PARAM_REVERB_MODEL:
                 {
                     lv_dropdown_set_selected(objects.ui_reverb_model_dropdown, param_entry->Value);
+
+                    #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+                    switch ((int)param_ptr[TONEX_PARAM_REVERB_MODEL].Value)
+                    {
+                        case TONEX_REVERB_SPRING_1:
+                        {
+                            lv_img_set_src(objects.ui_icon_image_reverb, (lv_obj_t*)&img_reverb_spring_1);
+                        } break;
+
+                        case TONEX_REVERB_SPRING_2:
+                        {
+                            lv_img_set_src(objects.ui_icon_image_reverb, (lv_obj_t*)&img_reverb_spring_2);
+                        } break;
+
+                        case TONEX_REVERB_SPRING_3:
+                        {
+                            lv_img_set_src(objects.ui_icon_image_reverb, (lv_obj_t*)&img_reverb_spring_3);
+                        } break;
+
+                        case TONEX_REVERB_SPRING_4:
+                        {
+                            lv_img_set_src(objects.ui_icon_image_reverb, (lv_obj_t*)&img_reverb_spring_4);
+                        } break;
+
+                        case TONEX_REVERB_ROOM:
+                        {
+                            lv_img_set_src(objects.ui_icon_image_reverb, (lv_obj_t*)&img_reverb_room);
+                        } break;
+
+                        case TONEX_REVERB_PLATE:
+                        default:
+                        {
+                            lv_img_set_src(objects.ui_icon_image_reverb, (lv_obj_t*)&img_reverb_plate);
+                        } break;
+                    }
+                    #endif // CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
                 } break;
 
                 case TONEX_PARAM_REVERB_SPRING1_TIME:
@@ -2028,6 +2064,7 @@ uint8_t tonex_update_ui_parameters(void)
                             lv_label_set_text(objects.ui_modulation_param1_unit, "Hz");
                             lv_label_set_text(objects.ui_modulation_param2_unit, "%");
                             lv_label_set_text(objects.ui_modulation_param3_unit, "dB");
+                            lv_img_set_src(objects.ui_icon_image_mod, (lv_obj_t*)&img_mod_chorus);
                             #endif
                             lv_obj_add_flag(objects.ui_modulation_param4_label, LV_OBJ_FLAG_HIDDEN);
                             lv_obj_add_flag(objects.ui_modulation_param4_slider, LV_OBJ_FLAG_HIDDEN);
@@ -2045,6 +2082,7 @@ uint8_t tonex_update_ui_parameters(void)
                             lv_label_set_text(objects.ui_modulation_param2_unit, "t");
                             lv_label_set_text(objects.ui_modulation_param3_unit, "%");
                             lv_label_set_text(objects.ui_modulation_param4_unit, "dB");
+                            lv_img_set_src(objects.ui_icon_image_mod, (lv_obj_t*)&img_mod_tremolo);
                             #endif
                             lv_obj_clear_flag(objects.ui_modulation_param4_label, LV_OBJ_FLAG_HIDDEN);
                             lv_obj_clear_flag(objects.ui_modulation_param4_slider, LV_OBJ_FLAG_HIDDEN);
@@ -2060,6 +2098,7 @@ uint8_t tonex_update_ui_parameters(void)
                             lv_label_set_text(objects.ui_modulation_param1_unit, "Hz");
                             lv_label_set_text(objects.ui_modulation_param2_unit, "%");
                             lv_label_set_text(objects.ui_modulation_param3_unit, "dB");
+                            lv_img_set_src(objects.ui_icon_image_mod, (lv_obj_t*)&img_mod_phaser);
                             #endif
                             lv_obj_add_flag(objects.ui_modulation_param4_label, LV_OBJ_FLAG_HIDDEN);
                             lv_obj_add_flag(objects.ui_modulation_param4_slider, LV_OBJ_FLAG_HIDDEN);
@@ -2077,6 +2116,7 @@ uint8_t tonex_update_ui_parameters(void)
                             lv_label_set_text(objects.ui_modulation_param2_unit, "%");
                             lv_label_set_text(objects.ui_modulation_param3_unit, "%");
                             lv_label_set_text(objects.ui_modulation_param4_unit, "dB");
+                            lv_img_set_src(objects.ui_icon_image_mod, (lv_obj_t*)&img_mod_flanger);
                             #endif
                             lv_obj_clear_flag(objects.ui_modulation_param4_label, LV_OBJ_FLAG_HIDDEN);
                             lv_obj_clear_flag(objects.ui_modulation_param4_slider, LV_OBJ_FLAG_HIDDEN);
@@ -2094,6 +2134,7 @@ uint8_t tonex_update_ui_parameters(void)
                             lv_label_set_text(objects.ui_modulation_param2_unit, "mm");
                             lv_label_set_text(objects.ui_modulation_param3_unit, "%");
                             lv_label_set_text(objects.ui_modulation_param4_unit, "dB");
+                            lv_img_set_src(objects.ui_icon_image_mod, (lv_obj_t*)&img_mod_rotary);
                             #endif
                             lv_obj_clear_flag(objects.ui_modulation_param4_label, LV_OBJ_FLAG_HIDDEN);
                             lv_obj_clear_flag(objects.ui_modulation_param4_slider, LV_OBJ_FLAG_HIDDEN);
@@ -2609,6 +2650,22 @@ uint8_t tonex_update_ui_parameters(void)
                 case TONEX_PARAM_DELAY_MODEL:
                 {
                     lv_dropdown_set_selected(objects.ui_delay_model_dropdown, param_entry->Value);
+
+                    #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+                    switch ((int)param_ptr[TONEX_PARAM_DELAY_MODEL].Value)
+                    {
+                        case TONEX_DELAY_DIGITAL:
+                        {
+                            lv_img_set_src(objects.ui_icon_image_delay, (lv_obj_t*)&img_delay_digital);
+                        } break;
+
+                        case TONEX_DELAY_TAPE:
+                        default:
+                        {
+                            lv_img_set_src(objects.ui_icon_image_delay, (lv_obj_t*)&img_delay_tape);
+                        } break;
+                    }
+                    #endif // CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
                 } break;
 
                 case TONEX_PARAM_DELAY_DIGITAL_SYNC:
@@ -2806,10 +2863,18 @@ uint8_t tonex_update_ui_parameters(void)
                     if (param_entry->Value)
                     {
                         lv_obj_add_state(objects.ui_cab_bypass_switch, LV_STATE_CHECKED);
+
+                        #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+                        lv_obj_clear_flag(objects.ui_cab_global_disabled, LV_OBJ_FLAG_HIDDEN);
+                        #endif
                     }
                     else
                     {
                         lv_obj_clear_state(objects.ui_cab_bypass_switch, LV_STATE_CHECKED);
+
+                        #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+                        lv_obj_add_flag(objects.ui_cab_global_disabled, LV_OBJ_FLAG_HIDDEN);
+                        #endif
                     }
                 } break;
 

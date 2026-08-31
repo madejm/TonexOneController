@@ -42,6 +42,7 @@ void remove_style_button_preset_list_options(lv_obj_t *obj);
 lv_style_t *get_style_button_chain_MAIN_DEFAULT();
 lv_style_t *get_style_button_chain_MAIN_CHECKED();
 lv_style_t *get_style_button_chain_MAIN_PRESSED();
+lv_style_t *get_style_button_chain_MAIN_CHECKED_PRESSED();
 void add_style_button_chain(lv_obj_t *obj);
 void remove_style_button_chain(lv_obj_t *obj);
 

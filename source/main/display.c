@@ -422,13 +422,13 @@ void action_next_clicked(lv_event_t * e)
 * RETURN:      
 * NOTES:       
 *****************************************************************************/
-void action_fs_button_clicked(uint32_t buttonIndex)
+static void action_fs_button_clicked(uint32_t buttonIndex, bool alt)
 {
     for (uint32_t item = 0; item < MAX_EXTERNAL_EFFECT_FOOTSWITCHES; item ++)
     {
         tExternalFootswitchEffectConfig config;
         
-        control_get_config_item_external_fs_config(item, ui_AltMode, &config);
+        control_get_config_item_external_fs_config(item, alt, &config);
 
         if (config.Switch != buttonIndex) {
             continue;
@@ -467,59 +467,67 @@ void action_tap_tempo_clicked(lv_event_t * e)
 }
 void action_fs1_clicked(lv_event_t * e)
 {
-    if (ui_AltMode) {
-        action_fs_button_clicked(0);
+    bool alt = ui_AltMode != (e->code == LV_EVENT_LONG_PRESSED);
+    if (alt) {
+        action_fs_button_clicked(0, true);
     } else {
         control_request_preset_in_bank_index(0);
     }
 }
 void action_fs2_clicked(lv_event_t * e)
 {
-    if (ui_AltMode) {
-        action_fs_button_clicked(1);
+    bool alt = ui_AltMode != (e->code == LV_EVENT_LONG_PRESSED);
+    if (alt) {
+        action_fs_button_clicked(1, true);
     } else {
         control_request_preset_in_bank_index(1);
     }
 }
 void action_fs3_clicked(lv_event_t * e)
 {
-    if (ui_AltMode) {
-        action_fs_button_clicked(2);
+    bool alt = ui_AltMode != (e->code == LV_EVENT_LONG_PRESSED);
+    if (alt) {
+        action_fs_button_clicked(2, true);
     } else {
         control_request_preset_in_bank_index(2);
     }
 }
 void action_fs4_clicked(lv_event_t * e)
 {
-    if (ui_AltMode) {
-        action_fs_button_clicked(3);
+    bool alt = ui_AltMode != (e->code == LV_EVENT_LONG_PRESSED);
+    if (alt) {
+        action_fs_button_clicked(3, true);
     } else {
         control_request_preset_in_bank_index(3);
     }
 }
 void action_fs5_clicked(lv_event_t * e)
 {
-    if (ui_AltMode) {
-        action_fs_button_clicked(4);
+    bool alt = ui_AltMode != (e->code == LV_EVENT_LONG_PRESSED);
+    if (alt) {
+        action_fs_button_clicked(4, true);
     } else {
         control_request_bank_down();
     }
 }
 void action_fs6_clicked(lv_event_t * e)
 {
-    if (ui_AltMode) {
-        action_fs_button_clicked(5);
+    bool alt = ui_AltMode != (e->code == LV_EVENT_LONG_PRESSED);
+    if (alt) {
+        action_fs_button_clicked(5, true);
     } else {
         control_request_bank_up();
     }
 }
 void action_fs7_clicked(lv_event_t * e)
 {
-    action_fs_button_clicked(6);
+    bool alt = ui_AltMode != (e->code == LV_EVENT_LONG_PRESSED);
+    action_fs_button_clicked(6, alt);
 }
 void action_fs8_clicked(lv_event_t * e)
 {
-    action_fs_button_clicked(7);
+    bool alt = ui_AltMode != (e->code == LV_EVENT_LONG_PRESSED);
+    action_fs_button_clicked(7, alt);
 }
 void action_alt_button_clicked(lv_event_t * e)
 {
@@ -2175,9 +2183,13 @@ static  __attribute__((unused)) uint8_t update_ui_element(tUIUpdate* update)
 
         case UI_ELEMENT_BANK_INDEX:
         {
-#if CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI
+#if CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI && !CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
             element_1 = objects.ui_bank_value_label;
 #endif
+            ui_BankIndex = update->State;
+#if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+            updateFSButtons();
+#endif //CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM  
         } break;
 
         case UI_ELEMENT_AMP_SKIN:
@@ -2396,18 +2408,14 @@ static  __attribute__((unused)) uint8_t update_ui_element(tUIUpdate* update)
             {
                 set_skin_image(objects.ui_skin_image, update->Value, SKIN_SLOT_MAIN);
             }
-#endif //CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM  
             else if (element_1 == objects.ui_bank_value_label)
             {
                 // set Bank index
                 char buf[128];
                 sprintf(buf, "%d", (int)round(update->State) + 1);
                 lv_label_set_text(objects.ui_bank_value_label, buf);
-                ui_BankIndex = update->State;
-#if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
-                updateFSButtons();
-#endif //CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM  
             }
+#endif //CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM  
 #endif //CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI  
         } break;
 
