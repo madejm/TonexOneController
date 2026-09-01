@@ -583,7 +583,7 @@ void action_wi_fi_enabled_changed(lv_event_t * e) {
 *****************************************************************************/
 void __attribute__((unused)) action_tuner_pressed(lv_event_t * e)
 {
-#if CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI    
+#if CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI && !CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
     char buf[20];
     tModellerParameter* param_ptr;
     
@@ -604,7 +604,7 @@ void __attribute__((unused)) action_tuner_pressed(lv_event_t * e)
     // show reference freq on UI
     sprintf(buf, "%d Hz", (int)round(current_tuner_ref_freq));
     lv_label_set_text(objects.ui_tuner_reference_label, buf);
-#endif  //CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI   
+#endif  //CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI && !CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM  
 }
 
 /****************************************************************************
@@ -622,8 +622,6 @@ void __attribute__((unused)) action_tuner_close(lv_event_t * e)
     // show main screen
     lv_scr_load_anim(objects.screen1, LV_SCR_LOAD_ANIM_FADE_IN, 0, 0, false);
 }
-
->>>>>>> main
 #else   //CONFIG_TONEX_CONTROLLER_HAS_TOUCH
 
 // Dummy functions so that 1.69 and 1.69 Touch can share the same UI project
@@ -2311,15 +2309,12 @@ static  __attribute__((unused)) uint8_t update_ui_element(tUIUpdate* update)
                         lv_obj_clear_flag(objects.ui_bottom_panel_tonex, LV_OBJ_FLAG_HIDDEN);
                         lv_obj_add_flag(objects.ui_bottom_panel_valeton, LV_OBJ_FLAG_HIDDEN);
 
-#endif // CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
-
                         if (usb_get_connected_modeller_type() == AMP_MODELLER_TONEX_ONE_PLUS)
                         {
                             // unhide Tuner icon
                             lv_obj_clear_flag(objects.ui_tuner_button, LV_OBJ_FLAG_HIDDEN);
                         }
 
-#if !CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
                         lv_label_set_text(objects.ui_project_heading_label, "Tonex Controller"); 
 #endif // CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
 #else                    
@@ -2524,7 +2519,7 @@ static  __attribute__((unused)) uint8_t update_ui_element(tUIUpdate* update)
 
         case UI_ELEMENT_TUNER_FREQ:
         {
-#if CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI     
+#if CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI && !CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM  
             int32_t arc_value;
             lv_color_t col;
             char buf[32];
@@ -2572,7 +2567,7 @@ static  __attribute__((unused)) uint8_t update_ui_element(tUIUpdate* update)
                 // update label
                 lv_label_set_text(objects.ui_tuner_note_label, buf);
             }
-#endif            
+#endif // CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI && !CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
         } break;
 
         case UI_ELEMENT_TUNER_STATE:
@@ -2592,7 +2587,6 @@ static  __attribute__((unused)) uint8_t update_ui_element(tUIUpdate* update)
                 }
             }
 #endif  //CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI          
->>>>>>> main
         } break;
 
         default:

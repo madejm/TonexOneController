@@ -8410,7 +8410,7 @@
                     "childStyles": []
                   },
                   "locked": false,
-                  "hiddenInEditor": false,
+                  "hiddenInEditor": true,
                   "timeline": [],
                   "eventHandlers": [],
                   "identifier": "ui_CompresssorTab",
@@ -8434,7 +8434,7 @@
                         "conditionalStyles": [],
                         "childStyles": []
                       },
-                      "hiddenInEditor": false,
+                      "hiddenInEditor": true,
                       "timeline": [],
                       "eventHandlers": [],
                       "leftUnit": "px",
@@ -8457,7 +8457,7 @@
                             "conditionalStyles": [],
                             "childStyles": []
                           },
-                          "hiddenInEditor": false,
+                          "hiddenInEditor": true,
                           "timeline": [],
                           "eventHandlers": [],
                           "leftUnit": "px",
@@ -8480,7 +8480,7 @@
                                 "conditionalStyles": [],
                                 "childStyles": []
                               },
-                              "hiddenInEditor": false,
+                              "hiddenInEditor": true,
                               "timeline": [],
                               "eventHandlers": [],
                               "leftUnit": "px",
@@ -8503,7 +8503,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [],
                                   "identifier": "",
@@ -8556,7 +8556,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [
                                     {
@@ -8634,7 +8634,7 @@
                                 "conditionalStyles": [],
                                 "childStyles": []
                               },
-                              "hiddenInEditor": false,
+                              "hiddenInEditor": true,
                               "timeline": [],
                               "eventHandlers": [],
                               "leftUnit": "px",
@@ -8657,7 +8657,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [],
                                   "identifier": "",
@@ -8710,7 +8710,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [
                                     {
@@ -8816,7 +8816,7 @@
                             "conditionalStyles": [],
                             "childStyles": []
                           },
-                          "hiddenInEditor": false,
+                          "hiddenInEditor": true,
                           "timeline": [],
                           "eventHandlers": [],
                           "leftUnit": "px",
@@ -8839,7 +8839,7 @@
                                 "conditionalStyles": [],
                                 "childStyles": []
                               },
-                              "hiddenInEditor": false,
+                              "hiddenInEditor": true,
                               "timeline": [],
                               "eventHandlers": [
                                 {
@@ -8871,7 +8871,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [],
                                   "leftUnit": "px",
@@ -8935,7 +8935,7 @@
                                 "conditionalStyles": [],
                                 "childStyles": []
                               },
-                              "hiddenInEditor": false,
+                              "hiddenInEditor": true,
                               "timeline": [],
                               "eventHandlers": [
                                 {
@@ -8967,7 +8967,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [],
                                   "leftUnit": "px",
@@ -9057,7 +9057,7 @@
                             "conditionalStyles": [],
                             "childStyles": []
                           },
-                          "hiddenInEditor": false,
+                          "hiddenInEditor": true,
                           "timeline": [],
                           "eventHandlers": [],
                           "leftUnit": "px",
@@ -9080,7 +9080,7 @@
                                 "conditionalStyles": [],
                                 "childStyles": []
                               },
-                              "hiddenInEditor": false,
+                              "hiddenInEditor": true,
                               "timeline": [],
                               "eventHandlers": [],
                               "identifier": "",
@@ -9104,7 +9104,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [],
                                   "identifier": "",
@@ -9157,7 +9157,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [
                                     {
@@ -9189,7 +9189,7 @@
                                         "conditionalStyles": [],
                                         "childStyles": []
                                       },
-                                      "hiddenInEditor": false,
+                                      "hiddenInEditor": true,
                                       "timeline": [],
                                       "eventHandlers": [],
                                       "identifier": "ui_CompressorThresholdValue",
@@ -9241,7 +9241,7 @@
                                         "conditionalStyles": [],
                                         "childStyles": []
                                       },
-                                      "hiddenInEditor": false,
+                                      "hiddenInEditor": true,
                                       "timeline": [],
                                       "eventHandlers": [],
                                       "leftUnit": "px",
@@ -9356,7 +9356,7 @@
                                 "conditionalStyles": [],
                                 "childStyles": []
                               },
-                              "hiddenInEditor": false,
+                              "hiddenInEditor": true,
                               "timeline": [],
                               "eventHandlers": [],
                               "identifier": "",
@@ -9380,7 +9380,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [],
                                   "identifier": "",
@@ -9433,7 +9433,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [
                                     {
@@ -9465,7 +9465,7 @@
                                         "conditionalStyles": [],
                                         "childStyles": []
                                       },
-                                      "hiddenInEditor": false,
+                                      "hiddenInEditor": true,
                                       "timeline": [],
                                       "eventHandlers": [],
                                       "identifier": "ui_CompressorGainValue",
@@ -9517,7 +9517,7 @@
                                         "conditionalStyles": [],
                                         "childStyles": []
                                       },
-                                      "hiddenInEditor": false,
+                                      "hiddenInEditor": true,
                                       "timeline": [],
                                       "eventHandlers": [],
                                       "leftUnit": "px",
@@ -9632,7 +9632,7 @@
                                 "conditionalStyles": [],
                                 "childStyles": []
                               },
-                              "hiddenInEditor": false,
+                              "hiddenInEditor": true,
                               "timeline": [],
                               "eventHandlers": [],
                               "identifier": "",
@@ -9656,7 +9656,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [],
                                   "identifier": "",
@@ -9709,7 +9709,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [
                                     {
@@ -9741,7 +9741,7 @@
                                         "conditionalStyles": [],
                                         "childStyles": []
                                       },
-                                      "hiddenInEditor": false,
+                                      "hiddenInEditor": true,
                                       "timeline": [],
                                       "eventHandlers": [],
                                       "identifier": "ui_CompressorAttackValue",
@@ -9793,7 +9793,7 @@
                                         "conditionalStyles": [],
                                         "childStyles": []
                                       },
-                                      "hiddenInEditor": false,
+                                      "hiddenInEditor": true,
                                       "timeline": [],
                                       "eventHandlers": [],
                                       "leftUnit": "px",
@@ -9983,7 +9983,7 @@
                     "conditionalStyles": [],
                     "childStyles": []
                   },
-                  "hiddenInEditor": false,
+                  "hiddenInEditor": true,
                   "timeline": [],
                   "eventHandlers": [],
                   "identifier": "ui_AmpTab",
@@ -10007,7 +10007,7 @@
                         "conditionalStyles": [],
                         "childStyles": []
                       },
-                      "hiddenInEditor": false,
+                      "hiddenInEditor": true,
                       "timeline": [],
                       "eventHandlers": [],
                       "leftUnit": "px",
@@ -10030,7 +10030,7 @@
                             "conditionalStyles": [],
                             "childStyles": []
                           },
-                          "hiddenInEditor": false,
+                          "hiddenInEditor": true,
                           "timeline": [],
                           "eventHandlers": [],
                           "leftUnit": "px",
@@ -10053,7 +10053,7 @@
                                 "conditionalStyles": [],
                                 "childStyles": []
                               },
-                              "hiddenInEditor": false,
+                              "hiddenInEditor": true,
                               "timeline": [],
                               "eventHandlers": [],
                               "leftUnit": "px",
@@ -10076,7 +10076,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [],
                                   "identifier": "",
@@ -10129,7 +10129,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [
                                     {
@@ -10235,7 +10235,7 @@
                             "conditionalStyles": [],
                             "childStyles": []
                           },
-                          "hiddenInEditor": false,
+                          "hiddenInEditor": true,
                           "timeline": [],
                           "eventHandlers": [],
                           "leftUnit": "px",
@@ -10258,7 +10258,7 @@
                                 "conditionalStyles": [],
                                 "childStyles": []
                               },
-                              "hiddenInEditor": false,
+                              "hiddenInEditor": true,
                               "timeline": [],
                               "eventHandlers": [],
                               "leftUnit": "px",
@@ -10281,7 +10281,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [],
                                   "identifier": "",
@@ -10334,7 +10334,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [
                                     {
@@ -10366,7 +10366,7 @@
                                         "conditionalStyles": [],
                                         "childStyles": []
                                       },
-                                      "hiddenInEditor": false,
+                                      "hiddenInEditor": true,
                                       "timeline": [],
                                       "eventHandlers": [],
                                       "leftUnit": "px",
@@ -10462,7 +10462,7 @@
                                 "conditionalStyles": [],
                                 "childStyles": []
                               },
-                              "hiddenInEditor": false,
+                              "hiddenInEditor": true,
                               "timeline": [],
                               "eventHandlers": [],
                               "leftUnit": "px",
@@ -10485,7 +10485,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [
                                     {
@@ -10517,7 +10517,7 @@
                                         "conditionalStyles": [],
                                         "childStyles": []
                                       },
-                                      "hiddenInEditor": false,
+                                      "hiddenInEditor": true,
                                       "timeline": [],
                                       "eventHandlers": [],
                                       "leftUnit": "px",
@@ -10581,7 +10581,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [
                                     {
@@ -10613,7 +10613,7 @@
                                         "conditionalStyles": [],
                                         "childStyles": []
                                       },
-                                      "hiddenInEditor": false,
+                                      "hiddenInEditor": true,
                                       "timeline": [],
                                       "eventHandlers": [],
                                       "leftUnit": "px",
@@ -10731,7 +10731,7 @@
                             "conditionalStyles": [],
                             "childStyles": []
                           },
-                          "hiddenInEditor": false,
+                          "hiddenInEditor": true,
                           "timeline": [],
                           "eventHandlers": [],
                           "leftUnit": "px",
@@ -10754,7 +10754,7 @@
                                 "conditionalStyles": [],
                                 "childStyles": []
                               },
-                              "hiddenInEditor": false,
+                              "hiddenInEditor": true,
                               "timeline": [],
                               "eventHandlers": [],
                               "identifier": "",
@@ -10778,7 +10778,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [],
                                   "identifier": "",
@@ -10831,7 +10831,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [
                                     {
@@ -10863,7 +10863,7 @@
                                         "conditionalStyles": [],
                                         "childStyles": []
                                       },
-                                      "hiddenInEditor": false,
+                                      "hiddenInEditor": true,
                                       "timeline": [],
                                       "eventHandlers": [],
                                       "identifier": "ui_AmplifierGainValue",
@@ -10915,7 +10915,7 @@
                                         "conditionalStyles": [],
                                         "childStyles": []
                                       },
-                                      "hiddenInEditor": false,
+                                      "hiddenInEditor": true,
                                       "timeline": [],
                                       "eventHandlers": [],
                                       "leftUnit": "px",
@@ -11030,7 +11030,7 @@
                                 "conditionalStyles": [],
                                 "childStyles": []
                               },
-                              "hiddenInEditor": false,
+                              "hiddenInEditor": true,
                               "timeline": [],
                               "eventHandlers": [],
                               "identifier": "",
@@ -11054,7 +11054,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [],
                                   "identifier": "",
@@ -11107,7 +11107,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [
                                     {
@@ -11139,7 +11139,7 @@
                                         "conditionalStyles": [],
                                         "childStyles": []
                                       },
-                                      "hiddenInEditor": false,
+                                      "hiddenInEditor": true,
                                       "timeline": [],
                                       "eventHandlers": [],
                                       "identifier": "ui_AmplifierVolumeValue",
@@ -11191,7 +11191,7 @@
                                         "conditionalStyles": [],
                                         "childStyles": []
                                       },
-                                      "hiddenInEditor": false,
+                                      "hiddenInEditor": true,
                                       "timeline": [],
                                       "eventHandlers": [],
                                       "leftUnit": "px",
@@ -11381,7 +11381,7 @@
                     "conditionalStyles": [],
                     "childStyles": []
                   },
-                  "hiddenInEditor": false,
+                  "hiddenInEditor": true,
                   "timeline": [],
                   "eventHandlers": [],
                   "identifier": "ui_EQTab",
@@ -11405,7 +11405,7 @@
                         "conditionalStyles": [],
                         "childStyles": []
                       },
-                      "hiddenInEditor": false,
+                      "hiddenInEditor": true,
                       "timeline": [],
                       "eventHandlers": [],
                       "identifier": "ui_EQCanvas",
@@ -11464,7 +11464,7 @@
                         "conditionalStyles": [],
                         "childStyles": []
                       },
-                      "hiddenInEditor": false,
+                      "hiddenInEditor": true,
                       "timeline": [],
                       "eventHandlers": [],
                       "leftUnit": "px",
@@ -11487,7 +11487,7 @@
                             "conditionalStyles": [],
                             "childStyles": []
                           },
-                          "hiddenInEditor": false,
+                          "hiddenInEditor": true,
                           "timeline": [],
                           "eventHandlers": [],
                           "leftUnit": "px",
@@ -11510,7 +11510,7 @@
                                 "conditionalStyles": [],
                                 "childStyles": []
                               },
-                              "hiddenInEditor": false,
+                              "hiddenInEditor": true,
                               "timeline": [],
                               "eventHandlers": [],
                               "leftUnit": "px",
@@ -11551,7 +11551,7 @@
                                 "conditionalStyles": [],
                                 "childStyles": []
                               },
-                              "hiddenInEditor": false,
+                              "hiddenInEditor": true,
                               "timeline": [],
                               "eventHandlers": [],
                               "leftUnit": "px",
@@ -11574,7 +11574,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [
                                     {
@@ -11606,7 +11606,7 @@
                                         "conditionalStyles": [],
                                         "childStyles": []
                                       },
-                                      "hiddenInEditor": false,
+                                      "hiddenInEditor": true,
                                       "timeline": [],
                                       "eventHandlers": [],
                                       "identifier": "ui_AmplifierDepthValue",
@@ -11658,7 +11658,7 @@
                                         "conditionalStyles": [],
                                         "childStyles": []
                                       },
-                                      "hiddenInEditor": false,
+                                      "hiddenInEditor": true,
                                       "timeline": [],
                                       "eventHandlers": [],
                                       "leftUnit": "px",
@@ -11767,7 +11767,7 @@
                                 "conditionalStyles": [],
                                 "childStyles": []
                               },
-                              "hiddenInEditor": false,
+                              "hiddenInEditor": true,
                               "timeline": [],
                               "eventHandlers": [],
                               "leftUnit": "px",
@@ -11790,7 +11790,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [
                                     {
@@ -11822,7 +11822,7 @@
                                         "conditionalStyles": [],
                                         "childStyles": []
                                       },
-                                      "hiddenInEditor": false,
+                                      "hiddenInEditor": true,
                                       "timeline": [],
                                       "eventHandlers": [],
                                       "identifier": "ui_EQBassFreqValue",
@@ -11868,7 +11868,7 @@
                                         "conditionalStyles": [],
                                         "childStyles": []
                                       },
-                                      "hiddenInEditor": false,
+                                      "hiddenInEditor": true,
                                       "timeline": [],
                                       "eventHandlers": [],
                                       "leftUnit": "px",
@@ -11955,7 +11955,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [
                                     {
@@ -11987,7 +11987,7 @@
                                         "conditionalStyles": [],
                                         "childStyles": []
                                       },
-                                      "hiddenInEditor": false,
+                                      "hiddenInEditor": true,
                                       "timeline": [],
                                       "eventHandlers": [],
                                       "identifier": "ui_EQBassValue",
@@ -12033,7 +12033,7 @@
                                         "conditionalStyles": [],
                                         "childStyles": []
                                       },
-                                      "hiddenInEditor": false,
+                                      "hiddenInEditor": true,
                                       "timeline": [],
                                       "eventHandlers": [],
                                       "leftUnit": "px",
@@ -12142,7 +12142,7 @@
                                 "conditionalStyles": [],
                                 "childStyles": []
                               },
-                              "hiddenInEditor": false,
+                              "hiddenInEditor": true,
                               "timeline": [],
                               "eventHandlers": [],
                               "leftUnit": "px",
@@ -12165,7 +12165,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [
                                     {
@@ -12197,7 +12197,7 @@
                                         "conditionalStyles": [],
                                         "childStyles": []
                                       },
-                                      "hiddenInEditor": false,
+                                      "hiddenInEditor": true,
                                       "timeline": [],
                                       "eventHandlers": [],
                                       "identifier": "ui_EQMidFreqValue",
@@ -12243,7 +12243,7 @@
                                         "conditionalStyles": [],
                                         "childStyles": []
                                       },
-                                      "hiddenInEditor": false,
+                                      "hiddenInEditor": true,
                                       "timeline": [],
                                       "eventHandlers": [],
                                       "leftUnit": "px",
@@ -12330,7 +12330,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [
                                     {
@@ -12362,7 +12362,7 @@
                                         "conditionalStyles": [],
                                         "childStyles": []
                                       },
-                                      "hiddenInEditor": false,
+                                      "hiddenInEditor": true,
                                       "timeline": [],
                                       "eventHandlers": [],
                                       "identifier": "ui_EQMidQValue",
@@ -12408,7 +12408,7 @@
                                         "conditionalStyles": [],
                                         "childStyles": []
                                       },
-                                      "hiddenInEditor": false,
+                                      "hiddenInEditor": true,
                                       "timeline": [],
                                       "eventHandlers": [],
                                       "leftUnit": "px",
@@ -12496,7 +12496,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [
                                     {
@@ -12528,7 +12528,7 @@
                                         "conditionalStyles": [],
                                         "childStyles": []
                                       },
-                                      "hiddenInEditor": false,
+                                      "hiddenInEditor": true,
                                       "timeline": [],
                                       "eventHandlers": [],
                                       "identifier": "ui_EQMidValue",
@@ -12574,7 +12574,7 @@
                                         "conditionalStyles": [],
                                         "childStyles": []
                                       },
-                                      "hiddenInEditor": false,
+                                      "hiddenInEditor": true,
                                       "timeline": [],
                                       "eventHandlers": [],
                                       "leftUnit": "px",
@@ -12683,7 +12683,7 @@
                                 "conditionalStyles": [],
                                 "childStyles": []
                               },
-                              "hiddenInEditor": false,
+                              "hiddenInEditor": true,
                               "timeline": [],
                               "eventHandlers": [],
                               "leftUnit": "px",
@@ -12706,7 +12706,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [
                                     {
@@ -12738,7 +12738,7 @@
                                         "conditionalStyles": [],
                                         "childStyles": []
                                       },
-                                      "hiddenInEditor": false,
+                                      "hiddenInEditor": true,
                                       "timeline": [],
                                       "eventHandlers": [],
                                       "identifier": "ui_EQTrebleFreqValue",
@@ -12784,7 +12784,7 @@
                                         "conditionalStyles": [],
                                         "childStyles": []
                                       },
-                                      "hiddenInEditor": false,
+                                      "hiddenInEditor": true,
                                       "timeline": [],
                                       "eventHandlers": [],
                                       "leftUnit": "px",
@@ -12871,7 +12871,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [
                                     {
@@ -12903,7 +12903,7 @@
                                         "conditionalStyles": [],
                                         "childStyles": []
                                       },
-                                      "hiddenInEditor": false,
+                                      "hiddenInEditor": true,
                                       "timeline": [],
                                       "eventHandlers": [],
                                       "identifier": "ui_EQTrebleValue",
@@ -12949,7 +12949,7 @@
                                         "conditionalStyles": [],
                                         "childStyles": []
                                       },
-                                      "hiddenInEditor": false,
+                                      "hiddenInEditor": true,
                                       "timeline": [],
                                       "eventHandlers": [],
                                       "leftUnit": "px",
@@ -13058,7 +13058,7 @@
                                 "conditionalStyles": [],
                                 "childStyles": []
                               },
-                              "hiddenInEditor": false,
+                              "hiddenInEditor": true,
                               "timeline": [],
                               "eventHandlers": [],
                               "leftUnit": "px",
@@ -13081,7 +13081,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [
                                     {
@@ -13113,7 +13113,7 @@
                                         "conditionalStyles": [],
                                         "childStyles": []
                                       },
-                                      "hiddenInEditor": false,
+                                      "hiddenInEditor": true,
                                       "timeline": [],
                                       "eventHandlers": [],
                                       "identifier": "ui_AmplifierPresenseValue",
@@ -13159,7 +13159,7 @@
                                         "conditionalStyles": [],
                                         "childStyles": []
                                       },
-                                      "hiddenInEditor": false,
+                                      "hiddenInEditor": true,
                                       "timeline": [],
                                       "eventHandlers": [],
                                       "leftUnit": "px",
@@ -13291,7 +13291,7 @@
                             "conditionalStyles": [],
                             "childStyles": []
                           },
-                          "hiddenInEditor": false,
+                          "hiddenInEditor": true,
                           "timeline": [],
                           "eventHandlers": [],
                           "leftUnit": "px",
@@ -13314,7 +13314,7 @@
                                 "conditionalStyles": [],
                                 "childStyles": []
                               },
-                              "hiddenInEditor": false,
+                              "hiddenInEditor": true,
                               "timeline": [],
                               "eventHandlers": [
                                 {
@@ -13346,7 +13346,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [],
                                   "leftUnit": "px",
@@ -13410,7 +13410,7 @@
                                 "conditionalStyles": [],
                                 "childStyles": []
                               },
-                              "hiddenInEditor": false,
+                              "hiddenInEditor": true,
                               "timeline": [],
                               "eventHandlers": [
                                 {
@@ -13442,7 +13442,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [],
                                   "leftUnit": "px",
@@ -13506,7 +13506,7 @@
                                 "conditionalStyles": [],
                                 "childStyles": []
                               },
-                              "hiddenInEditor": false,
+                              "hiddenInEditor": true,
                               "timeline": [],
                               "eventHandlers": [],
                               "leftUnit": "px",
@@ -13529,7 +13529,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [],
                                   "leftUnit": "px",
@@ -13573,7 +13573,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [
                                     {
@@ -13722,7 +13722,7 @@
                     "conditionalStyles": [],
                     "childStyles": []
                   },
-                  "hiddenInEditor": false,
+                  "hiddenInEditor": true,
                   "timeline": [],
                   "eventHandlers": [],
                   "identifier": "ui_ModulationTab",
@@ -13746,7 +13746,7 @@
                         "conditionalStyles": [],
                         "childStyles": []
                       },
-                      "hiddenInEditor": false,
+                      "hiddenInEditor": true,
                       "timeline": [],
                       "eventHandlers": [],
                       "leftUnit": "px",
@@ -13769,7 +13769,7 @@
                             "conditionalStyles": [],
                             "childStyles": []
                           },
-                          "hiddenInEditor": false,
+                          "hiddenInEditor": true,
                           "timeline": [],
                           "eventHandlers": [],
                           "leftUnit": "px",
@@ -13792,7 +13792,7 @@
                                 "conditionalStyles": [],
                                 "childStyles": []
                               },
-                              "hiddenInEditor": false,
+                              "hiddenInEditor": true,
                               "timeline": [],
                               "eventHandlers": [],
                               "leftUnit": "px",
@@ -13815,7 +13815,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [],
                                   "identifier": "",
@@ -13868,7 +13868,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [
                                     {
@@ -13946,7 +13946,7 @@
                                 "conditionalStyles": [],
                                 "childStyles": []
                               },
-                              "hiddenInEditor": false,
+                              "hiddenInEditor": true,
                               "timeline": [],
                               "eventHandlers": [],
                               "leftUnit": "px",
@@ -13969,7 +13969,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [],
                                   "identifier": "",
@@ -14022,7 +14022,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [
                                     {
@@ -14100,7 +14100,7 @@
                                 "conditionalStyles": [],
                                 "childStyles": []
                               },
-                              "hiddenInEditor": false,
+                              "hiddenInEditor": true,
                               "timeline": [],
                               "eventHandlers": [],
                               "leftUnit": "px",
@@ -14123,7 +14123,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [],
                                   "identifier": "",
@@ -14176,7 +14176,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [
                                     {
@@ -14282,7 +14282,7 @@
                             "conditionalStyles": [],
                             "childStyles": []
                           },
-                          "hiddenInEditor": false,
+                          "hiddenInEditor": true,
                           "timeline": [],
                           "eventHandlers": [],
                           "leftUnit": "px",
@@ -14305,7 +14305,7 @@
                                 "conditionalStyles": [],
                                 "childStyles": []
                               },
-                              "hiddenInEditor": false,
+                              "hiddenInEditor": true,
                               "timeline": [],
                               "eventHandlers": [],
                               "leftUnit": "px",
@@ -14328,7 +14328,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [],
                                   "identifier": "",
@@ -14381,7 +14381,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [
                                     {
@@ -14413,7 +14413,7 @@
                                         "conditionalStyles": [],
                                         "childStyles": []
                                       },
-                                      "hiddenInEditor": false,
+                                      "hiddenInEditor": true,
                                       "timeline": [],
                                       "eventHandlers": [],
                                       "leftUnit": "px",
@@ -14506,7 +14506,7 @@
                                 "conditionalStyles": [],
                                 "childStyles": []
                               },
-                              "hiddenInEditor": false,
+                              "hiddenInEditor": true,
                               "timeline": [],
                               "eventHandlers": [],
                               "leftUnit": "px",
@@ -14529,7 +14529,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [
                                     {
@@ -14561,7 +14561,7 @@
                                         "conditionalStyles": [],
                                         "childStyles": []
                                       },
-                                      "hiddenInEditor": false,
+                                      "hiddenInEditor": true,
                                       "timeline": [],
                                       "eventHandlers": [],
                                       "leftUnit": "px",
@@ -14625,7 +14625,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [
                                     {
@@ -14657,7 +14657,7 @@
                                         "conditionalStyles": [],
                                         "childStyles": []
                                       },
-                                      "hiddenInEditor": false,
+                                      "hiddenInEditor": true,
                                       "timeline": [],
                                       "eventHandlers": [],
                                       "leftUnit": "px",
@@ -14775,7 +14775,7 @@
                             "conditionalStyles": [],
                             "childStyles": []
                           },
-                          "hiddenInEditor": false,
+                          "hiddenInEditor": true,
                           "timeline": [],
                           "eventHandlers": [],
                           "leftUnit": "px",
@@ -14798,7 +14798,7 @@
                                 "conditionalStyles": [],
                                 "childStyles": []
                               },
-                              "hiddenInEditor": false,
+                              "hiddenInEditor": true,
                               "timeline": [],
                               "eventHandlers": [],
                               "identifier": "",
@@ -14822,7 +14822,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [],
                                   "identifier": "ui_ModulationParam1Label",
@@ -14875,7 +14875,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [],
                                   "leftUnit": "px",
@@ -14898,7 +14898,7 @@
                                         "conditionalStyles": [],
                                         "childStyles": []
                                       },
-                                      "hiddenInEditor": false,
+                                      "hiddenInEditor": true,
                                       "timeline": [],
                                       "eventHandlers": [
                                         {
@@ -14930,7 +14930,7 @@
                                             "conditionalStyles": [],
                                             "childStyles": []
                                           },
-                                          "hiddenInEditor": false,
+                                          "hiddenInEditor": true,
                                           "timeline": [],
                                           "eventHandlers": [],
                                           "identifier": "ui_ModulationParam1Value",
@@ -14982,7 +14982,7 @@
                                             "conditionalStyles": [],
                                             "childStyles": []
                                           },
-                                          "hiddenInEditor": false,
+                                          "hiddenInEditor": true,
                                           "timeline": [],
                                           "eventHandlers": [],
                                           "identifier": "ui_ModulationParam1Unit",
@@ -15072,7 +15072,7 @@
                                         "conditionalStyles": [],
                                         "childStyles": []
                                       },
-                                      "hiddenInEditor": false,
+                                      "hiddenInEditor": true,
                                       "timeline": [],
                                       "eventHandlers": [
                                         {
@@ -15104,7 +15104,7 @@
                                             "conditionalStyles": [],
                                             "childStyles": []
                                           },
-                                          "hiddenInEditor": false,
+                                          "hiddenInEditor": true,
                                           "timeline": [],
                                           "eventHandlers": [],
                                           "leftUnit": "px",
@@ -15216,7 +15216,7 @@
                                 "conditionalStyles": [],
                                 "childStyles": []
                               },
-                              "hiddenInEditor": false,
+                              "hiddenInEditor": true,
                               "timeline": [],
                               "eventHandlers": [],
                               "identifier": "",
@@ -15240,7 +15240,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [],
                                   "identifier": "ui_ModulationParam2Label",
@@ -15293,7 +15293,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [
                                     {
@@ -15325,7 +15325,7 @@
                                         "conditionalStyles": [],
                                         "childStyles": []
                                       },
-                                      "hiddenInEditor": false,
+                                      "hiddenInEditor": true,
                                       "timeline": [],
                                       "eventHandlers": [],
                                       "identifier": "ui_ModulationParam2Value",
@@ -15377,7 +15377,7 @@
                                         "conditionalStyles": [],
                                         "childStyles": []
                                       },
-                                      "hiddenInEditor": false,
+                                      "hiddenInEditor": true,
                                       "timeline": [],
                                       "eventHandlers": [],
                                       "identifier": "ui_ModulationParam2Unit",
@@ -15493,7 +15493,7 @@
                                 "conditionalStyles": [],
                                 "childStyles": []
                               },
-                              "hiddenInEditor": false,
+                              "hiddenInEditor": true,
                               "timeline": [],
                               "eventHandlers": [],
                               "identifier": "",
@@ -15517,7 +15517,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [],
                                   "identifier": "ui_ModulationParam3Label",
@@ -15570,7 +15570,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [
                                     {
@@ -15602,7 +15602,7 @@
                                         "conditionalStyles": [],
                                         "childStyles": []
                                       },
-                                      "hiddenInEditor": false,
+                                      "hiddenInEditor": true,
                                       "timeline": [],
                                       "eventHandlers": [],
                                       "identifier": "ui_ModulationParam3Value",
@@ -15654,7 +15654,7 @@
                                         "conditionalStyles": [],
                                         "childStyles": []
                                       },
-                                      "hiddenInEditor": false,
+                                      "hiddenInEditor": true,
                                       "timeline": [],
                                       "eventHandlers": [],
                                       "identifier": "ui_ModulationParam3Unit",
@@ -15770,7 +15770,7 @@
                                 "conditionalStyles": [],
                                 "childStyles": []
                               },
-                              "hiddenInEditor": false,
+                              "hiddenInEditor": true,
                               "timeline": [],
                               "eventHandlers": [],
                               "identifier": "",
@@ -15794,7 +15794,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [],
                                   "identifier": "ui_ModulationParam4Label",
@@ -15848,7 +15848,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [
                                     {
@@ -15880,7 +15880,7 @@
                                         "conditionalStyles": [],
                                         "childStyles": []
                                       },
-                                      "hiddenInEditor": false,
+                                      "hiddenInEditor": true,
                                       "timeline": [],
                                       "eventHandlers": [],
                                       "identifier": "ui_ModulationParam4Value",
@@ -15932,7 +15932,7 @@
                                         "conditionalStyles": [],
                                         "childStyles": []
                                       },
-                                      "hiddenInEditor": false,
+                                      "hiddenInEditor": true,
                                       "timeline": [],
                                       "eventHandlers": [],
                                       "identifier": "ui_ModulationParam4Unit",
@@ -16126,7 +16126,7 @@
                     "conditionalStyles": [],
                     "childStyles": []
                   },
-                  "hiddenInEditor": false,
+                  "hiddenInEditor": true,
                   "timeline": [],
                   "eventHandlers": [],
                   "identifier": "ui_DelayTab",
@@ -16150,7 +16150,7 @@
                         "conditionalStyles": [],
                         "childStyles": []
                       },
-                      "hiddenInEditor": false,
+                      "hiddenInEditor": true,
                       "timeline": [],
                       "eventHandlers": [],
                       "leftUnit": "px",
@@ -16173,7 +16173,7 @@
                             "conditionalStyles": [],
                             "childStyles": []
                           },
-                          "hiddenInEditor": false,
+                          "hiddenInEditor": true,
                           "timeline": [],
                           "eventHandlers": [],
                           "leftUnit": "px",
@@ -16196,7 +16196,7 @@
                                 "conditionalStyles": [],
                                 "childStyles": []
                               },
-                              "hiddenInEditor": false,
+                              "hiddenInEditor": true,
                               "timeline": [],
                               "eventHandlers": [],
                               "leftUnit": "px",
@@ -16219,7 +16219,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [],
                                   "identifier": "",
@@ -16272,7 +16272,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [
                                     {
@@ -16350,7 +16350,7 @@
                                 "conditionalStyles": [],
                                 "childStyles": []
                               },
-                              "hiddenInEditor": false,
+                              "hiddenInEditor": true,
                               "timeline": [],
                               "eventHandlers": [],
                               "leftUnit": "px",
@@ -16373,7 +16373,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [],
                                   "identifier": "",
@@ -16426,7 +16426,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [
                                     {
@@ -16504,7 +16504,7 @@
                                 "conditionalStyles": [],
                                 "childStyles": []
                               },
-                              "hiddenInEditor": false,
+                              "hiddenInEditor": true,
                               "timeline": [],
                               "eventHandlers": [],
                               "leftUnit": "px",
@@ -16527,7 +16527,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [],
                                   "identifier": "",
@@ -16580,7 +16580,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [
                                     {
@@ -16658,7 +16658,7 @@
                                 "conditionalStyles": [],
                                 "childStyles": []
                               },
-                              "hiddenInEditor": false,
+                              "hiddenInEditor": true,
                               "timeline": [],
                               "eventHandlers": [],
                               "leftUnit": "px",
@@ -16681,7 +16681,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [],
                                   "identifier": "",
@@ -16734,7 +16734,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [
                                     {
@@ -16840,7 +16840,7 @@
                             "conditionalStyles": [],
                             "childStyles": []
                           },
-                          "hiddenInEditor": false,
+                          "hiddenInEditor": true,
                           "timeline": [],
                           "eventHandlers": [],
                           "leftUnit": "px",
@@ -16863,7 +16863,7 @@
                                 "conditionalStyles": [],
                                 "childStyles": []
                               },
-                              "hiddenInEditor": false,
+                              "hiddenInEditor": true,
                               "timeline": [],
                               "eventHandlers": [],
                               "leftUnit": "px",
@@ -16886,7 +16886,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [],
                                   "identifier": "",
@@ -16939,7 +16939,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [
                                     {
@@ -16971,7 +16971,7 @@
                                         "conditionalStyles": [],
                                         "childStyles": []
                                       },
-                                      "hiddenInEditor": false,
+                                      "hiddenInEditor": true,
                                       "timeline": [],
                                       "eventHandlers": [],
                                       "leftUnit": "px",
@@ -17064,7 +17064,7 @@
                                 "conditionalStyles": [],
                                 "childStyles": []
                               },
-                              "hiddenInEditor": false,
+                              "hiddenInEditor": true,
                               "timeline": [],
                               "eventHandlers": [],
                               "leftUnit": "px",
@@ -17087,7 +17087,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [
                                     {
@@ -17119,7 +17119,7 @@
                                         "conditionalStyles": [],
                                         "childStyles": []
                                       },
-                                      "hiddenInEditor": false,
+                                      "hiddenInEditor": true,
                                       "timeline": [],
                                       "eventHandlers": [],
                                       "leftUnit": "px",
@@ -17183,7 +17183,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [
                                     {
@@ -17215,7 +17215,7 @@
                                         "conditionalStyles": [],
                                         "childStyles": []
                                       },
-                                      "hiddenInEditor": false,
+                                      "hiddenInEditor": true,
                                       "timeline": [],
                                       "eventHandlers": [],
                                       "leftUnit": "px",
@@ -17333,7 +17333,7 @@
                             "conditionalStyles": [],
                             "childStyles": []
                           },
-                          "hiddenInEditor": false,
+                          "hiddenInEditor": true,
                           "timeline": [],
                           "eventHandlers": [],
                           "leftUnit": "px",
@@ -17356,7 +17356,7 @@
                                 "conditionalStyles": [],
                                 "childStyles": []
                               },
-                              "hiddenInEditor": false,
+                              "hiddenInEditor": true,
                               "timeline": [],
                               "eventHandlers": [],
                               "identifier": "",
@@ -17380,7 +17380,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [],
                                   "identifier": "",
@@ -17433,7 +17433,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [],
                                   "leftUnit": "px",
@@ -17456,7 +17456,7 @@
                                         "conditionalStyles": [],
                                         "childStyles": []
                                       },
-                                      "hiddenInEditor": false,
+                                      "hiddenInEditor": true,
                                       "timeline": [],
                                       "eventHandlers": [
                                         {
@@ -17488,7 +17488,7 @@
                                             "conditionalStyles": [],
                                             "childStyles": []
                                           },
-                                          "hiddenInEditor": false,
+                                          "hiddenInEditor": true,
                                           "timeline": [],
                                           "eventHandlers": [],
                                           "identifier": "ui_DelayTSValue",
@@ -17540,7 +17540,7 @@
                                             "conditionalStyles": [],
                                             "childStyles": []
                                           },
-                                          "hiddenInEditor": false,
+                                          "hiddenInEditor": true,
                                           "timeline": [],
                                           "eventHandlers": [],
                                           "leftUnit": "px",
@@ -17629,7 +17629,7 @@
                                         "conditionalStyles": [],
                                         "childStyles": []
                                       },
-                                      "hiddenInEditor": false,
+                                      "hiddenInEditor": true,
                                       "timeline": [],
                                       "eventHandlers": [
                                         {
@@ -17661,7 +17661,7 @@
                                             "conditionalStyles": [],
                                             "childStyles": []
                                           },
-                                          "hiddenInEditor": false,
+                                          "hiddenInEditor": true,
                                           "timeline": [],
                                           "eventHandlers": [],
                                           "leftUnit": "px",
@@ -17773,7 +17773,7 @@
                                 "conditionalStyles": [],
                                 "childStyles": []
                               },
-                              "hiddenInEditor": false,
+                              "hiddenInEditor": true,
                               "timeline": [],
                               "eventHandlers": [],
                               "identifier": "",
@@ -17797,7 +17797,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [],
                                   "identifier": "",
@@ -17850,7 +17850,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [
                                     {
@@ -17882,7 +17882,7 @@
                                         "conditionalStyles": [],
                                         "childStyles": []
                                       },
-                                      "hiddenInEditor": false,
+                                      "hiddenInEditor": true,
                                       "timeline": [],
                                       "eventHandlers": [],
                                       "identifier": "ui_DelayFeedbackValue",
@@ -17934,7 +17934,7 @@
                                         "conditionalStyles": [],
                                         "childStyles": []
                                       },
-                                      "hiddenInEditor": false,
+                                      "hiddenInEditor": true,
                                       "timeline": [],
                                       "eventHandlers": [],
                                       "leftUnit": "px",
@@ -18049,7 +18049,7 @@
                                 "conditionalStyles": [],
                                 "childStyles": []
                               },
-                              "hiddenInEditor": false,
+                              "hiddenInEditor": true,
                               "timeline": [],
                               "eventHandlers": [],
                               "identifier": "",
@@ -18073,7 +18073,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [],
                                   "identifier": "",
@@ -18126,7 +18126,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [
                                     {
@@ -18158,7 +18158,7 @@
                                         "conditionalStyles": [],
                                         "childStyles": []
                                       },
-                                      "hiddenInEditor": false,
+                                      "hiddenInEditor": true,
                                       "timeline": [],
                                       "eventHandlers": [],
                                       "identifier": "ui_DelayMixValue",
@@ -18210,7 +18210,7 @@
                                         "conditionalStyles": [],
                                         "childStyles": []
                                       },
-                                      "hiddenInEditor": false,
+                                      "hiddenInEditor": true,
                                       "timeline": [],
                                       "eventHandlers": [],
                                       "leftUnit": "px",
@@ -20459,6 +20459,7 @@
                     "conditionalStyles": [],
                     "childStyles": []
                   },
+                  "locked": false,
                   "hiddenInEditor": false,
                   "timeline": [],
                   "eventHandlers": [],
@@ -20492,16 +20493,16 @@
                       "heightUnit": "%",
                       "children": [
                         {
-                          "objID": "96631fbd-bf39-4a0b-963f-7c832d5af520",
+                          "objID": "d75fe874-297c-4077-d4b7-6aacc2278d2a",
                           "type": "LVGLContainerWidget",
                           "left": 0,
                           "top": 0,
                           "width": 100,
-                          "height": 44,
+                          "height": 122,
                           "customInputs": [],
                           "customOutputs": [],
                           "style": {
-                            "objID": "9fc603dc-8a97-49fe-9cdf-9910fd2a139c",
+                            "objID": "994961a3-146d-4fde-c3cc-5cf0d204d599",
                             "useStyle": "default",
                             "conditionalStyles": [],
                             "childStyles": []
@@ -20515,16 +20516,16 @@
                           "heightUnit": "content",
                           "children": [
                             {
-                              "objID": "d5359aa6-5ea1-4027-ba45-e4082b785434",
+                              "objID": "96631fbd-bf39-4a0b-963f-7c832d5af520",
                               "type": "LVGLContainerWidget",
                               "left": 0,
                               "top": 0,
-                              "width": 207,
-                              "height": 44,
+                              "width": 232,
+                              "height": 108,
                               "customInputs": [],
                               "customOutputs": [],
                               "style": {
-                                "objID": "a8a9cf29-be5c-4673-96c0-54f5d206b6f0",
+                                "objID": "9fc603dc-8a97-49fe-9cdf-9910fd2a139c",
                                 "useStyle": "default",
                                 "conditionalStyles": [],
                                 "childStyles": []
@@ -20538,16 +20539,16 @@
                               "heightUnit": "content",
                               "children": [
                                 {
-                                  "objID": "55bfa01b-8751-4cc6-bc7e-b464ba6f2426",
-                                  "type": "LVGLLabelWidget",
-                                  "left": 13,
-                                  "top": -148,
-                                  "width": 116,
-                                  "height": 23,
+                                  "objID": "d5359aa6-5ea1-4027-ba45-e4082b785434",
+                                  "type": "LVGLContainerWidget",
+                                  "left": 0,
+                                  "top": 0,
+                                  "width": 207,
+                                  "height": 44,
                                   "customInputs": [],
                                   "customOutputs": [],
                                   "style": {
-                                    "objID": "6553811c-4f05-4864-e67a-bee4a6ad29f3",
+                                    "objID": "a8a9cf29-be5c-4673-96c0-54f5d206b6f0",
                                     "useStyle": "default",
                                     "conditionalStyles": [],
                                     "childStyles": []
@@ -20555,74 +20556,117 @@
                                   "hiddenInEditor": false,
                                   "timeline": [],
                                   "eventHandlers": [],
-                                  "identifier": "",
                                   "leftUnit": "px",
                                   "topUnit": "px",
                                   "widthUnit": "content",
                                   "heightUnit": "content",
-                                  "children": [],
-                                  "widgetFlags": "CLICK_FOCUSABLE|GESTURE_BUBBLE|PRESS_LOCK|SCROLL_CHAIN_HOR|SCROLL_CHAIN_VER|SCROLL_ELASTIC|SCROLL_MOMENTUM|SCROLL_WITH_ARROW|SNAPPABLE",
-                                  "hiddenFlagType": "literal",
-                                  "clickableFlagType": "literal",
-                                  "flagScrollbarMode": "",
-                                  "flagScrollDirection": "",
-                                  "scrollSnapX": "",
-                                  "scrollSnapY": "",
-                                  "checkedStateType": "literal",
-                                  "disabledStateType": "literal",
-                                  "states": "",
-                                  "localStyles": {
-                                    "objID": "97cf4ae0-7401-4943-8d8b-7ab308db1c38",
-                                    "definition": {
-                                      "MAIN": {
-                                        "DEFAULT": {
-                                          "align": "LEFT_MID",
-                                          "text_color": "#FFFFFF"
-                                        }
-                                      }
-                                    }
-                                  },
-                                  "group": "",
-                                  "groupIndex": 0,
-                                  "text": "Cab Bypass",
-                                  "textType": "literal",
-                                  "longMode": "WRAP",
-                                  "recolor": false,
-                                  "useStaticText": true
-                                },
-                                {
-                                  "objID": "cee154cd-1f9d-44f4-927f-02cd8e4549f9",
-                                  "type": "LVGLSwitchWidget",
-                                  "left": 168,
-                                  "top": -148,
-                                  "width": 80,
-                                  "height": 44,
-                                  "customInputs": [],
-                                  "customOutputs": [],
-                                  "style": {
-                                    "objID": "49a718a0-1c83-498d-f07b-6b88ee232887",
-                                    "useStyle": "default",
-                                    "conditionalStyles": [],
-                                    "childStyles": []
-                                  },
-                                  "hiddenInEditor": false,
-                                  "timeline": [],
-                                  "eventHandlers": [
+                                  "children": [
                                     {
-                                      "objID": "4ef3b7fb-6f83-4331-8c13-8233c99db97a",
-                                      "eventName": "RELEASED",
-                                      "handlerType": "action",
-                                      "action": "ParameterChanged",
-                                      "userData": 0
+                                      "objID": "55bfa01b-8751-4cc6-bc7e-b464ba6f2426",
+                                      "type": "LVGLLabelWidget",
+                                      "left": 13,
+                                      "top": -148,
+                                      "width": 116,
+                                      "height": 23,
+                                      "customInputs": [],
+                                      "customOutputs": [],
+                                      "style": {
+                                        "objID": "6553811c-4f05-4864-e67a-bee4a6ad29f3",
+                                        "useStyle": "default",
+                                        "conditionalStyles": [],
+                                        "childStyles": []
+                                      },
+                                      "hiddenInEditor": false,
+                                      "timeline": [],
+                                      "eventHandlers": [],
+                                      "identifier": "",
+                                      "leftUnit": "px",
+                                      "topUnit": "px",
+                                      "widthUnit": "content",
+                                      "heightUnit": "content",
+                                      "children": [],
+                                      "widgetFlags": "CLICK_FOCUSABLE|GESTURE_BUBBLE|PRESS_LOCK|SCROLL_CHAIN_HOR|SCROLL_CHAIN_VER|SCROLL_ELASTIC|SCROLL_MOMENTUM|SCROLL_WITH_ARROW|SNAPPABLE",
+                                      "hiddenFlagType": "literal",
+                                      "clickableFlagType": "literal",
+                                      "flagScrollbarMode": "",
+                                      "flagScrollDirection": "",
+                                      "scrollSnapX": "",
+                                      "scrollSnapY": "",
+                                      "checkedStateType": "literal",
+                                      "disabledStateType": "literal",
+                                      "states": "",
+                                      "localStyles": {
+                                        "objID": "97cf4ae0-7401-4943-8d8b-7ab308db1c38",
+                                        "definition": {
+                                          "MAIN": {
+                                            "DEFAULT": {
+                                              "align": "LEFT_MID",
+                                              "text_color": "#FFFFFF"
+                                            }
+                                          }
+                                        }
+                                      },
+                                      "group": "",
+                                      "groupIndex": 0,
+                                      "text": "Cab Bypass",
+                                      "textType": "literal",
+                                      "longMode": "WRAP",
+                                      "recolor": false,
+                                      "useStaticText": true
+                                    },
+                                    {
+                                      "objID": "cee154cd-1f9d-44f4-927f-02cd8e4549f9",
+                                      "type": "LVGLSwitchWidget",
+                                      "left": 168,
+                                      "top": -148,
+                                      "width": 80,
+                                      "height": 44,
+                                      "customInputs": [],
+                                      "customOutputs": [],
+                                      "style": {
+                                        "objID": "49a718a0-1c83-498d-f07b-6b88ee232887",
+                                        "useStyle": "default",
+                                        "conditionalStyles": [],
+                                        "childStyles": []
+                                      },
+                                      "hiddenInEditor": false,
+                                      "timeline": [],
+                                      "eventHandlers": [
+                                        {
+                                          "objID": "4ef3b7fb-6f83-4331-8c13-8233c99db97a",
+                                          "eventName": "RELEASED",
+                                          "handlerType": "action",
+                                          "action": "ParameterChanged",
+                                          "userData": 0
+                                        }
+                                      ],
+                                      "identifier": "ui_CabBypassSwitch",
+                                      "leftUnit": "px",
+                                      "topUnit": "px",
+                                      "widthUnit": "content",
+                                      "heightUnit": "content",
+                                      "children": [],
+                                      "widgetFlags": "CHECKABLE|CLICK_FOCUSABLE|GESTURE_BUBBLE|PRESS_LOCK|SCROLL_CHAIN_HOR|SCROLL_CHAIN_VER|SCROLL_ELASTIC|SCROLL_MOMENTUM|SCROLL_ON_FOCUS|SCROLL_WITH_ARROW|SNAPPABLE",
+                                      "hiddenFlagType": "literal",
+                                      "clickableFlag": true,
+                                      "clickableFlagType": "literal",
+                                      "flagScrollbarMode": "",
+                                      "flagScrollDirection": "",
+                                      "scrollSnapX": "",
+                                      "scrollSnapY": "",
+                                      "checkedState": false,
+                                      "checkedStateType": "literal",
+                                      "disabledStateType": "literal",
+                                      "states": "",
+                                      "useStyle": "Switch Dark",
+                                      "localStyles": {
+                                        "objID": "139af5a9-00a5-45f3-b4f9-20de51f51b28"
+                                      },
+                                      "group": "",
+                                      "groupIndex": 0
                                     }
                                   ],
-                                  "identifier": "ui_CabBypassSwitch",
-                                  "leftUnit": "px",
-                                  "topUnit": "px",
-                                  "widthUnit": "content",
-                                  "heightUnit": "content",
-                                  "children": [],
-                                  "widgetFlags": "CHECKABLE|CLICK_FOCUSABLE|GESTURE_BUBBLE|PRESS_LOCK|SCROLL_CHAIN_HOR|SCROLL_CHAIN_VER|SCROLL_ELASTIC|SCROLL_MOMENTUM|SCROLL_ON_FOCUS|SCROLL_WITH_ARROW|SNAPPABLE",
+                                  "widgetFlags": "CLICK_FOCUSABLE|GESTURE_BUBBLE|PRESS_LOCK|SCROLLABLE|SCROLL_CHAIN_HOR|SCROLL_CHAIN_VER|SCROLL_ELASTIC|SCROLL_MOMENTUM|SCROLL_WITH_ARROW|SNAPPABLE",
                                   "hiddenFlagType": "literal",
                                   "clickableFlag": true,
                                   "clickableFlagType": "literal",
@@ -20630,13 +20674,174 @@
                                   "flagScrollDirection": "",
                                   "scrollSnapX": "",
                                   "scrollSnapY": "",
-                                  "checkedState": false,
                                   "checkedStateType": "literal",
                                   "disabledStateType": "literal",
                                   "states": "",
-                                  "useStyle": "Switch Dark",
                                   "localStyles": {
-                                    "objID": "139af5a9-00a5-45f3-b4f9-20de51f51b28"
+                                    "objID": "ed192c22-0ebd-4957-8504-65fbd46e42b6",
+                                    "definition": {
+                                      "MAIN": {
+                                        "DEFAULT": {
+                                          "layout": "FLEX",
+                                          "flex_flow": "ROW",
+                                          "flex_cross_place": "CENTER"
+                                        }
+                                      }
+                                    }
+                                  },
+                                  "group": "",
+                                  "groupIndex": 0
+                                },
+                                {
+                                  "objID": "155f7258-2119-443d-b8b0-dbc3d5f845e3",
+                                  "type": "LVGLContainerWidget",
+                                  "left": 0,
+                                  "top": 0,
+                                  "width": 232,
+                                  "height": 44,
+                                  "customInputs": [],
+                                  "customOutputs": [],
+                                  "style": {
+                                    "objID": "4863b550-7f39-461a-f8a2-f8f830cbc3c5",
+                                    "useStyle": "default",
+                                    "conditionalStyles": [],
+                                    "childStyles": []
+                                  },
+                                  "hiddenInEditor": false,
+                                  "timeline": [],
+                                  "eventHandlers": [],
+                                  "leftUnit": "px",
+                                  "topUnit": "px",
+                                  "widthUnit": "content",
+                                  "heightUnit": "content",
+                                  "children": [
+                                    {
+                                      "objID": "6e8f2e87-24a5-4767-e132-b6df6c1fa3fe",
+                                      "type": "LVGLLabelWidget",
+                                      "left": 13,
+                                      "top": -148,
+                                      "width": 141,
+                                      "height": 23,
+                                      "customInputs": [],
+                                      "customOutputs": [],
+                                      "style": {
+                                        "objID": "77525a73-8a2b-42e9-ec65-08643c85678b",
+                                        "useStyle": "default",
+                                        "conditionalStyles": [],
+                                        "childStyles": []
+                                      },
+                                      "hiddenInEditor": false,
+                                      "timeline": [],
+                                      "eventHandlers": [],
+                                      "identifier": "",
+                                      "leftUnit": "px",
+                                      "topUnit": "px",
+                                      "widthUnit": "content",
+                                      "heightUnit": "content",
+                                      "children": [],
+                                      "widgetFlags": "CLICK_FOCUSABLE|GESTURE_BUBBLE|PRESS_LOCK|SCROLL_CHAIN_HOR|SCROLL_CHAIN_VER|SCROLL_ELASTIC|SCROLL_MOMENTUM|SCROLL_WITH_ARROW|SNAPPABLE",
+                                      "hiddenFlagType": "literal",
+                                      "clickableFlagType": "literal",
+                                      "flagScrollbarMode": "",
+                                      "flagScrollDirection": "",
+                                      "scrollSnapX": "",
+                                      "scrollSnapY": "",
+                                      "checkedStateType": "literal",
+                                      "disabledStateType": "literal",
+                                      "states": "",
+                                      "localStyles": {
+                                        "objID": "163fbbc6-f425-47ed-e2e1-25bda9acc553",
+                                        "definition": {
+                                          "MAIN": {
+                                            "DEFAULT": {
+                                              "align": "LEFT_MID",
+                                              "text_color": "#FFFFFF"
+                                            }
+                                          }
+                                        }
+                                      },
+                                      "group": "",
+                                      "groupIndex": 0,
+                                      "text": "Direct Monitor",
+                                      "textType": "literal",
+                                      "longMode": "WRAP",
+                                      "recolor": false,
+                                      "useStaticText": true
+                                    },
+                                    {
+                                      "objID": "95bbac19-8113-4bc8-f59d-49bda4b2d17a",
+                                      "type": "LVGLSwitchWidget",
+                                      "left": 168,
+                                      "top": -148,
+                                      "width": 80,
+                                      "height": 44,
+                                      "customInputs": [],
+                                      "customOutputs": [],
+                                      "style": {
+                                        "objID": "0a95a217-73fd-4845-95f3-ce5e7cc2114d",
+                                        "useStyle": "default",
+                                        "conditionalStyles": [],
+                                        "childStyles": []
+                                      },
+                                      "hiddenInEditor": false,
+                                      "timeline": [],
+                                      "eventHandlers": [
+                                        {
+                                          "objID": "3f0c3566-a6e9-4854-933f-a1fb2c9b7e01",
+                                          "eventName": "RELEASED",
+                                          "handlerType": "action",
+                                          "action": "ParameterChanged",
+                                          "userData": 0
+                                        }
+                                      ],
+                                      "identifier": "ui_DirectMonitorSwitch",
+                                      "leftUnit": "px",
+                                      "topUnit": "px",
+                                      "widthUnit": "content",
+                                      "heightUnit": "content",
+                                      "children": [],
+                                      "widgetFlags": "CHECKABLE|CLICK_FOCUSABLE|GESTURE_BUBBLE|PRESS_LOCK|SCROLL_CHAIN_HOR|SCROLL_CHAIN_VER|SCROLL_ELASTIC|SCROLL_MOMENTUM|SCROLL_ON_FOCUS|SCROLL_WITH_ARROW|SNAPPABLE",
+                                      "hiddenFlagType": "literal",
+                                      "clickableFlag": true,
+                                      "clickableFlagType": "literal",
+                                      "flagScrollbarMode": "",
+                                      "flagScrollDirection": "",
+                                      "scrollSnapX": "",
+                                      "scrollSnapY": "",
+                                      "checkedState": false,
+                                      "checkedStateType": "literal",
+                                      "disabledStateType": "literal",
+                                      "states": "",
+                                      "useStyle": "Switch Dark",
+                                      "localStyles": {
+                                        "objID": "57a5db20-68d7-4639-e2cc-8f951eceb529"
+                                      },
+                                      "group": "",
+                                      "groupIndex": 0
+                                    }
+                                  ],
+                                  "widgetFlags": "CLICK_FOCUSABLE|GESTURE_BUBBLE|PRESS_LOCK|SCROLLABLE|SCROLL_CHAIN_HOR|SCROLL_CHAIN_VER|SCROLL_ELASTIC|SCROLL_MOMENTUM|SCROLL_WITH_ARROW|SNAPPABLE",
+                                  "hiddenFlagType": "literal",
+                                  "clickableFlag": true,
+                                  "clickableFlagType": "literal",
+                                  "flagScrollbarMode": "",
+                                  "flagScrollDirection": "",
+                                  "scrollSnapX": "",
+                                  "scrollSnapY": "",
+                                  "checkedStateType": "literal",
+                                  "disabledStateType": "literal",
+                                  "states": "",
+                                  "localStyles": {
+                                    "objID": "403c9145-9c0f-4199-db59-ee90a7618dac",
+                                    "definition": {
+                                      "MAIN": {
+                                        "DEFAULT": {
+                                          "layout": "FLEX",
+                                          "flex_flow": "ROW",
+                                          "flex_cross_place": "CENTER"
+                                        }
+                                      }
+                                    }
                                   },
                                   "group": "",
                                   "groupIndex": 0
@@ -20653,14 +20858,16 @@
                               "checkedStateType": "literal",
                               "disabledStateType": "literal",
                               "states": "",
+                              "useStyle": "",
                               "localStyles": {
-                                "objID": "ed192c22-0ebd-4957-8504-65fbd46e42b6",
+                                "objID": "d97f8b1b-e29c-458a-a04e-57c37d94adb0",
                                 "definition": {
                                   "MAIN": {
                                     "DEFAULT": {
                                       "layout": "FLEX",
-                                      "flex_flow": "ROW",
-                                      "flex_cross_place": "CENTER"
+                                      "flex_flow": "COLUMN",
+                                      "pad_row": 20,
+                                      "flex_cross_place": "END"
                                     }
                                   }
                                 }
@@ -20669,7 +20876,7 @@
                               "groupIndex": 0
                             },
                             {
-                              "objID": "c9cdaed3-a3e1-4ca8-83ba-a272224e17dd",
+                              "objID": "ce168932-208c-424f-8828-2143b655c9af",
                               "type": "LVGLContainerWidget",
                               "left": 0,
                               "top": 0,
@@ -20678,7 +20885,7 @@
                               "customInputs": [],
                               "customOutputs": [],
                               "style": {
-                                "objID": "8ac7797f-5796-4147-b699-0f3dd40c52e3",
+                                "objID": "32c4997a-fd23-4566-ce0b-95511fa0c5f7",
                                 "useStyle": "default",
                                 "conditionalStyles": [],
                                 "childStyles": []
@@ -20692,16 +20899,16 @@
                               "heightUnit": "content",
                               "children": [
                                 {
-                                  "objID": "191b010d-e7ac-4e63-e013-834840bf336c",
-                                  "type": "LVGLLabelWidget",
-                                  "left": 13,
-                                  "top": -148,
-                                  "width": 176,
-                                  "height": 23,
+                                  "objID": "c9cdaed3-a3e1-4ca8-83ba-a272224e17dd",
+                                  "type": "LVGLContainerWidget",
+                                  "left": 0,
+                                  "top": 0,
+                                  "width": 267,
+                                  "height": 44,
                                   "customInputs": [],
                                   "customOutputs": [],
                                   "style": {
-                                    "objID": "d6d2cf5f-448d-4e2c-eb40-f886a39c3d19",
+                                    "objID": "8ac7797f-5796-4147-b699-0f3dd40c52e3",
                                     "useStyle": "default",
                                     "conditionalStyles": [],
                                     "childStyles": []
@@ -20709,74 +20916,117 @@
                                   "hiddenInEditor": false,
                                   "timeline": [],
                                   "eventHandlers": [],
-                                  "identifier": "",
                                   "leftUnit": "px",
                                   "topUnit": "px",
                                   "widthUnit": "content",
                                   "heightUnit": "content",
-                                  "children": [],
-                                  "widgetFlags": "CLICK_FOCUSABLE|GESTURE_BUBBLE|PRESS_LOCK|SCROLL_CHAIN_HOR|SCROLL_CHAIN_VER|SCROLL_ELASTIC|SCROLL_MOMENTUM|SCROLL_WITH_ARROW|SNAPPABLE",
-                                  "hiddenFlagType": "literal",
-                                  "clickableFlagType": "literal",
-                                  "flagScrollbarMode": "",
-                                  "flagScrollDirection": "",
-                                  "scrollSnapX": "",
-                                  "scrollSnapY": "",
-                                  "checkedStateType": "literal",
-                                  "disabledStateType": "literal",
-                                  "states": "",
-                                  "localStyles": {
-                                    "objID": "a663341d-7ee9-4bfa-b4d6-5e4035297d77",
-                                    "definition": {
-                                      "MAIN": {
-                                        "DEFAULT": {
-                                          "align": "LEFT_MID",
-                                          "text_color": "#FFFFFF"
-                                        }
-                                      }
-                                    }
-                                  },
-                                  "group": "",
-                                  "groupIndex": 0,
-                                  "text": "Tempo Per Preset",
-                                  "textType": "literal",
-                                  "longMode": "WRAP",
-                                  "recolor": false,
-                                  "useStaticText": true
-                                },
-                                {
-                                  "objID": "faab756f-2178-4bf7-8784-097faf1843ff",
-                                  "type": "LVGLSwitchWidget",
-                                  "left": 168,
-                                  "top": -148,
-                                  "width": 80,
-                                  "height": 44,
-                                  "customInputs": [],
-                                  "customOutputs": [],
-                                  "style": {
-                                    "objID": "6895a9de-6f1d-4e0b-d905-30a420602036",
-                                    "useStyle": "default",
-                                    "conditionalStyles": [],
-                                    "childStyles": []
-                                  },
-                                  "hiddenInEditor": false,
-                                  "timeline": [],
-                                  "eventHandlers": [
+                                  "children": [
                                     {
-                                      "objID": "53901af0-5c6a-4ad8-ab65-01a4833ebe7b",
-                                      "eventName": "RELEASED",
-                                      "handlerType": "action",
-                                      "action": "ParameterChanged",
-                                      "userData": 0
+                                      "objID": "191b010d-e7ac-4e63-e013-834840bf336c",
+                                      "type": "LVGLLabelWidget",
+                                      "left": 13,
+                                      "top": -148,
+                                      "width": 176,
+                                      "height": 23,
+                                      "customInputs": [],
+                                      "customOutputs": [],
+                                      "style": {
+                                        "objID": "d6d2cf5f-448d-4e2c-eb40-f886a39c3d19",
+                                        "useStyle": "default",
+                                        "conditionalStyles": [],
+                                        "childStyles": []
+                                      },
+                                      "hiddenInEditor": false,
+                                      "timeline": [],
+                                      "eventHandlers": [],
+                                      "identifier": "",
+                                      "leftUnit": "px",
+                                      "topUnit": "px",
+                                      "widthUnit": "content",
+                                      "heightUnit": "content",
+                                      "children": [],
+                                      "widgetFlags": "CLICK_FOCUSABLE|GESTURE_BUBBLE|PRESS_LOCK|SCROLL_CHAIN_HOR|SCROLL_CHAIN_VER|SCROLL_ELASTIC|SCROLL_MOMENTUM|SCROLL_WITH_ARROW|SNAPPABLE",
+                                      "hiddenFlagType": "literal",
+                                      "clickableFlagType": "literal",
+                                      "flagScrollbarMode": "",
+                                      "flagScrollDirection": "",
+                                      "scrollSnapX": "",
+                                      "scrollSnapY": "",
+                                      "checkedStateType": "literal",
+                                      "disabledStateType": "literal",
+                                      "states": "",
+                                      "localStyles": {
+                                        "objID": "a663341d-7ee9-4bfa-b4d6-5e4035297d77",
+                                        "definition": {
+                                          "MAIN": {
+                                            "DEFAULT": {
+                                              "align": "LEFT_MID",
+                                              "text_color": "#FFFFFF"
+                                            }
+                                          }
+                                        }
+                                      },
+                                      "group": "",
+                                      "groupIndex": 0,
+                                      "text": "Tempo Per Preset",
+                                      "textType": "literal",
+                                      "longMode": "WRAP",
+                                      "recolor": false,
+                                      "useStaticText": true
+                                    },
+                                    {
+                                      "objID": "faab756f-2178-4bf7-8784-097faf1843ff",
+                                      "type": "LVGLSwitchWidget",
+                                      "left": 168,
+                                      "top": -148,
+                                      "width": 80,
+                                      "height": 44,
+                                      "customInputs": [],
+                                      "customOutputs": [],
+                                      "style": {
+                                        "objID": "6895a9de-6f1d-4e0b-d905-30a420602036",
+                                        "useStyle": "default",
+                                        "conditionalStyles": [],
+                                        "childStyles": []
+                                      },
+                                      "hiddenInEditor": false,
+                                      "timeline": [],
+                                      "eventHandlers": [
+                                        {
+                                          "objID": "53901af0-5c6a-4ad8-ab65-01a4833ebe7b",
+                                          "eventName": "RELEASED",
+                                          "handlerType": "action",
+                                          "action": "ParameterChanged",
+                                          "userData": 0
+                                        }
+                                      ],
+                                      "identifier": "ui_TempoSourceSwitch",
+                                      "leftUnit": "px",
+                                      "topUnit": "px",
+                                      "widthUnit": "content",
+                                      "heightUnit": "content",
+                                      "children": [],
+                                      "widgetFlags": "CHECKABLE|CLICK_FOCUSABLE|GESTURE_BUBBLE|PRESS_LOCK|SCROLL_CHAIN_HOR|SCROLL_CHAIN_VER|SCROLL_ELASTIC|SCROLL_MOMENTUM|SCROLL_ON_FOCUS|SCROLL_WITH_ARROW|SNAPPABLE",
+                                      "hiddenFlagType": "literal",
+                                      "clickableFlag": true,
+                                      "clickableFlagType": "literal",
+                                      "flagScrollbarMode": "",
+                                      "flagScrollDirection": "",
+                                      "scrollSnapX": "",
+                                      "scrollSnapY": "",
+                                      "checkedState": false,
+                                      "checkedStateType": "literal",
+                                      "disabledStateType": "literal",
+                                      "states": "",
+                                      "useStyle": "Switch Dark",
+                                      "localStyles": {
+                                        "objID": "9a111167-44d6-4c9c-f823-9db6290c5fa8"
+                                      },
+                                      "group": "",
+                                      "groupIndex": 0
                                     }
                                   ],
-                                  "identifier": "ui_TempoSourceSwitch",
-                                  "leftUnit": "px",
-                                  "topUnit": "px",
-                                  "widthUnit": "content",
-                                  "heightUnit": "content",
-                                  "children": [],
-                                  "widgetFlags": "CHECKABLE|CLICK_FOCUSABLE|GESTURE_BUBBLE|PRESS_LOCK|SCROLL_CHAIN_HOR|SCROLL_CHAIN_VER|SCROLL_ELASTIC|SCROLL_MOMENTUM|SCROLL_ON_FOCUS|SCROLL_WITH_ARROW|SNAPPABLE",
+                                  "widgetFlags": "CLICK_FOCUSABLE|GESTURE_BUBBLE|PRESS_LOCK|SCROLLABLE|SCROLL_CHAIN_HOR|SCROLL_CHAIN_VER|SCROLL_ELASTIC|SCROLL_MOMENTUM|SCROLL_WITH_ARROW|SNAPPABLE",
                                   "hiddenFlagType": "literal",
                                   "clickableFlag": true,
                                   "clickableFlagType": "literal",
@@ -20784,13 +21034,20 @@
                                   "flagScrollDirection": "",
                                   "scrollSnapX": "",
                                   "scrollSnapY": "",
-                                  "checkedState": false,
                                   "checkedStateType": "literal",
                                   "disabledStateType": "literal",
                                   "states": "",
-                                  "useStyle": "Switch Dark",
                                   "localStyles": {
-                                    "objID": "9a111167-44d6-4c9c-f823-9db6290c5fa8"
+                                    "objID": "d532c2cb-d390-47cc-af0e-d6e2772934ce",
+                                    "definition": {
+                                      "MAIN": {
+                                        "DEFAULT": {
+                                          "layout": "FLEX",
+                                          "flex_flow": "ROW",
+                                          "flex_cross_place": "CENTER"
+                                        }
+                                      }
+                                    }
                                   },
                                   "group": "",
                                   "groupIndex": 0
@@ -20808,13 +21065,14 @@
                               "disabledStateType": "literal",
                               "states": "",
                               "localStyles": {
-                                "objID": "d532c2cb-d390-47cc-af0e-d6e2772934ce",
+                                "objID": "5bd08d84-2d92-49ae-a0e3-f9fc9bd834da",
                                 "definition": {
                                   "MAIN": {
                                     "DEFAULT": {
                                       "layout": "FLEX",
-                                      "flex_flow": "ROW",
-                                      "flex_cross_place": "CENTER"
+                                      "flex_flow": "COLUMN",
+                                      "flex_cross_place": "END",
+                                      "pad_row": 20
                                     }
                                   }
                                 }
@@ -20834,58 +21092,20 @@
                           "checkedStateType": "literal",
                           "disabledStateType": "literal",
                           "states": "",
-                          "useStyle": "",
                           "localStyles": {
-                            "objID": "d97f8b1b-e29c-458a-a04e-57c37d94adb0",
+                            "objID": "377667bc-9288-44e6-90aa-56429639daca",
                             "definition": {
                               "MAIN": {
                                 "DEFAULT": {
                                   "layout": "FLEX",
                                   "flex_flow": "ROW",
-                                  "flex_main_place": "SPACE_AROUND"
+                                  "pad_column": 12,
+                                  "pad_row": 12,
+                                  "flex_main_place": "SPACE_EVENLY",
+                                  "pad_bottom": 14
                                 }
                               }
                             }
-                          },
-                          "group": "",
-                          "groupIndex": 0
-                        },
-                        {
-                          "objID": "ce168932-208c-424f-8828-2143b655c9af",
-                          "type": "LVGLContainerWidget",
-                          "left": 0,
-                          "top": 0,
-                          "width": 300,
-                          "height": 45,
-                          "customInputs": [],
-                          "customOutputs": [],
-                          "style": {
-                            "objID": "32c4997a-fd23-4566-ce0b-95511fa0c5f7",
-                            "useStyle": "default",
-                            "conditionalStyles": [],
-                            "childStyles": []
-                          },
-                          "hiddenInEditor": false,
-                          "timeline": [],
-                          "eventHandlers": [],
-                          "leftUnit": "px",
-                          "topUnit": "px",
-                          "widthUnit": "px",
-                          "heightUnit": "px",
-                          "children": [],
-                          "widgetFlags": "CLICK_FOCUSABLE|GESTURE_BUBBLE|PRESS_LOCK|SCROLLABLE|SCROLL_CHAIN_HOR|SCROLL_CHAIN_VER|SCROLL_ELASTIC|SCROLL_MOMENTUM|SCROLL_WITH_ARROW|SNAPPABLE",
-                          "hiddenFlagType": "literal",
-                          "clickableFlag": true,
-                          "clickableFlagType": "literal",
-                          "flagScrollbarMode": "",
-                          "flagScrollDirection": "",
-                          "scrollSnapX": "",
-                          "scrollSnapY": "",
-                          "checkedStateType": "literal",
-                          "disabledStateType": "literal",
-                          "states": "",
-                          "localStyles": {
-                            "objID": "5bd08d84-2d92-49ae-a0e3-f9fc9bd834da"
                           },
                           "group": "",
                           "groupIndex": 0
@@ -22064,7 +22284,7 @@
                     "conditionalStyles": [],
                     "childStyles": []
                   },
-                  "hiddenInEditor": false,
+                  "hiddenInEditor": true,
                   "timeline": [],
                   "eventHandlers": [],
                   "identifier": "ui_WiFiTab",
@@ -22088,7 +22308,7 @@
                         "conditionalStyles": [],
                         "childStyles": []
                       },
-                      "hiddenInEditor": false,
+                      "hiddenInEditor": true,
                       "timeline": [],
                       "eventHandlers": [],
                       "leftUnit": "px",
@@ -22111,7 +22331,7 @@
                             "conditionalStyles": [],
                             "childStyles": []
                           },
-                          "hiddenInEditor": false,
+                          "hiddenInEditor": true,
                           "timeline": [],
                           "eventHandlers": [],
                           "leftUnit": "px",
@@ -22134,7 +22354,7 @@
                                 "conditionalStyles": [],
                                 "childStyles": []
                               },
-                              "hiddenInEditor": false,
+                              "hiddenInEditor": true,
                               "timeline": [],
                               "eventHandlers": [],
                               "leftUnit": "px",
@@ -22157,7 +22377,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [],
                                   "identifier": "",
@@ -22202,7 +22422,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [],
                                   "identifier": "ui_WIFIModeDropdown",
@@ -22226,7 +22446,7 @@
                                         "conditionalStyles": [],
                                         "childStyles": []
                                       },
-                                      "hiddenInEditor": false,
+                                      "hiddenInEditor": true,
                                       "timeline": [],
                                       "eventHandlers": [],
                                       "leftUnit": "px",
@@ -22292,7 +22512,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [],
                                   "identifier": "",
@@ -22337,7 +22557,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [],
                                   "identifier": "ui_WIFIPowerDropdown",
@@ -22361,7 +22581,7 @@
                                         "conditionalStyles": [],
                                         "childStyles": []
                                       },
-                                      "hiddenInEditor": false,
+                                      "hiddenInEditor": true,
                                       "timeline": [],
                                       "eventHandlers": [],
                                       "leftUnit": "px",
@@ -22454,7 +22674,7 @@
                                 "conditionalStyles": [],
                                 "childStyles": []
                               },
-                              "hiddenInEditor": false,
+                              "hiddenInEditor": true,
                               "timeline": [],
                               "eventHandlers": [],
                               "leftUnit": "px",
@@ -22477,7 +22697,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [],
                                   "identifier": "",
@@ -22529,7 +22749,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [
                                     {
@@ -22586,7 +22806,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [],
                                   "leftUnit": "px",
@@ -22609,7 +22829,7 @@
                                         "conditionalStyles": [],
                                         "childStyles": []
                                       },
-                                      "hiddenInEditor": false,
+                                      "hiddenInEditor": true,
                                       "timeline": [],
                                       "eventHandlers": [],
                                       "identifier": "",
@@ -22654,7 +22874,7 @@
                                         "conditionalStyles": [],
                                         "childStyles": []
                                       },
-                                      "hiddenInEditor": false,
+                                      "hiddenInEditor": true,
                                       "timeline": [],
                                       "eventHandlers": [
                                         {
@@ -22734,7 +22954,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [
                                     {
@@ -22792,7 +23012,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [],
                                   "identifier": "",
@@ -22837,7 +23057,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [
                                     {
@@ -22948,7 +23168,7 @@
                             "conditionalStyles": [],
                             "childStyles": []
                           },
-                          "hiddenInEditor": false,
+                          "hiddenInEditor": true,
                           "timeline": [],
                           "eventHandlers": [],
                           "leftUnit": "px",
@@ -22971,7 +23191,7 @@
                                 "conditionalStyles": [],
                                 "childStyles": []
                               },
-                              "hiddenInEditor": false,
+                              "hiddenInEditor": true,
                               "timeline": [],
                               "eventHandlers": [],
                               "leftUnit": "px",
@@ -22994,7 +23214,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [],
                                   "identifier": "",
@@ -23047,7 +23267,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [
                                     {
@@ -23125,7 +23345,7 @@
                                 "conditionalStyles": [],
                                 "childStyles": []
                               },
-                              "hiddenInEditor": false,
+                              "hiddenInEditor": true,
                               "timeline": [],
                               "eventHandlers": [
                                 {
@@ -23156,7 +23376,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [],
                                   "leftUnit": "px",
@@ -23297,7 +23517,7 @@
                     "conditionalStyles": [],
                     "childStyles": []
                   },
-                  "hiddenInEditor": false,
+                  "hiddenInEditor": true,
                   "timeline": [],
                   "eventHandlers": [],
                   "identifier": "ui_USBTab",
@@ -23321,7 +23541,7 @@
                         "conditionalStyles": [],
                         "childStyles": []
                       },
-                      "hiddenInEditor": false,
+                      "hiddenInEditor": true,
                       "timeline": [],
                       "eventHandlers": [],
                       "leftUnit": "px",
@@ -23344,7 +23564,7 @@
                             "conditionalStyles": [],
                             "childStyles": []
                           },
-                          "hiddenInEditor": false,
+                          "hiddenInEditor": true,
                           "timeline": [],
                           "eventHandlers": [
                             {
@@ -23376,7 +23596,7 @@
                                 "conditionalStyles": [],
                                 "childStyles": []
                               },
-                              "hiddenInEditor": false,
+                              "hiddenInEditor": true,
                               "timeline": [],
                               "eventHandlers": [],
                               "leftUnit": "px",
@@ -23448,7 +23668,7 @@
                             "conditionalStyles": [],
                             "childStyles": []
                           },
-                          "hiddenInEditor": false,
+                          "hiddenInEditor": true,
                           "timeline": [],
                           "eventHandlers": [
                             {
@@ -23480,7 +23700,7 @@
                                 "conditionalStyles": [],
                                 "childStyles": []
                               },
-                              "hiddenInEditor": false,
+                              "hiddenInEditor": true,
                               "timeline": [],
                               "eventHandlers": [],
                               "leftUnit": "px",
