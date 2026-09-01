@@ -22,15 +22,9 @@ extern void action_effect_icon_clicked(lv_event_t * e);
 extern void action_gesture(lv_event_t * e);
 extern void action_value_keyboard_ok(lv_event_t * e);
 extern void action_value_clicked(lv_event_t * e);
-extern void action_close_presets_page(lv_event_t * e);
-extern void action_preset_list_insert_clicked(lv_event_t * e);
-extern void action_preset_list_keyboard_ok(lv_event_t * e);
-extern void action_preset_list_next(lv_event_t * e);
-extern void action_preset_list_options(lv_event_t * e);
-extern void action_preset_list_previous(lv_event_t * e);
-extern void action_preset_list_select(lv_event_t * e);
-extern void action_preset_list_swap_clicked(lv_event_t * e);
-extern void action_open_presets_page(lv_event_t * e);
+extern void action_tuner_close(lv_event_t * e);
+extern void action_tuner_pressed(lv_event_t * e);
+extern void action_slider_event(lv_event_t * e);
 
 #ifdef __cplusplus
 }

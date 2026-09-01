@@ -14,7 +14,7 @@ enum ScreensEnum {
     SCREEN_ID_SCREEN1 = 1,
     SCREEN_ID_SETTINGS = 2,
     SCREEN_ID_VAL_SETTINGS = 3,
-    SCREEN_ID_PRESETS = 4,
+    SCREEN_ID_TUNER = 4,
     _SCREEN_ID_LAST = 4
 };
 
@@ -22,7 +22,7 @@ typedef struct _objects_t {
     lv_obj_t *screen1;
     lv_obj_t *settings;
     lv_obj_t *val_settings;
-    lv_obj_t *presets;
+    lv_obj_t *tuner;
     lv_obj_t *ui_touch_gesture_container;
     lv_obj_t *ui_top_panel;
     lv_obj_t *ui_usb_status_fail;
@@ -40,6 +40,7 @@ typedef struct _objects_t {
     lv_obj_t *ui_bank_container;
     lv_obj_t *ui_bank_title_label;
     lv_obj_t *ui_bank_value_label;
+    lv_obj_t *ui_tuner_button;
     lv_obj_t *ui_bpm_container;
     lv_obj_t *ui_bpm_title_label;
     lv_obj_t *ui_bpm_value_label;
@@ -205,6 +206,8 @@ typedef struct _objects_t {
     lv_obj_t *ui_cab_bypass_switch;
     lv_obj_t *ui_tempo_sourcet_label;
     lv_obj_t *ui_tempo_source_switch;
+    lv_obj_t *ui_direct_monitor_label;
+    lv_obj_t *ui_direct_monitor_switch;
     lv_obj_t *ui_bpm_label;
     lv_obj_t *ui_bpm_slider;
     lv_obj_t *ui_bpm_value;
@@ -439,64 +442,16 @@ typedef struct _objects_t {
     lv_obj_t *ui_val_settings_dialog;
     lv_obj_t *ui_val_settings_text_entry;
     lv_obj_t *ui_val_settings_keyboard;
-    lv_obj_t *ui_preset_list;
-    lv_obj_t *ui_preset_list_element_0;
-    lv_obj_t *ui_preset_list_button_0;
-    lv_obj_t *ui_preset_list_image_0;
-    lv_obj_t *ui_preset_list_label_0;
-    lv_obj_t *obj18;
-    lv_obj_t *ui_preset_list_element_1;
-    lv_obj_t *ui_preset_list_button_1;
-    lv_obj_t *ui_preset_list_image_1;
-    lv_obj_t *ui_preset_list_label_1;
-    lv_obj_t *obj19;
-    lv_obj_t *ui_preset_list_element_2;
-    lv_obj_t *ui_preset_list_button_2;
-    lv_obj_t *ui_preset_list_image_2;
-    lv_obj_t *ui_preset_list_label_2;
-    lv_obj_t *obj20;
-    lv_obj_t *ui_preset_list_element_3;
-    lv_obj_t *ui_preset_list_button_3;
-    lv_obj_t *ui_preset_list_image_3;
-    lv_obj_t *ui_preset_list_label_3;
-    lv_obj_t *obj21;
-    lv_obj_t *ui_preset_list_element_4;
-    lv_obj_t *ui_preset_list_button_4;
-    lv_obj_t *ui_preset_list_image_4;
-    lv_obj_t *ui_preset_list_label_4;
-    lv_obj_t *obj22;
-    lv_obj_t *ui_preset_list_element_5;
-    lv_obj_t *ui_preset_list_button_5;
-    lv_obj_t *ui_preset_list_image_5;
-    lv_obj_t *ui_preset_list_label_5;
-    lv_obj_t *obj23;
-    lv_obj_t *ui_preset_list_element_6;
-    lv_obj_t *ui_preset_list_button_6;
-    lv_obj_t *ui_preset_list_image_6;
-    lv_obj_t *ui_preset_list_label_6;
-    lv_obj_t *obj24;
-    lv_obj_t *ui_preset_list_element_7;
-    lv_obj_t *ui_preset_list_button_7;
-    lv_obj_t *ui_preset_list_image_7;
-    lv_obj_t *ui_preset_list_label_7;
-    lv_obj_t *obj25;
-    lv_obj_t *ui_preset_list_element_8;
-    lv_obj_t *ui_preset_list_button_8;
-    lv_obj_t *ui_preset_list_image_8;
-    lv_obj_t *ui_preset_list_label_8;
-    lv_obj_t *obj26;
-    lv_obj_t *ui_preset_list_element_9;
-    lv_obj_t *ui_preset_list_button_9;
-    lv_obj_t *ui_preset_list_image_9;
-    lv_obj_t *ui_preset_list_label_9;
-    lv_obj_t *obj27;
-    lv_obj_t *ui_preset_list_dialog;
-    lv_obj_t *obj28;
-    lv_obj_t *ui_preset_list_dialog_name;
-    lv_obj_t *ui_preset_list_dialog_number_entry;
-    lv_obj_t *ui_preset_list_dialog_button_insert;
-    lv_obj_t *ui_preset_list_dialog_button_swap;
-    lv_obj_t *ui_preset_list_dialog_keyboard;
+    lv_obj_t *ui_tuner_touch_gesture_container;
+    lv_obj_t *ui_tuner_top_panel;
+    lv_obj_t *ui_tuner_heading_label;
+    lv_obj_t *ui_tuner_logo;
+    lv_obj_t *ui_tuner_heading;
+    lv_obj_t *ui_tuner_arc;
+    lv_obj_t *ui_tuner_note_label;
+    lv_obj_t *ui_tuner_reference_heading_label;
+    lv_obj_t *ui_tuner_reference_label;
+    lv_obj_t *ui_tuner_ok_tick;
 } objects_t;
 
 extern objects_t objects;
@@ -510,8 +465,8 @@ void tick_screen_settings();
 void create_screen_val_settings();
 void tick_screen_val_settings();
 
-void create_screen_presets();
-void tick_screen_presets();
+void create_screen_tuner();
+void tick_screen_tuner();
 
 void tick_screen_by_id(enum ScreensEnum screenId);
 void tick_screen(int screen_index);

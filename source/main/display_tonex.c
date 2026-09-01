@@ -48,7 +48,6 @@ limitations under the License.
 #include "esp_mac.h"
 #include "esp_crc.h"
 #include "esp_now.h"
-#include "driver/i2c.h"
 #include "soc/lldesc.h"
 #include "esp_lcd_touch_gt911.h"
 #include "esp_lcd_touch_cst816s.h"
@@ -902,6 +901,10 @@ void tonex_action_parameter_changed(lv_event_t * e)
     else if (obj == objects.ui_volume_slider)
     {
         usb_modify_parameter(TONEX_GLOBAL_MASTER_VOLUME, LV_SLIDER_GET_VALUE(obj)/ParamFormats.MASTER.multiplier);    
+    }
+    else if (obj == objects.ui_direct_monitor_switch)
+    {
+        usb_modify_parameter(TONEX_GLOBAL_DIRECT_MONITOR, lv_obj_has_state(obj, LV_STATE_CHECKED) ? 1 : 0);
     }
     else
     {
@@ -2956,6 +2959,18 @@ uint8_t tonex_update_ui_parameters(void)
                     
                     // set user data for later use
                     lv_obj_set_user_data(objects.ui_volume_value, (void*)(uintptr_t)TONEX_GLOBAL_MASTER_VOLUME);                                        
+                } break;
+
+                case TONEX_GLOBAL_DIRECT_MONITOR:
+                {
+                    if (param_entry->Value)
+                    {
+                        lv_obj_add_state(objects.ui_direct_monitor_switch, LV_STATE_CHECKED);
+                    }
+                    else
+                    {
+                        lv_obj_clear_state(objects.ui_direct_monitor_switch, LV_STATE_CHECKED);
+                    }
                 } break;
             } 
 

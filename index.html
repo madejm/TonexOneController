@@ -229,15 +229,23 @@
       <div class="section">
         <h2>Select Version</h2>
         <ul class="radios">      
+          <!-- arguments in value are release_folder, filename_part -->
           <li>
-            <!-- arguments in value are release_folder, filename_part -->
-            <input type="radio" name="version" value="V2.0.2.2,V2.0.2.2" id="ver-2022" checked />
+            <input type="radio" name="version" value="beta,V2.5.0.2_beta_1" id="ver-2502"/>
+            <label for="ver-2502">V2.5.0.2 beta 1</label>
+          </li>
+          <li>
+            <input type="radio" name="version" value="V2.0.4.2,V2.0.4.2" id="ver-2042" checked />
+            <label for="ver-2042">V2.0.4.2</label>
+          </li>
+          <li>          
+            <input type="radio" name="version" value="V2.0.3.2,V2.0.3.2" id="ver-2023"/>
+            <label for="ver-2023">V2.0.3.2</label>
+          </li>
+          <li>           
+            <input type="radio" name="version" value="V2.0.2.2,V2.0.2.2" id="ver-2022"/>
             <label for="ver-2022">V2.0.2.2</label>
-          </li>
-          <li>
-            <input type="radio" name="version" value="beta,V2.0.3.2_beta_2" id="ver-2023"/>
-            <label for="ver-2023">V2.0.3.2 beta 2</label>
-          </li>
+          </li>         
         </ul>
       </div>
 
@@ -271,11 +279,12 @@
         <div class="group-title">Pirate Midi</div>
         <ul class="radios">
           <li><input type="radio" name="type" value="PirateMidi_PolarMax" id="p30" /><label for="p30">Pirate Midi Polar Max V1</label></li>
-          <li><input type="radio" name="type" value="PirateMidi_PolarPico" id="p31" /><label for="p31">Pirate Midi Polar Pico</label></li>
+          <li><input type="radio" name="type" value="PirateMidi_PolarMax35" id="p31" /><label for="p31">Pirate Midi Polar Max V2</label></li>
           <li><input type="radio" name="type" value="PirateMidi_PolarMini" id="p32" /><label for="p32">Pirate Midi Polar Mini V1</label></li>
           <li><input type="radio" name="type" value="PirateMidi_PolarMiniV2" id="p33" /><label for="p33">Pirate Midi Polar Mini V2</label></li>
           <li><input type="radio" name="type" value="PirateMidi_PolarPlus" id="p34" /><label for="p34">Pirate Midi Polar Plus V1</label></li>
-          <li><input type="radio" name="type" value="PirateMidi_PolarPlusV2" id="p35" /><label for="p35">Pirate Midi Polar Plus V2</label></li>         
+          <li><input type="radio" name="type" value="PirateMidi_PolarPlusV2" id="p35" /><label for="p35">Pirate Midi Polar Plus V2</label></li>   
+          <li><input type="radio" name="type" value="PirateMidi_PolarPico" id="p36" /><label for="p36">Pirate Midi Polar Pico</label></li>          
         </ul>
         
         <!-- Others -->

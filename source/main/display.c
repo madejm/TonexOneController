@@ -48,7 +48,6 @@ limitations under the License.
 #include "esp_mac.h"
 #include "esp_crc.h"
 #include "esp_now.h"
-#include "driver/i2c.h"
 #include "soc/lldesc.h"
 #include "esp_lcd_touch_gt911.h"
 #include "esp_lcd_touch_cst816s.h"
@@ -105,6 +104,7 @@ static const char *TAG = "app_display";
 #define MAX_SKIN_IMAGES                 100
 #define SKIN_PARTITION_TYPE             0x40
 #define SKIN_PARTITION_NAME             "skins"
+#define SLIDER_STOP_DELAY               225   // msec
 
 enum UIElements
 {
@@ -123,6 +123,8 @@ enum UIElements
     UI_ELEMENT_TOAST,
     UI_ELEMENT_PRESET_LIST,
     UI_ELEMENT_SETTINGS_CLIPBOARD,
+    UI_ELEMENT_TUNER_FREQ,
+    UI_ELEMENT_TUNER_STATE
 };
 
 enum UIAction
@@ -224,6 +226,12 @@ static const esp_partition_t* skin_partition;
 static const void* skin_data_map_ptr;
 static esp_partition_mmap_handle_t skin_data_map_handle = 0;
 #endif // !CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+static float current_tuner_ref_freq = 440.0f;
+#ifndef clampf
+    #define clampf(x, lo, hi)  ((x) < (lo) ? (lo) : ((x) > (hi) ? (hi) : (x)))
+#endif
+static lv_timer_t* slider_stop_timer = NULL;
+static lv_obj_t* last_active_slider = NULL;
 #endif // CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI
 
 /****************************************************************************
@@ -293,27 +301,33 @@ void __attribute__((unused)) touch_data_ready(esp_lcd_touch_t *handle)
 * RETURN:      
 * NOTES:       
 *****************************************************************************/
-void display_lvgl_touch_cb(lv_indev_drv_t * drv, lv_indev_data_t * data)
+void __attribute__((unused, weak)) display_lvgl_touch_cb(lv_indev_drv_t * drv, lv_indev_data_t * data)
 {
-    uint16_t touchpad_x[1] = {0};
-    uint16_t touchpad_y[1] = {0};
+    esp_lcd_touch_point_data_t points[1] = {0};
     uint8_t touchpad_cnt = 0;
     bool touchpad_pressed = false;
 
-#if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_LILYGO_TDISPLAY_S3 || CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_169TOUCH || CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_19TOUCH
-    // CST816 driver has to set interrupt before data is valid to read
+#if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_LILYGO_TDISPLAY_S3 || CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_169TOUCH  || CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_19TOUCH
+    // CST816 driver has to set interrupt before data is valid to read.
     if (touch_data_ready_to_read)
     {
         if (xSemaphoreTake(I2CMutexHandle, (TickType_t)10) == pdTRUE)
         {
             // Read touch controller data
-            esp_lcd_touch_read_data(drv->user_data);
-
-            // Get coordinates 
-            touchpad_pressed = esp_lcd_touch_get_coordinates(drv->user_data, touchpad_x, touchpad_y, NULL, &touchpad_cnt, 1);
-
-            // reset flag
-            touch_data_ready_to_read = 0;
+            if (esp_lcd_touch_read_data(drv->user_data) == ESP_OK)
+            {
+                // Get coordinates 
+                if (esp_lcd_touch_get_data(drv->user_data, points, &touchpad_cnt, 1) == ESP_OK)
+                {
+                    if (touchpad_cnt > 0)
+                    {
+                        touchpad_pressed = 1;
+                    }
+                }
+            
+                // reset flag
+                touch_data_ready_to_read = 0;
+            }
 
             xSemaphoreGive(I2CMutexHandle);
         }
@@ -324,11 +338,20 @@ void display_lvgl_touch_cb(lv_indev_drv_t * drv, lv_indev_data_t * data)
     // poll the driver chip
     if (xSemaphoreTake(I2CMutexHandle, (TickType_t)10) == pdTRUE)
     {
-        /* Read touch controller data */
-        esp_lcd_touch_read_data(drv->user_data);
+        // Read touch controller data 
+        if (esp_lcd_touch_read_data(drv->user_data) == ESP_OK)
+        {
+            touchpad_cnt = 0;
 
-        /* Get coordinates */
-        touchpad_pressed = esp_lcd_touch_get_coordinates(drv->user_data, touchpad_x, touchpad_y, NULL, &touchpad_cnt, 1);
+            // Get coordinates
+            if (esp_lcd_touch_get_data(drv->user_data, points, &touchpad_cnt, 1) == ESP_OK)
+            {
+                if (touchpad_cnt > 0)
+                {
+                    touchpad_pressed = 1;
+                }
+            }
+        }
 
         xSemaphoreGive(I2CMutexHandle);
     }
@@ -340,8 +363,8 @@ void display_lvgl_touch_cb(lv_indev_drv_t * drv, lv_indev_data_t * data)
 
     if (touchpad_pressed && touchpad_cnt > 0) 
     {
-        data->point.x = touchpad_x[0];
-        data->point.y = touchpad_y[0];
+        data->point.x = points[0].x;
+        data->point.y = points[0].y;
 
         // allow platform to adjust if needed
         platform_adjust_touch_coords(&data->point.x, &data->point.y);
@@ -415,13 +438,6 @@ void action_next_clicked(lv_event_t * e)
 }
 
 #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
-/****************************************************************************
-* NAME:        
-* DESCRIPTION: 
-* PARAMETERS:  
-* RETURN:      
-* NOTES:       
-*****************************************************************************/
 static void action_fs_button_clicked(uint32_t buttonIndex, bool alt)
 {
     for (uint32_t item = 0; item < MAX_EXTERNAL_EFFECT_FOOTSWITCHES; item ++)
@@ -558,6 +574,56 @@ void action_wi_fi_enabled_changed(lv_event_t * e) {
 }
 #endif //CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
 
+/****************************************************************************
+* NAME:        
+* DESCRIPTION: 
+* PARAMETERS:  
+* RETURN:      
+* NOTES:       
+*****************************************************************************/
+void __attribute__((unused)) action_tuner_pressed(lv_event_t * e)
+{
+#if CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI    
+    char buf[20];
+    tModellerParameter* param_ptr;
+    
+    ESP_LOGI(TAG, "UI tuner pressed");      
+    control_request_tuner(1);
+    
+    // show tuner screen
+    lv_scr_load_anim(objects.tuner, LV_SCR_LOAD_ANIM_FADE_IN, 0, 0, false);   
+
+    // grab current tuner ref freq and save it
+    if (tonex_params_get_locked_access(&param_ptr) == ESP_OK)
+    {
+        current_tuner_ref_freq = param_ptr[TONEX_GLOBAL_TUNING_REFERENCE].Value;
+
+        tonex_params_release_locked_access();
+    }
+
+    // show reference freq on UI
+    sprintf(buf, "%d Hz", (int)round(current_tuner_ref_freq));
+    lv_label_set_text(objects.ui_tuner_reference_label, buf);
+#endif  //CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI   
+}
+
+/****************************************************************************
+* NAME:        
+* DESCRIPTION: 
+* PARAMETERS:  
+* RETURN:      
+* NOTES:       
+*****************************************************************************/
+void __attribute__((unused)) action_tuner_close(lv_event_t * e)
+{
+    ESP_LOGI(TAG, "UI tuner close");      
+    control_request_tuner(0);
+
+    // show main screen
+    lv_scr_load_anim(objects.screen1, LV_SCR_LOAD_ANIM_FADE_IN, 0, 0, false);
+}
+
+>>>>>>> main
 #else   //CONFIG_TONEX_CONTROLLER_HAS_TOUCH
 
 // Dummy functions so that 1.69 and 1.69 Touch can share the same UI project
@@ -613,6 +679,8 @@ void ui_show_settings_tab(lv_event_t * e)
     {
         case AMP_MODELLER_TONEX_ONE:        // fallthrough
         case AMP_MODELLER_TONEX:            // fallthrough
+        case AMP_MODELLER_TONEX_ONE_PLUS:   // fallthrough
+        case AMP_MODELLER_TONEX_PLUG:
         default:
         {
             tonex_show_settings_tab(e);
@@ -640,6 +708,8 @@ void action_effect_icon_clicked(lv_event_t * e)
     {
         case AMP_MODELLER_TONEX_ONE:        // fallthrough
         case AMP_MODELLER_TONEX:            // fallthrough
+        case AMP_MODELLER_TONEX_ONE_PLUS:   // fallthrough
+        case AMP_MODELLER_TONEX_PLUG:
         default:
         {
             tonex_action_effect_icon_clicked(e);
@@ -737,6 +807,8 @@ void action_show_settings_page(lv_event_t * e)
     {
         case AMP_MODELLER_TONEX_ONE:        // fallthrough
         case AMP_MODELLER_TONEX:            // fallthrough
+        case AMP_MODELLER_TONEX_ONE_PLUS:   // fallthrough
+        case AMP_MODELLER_TONEX_PLUG:
         default:
         {
             lv_scr_load_anim(objects.settings, LV_SCR_LOAD_ANIM_FADE_IN, 0, 0, false);
@@ -782,7 +854,8 @@ void action_save_skin_edit(lv_event_t * e)
 #if !CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
     ESP_LOGI(TAG, "UI save skin edit");
 
-    action_keyboard_ok(e);
+    // make sure user text is saved
+    lv_event_send(objects.ui_entry_keyboard, LV_EVENT_READY, NULL);
     control_save_user_data(0);
     
     lv_obj_add_flag(objects.ui_ok_tick, LV_OBJ_FLAG_HIDDEN);
@@ -833,6 +906,8 @@ void action_value_clicked(lv_event_t *e)
     {
         case AMP_MODELLER_TONEX_ONE:        // fallthrough
         case AMP_MODELLER_TONEX:            // fallthrough
+        case AMP_MODELLER_TONEX_ONE_PLUS:   // fallthrough
+        case AMP_MODELLER_TONEX_PLUG:
         default:
         {
             tonex_value_clicked(e);         
@@ -872,7 +947,7 @@ void action_keyboard_ok(lv_event_t * e)
 #if !CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
     lv_event_code_t event_code = lv_event_get_code(e);
 
-    if(event_code == LV_EVENT_READY) 
+    if (event_code == LV_EVENT_READY) 
     {
         // hide keyboard
         lv_obj_add_flag(objects.ui_entry_keyboard, LV_OBJ_FLAG_HIDDEN);
@@ -905,6 +980,8 @@ void action_value_keyboard_ok(lv_event_t * e)
         {
             case AMP_MODELLER_TONEX_ONE:        // fallthrough
             case AMP_MODELLER_TONEX:            // fallthrough
+            case AMP_MODELLER_TONEX_ONE_PLUS:   // fallthrough
+            case AMP_MODELLER_TONEX_PLUG:
             default:
             {
                 tonex_value_changed(e);
@@ -927,12 +1004,89 @@ void action_value_keyboard_ok(lv_event_t * e)
 * RETURN:      
 * NOTES:       
 *****************************************************************************/
+static void slider_stop_timer_cb(lv_timer_t* timer)
+{
+    if (last_active_slider == NULL)
+    {
+        return;
+    }
+
+    // send simulated event for this slider
+    lv_event_t event;
+    lv_memset_00(&event, sizeof(event));
+    event.target = last_active_slider;
+    event.current_target = last_active_slider;
+    event.code = LV_EVENT_RELEASED;
+    action_parameter_changed(&event);
+
+    // Clean up
+    lv_timer_del(timer);
+    slider_stop_timer = NULL;
+    last_active_slider = NULL;
+}
+
+/****************************************************************************
+* NAME:        
+* DESCRIPTION: 
+* PARAMETERS:  
+* RETURN:      
+* NOTES:       
+*****************************************************************************/
+void action_slider_event(lv_event_t* e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_obj_t* slider = lv_event_get_target(e);
+
+    if (code == LV_EVENT_VALUE_CHANGED) 
+    {
+        last_active_slider = slider;
+
+        if (slider_stop_timer) 
+        {
+            // restart the timer countdown
+            lv_timer_reset(slider_stop_timer);
+        } 
+        else 
+        {
+            // Create timer to fire after a time delay
+            slider_stop_timer = lv_timer_create(slider_stop_timer_cb, SLIDER_STOP_DELAY,  NULL);
+        }
+    }
+    else if (code == LV_EVENT_RELEASED) 
+    {
+        if (slider_stop_timer && last_active_slider == slider) 
+        {
+            lv_timer_del(slider_stop_timer);
+            slider_stop_timer = NULL;
+
+            // send simulated event for this slider
+            lv_event_t event;
+            lv_memset_00(&event, sizeof(event));
+            event.target = last_active_slider;
+            event.current_target = last_active_slider;
+            event.code = LV_EVENT_RELEASED;
+            action_parameter_changed(&event);
+
+            last_active_slider = NULL;
+        }
+    }
+}
+
+/****************************************************************************
+* NAME:        
+* DESCRIPTION: 
+* PARAMETERS:  
+* RETURN:      
+* NOTES:       
+*****************************************************************************/
 void action_parameter_changed(lv_event_t * e)
 {
     switch (usb_get_connected_modeller_type())
     {
         case AMP_MODELLER_TONEX_ONE:        // fallthrough
         case AMP_MODELLER_TONEX:            // fallthrough
+        case AMP_MODELLER_TONEX_ONE_PLUS:   // fallthrough
+        case AMP_MODELLER_TONEX_PLUG:
         default:
         {
             tonex_action_parameter_changed(e);
@@ -1706,6 +1860,29 @@ void UI_SetWiFiClientConnected(uint8_t state)
 * RETURN:      
 * NOTES:       
 *****************************************************************************/
+void UI_SetTunerState(uint8_t state)
+{
+    tUIUpdate ui_update;
+
+    // build command
+    ui_update.ElementID = UI_ELEMENT_TUNER_STATE;
+    ui_update.Action = UI_ACTION_NONE;
+    ui_update.Value = state;
+
+    // send to queue
+    if (xQueueSend(ui_update_queue, (void*)&ui_update, 0) != pdPASS)
+    {
+        ESP_LOGE(TAG, "UI SetTunerState queue send failed!");            
+    }
+}
+
+/****************************************************************************
+* NAME:        
+* DESCRIPTION: 
+* PARAMETERS:  
+* RETURN:      
+* NOTES:       
+*****************************************************************************/
 void UI_SetPresetLabel(uint16_t index, char* name)
 {
     tUIUpdate ui_update;
@@ -1727,6 +1904,43 @@ void UI_SetPresetLabel(uint16_t index, char* name)
         ESP_LOGE(TAG, "UI Update queue send failed!");            
     }
 }
+
+/****************************************************************************
+* NAME:        
+* DESCRIPTION: 
+* PARAMETERS:  
+* RETURN:      
+* NOTES:       
+*****************************************************************************/
+void UI_SetTunerFrequencies(float error, float ref_freq, uint8_t midi_note)
+{
+    tUIUpdate ui_update;
+
+    // Tuner spams out a huge amount of traffic. Avoid flooding the queue
+    uint32_t elements_in_queue = uxQueueMessagesWaiting(ui_update_queue); 
+
+    if (elements_in_queue < 3)
+    {
+        // build command
+        ui_update.ElementID = UI_ELEMENT_TUNER_FREQ;
+        ui_update.Action = UI_ACTION_NONE;
+        ui_update.Value = (uint32_t)midi_note;
+
+        // put tuner error into string as we don't have floats in the tUIUpdate and adding would waste ram for queue size (yeah OK could use a union I guess...)
+        sprintf(ui_update.Text, "%3.2f", error);
+
+        // send to queue
+        if (xQueueSend(ui_update_queue, (void*)&ui_update, 0) != pdPASS)
+        {
+            ESP_LOGE(TAG, "UI_SetTunerFrequencies queue send failed!");            
+        }
+    }
+    else
+    {
+        // skip this one and get the next once queue has emptied some more
+    }
+}
+
 
 /****************************************************************************
 * NAME:        
@@ -2041,6 +2255,8 @@ void updateIconOrder(void)
     {
         case AMP_MODELLER_TONEX_ONE:        // fallthrough
         case AMP_MODELLER_TONEX:            // fallthrough
+        case AMP_MODELLER_TONEX_ONE_PLUS:   // fallthrough
+        case AMP_MODELLER_TONEX_PLUG:
         default:
         {
             tonex_update_icon_order();
@@ -2070,7 +2286,7 @@ static  __attribute__((unused)) uint8_t update_ui_element(tUIUpdate* update)
     lv_obj_t* element_1 = NULL;
 
     switch (update->ElementID)
-    {
+    {    
         case UI_ELEMENT_USB_STATUS:
         {
             #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
@@ -2086,6 +2302,8 @@ static  __attribute__((unused)) uint8_t update_ui_element(tUIUpdate* update)
                 {
                     case AMP_MODELLER_TONEX_ONE:        // fallthrough
                     case AMP_MODELLER_TONEX:            // fallthrough
+                    case AMP_MODELLER_TONEX_ONE_PLUS:   // fallthrough
+                    case AMP_MODELLER_TONEX_PLUG:
                     default:
                     {
 #if CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI
@@ -2093,7 +2311,16 @@ static  __attribute__((unused)) uint8_t update_ui_element(tUIUpdate* update)
                         lv_obj_clear_flag(objects.ui_bottom_panel_tonex, LV_OBJ_FLAG_HIDDEN);
                         lv_obj_add_flag(objects.ui_bottom_panel_valeton, LV_OBJ_FLAG_HIDDEN);
 
-                        // lv_label_set_text(objects.ui_project_heading_label, "Tonex Controller"); 
+#endif // CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+
+                        if (usb_get_connected_modeller_type() == AMP_MODELLER_TONEX_ONE_PLUS)
+                        {
+                            // unhide Tuner icon
+                            lv_obj_clear_flag(objects.ui_tuner_button, LV_OBJ_FLAG_HIDDEN);
+                        }
+
+#if !CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+                        lv_label_set_text(objects.ui_project_heading_label, "Tonex Controller"); 
 #endif // CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
 #else                    
                         // set effect letter to "C" (Compressor)
@@ -2250,6 +2477,8 @@ static  __attribute__((unused)) uint8_t update_ui_element(tUIUpdate* update)
             {
                 case AMP_MODELLER_TONEX_ONE:        // fallthrough
                 case AMP_MODELLER_TONEX:            // fallthrough
+                case AMP_MODELLER_TONEX_ONE_PLUS:   // fallthrough
+                case AMP_MODELLER_TONEX_PLUG:
                 default:
                 {
                     tonex_update_ui_parameters();
@@ -2291,6 +2520,79 @@ static  __attribute__((unused)) uint8_t update_ui_element(tUIUpdate* update)
                 updatePresetListSelection();
                 updatePresetListNames();
             }
+        } break;
+
+        case UI_ELEMENT_TUNER_FREQ:
+        {
+#if CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI     
+            int32_t arc_value;
+            lv_color_t col;
+            char buf[32];
+            float tuner_error_cents = (float)atof(update->Text);
+
+            arc_value = (int32_t)clampf(tuner_error_cents, -50.0f, 50.0f);
+
+            // update LCD
+            lv_arc_set_value(objects.ui_tuner_arc, arc_value);
+
+            if (fabsf(tuner_error_cents) < 5.0f)
+            {
+                // green – in tune
+                col = lv_color_hex(0x00FF88);      
+            }
+            else if (fabsf(tuner_error_cents) < 15.0f)
+            {
+                // orange
+                col = lv_color_hex(0xFFAA00);      
+            }
+            else
+            {
+                // red
+                col = lv_color_hex(0xFF4444);      
+            }
+
+            lv_obj_set_style_bg_color(objects.ui_tuner_arc, col, LV_PART_KNOB);
+
+            // show Note
+            if ((tuner_error_cents == 0.0f) && (update->Value == 0x80))
+            {
+                // no note detected
+                sprintf(buf, "--");
+            }
+            else
+            {
+                control_get_midi_note_name(update->Value, current_tuner_ref_freq, buf, sizeof(buf) - 1);
+            }
+                            
+            const char* current = lv_label_get_text(objects.ui_tuner_note_label);
+
+            // check if note changed
+            if (strcmp(current, buf) != 0)
+            {
+                // update label
+                lv_label_set_text(objects.ui_tuner_note_label, buf);
+            }
+#endif            
+        } break;
+
+        case UI_ELEMENT_TUNER_STATE:
+        {
+#if CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI    
+            if (usb_get_connected_modeller_type() == AMP_MODELLER_TONEX_ONE_PLUS)
+            {
+                if (update->Value == 1)
+                {
+                    // show tuner page
+                    action_tuner_pressed(NULL);
+                }        
+                else 
+                { 
+                    // hide tuner page
+                    action_tuner_close(NULL);
+                }
+            }
+#endif  //CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI          
+>>>>>>> main
         } break;
 
         default:
@@ -2608,6 +2910,7 @@ static void __attribute__((unused)) ui_toast_close(void)
 
     // Close and delete the message box
     lv_msgbox_close(msgbox_data.mbox);
+    msgbox_data.mbox = NULL;
 }
 
 /****************************************************************************
@@ -2825,7 +3128,7 @@ void display_init(i2c_master_bus_handle_t bus_handle, SemaphoreHandle_t I2CMutex
     {
         lv_obj_add_flag(objects.ui_bpm_indicator, LV_OBJ_FLAG_HIDDEN);
     }
-#endif
+#endif  //CONFIG_TONEX_CONTROLLER_SHOW_BPM_INDICATOR
 
     // create display task
     xTaskCreatePinnedToCore(display_task, "Dsp", DISPLAY_TASK_STACK_SIZE, NULL, DISPLAY_TASK_PRIORITY, NULL, 1);

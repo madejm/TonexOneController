@@ -371,6 +371,8 @@ void control_request_bank_up();
 void control_request_bank_down();
 void control_request_fs_alt_mode();
 void control_request_bank_index(uint8_t index);
+void control_request_ab_bank_up(void);
+void control_request_ab_bank_down(void);
 void control_set_usb_status(uint32_t status);
 void control_set_bt_status(uint32_t status);
 void control_set_wifi_status(uint32_t status);
@@ -397,6 +399,11 @@ void control_get_preset_name(uint8_t index, char* dest);
 void control_update_footswitch_leds(void);
 esp_err_t control_get_connected_modeller_params_locked_access(tModellerParameter** param_ptr);
 esp_err_t control_release_connected_modeller_params_locked_access(void);
+void control_request_tuner(uint8_t state);
+float control_get_note_freq(float a4_ref, int midi_note);
+float control_get_cents(float measured, float target);
+int control_frequency_to_note(float freq, float ref_freq, char *note_name, size_t buflen);
+int control_get_midi_note_name(uint8_t note, float ref_freq, char *note_name, size_t buflen);
 
 // config API
 void control_set_default_config(void);

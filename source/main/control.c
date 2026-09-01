@@ -76,6 +76,8 @@ enum CommandEvents
     EVENT_BANK_UP,
     EVENT_BANK_DOWN,
     EVENT_BANK_INDEX_SYNC,
+    EVENT_AB_BANK_DOWN,
+    EVENT_AB_BANK_UP,
     EVENT_SET_PRESET_NAME,
     EVENT_SET_PRESET_DETAILS,
     EVENT_SET_USB_STATUS,
@@ -87,7 +89,8 @@ enum CommandEvents
     EVENT_SET_CONFIG_ITEM_INT,
     EVENT_SET_CONFIG_ITEM_STRING,
     EVENT_TRIGGER_TAP_TEMPO,
-    EVENT_UPDATE_FOOTSWITCH_LEDS
+    EVENT_UPDATE_FOOTSWITCH_LEDS,
+    EVENT_TUNER_REQUEST
 };
 
 typedef struct
@@ -261,6 +264,7 @@ typedef struct
     // Tonex Preset Index, has to be mapped to footswitch index from tPresetOrderMappingConfig
     uint32_t PresetIndex;                        // 0-based index
     uint32_t BankIndex;                        // 0-based index
+    uint8_t ABSlotBank;                          // 0-based AB slot bank (Slot A = bank*2, Slot B = bank*2+1)
     char PresetNames[MAX_SUPPORTED_PRESETS][MAX_PRESET_NAME_LENGTH];
     uint32_t USBStatus;
     uint32_t BTStatus;
@@ -379,6 +383,15 @@ static uint8_t process_control_command(tControlMessage* message)
             footswitches_bank_up();
         } break;
 
+        case EVENT_TUNER_REQUEST:
+        {
+            if (ControlData.USBStatus != 0)
+            {
+                // send message to USB
+                usb_request_tuner(message->Value);
+            }
+        } break;
+
         case EVENT_PRESET_INDEX:
         {
             if (ControlData.USBStatus != 0)
@@ -411,6 +424,46 @@ static uint8_t process_control_command(tControlMessage* message)
 #endif
         } break;
 
+        case EVENT_AB_BANK_DOWN:
+        {
+            if (ControlData.USBStatus != 0)
+            {
+                uint8_t max_bank = (usb_get_max_presets_for_connected_modeller() / 2) - 1;
+
+                if (ControlData.ABSlotBank > 0)
+                {
+                    ControlData.ABSlotBank--;
+                }
+                else if (control_get_config_item_int(CONFIG_ITEM_LOOP_AROUND))
+                {
+                    ControlData.ABSlotBank = max_bank;
+                }
+
+                // load both slots, force A/B (Double) mode, activate Slot A and refresh display
+                usb_set_ab_slots(ControlData.ABSlotBank * 2, ControlData.ABSlotBank * 2 + 1);
+            }
+        } break;
+
+        case EVENT_AB_BANK_UP:
+        {
+            if (ControlData.USBStatus != 0)
+            {
+                uint8_t max_bank = (usb_get_max_presets_for_connected_modeller() / 2) - 1;
+
+                if (ControlData.ABSlotBank < max_bank)
+                {
+                    ControlData.ABSlotBank++;
+                }
+                else if (control_get_config_item_int(CONFIG_ITEM_LOOP_AROUND))
+                {
+                    ControlData.ABSlotBank = 0;
+                }
+
+                // load both slots, force A/B (Double) mode, activate Slot A and refresh display
+                usb_set_ab_slots(ControlData.ABSlotBank * 2, ControlData.ABSlotBank * 2 + 1);
+            }
+        } break;
+        
         case EVENT_SET_PRESET_NAME:
         {
             memcpy((void*)ControlData.PresetNames[message->Value], (void*)message->Text, MAX_PRESET_NAME_LENGTH);
@@ -1293,6 +1346,8 @@ static uint8_t process_control_command(tControlMessage* message)
                 {
                     case AMP_MODELLER_TONEX_ONE:        // fallthrough
                     case AMP_MODELLER_TONEX:            // fallthrough
+                    case AMP_MODELLER_TONEX_ONE_PLUS:   // fallthrough
+                    case AMP_MODELLER_TONEX_PLUG:
                     default:
                     {
                         usb_modify_parameter(TONEX_GLOBAL_BPM, ControlData.TapTempo.BPM);
@@ -1366,6 +1421,29 @@ void control_request_preset_up(void)
 * RETURN:      
 * NOTES:       
 *****************************************************************************/
+void control_request_tuner(uint8_t state)
+{
+    tControlMessage message;
+
+    ESP_LOGI(TAG, "control_request_tuner");
+
+    message.Event = EVENT_TUNER_REQUEST;
+    message.Value = state;
+
+    // send to queue
+    if (xQueueSend(control_input_queue, (void*)&message, pdMS_TO_TICKS(CONTROL_QUEUE_WRITE_TIMEOUT)) != pdPASS)
+    {
+        ESP_LOGE(TAG, "control_request_tuner queue send failed!");            
+    }
+}
+
+/****************************************************************************
+* NAME:        
+* DESCRIPTION: 
+* PARAMETERS:  
+* RETURN:      
+* NOTES:       
+*****************************************************************************/
 void control_request_preset_index(uint8_t index)
 {
     tControlMessage message;
@@ -1425,6 +1503,51 @@ void control_request_bank_index(uint8_t index)
     if (xQueueSend(control_input_queue, (void*)&message, pdMS_TO_TICKS(CONTROL_QUEUE_WRITE_TIMEOUT)) != pdPASS)
     {
         ESP_LOGE(TAG, "control_request_bank_index queue send failed!");            
+    }
+}
+
+
+/****************************************************************************
+* NAME:
+* DESCRIPTION:
+* PARAMETERS:
+* RETURN:
+* NOTES:
+*****************************************************************************/
+void control_request_ab_bank_down(void)
+{
+    tControlMessage message;
+
+    ESP_LOGI(TAG, "control_request_ab_bank_down");
+
+    message.Event = EVENT_AB_BANK_DOWN;
+
+    // send to queue
+    if (xQueueSend(control_input_queue, (void*)&message, pdMS_TO_TICKS(CONTROL_QUEUE_WRITE_TIMEOUT)) != pdPASS)
+    {
+        ESP_LOGE(TAG, "control_request_ab_bank_down queue send failed!");
+    }
+}
+
+/****************************************************************************
+* NAME:
+* DESCRIPTION:
+* PARAMETERS:
+* RETURN:
+* NOTES:
+*****************************************************************************/
+void control_request_ab_bank_up(void)
+{
+    tControlMessage message;
+
+    ESP_LOGI(TAG, "control_request_ab_bank_up");
+
+    message.Event = EVENT_AB_BANK_UP;
+
+    // send to queue
+    if (xQueueSend(control_input_queue, (void*)&message, pdMS_TO_TICKS(CONTROL_QUEUE_WRITE_TIMEOUT)) != pdPASS)
+    {
+        ESP_LOGE(TAG, "control_request_ab_bank_up queue send failed!");
     }
 }
 
@@ -3310,7 +3433,9 @@ static void UpdateFootswitchLeds(void)
 
         switch (usb_get_connected_modeller_type())
         {
-            case AMP_MODELLER_TONEX_ONE:
+            case AMP_MODELLER_TONEX_ONE:    // fallthrough
+            case AMP_MODELLER_TONEX_ONE_PLUS:   // fallthrough
+            case AMP_MODELLER_TONEX_PLUG:
             {
                 // tonex one has colour per preset
                 if (tonex_params_colors_get_color(ControlData.PresetIndex, &preset_color) == ESP_OK)
@@ -3369,6 +3494,8 @@ static void UpdateFootswitchLeds(void)
                                 {
                                     case AMP_MODELLER_TONEX_ONE:        // fallthrough
                                     case AMP_MODELLER_TONEX:            // fallthrough
+                                    case AMP_MODELLER_TONEX_ONE_PLUS:   // fallthrough
+                                    case AMP_MODELLER_TONEX_PLUG:
                                     default:
                                     {
                                         switch (param)
@@ -3583,6 +3710,7 @@ void control_set_default_config(void)
     
     for (uint8_t loop = 0; loop < MAX_PC_MAP; loop++)
     {
+        // issue here, really need to use (loop + usb_get_first_preset_index_for_connected_modeller()) but modeller may not yet be connected
         ControlData.ConfigData.PCMapConfig.PCMap[loop] = loop;
     }
 }
@@ -3600,6 +3728,8 @@ esp_err_t control_get_connected_modeller_params_locked_access(tModellerParameter
     {
         case AMP_MODELLER_TONEX_ONE:        // fallthrough
         case AMP_MODELLER_TONEX:            // fallthrough
+        case AMP_MODELLER_TONEX_ONE_PLUS:   // fallthrough
+        case AMP_MODELLER_TONEX_PLUG:
         default:
         {
             return tonex_params_get_locked_access(param_ptr);
@@ -3625,6 +3755,8 @@ esp_err_t control_release_connected_modeller_params_locked_access(void)
     {
         case AMP_MODELLER_TONEX_ONE:        // fallthrough
         case AMP_MODELLER_TONEX:            // fallthrough
+        case AMP_MODELLER_TONEX_ONE_PLUS:   // fallthrough
+        case AMP_MODELLER_TONEX_PLUG:
         default:
         {
             return tonex_params_release_locked_access();
@@ -3635,6 +3767,113 @@ esp_err_t control_release_connected_modeller_params_locked_access(void)
             return valeton_params_release_locked_access();
         } break;
     }
+}
+
+/****************************************************************************
+* NAME:        
+* DESCRIPTION: 
+* PARAMETERS:  
+* RETURN:      
+* NOTES:       
+*****************************************************************************/
+float control_get_note_freq(float a4_ref, int midi_note)
+{
+    // MIDI note 69 = A4
+    return a4_ref * powf(2.0f, (midi_note - 69) / 12.0f);
+}
+
+/****************************************************************************
+* NAME:        
+* DESCRIPTION: 
+* PARAMETERS:  
+* RETURN:      
+* NOTES:       
+*****************************************************************************/
+float control_get_cents(float measured, float target)
+{
+    if (target <= 0.0f || measured <= 0.0f)
+    {
+        return 0.0f;
+    }
+
+    return 1200.0f * log2f(measured / target);
+}
+
+/****************************************************************************
+* NAME:        
+* DESCRIPTION: 
+* PARAMETERS:  
+* RETURN:      
+* NOTES:       
+*****************************************************************************/
+int control_frequency_to_note(float freq, float ref_freq, char *note_name, size_t buflen)
+{
+    static const char* const note_names[] = 
+    {
+        "C", "C#", "D", "D#", "E", "F",
+        "F#", "G", "G#", "A", "A#", "B"
+    };
+
+    if ((freq <= 0.0) || (note_name == NULL) || (buflen < 8))
+    {
+        return -1;
+    }
+
+    // MIDI note number (floating point)
+    float midi = 69.0f + 12.0f * log2(freq / ref_freq);
+
+    // Round to nearest integer note
+    int n = (int)round(midi);
+
+    // Clamp to a reasonable range (MIDI 0–127)
+    if (n < 0) 
+    {
+        n = 0;
+    }
+    
+    if (n > 127) 
+    {
+        n = 127;
+    }
+
+    int octave = (n / 12) - 1;
+    int note_index = n % 12;
+
+    snprintf(note_name, buflen, "%s%d", note_names[note_index], octave);
+    return 0;
+}
+
+/****************************************************************************
+* NAME:        
+* DESCRIPTION: 
+* PARAMETERS:  
+* RETURN:      
+* NOTES:       
+*****************************************************************************/
+int control_get_midi_note_name(uint8_t note, float ref_freq, char *note_name, size_t buflen)
+{
+    static const char* const note_names[] = 
+    {
+        "C", "C#", "D", "D#", "E", "F",
+        "F#", "G", "G#", "A", "A#", "B"
+    };
+
+    if ((note_name == NULL) || (buflen < 8))
+    {
+        return -1;
+    }
+
+    // Clamp to a reasonable range (MIDI 0–127)
+    if (note > 127) 
+    {
+        note = 127;
+    }
+
+    int octave = (note / 12) - 1;
+    int note_index = note % 12;
+
+    snprintf(note_name, buflen, "%s%d", note_names[note_index], octave);
+    return 0;
 }
 
 /****************************************************************************

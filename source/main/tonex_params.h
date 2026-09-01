@@ -195,6 +195,7 @@ typedef enum
     TONEX_GLOBAL_TUNING_REFERENCE,
     TONEX_GLOBAL_BYPASS,                // preset bypass mode
     TONEX_GLOBAL_MASTER_VOLUME, 
+    TONEX_GLOBAL_DIRECT_MONITOR,
 
     // must be last actual global
     TONEX_GLOBAL_LAST,

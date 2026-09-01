@@ -61,6 +61,8 @@ void UI_SetPresetDescription(char* text);
 void UI_RefreshParameterValues(void);
 void UI_ShowToast(char* text);
 void UI_SettingsCopied(Clipboard_t type);
+void UI_SetTunerFrequencies(float error, float ref_freq, uint8_t midi_note);
+void UI_SetTunerState(uint8_t state);
 
 #ifdef __cplusplus
 } /*extern "C"*/

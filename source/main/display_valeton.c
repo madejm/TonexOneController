@@ -48,7 +48,6 @@ limitations under the License.
 #include "esp_mac.h"
 #include "esp_crc.h"
 #include "esp_now.h"
-#include "driver/i2c.h"
 #include "soc/lldesc.h"
 #include "esp_lcd_touch_gt911.h"
 #include "esp_lcd_touch_cst816s.h"
@@ -97,6 +96,8 @@ void valeton_show_settings_tab(lv_event_t * e)
 #if CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI          
 	lv_obj_t* target = lv_event_get_current_target(e);
 
+    ESP_LOGI(TAG, "valeton_show_settings_tab");
+
     if (target == objects.ui_icon_val_pre)
     {
         lv_tabview_set_act(objects.ui_val_settings_tab_view, CONFIG_TAB_VAL_PRE, LV_ANIM_OFF);
@@ -119,7 +120,7 @@ void valeton_show_settings_tab(lv_event_t * e)
     }
     else if (target == objects.ui_icon_val_tc)
     {
-        lv_tabview_set_act(objects.ui_val_settings_tab_view, CONFIG_TAB_VAL_NR, LV_ANIM_OFF);
+        lv_tabview_set_act(objects.ui_val_settings_tab_view, CONFIG_TAB_VAL_NS, LV_ANIM_OFF);
     }
     else if (target == objects.ui_icon_val_eq)
     {

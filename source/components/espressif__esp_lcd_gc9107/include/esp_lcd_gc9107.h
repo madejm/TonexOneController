@@ -66,19 +66,12 @@ esp_err_t esp_lcd_new_panel_gc9107(const esp_lcd_panel_io_handle_t io, const esp
  */
 #define GC9107_PANEL_BUS_SPI_CONFIG(sclk, mosi, max_trans_sz)   \
     {                                                           \
+        .sclk_io_num = sclk,                                    \
         .mosi_io_num = mosi,                                    \
         .miso_io_num = -1,                                      \
-        .sclk_io_num = sclk,                                    \
-        .quadwp_io_num = -1,                                    \
         .quadhd_io_num = -1,                                    \
-        .data4_io_num = -1,                                     \
-        .data5_io_num = -1,                                     \
-        .data6_io_num = -1,                                     \
-        .data7_io_num = -1,                                     \
+        .quadwp_io_num = -1,                                    \
         .max_transfer_sz = max_trans_sz,                        \
-        .flags = 0,                                             \
-        .isr_cpu_id = ESP_INTR_CPU_AFFINITY_AUTO,               \
-        .intr_flags = 0                                         \
     }
 
 /**
@@ -90,18 +83,17 @@ esp_err_t esp_lcd_new_panel_gc9107(const esp_lcd_panel_io_handle_t io, const esp
  * @param[in] cb_ctx Callback function context
  *
  */
-#define GC9107_PANEL_IO_SPI_CONFIG(cs, dc, callback, callback_ctx)  \
-    {                                                               \
-        .cs_gpio_num = cs,                                          \
-        .dc_gpio_num = dc,                                          \
-        .spi_mode = 0,                                              \
-        .pclk_hz = 80 * 1000 * 1000,                                \
-        .trans_queue_depth = 10,                                    \
-        .on_color_trans_done = callback,                            \
-        .user_ctx = callback_ctx,                                   \
-        .lcd_cmd_bits = 8,                                          \
-        .lcd_param_bits = 8,                                        \
-        .flags = {}                                                 \
+#define GC9107_PANEL_IO_SPI_CONFIG(cs, dc, cb, cb_ctx)          \
+    {                                                           \
+        .cs_gpio_num = cs,                                      \
+        .dc_gpio_num = dc,                                      \
+        .spi_mode = 0,                                          \
+        .pclk_hz = 40 * 1000 * 1000,                            \
+        .trans_queue_depth = 10,                                \
+        .on_color_trans_done = cb,                              \
+        .user_ctx = cb_ctx,                                     \
+        .lcd_cmd_bits = 8,                                      \
+        .lcd_param_bits = 8,                                    \
     }
 
 #ifdef __cplusplus

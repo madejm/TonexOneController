@@ -26,7 +26,6 @@ limitations under the License.
 #include "esp_check.h"
 #include "esp_log.h"
 #include "usb/usb_host.h"
-#include "driver/i2c.h"
 #include "nvs_flash.h"
 #include "esp_vfs.h"
 #include "esp_vfs_fat.h"
@@ -94,6 +93,8 @@ esp_err_t midi_helper_adjust_param_via_midi(MidiValue_t change_num, uint8_t midi
     {
         case AMP_MODELLER_TONEX_ONE:        // fallthrough
         case AMP_MODELLER_TONEX:            // fallthrough
+        case AMP_MODELLER_TONEX_ONE_PLUS:   // fallthrough
+        case AMP_MODELLER_TONEX_PLUG:
         default:
         {
             return midi_helper_tonex_adjust_param_via_midi(change_num, midi_value);
@@ -119,6 +120,8 @@ TonexParameter_t midi_helper_get_param_for_change_num(MidiValue_t change_num, ui
     {
         case AMP_MODELLER_TONEX_ONE:        // fallthrough
         case AMP_MODELLER_TONEX:            // fallthrough
+        case AMP_MODELLER_TONEX_ONE_PLUS:   // fallthrough
+        case AMP_MODELLER_TONEX_PLUG:
         default:
         {
             return midi_helper_tonex_get_param_for_change_num(change_num, midi_value_1, midi_value_2);
@@ -198,11 +201,13 @@ uint8_t midi_helper_process_incoming_data(uint8_t* data, uint8_t length, uint8_t
                 // Program change Should be 0xC0 XX (XX = preset index, 0-based)
                 if (channel == midi_channel)
                 {
+                    //ESP_LOGW(TAG, "Midi PC val %d", (int)*ptr);
+
                     // load the mapped value for this program change value
                     uint8_t map_val = control_get_pc_map()[*ptr];
 
                     // set preset
-                    control_request_preset_index(map_val);
+                    control_request_preset_index(map_val); 
                 }
 
                 ptr++;

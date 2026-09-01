@@ -144,7 +144,29 @@ For more information about the firmware development and customisation, refer to 
 - https://github.com/vit3k/tonex_controller for great work on reverse engineering the Tonex One USB protocol
 
 ## Firmware Release Notes <a name="release_notes"></a>
-V2.0.3.2 beta 1
+V2.5.0.2 beta 1
+- Update to ESP-IDF 6.0.2 framework
+- Update to latest Managed Components
+- Added support for Tonex One Plus, including LCD tuner interface for large screen devices 
+- Direct monitoring setting now configurable via LCD/Web
+- New method handling LCD parameter sliders, where changes are sent after a short time of no movement, without needing to remove the finger from the slider
+- Fixed bug where pressing green tick during user text editing would not save the text
+- Fixed issue where swiping on the user text keyboard would change presets
+- Migrated to CmakePresets for project management
+- Some initial code for the Tonex Plug, but incomplete and untested
+- Improvements to client WiFi scanning for cases where multiple access points are present
+
+
+V2.0.4.2
+- Minor update for bug fixes and some small features
+- Fixed issue with GP5 on 4.3B, where long press of the NS icon would not jump to the settings page. Thanks to freelender for reporting.
+- Fixed issue where some Waveshare 4.3Bs would get some LCD flicker/ghosting/pixel offsets
+- Fixed issue with Midi PC map, where indexes where messed up for the Tonex One due to its 1-based preset indexing scheme
+- Fixed issue with BPM indicator stuck on for Polar products with 1.69" screen
+- User contribution from Acogkr: AB slot bank up/down via MIDI CC 89/90
+- Fixed issue with effect Icon co-ordinates on Pirate Midi Max V2.
+
+V2.0.3.2
 - Minor update for bug fixes and some small features
 - Fixed issue where the "toast" message for WiFi connection was not rotated on the 1.69" landscape version 
 - Support for Pirate Midi Polar Mini V2 and Plus V2

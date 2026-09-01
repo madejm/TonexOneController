@@ -48,7 +48,6 @@ limitations under the License.
 #include "esp_mac.h"
 #include "esp_crc.h"
 #include "esp_now.h"
-#include "driver/i2c.h"
 #include "soc/lldesc.h"
 #include "esp_lcd_touch_gt911.h"
 #include "esp_lcd_touch_cst816s.h"
@@ -79,6 +78,7 @@ static const char *TAG = "platform_ws43b";
 
 // LCD panel config
 #define DISPLAY_LCD_PIXEL_CLOCK_HZ     (14500000)
+// #define DISPLAY_LCD_PIXEL_CLOCK_HZ     (14000000)
 #define DISPLAY_LCD_BK_LIGHT_ON_LEVEL  1
 #define DISPLAY_LCD_BK_LIGHT_OFF_LEVEL !DISPLAY_LCD_BK_LIGHT_ON_LEVEL
 
@@ -227,6 +227,8 @@ __attribute__((unused)) void platform_get_icon_coords(int16_t* dest, uint8_t max
     {
         case AMP_MODELLER_TONEX_ONE:    // fallthrough
         case AMP_MODELLER_TONEX:        // fallthrough    
+        case AMP_MODELLER_TONEX_ONE_PLUS:   // fallthrough
+        case AMP_MODELLER_TONEX_PLUG:
         default:
         {
             // Tonex
@@ -336,9 +338,14 @@ void platform_init(i2c_master_bus_handle_t bus_handle, SemaphoreHandle_t I2CMute
     ESP_LOGI(TAG, "Install RGB LCD panel driver");
     esp_lcd_panel_handle_t panel_handle = NULL;
     esp_lcd_rgb_panel_config_t panel_config = {
-        .data_width = 16, // RGB565 in parallel mode, thus 16bit in width
+        .data_width = 16, // RGB565 in parallel mode, thus 16bit in width        
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(6, 0, 0)
+        .in_color_format = LCD_COLOR_FMT_RGB565, 
+        .dma_burst_size = 64,
+#else
         .bits_per_pixel = 16,
         .psram_trans_align = 64,
+#endif       
         .num_fbs = DISPLAY_LCD_NUM_FB,
         .bounce_buffer_size_px = 10 * DISPLAY_LCD_H_RES,
         .clk_src = LCD_CLK_SRC_DEFAULT,
@@ -375,7 +382,7 @@ void platform_init(i2c_master_bus_handle_t bus_handle, SemaphoreHandle_t I2CMute
             .hsync_front_porch = 8,
             .vsync_pulse_width = 4,
             .vsync_back_porch  = 45,   // these 2 values critical. Too small gets ghosting/flicker at higher pixel clock values
-            .vsync_front_porch = 45,
+            .vsync_front_porch = 45,       
             .flags = {
                 .hsync_idle_low   = 0,
                 .vsync_idle_low   = 0,
