@@ -25,6 +25,8 @@ extern "C" {
 
 #include "usb/usb_host.h"
 
+#define USB_DEBUG 0
+
 #define IK_MULTIMEDIA_USB_VENDOR        0x1963
 #define TONEX_ONE_PRODUCT_ID            0x00D1
 #define TONEX_PRODUCT_ID                0x0068

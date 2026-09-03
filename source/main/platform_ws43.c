@@ -77,8 +77,7 @@ limitations under the License.
 static const char *TAG = "platform_ws43b";
 
 // LCD panel config
-#define DISPLAY_LCD_PIXEL_CLOCK_HZ     (14500000)
-// #define DISPLAY_LCD_PIXEL_CLOCK_HZ     (14000000)
+#define DISPLAY_LCD_PIXEL_CLOCK_HZ     (14000000)
 #define DISPLAY_LCD_BK_LIGHT_ON_LEVEL  1
 #define DISPLAY_LCD_BK_LIGHT_OFF_LEVEL !DISPLAY_LCD_BK_LIGHT_ON_LEVEL
 
@@ -88,7 +87,7 @@ static const char *TAG = "platform_ws43b";
 
 #define DISPLAY_LCD_NUM_FB              2
 
-#define DRAW_BUFFER_SIZE                6
+#define DRAW_BUFFER_SIZE                10
 
 #define BUF_SIZE                        (1024)
 #define I2C_MASTER_TIMEOUT_MS           1000
@@ -337,6 +336,8 @@ void platform_init(i2c_master_bus_handle_t bus_handle, SemaphoreHandle_t I2CMute
 
     ESP_LOGI(TAG, "Install RGB LCD panel driver");
     esp_lcd_panel_handle_t panel_handle = NULL;
+    void *unused_panel_fb0 = NULL;
+    void *panel_fb1 = NULL;
     esp_lcd_rgb_panel_config_t panel_config = {
         .data_width = 16, // RGB565 in parallel mode, thus 16bit in width        
 #if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(6, 0, 0)
@@ -412,6 +413,14 @@ void platform_init(i2c_master_bus_handle_t bus_handle, SemaphoreHandle_t I2CMute
     ESP_LOGI(TAG, "Initialize RGB LCD panel");
     ESP_ERROR_CHECK(esp_lcd_panel_reset(panel_handle));
     ESP_ERROR_CHECK(esp_lcd_panel_init(panel_handle));
+
+    // Keep a single framebuffer active. Alternating the RGB driver's two PSRAM
+    // framebuffers causes visible offset and bounce artifacts on this panel.
+    ESP_ERROR_CHECK(esp_lcd_rgb_panel_get_frame_buffer(panel_handle, 2,
+                                                       &unused_panel_fb0, &panel_fb1));
+    ESP_ERROR_CHECK(esp_lcd_panel_draw_bitmap(panel_handle, 0, 0,
+                                              DISPLAY_LCD_H_RES, DISPLAY_LCD_V_RES,
+                                              panel_fb1));
 
 #if DISPLAY_PIN_NUM_BK_LIGHT >= 0
     ESP_LOGI(TAG, "Turn on LCD backlight");
@@ -567,7 +576,7 @@ void platform_init(i2c_master_bus_handle_t bus_handle, SemaphoreHandle_t I2CMute
     disp_drv->flush_cb = display_lvgl_flush_cb;
     disp_drv->draw_buf = &disp_buf;
     disp_drv->user_data = panel_handle;
-    disp_drv->full_refresh = true;
+    disp_drv->full_refresh = false;
 
     lv_disp_t* __attribute__((unused)) disp = lv_disp_drv_register(disp_drv);
 

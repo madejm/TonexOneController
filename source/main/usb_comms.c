@@ -962,6 +962,12 @@ uint8_t usb_get_connected_modeller_type(void)
 *****************************************************************************/
 void init_usb_comms(void)
 {
+#if USB_DEBUG
+    ESP_LOGW(TAG, "USB_DEBUG enabled: USB Host disabled");
+    enable_usb_serial_jtag();
+    return;
+#endif
+
     if (usb_comms_state != USB_COMMS_STOPPED)
     {
         return;
