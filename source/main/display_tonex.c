@@ -153,7 +153,7 @@ void tonex_action_effect_icon_clicked(lv_event_t * e)
     // called from LVGL 
     ESP_LOGI(TAG, "action_effect_icon_clicked");
 
-    if (event_code == LV_EVENT_SHORT_CLICKED) 
+    if (event_code == LV_EVENT_LONG_PRESSED) 
     {
         if (event_object == objects.ui_icon_reverb)
         {
@@ -280,7 +280,7 @@ void tonex_action_effect_icon_clicked(lv_event_t * e)
             // no short press action
         } 
     }
-    else if (event_code == LV_EVENT_LONG_PRESSED) 
+    else if (event_code == LV_EVENT_SHORT_CLICKED) 
     {
         // change to settings page and jump to relevant tab
         action_show_settings_page(e);

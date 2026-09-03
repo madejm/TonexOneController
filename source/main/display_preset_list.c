@@ -1,4 +1,3 @@
-
 #include "display_preset_list.h"
 #include "esp_log.h"
 #if CONFIG_TONEX_CONTROLLER_HAS_DISPLAY
@@ -14,6 +13,7 @@
 #include "control.h"
 #include "wifi_config.h"
 #include "tonex_params.h"
+#include "display_scenes.h"
 
 static const char *TAG = "app_display_preset_list";
 
@@ -44,16 +44,16 @@ void updatePresetListSelection()
         selectedPreset = control_get_current_preset_mapped_index();
     }
 
-    lv_obj_set_checked(objects.ui_preset_list_button_0, selectedPreset == (pageStart + 0));
-    lv_obj_set_checked(objects.ui_preset_list_button_1, selectedPreset == (pageStart + 1));
-    lv_obj_set_checked(objects.ui_preset_list_button_2, selectedPreset == (pageStart + 2));
-    lv_obj_set_checked(objects.ui_preset_list_button_3, selectedPreset == (pageStart + 3));
-    lv_obj_set_checked(objects.ui_preset_list_button_4, selectedPreset == (pageStart + 4));
-    lv_obj_set_checked(objects.ui_preset_list_button_5, selectedPreset == (pageStart + 5));
-    lv_obj_set_checked(objects.ui_preset_list_button_6, selectedPreset == (pageStart + 6));
-    lv_obj_set_checked(objects.ui_preset_list_button_7, selectedPreset == (pageStart + 7));
-    lv_obj_set_checked(objects.ui_preset_list_button_8, selectedPreset == (pageStart + 8));
-    lv_obj_set_checked(objects.ui_preset_list_button_9, selectedPreset == (pageStart + 9));
+    lv_obj_set_checked(objects.ui_preset_list_element_0__button, selectedPreset == (pageStart + 0));
+    lv_obj_set_checked(objects.ui_preset_list_element_1__button, selectedPreset == (pageStart + 1));
+    lv_obj_set_checked(objects.ui_preset_list_element_2__button, selectedPreset == (pageStart + 2));
+    lv_obj_set_checked(objects.ui_preset_list_element_3__button, selectedPreset == (pageStart + 3));
+    lv_obj_set_checked(objects.ui_preset_list_element_4__button, selectedPreset == (pageStart + 4));
+    lv_obj_set_checked(objects.ui_preset_list_element_5__button, selectedPreset == (pageStart + 5));
+    lv_obj_set_checked(objects.ui_preset_list_element_6__button, selectedPreset == (pageStart + 6));
+    lv_obj_set_checked(objects.ui_preset_list_element_7__button, selectedPreset == (pageStart + 7));
+    lv_obj_set_checked(objects.ui_preset_list_element_8__button, selectedPreset == (pageStart + 8));
+    lv_obj_set_checked(objects.ui_preset_list_element_9__button, selectedPreset == (pageStart + 9));
 }
 
 static inline void lv_label_set_preset_name(lv_obj_t* label, uint8_t index)
@@ -69,38 +69,39 @@ static inline void lv_panel_set_preset_color(lv_obj_t* colorPanel, uint8_t index
 {
     uint32_t color = get_preset_color(index);
     lv_obj_set_style_outline_color(colorPanel, lv_color_hex(color), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_clear_flag(colorPanel, LV_OBJ_FLAG_HIDDEN);
 }
 
 void updatePresetListColors()
 {
     uint8_t pageStart = preset_list_page * PRESET_LIST_PRESETS_PER_PAGE;
 
-    lv_panel_set_preset_color(objects.ui_preset_list_color_0, pageStart + 0);
-    lv_panel_set_preset_color(objects.ui_preset_list_color_1, pageStart + 1);
-    lv_panel_set_preset_color(objects.ui_preset_list_color_2, pageStart + 2);
-    lv_panel_set_preset_color(objects.ui_preset_list_color_3, pageStart + 3);
-    lv_panel_set_preset_color(objects.ui_preset_list_color_4, pageStart + 4);
-    lv_panel_set_preset_color(objects.ui_preset_list_color_5, pageStart + 5);
-    lv_panel_set_preset_color(objects.ui_preset_list_color_6, pageStart + 6);
-    lv_panel_set_preset_color(objects.ui_preset_list_color_7, pageStart + 7);
-    lv_panel_set_preset_color(objects.ui_preset_list_color_8, pageStart + 8);
-    lv_panel_set_preset_color(objects.ui_preset_list_color_9, pageStart + 9);
+    lv_panel_set_preset_color(objects.ui_preset_list_element_0__color, pageStart + 0);
+    lv_panel_set_preset_color(objects.ui_preset_list_element_1__color, pageStart + 1);
+    lv_panel_set_preset_color(objects.ui_preset_list_element_2__color, pageStart + 2);
+    lv_panel_set_preset_color(objects.ui_preset_list_element_3__color, pageStart + 3);
+    lv_panel_set_preset_color(objects.ui_preset_list_element_4__color, pageStart + 4);
+    lv_panel_set_preset_color(objects.ui_preset_list_element_5__color, pageStart + 5);
+    lv_panel_set_preset_color(objects.ui_preset_list_element_6__color, pageStart + 6);
+    lv_panel_set_preset_color(objects.ui_preset_list_element_7__color, pageStart + 7);
+    lv_panel_set_preset_color(objects.ui_preset_list_element_8__color, pageStart + 8);
+    lv_panel_set_preset_color(objects.ui_preset_list_element_9__color, pageStart + 9);
 }
 
 void updatePresetListNames()
 {
     uint8_t pageStart = preset_list_page * PRESET_LIST_PRESETS_PER_PAGE;
 
-    lv_label_set_preset_name(objects.ui_preset_list_label_0, pageStart + 0);
-    lv_label_set_preset_name(objects.ui_preset_list_label_1, pageStart + 1);
-    lv_label_set_preset_name(objects.ui_preset_list_label_2, pageStart + 2);
-    lv_label_set_preset_name(objects.ui_preset_list_label_3, pageStart + 3);
-    lv_label_set_preset_name(objects.ui_preset_list_label_4, pageStart + 4);
-    lv_label_set_preset_name(objects.ui_preset_list_label_5, pageStart + 5);
-    lv_label_set_preset_name(objects.ui_preset_list_label_6, pageStart + 6);
-    lv_label_set_preset_name(objects.ui_preset_list_label_7, pageStart + 7);
-    lv_label_set_preset_name(objects.ui_preset_list_label_8, pageStart + 8);
-    lv_label_set_preset_name(objects.ui_preset_list_label_9, pageStart + 9);
+    lv_label_set_preset_name(objects.ui_preset_list_element_0__label, pageStart + 0);
+    lv_label_set_preset_name(objects.ui_preset_list_element_1__label, pageStart + 1);
+    lv_label_set_preset_name(objects.ui_preset_list_element_2__label, pageStart + 2);
+    lv_label_set_preset_name(objects.ui_preset_list_element_3__label, pageStart + 3);
+    lv_label_set_preset_name(objects.ui_preset_list_element_4__label, pageStart + 4);
+    lv_label_set_preset_name(objects.ui_preset_list_element_5__label, pageStart + 5);
+    lv_label_set_preset_name(objects.ui_preset_list_element_6__label, pageStart + 6);
+    lv_label_set_preset_name(objects.ui_preset_list_element_7__label, pageStart + 7);
+    lv_label_set_preset_name(objects.ui_preset_list_element_8__label, pageStart + 8);
+    lv_label_set_preset_name(objects.ui_preset_list_element_9__label, pageStart + 9);
     
     updatePresetListColors();
 }
@@ -113,10 +114,23 @@ void action_open_presets_page(lv_event_t * e)
 
     preset_list_edit_index = -1;
     lv_obj_add_flag(objects.ui_preset_list_cancel_button, LV_OBJ_FLAG_HIDDEN);
-    lv_obj_add_flag(objects.ui_preset_list_dialog, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_add_flag(objects.ui_preset_list_color_dialog, LV_OBJ_FLAG_HIDDEN);
 
     updatePresetListSelection();
     updatePresetListNames();
+
+    const char *options = "Insert before...\nSwap with...\nChange color";
+    lv_dropdown_set_options(objects.ui_preset_list_element_0__options, options);
+    lv_dropdown_set_options(objects.ui_preset_list_element_1__options, options);
+    lv_dropdown_set_options(objects.ui_preset_list_element_2__options, options);
+    lv_dropdown_set_options(objects.ui_preset_list_element_3__options, options);
+    lv_dropdown_set_options(objects.ui_preset_list_element_4__options, options);
+    lv_dropdown_set_options(objects.ui_preset_list_element_5__options, options);
+    lv_dropdown_set_options(objects.ui_preset_list_element_6__options, options);
+    lv_dropdown_set_options(objects.ui_preset_list_element_7__options, options);
+    lv_dropdown_set_options(objects.ui_preset_list_element_8__options, options);
+    lv_dropdown_set_options(objects.ui_preset_list_element_9__options, options);
+
     lv_scr_load_anim(objects.presets, LV_SCR_LOAD_ANIM_FADE_IN, 0, 0, false);
 }
 
@@ -127,12 +141,11 @@ void action_close_presets_page(lv_event_t * e)
     lv_scr_load_anim(objects.screen1, LV_SCR_LOAD_ANIM_FADE_IN, 0, 0, false);
 }
 
-void action_preset_list_select(lv_event_t * e)
+void selectPresetListPreset(uint8_t buttonIndex)
 {
     ESP_LOGI(TAG, "action_preset_list_select");
 
-    uint8_t button_index = (uint8_t)(intptr_t)lv_event_get_user_data(e);
-    uint8_t preset_index = button_index + preset_list_page * PRESET_LIST_PRESETS_PER_PAGE;
+    uint8_t preset_index = buttonIndex + preset_list_page * PRESET_LIST_PRESETS_PER_PAGE;
 
     if (preset_list_edit_index > -1) {
         uint8_t newPresetOrder[MAX_SUPPORTED_PRESETS];
@@ -180,7 +193,6 @@ void action_preset_list_select(lv_event_t * e)
         
         preset_list_edit_index = -1;
         lv_obj_add_flag(objects.ui_preset_list_cancel_button, LV_OBJ_FLAG_HIDDEN);
-        lv_obj_add_flag(objects.ui_preset_list_dialog, LV_OBJ_FLAG_HIDDEN);
 
         updatePresetListSelection();
         updatePresetListNames();
@@ -257,26 +269,35 @@ static void setDialogColorButton(int index, uint32_t rawColor)
     lv_obj_set_checked(button, mapping.rawColor == rawColor);
 }
 
-void action_preset_list_options(lv_event_t * e)
+void presetOptionsSelected(uint8_t buttonIndex, uint16_t option)
 {
-    ESP_LOGI(TAG, "action_preset_list_options");
-
     if (preset_list_edit_index > -1) {
         return;
     }
 
-    uint8_t buttonIndex = (uint8_t)(intptr_t)lv_event_get_user_data(e);
     preset_list_edit_index = preset_list_page * PRESET_LIST_PRESETS_PER_PAGE + buttonIndex;
-    
-    lv_label_set_preset_name(objects.ui_preset_list_dialog_name, preset_list_edit_index);
 
-    uint32_t rawColor = get_preset_color_raw(preset_list_edit_index);
+    switch (option) {
+        case 0:
+        case 1: {
+            preset_list_insert_mode = option == 0 ? PRESET_LIST_INSERT_MODE_INSERT : PRESET_LIST_INSERT_MODE_SWAP;
 
-    for (int i = 0; i <= 20; i++) {
-        setDialogColorButton(i, rawColor);
+            lv_obj_clear_flag(objects.ui_preset_list_cancel_button, LV_OBJ_FLAG_HIDDEN);
+            updatePresetListSelection();
+        } break;
+
+        case 2: {
+            lv_label_set_preset_name(objects.ui_preset_list_color_dialog_name, preset_list_edit_index);
+
+            uint32_t rawColor = get_preset_color_raw(preset_list_edit_index);
+
+            for (int i = 0; i <= 20; i++) {
+                setDialogColorButton(i, rawColor);
+            }
+
+            lv_obj_clear_flag(objects.ui_preset_list_color_dialog, LV_OBJ_FLAG_HIDDEN);
+        } break;
     }
-
-    lv_obj_clear_flag(objects.ui_preset_list_dialog, LV_OBJ_FLAG_HIDDEN);
 }
 
 void action_preset_list_color(lv_event_t * e)
@@ -294,14 +315,14 @@ void action_preset_list_color(lv_event_t * e)
 
     preset_list_edit_index = -1;
     lv_obj_add_flag(objects.ui_preset_list_cancel_button, LV_OBJ_FLAG_HIDDEN);
-    lv_obj_add_flag(objects.ui_preset_list_dialog, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_add_flag(objects.ui_preset_list_color_dialog, LV_OBJ_FLAG_HIDDEN);
 }
 
 void action_preset_list_dialog_close(lv_event_t * e)
 {
     preset_list_edit_index = -1;
     lv_obj_add_flag(objects.ui_preset_list_cancel_button, LV_OBJ_FLAG_HIDDEN);
-    lv_obj_add_flag(objects.ui_preset_list_dialog, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_add_flag(objects.ui_preset_list_color_dialog, LV_OBJ_FLAG_HIDDEN);
 }
 
 void action_preset_list_cancel(lv_event_t * e)
@@ -309,27 +330,5 @@ void action_preset_list_cancel(lv_event_t * e)
     preset_list_edit_index = -1;
     lv_obj_add_flag(objects.ui_preset_list_cancel_button, LV_OBJ_FLAG_HIDDEN);
 
-    updatePresetListSelection();
-}
-
-void action_preset_list_insert_clicked(lv_event_t * e)
-{
-    ESP_LOGI(TAG, "action_preset_list_insert_clicked");
-
-    preset_list_insert_mode = PRESET_LIST_INSERT_MODE_INSERT;
-
-    lv_obj_clear_flag(objects.ui_preset_list_cancel_button, LV_OBJ_FLAG_HIDDEN);
-    lv_obj_add_flag(objects.ui_preset_list_dialog, LV_OBJ_FLAG_HIDDEN);
-    updatePresetListSelection();
-}
-
-void action_preset_list_swap_clicked(lv_event_t * e)
-{
-    ESP_LOGI(TAG, "action_preset_list_swap_clicked");
-
-    preset_list_insert_mode = PRESET_LIST_INSERT_MODE_SWAP;
-
-    lv_obj_clear_flag(objects.ui_preset_list_cancel_button, LV_OBJ_FLAG_HIDDEN);
-    lv_obj_add_flag(objects.ui_preset_list_dialog, LV_OBJ_FLAG_HIDDEN);
     updatePresetListSelection();
 }

@@ -32,12 +32,6 @@ lv_style_t *get_style_button_highlighted_MAIN_PRESSED();
 void add_style_button_highlighted(lv_obj_t *obj);
 void remove_style_button_highlighted(lv_obj_t *obj);
 
-// Style: Button Preset List Options
-lv_style_t *get_style_button_preset_list_options_MAIN_DEFAULT();
-lv_style_t *get_style_button_preset_list_options_MAIN_PRESSED();
-void add_style_button_preset_list_options(lv_obj_t *obj);
-void remove_style_button_preset_list_options(lv_obj_t *obj);
-
 // Style: Button Chain
 lv_style_t *get_style_button_chain_MAIN_DEFAULT();
 lv_style_t *get_style_button_chain_MAIN_CHECKED();
@@ -109,14 +103,9 @@ lv_style_t *get_style_arc_settings_MAIN_DEFAULT();
 void add_style_arc_settings(lv_obj_t *obj);
 void remove_style_arc_settings(lv_obj_t *obj);
 
-// Style: Button Preset List
-lv_style_t *get_style_button_preset_list_MAIN_DEFAULT();
-lv_style_t *get_style_button_preset_list_MAIN_CHECKED();
-void add_style_button_preset_list(lv_obj_t *obj);
-void remove_style_button_preset_list(lv_obj_t *obj);
-
 // Style: Container Preset List Cell
 lv_style_t *get_style_container_preset_list_cell_MAIN_DEFAULT();
+lv_style_t *get_style_container_preset_list_cell_MAIN_CHECKED();
 void add_style_container_preset_list_cell(lv_obj_t *obj);
 void remove_style_container_preset_list_cell(lv_obj_t *obj);
 
@@ -198,6 +187,13 @@ lv_style_t *get_style_button_settings_color_MAIN_DEFAULT();
 lv_style_t *get_style_button_settings_color_MAIN_CHECKED();
 void add_style_button_settings_color(lv_obj_t *obj);
 void remove_style_button_settings_color(lv_obj_t *obj);
+
+// Style: Keyboard
+lv_style_t *get_style_keyboard_MAIN_DEFAULT();
+lv_style_t *get_style_keyboard_ITEMS_DEFAULT();
+lv_style_t *get_style_keyboard_ITEMS_CHECKED();
+void add_style_keyboard(lv_obj_t *obj);
+void remove_style_keyboard(lv_obj_t *obj);
 
 #ifdef __cplusplus
 }

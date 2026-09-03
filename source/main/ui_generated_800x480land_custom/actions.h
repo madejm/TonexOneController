@@ -26,13 +26,11 @@ extern void action_fs7_clicked(lv_event_t * e);
 extern void action_fs5_clicked(lv_event_t * e);
 extern void action_tap_tempo_clicked(lv_event_t * e);
 extern void action_close_presets_page(lv_event_t * e);
-extern void action_preset_list_select(lv_event_t * e);
+extern void action_preset_button(lv_event_t * e);
 extern void action_open_presets_page(lv_event_t * e);
 extern void action_preset_list_previous(lv_event_t * e);
 extern void action_preset_list_next(lv_event_t * e);
-extern void action_preset_list_options(lv_event_t * e);
-extern void action_preset_list_insert_clicked(lv_event_t * e);
-extern void action_preset_list_swap_clicked(lv_event_t * e);
+extern void action_preset_button_options(lv_event_t * e);
 extern void action_close_controller_page(lv_event_t * e);
 extern void action_save_wifi_settings(lv_event_t * e);
 extern void action_edit_wifi_ssid_clicked(lv_event_t * e);
@@ -58,6 +56,13 @@ extern void action_settings_paste(lv_event_t * e);
 extern void action_settings_copy_eq(lv_event_t * e);
 extern void action_settings_copy_delay(lv_event_t * e);
 extern void action_settings_copy_modulation(lv_event_t * e);
+extern void action_open_scenes_page(lv_event_t * e);
+extern void action_close_scenes_page(lv_event_t * e);
+extern void action_new_scene(lv_event_t * e);
+extern void action_scene_rename_dialog_keyboard_ok(lv_event_t * e);
+extern void action_scene_rename_dialog_close(lv_event_t * e);
+extern void action_scene_delete_dialog_cancel(lv_event_t * e);
+extern void action_scene_delete_dialog_delete(lv_event_t * e);
 
 #ifdef __cplusplus
 }

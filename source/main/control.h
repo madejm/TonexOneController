@@ -361,6 +361,14 @@ typedef struct __attribute__ ((packed))
 #define MAX_PRESET_NAME_LENGTH                  33
 #define MAX_PC_MAP                              128 // 0 to 127, matches Midi values
 #define MAX_BT_PERIPHERAL_NAME                  25    
+#define MAX_SCENES                              4
+#define MAX_SCENE_NAME                          30
+
+typedef struct __attribute__ ((packed)) 
+{
+    char Name[MAX_SCENE_NAME];
+    uint8_t PresetOrder[MAX_SUPPORTED_PRESETS];
+} tScene;
 
 // thread safe public API
 void control_request_preset_up(void);
@@ -386,8 +394,16 @@ void control_sync_preset_details(uint16_t index, char* name);
 void control_set_user_text(char* text);
 void control_trigger_tap_tempo(void);
 void control_trigger_tap_tempo_at(uint32_t tick_count);
+void control_refresh_preset_order();
 void control_set_preset_order(uint8_t* order);
 uint8_t* control_get_preset_order(void);
+tScene* control_get_scene(uint8_t index);
+uint8_t control_get_selected_scene();
+void control_select_scene(uint8_t index);
+uint8_t control_get_scenes_count();
+bool control_create_scene();
+void control_delete_scene(uint8_t index);
+void control_set_scene_name(uint8_t index, char *name);
 void control_set_pc_map(uint8_t* map);
 uint8_t* control_get_pc_map(void);
 void control_set_sync_complete(void);

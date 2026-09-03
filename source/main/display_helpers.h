@@ -108,6 +108,7 @@ void lv_obj_set_disabled(lv_obj_t * obj, bool disabled);
 void customize_ui();
 uint32_t get_preset_color_raw(uint16_t index);
 uint32_t get_preset_color(uint16_t index);
+void lv_keyboard_set_custom_map(lv_obj_t *obj);
 #endif
 
 #ifdef __cplusplus

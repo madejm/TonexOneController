@@ -449,6 +449,8 @@ void customize_ui() {
     lv_helper_create_arc_gesture_cb(objects.ui_modulation_param3_slider,    objects.ui_modulation_param3_value,    mod_format_cb);
     lv_helper_create_arc_gesture_cb(objects.ui_modulation_param4_slider,    objects.ui_modulation_param4_value,    mod_format_cb);
 
+    lv_keyboard_set_custom_map(objects.ui_scene_rename_dialog_keyboard);
+
     eq_canvas_setup();
 }
 
@@ -474,5 +476,86 @@ uint32_t get_preset_color_raw(uint16_t index)
 uint32_t get_preset_color(uint16_t index)
 {
     return get_preset_color_raw_or_real(index, true);
+}
+
+static void keyboard_value_changed_cb(lv_event_t * e)
+{
+    lv_obj_t *keyboard = lv_event_get_target(e);
+    lv_obj_t *textArea = lv_keyboard_get_textarea(keyboard);
+
+    // uint32_t keyId = (uint32_t)(intptr_t)lv_event_get_user_data(e);
+    lv_keyboard_mode_t keyboardMode = lv_keyboard_get_mode(keyboard);
+    const char *text = lv_textarea_get_text(textArea);
+
+    uint16_t buttonId = lv_btnmatrix_get_selected_btn(keyboard);
+    const char *buttonText = lv_btnmatrix_get_btn_text(keyboard, buttonId);
+
+    if (strcmp(buttonText, LV_SYMBOL_BACKSPACE) == 0) { 
+        if (strlen(text) == 0 && keyboardMode == LV_KEYBOARD_MODE_TEXT_LOWER) {
+            lv_keyboard_set_mode(keyboard, LV_KEYBOARD_MODE_TEXT_UPPER);
+        }
+    } else if (strcmp(buttonText, LV_SYMBOL_NEW_LINE) == 0) {
+    } else if (strcmp(buttonText, LV_SYMBOL_CLOSE) == 0) {
+    } else if (strcmp(buttonText, LV_SYMBOL_LEFT) == 0) {
+    } else if (strcmp(buttonText, LV_SYMBOL_RIGHT) == 0) {
+    } else if (strcmp(buttonText, LV_SYMBOL_OK) == 0) {
+    } else if (strcmp(buttonText, "abc") == 0) {
+    } else if (strcmp(buttonText, "ABC") == 0) {
+    } else if (strcmp(buttonText, "1#") == 0) {
+    } else if (strcmp(buttonText, " ") == 0) {
+    } else {
+        if (strlen(text) == 1 && keyboardMode == LV_KEYBOARD_MODE_TEXT_UPPER) {
+            lv_keyboard_set_mode(keyboard, LV_KEYBOARD_MODE_TEXT_LOWER);
+        }
+    }
+}
+
+// #define C(val) (LV_BTNMATRIX_CTRL_CHECKABLE | LV_BTNMATRIX_CTRL_CHECKED | val)
+#define C(val) (LV_BTNMATRIX_CTRL_CHECKED | val)
+
+#define KB_BOTTOM_ROW_MAP \
+    LV_SYMBOL_CLOSE, LV_SYMBOL_LEFT, " ", LV_SYMBOL_RIGHT, LV_SYMBOL_OK
+
+#define KB_BOTTOM_ROW_CTRL \
+    C(4),            C(2),           8,   C(2),            C(4)
+
+void lv_keyboard_set_custom_map(lv_obj_t *obj)
+{
+    static const char * upper_map[] = {
+        "1#",  "Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P", LV_SYMBOL_BACKSPACE, "\n",
+        "abc", "A", "S", "D", "F", "G", "H", "J", "K", "L",      LV_SYMBOL_NEW_LINE,  "\n",
+        "_",   "-", "Z", "X", "C", "V", "B", "N", "M", ",", ".", ":", "\n",
+        KB_BOTTOM_ROW_MAP, NULL };
+
+    static const char * lower_map[] = {
+        "1#",  "q", "w", "e", "r", "t", "y", "u", "i", "o", "p", LV_SYMBOL_BACKSPACE, "\n",
+        "ABC", "a", "s", "d", "f", "g", "h", "j", "k", "l",      LV_SYMBOL_NEW_LINE,  "\n",
+        "_",   "-", "z", "x", "c", "v", "b", "n", "m", ",", ".", ":", "\n",
+        KB_BOTTOM_ROW_MAP, NULL
+    };
+
+    static const lv_btnmatrix_ctrl_t abc_ctrl[] = {
+        C(4),  4,   4,   4,   4,   4,   4,   4,   4,   4,   4,   C(6),
+        C(6),  4,   4,   4,   4,   4,   4,   4,   4,   4,        C(6),
+        4,     4,   4,   4,   4,   4,   4,   4,   4,   4,   4,   4,
+        KB_BOTTOM_ROW_CTRL };
+
+    static const char * special_map[] = {
+        "~",   "1", "2", "3", "4",  "5", "6", "7", "8", "9", "0", LV_SYMBOL_BACKSPACE, "\n",
+        "abc", "!", "@", "#", "$",  "%", "^", "&", "*", "(", ")", "\n",
+        "{",   "}", ";", "'", "\"", "<", ">", "/", "|", "?", "[", "]", "\n",
+        KB_BOTTOM_ROW_MAP, NULL };
+
+    static const lv_btnmatrix_ctrl_t special_ctrl[] = {
+        4,     4,   4,   4,   4,    4,   4,   4,   4,   4,   4,   C(6),
+        C(6),  4,   4,   4,   4,    4,   4,   4,   4,   4,   4,
+        4,     4,   4,   4,   4,    4,   4,   4,   4,   4,   4,   4,
+        KB_BOTTOM_ROW_CTRL };
+
+    lv_keyboard_set_map(obj, LV_KEYBOARD_MODE_TEXT_UPPER, upper_map, abc_ctrl);
+    lv_keyboard_set_map(obj, LV_KEYBOARD_MODE_TEXT_LOWER, lower_map, abc_ctrl);
+    lv_keyboard_set_map(obj, LV_KEYBOARD_MODE_SPECIAL, special_map, special_ctrl);
+
+    lv_obj_add_event_cb(obj, keyboard_value_changed_cb, LV_EVENT_VALUE_CHANGED, NULL);
 }
 #endif

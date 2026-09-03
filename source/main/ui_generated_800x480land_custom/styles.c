@@ -232,61 +232,6 @@ void remove_style_button_highlighted(lv_obj_t *obj) {
 };
 
 //
-// Style: Button Preset List Options
-//
-
-void init_style_button_preset_list_options_MAIN_DEFAULT(lv_style_t *style) {
-    init_style_button_basic_MAIN_DEFAULT(style);
-    
-    lv_style_set_pad_top(style, 0);
-    lv_style_set_pad_bottom(style, 0);
-    lv_style_set_radius(style, 12);
-    lv_style_set_pad_right(style, 0);
-    lv_style_set_pad_left(style, 0);
-    lv_style_set_layout(style, LV_LAYOUT_FLEX);
-    lv_style_set_flex_flow(style, LV_FLEX_FLOW_ROW);
-    lv_style_set_flex_main_place(style, LV_FLEX_ALIGN_CENTER);
-    lv_style_set_text_align(style, LV_TEXT_ALIGN_CENTER);
-};
-
-lv_style_t *get_style_button_preset_list_options_MAIN_DEFAULT() {
-    static lv_style_t *style;
-    if (!style) {
-        style = (lv_style_t *)lv_mem_alloc(sizeof(lv_style_t));
-        lv_style_init(style);
-        init_style_button_preset_list_options_MAIN_DEFAULT(style);
-    }
-    return style;
-};
-
-void init_style_button_preset_list_options_MAIN_PRESSED(lv_style_t *style) {
-    init_style_button_basic_MAIN_PRESSED(style);
-    
-};
-
-lv_style_t *get_style_button_preset_list_options_MAIN_PRESSED() {
-    static lv_style_t *style;
-    if (!style) {
-        style = (lv_style_t *)lv_mem_alloc(sizeof(lv_style_t));
-        lv_style_init(style);
-        init_style_button_preset_list_options_MAIN_PRESSED(style);
-    }
-    return style;
-};
-
-void add_style_button_preset_list_options(lv_obj_t *obj) {
-    (void)obj;
-    lv_obj_add_style(obj, get_style_button_preset_list_options_MAIN_DEFAULT(), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_add_style(obj, get_style_button_preset_list_options_MAIN_PRESSED(), LV_PART_MAIN | LV_STATE_PRESSED);
-};
-
-void remove_style_button_preset_list_options(lv_obj_t *obj) {
-    (void)obj;
-    lv_obj_remove_style(obj, get_style_button_preset_list_options_MAIN_DEFAULT(), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_remove_style(obj, get_style_button_preset_list_options_MAIN_PRESSED(), LV_PART_MAIN | LV_STATE_PRESSED);
-};
-
-//
 // Style: Button Chain
 //
 
@@ -899,85 +844,15 @@ void remove_style_arc_settings(lv_obj_t *obj) {
 };
 
 //
-// Style: Button Preset List
-//
-
-void init_style_button_preset_list_MAIN_DEFAULT(lv_style_t *style) {
-    lv_style_set_pad_bottom(style, 0);
-    lv_style_set_layout(style, LV_LAYOUT_FLEX);
-    lv_style_set_flex_cross_place(style, LV_FLEX_ALIGN_CENTER);
-    lv_style_set_flex_flow(style, LV_FLEX_FLOW_ROW);
-    lv_style_set_flex_track_place(style, LV_FLEX_ALIGN_CENTER);
-    lv_style_set_text_font(style, &ui_font_ibm_22);
-    lv_style_set_bg_opa(style, 0);
-    lv_style_set_pad_top(style, 0);
-    lv_style_set_pad_left(style, 0);
-    lv_style_set_pad_right(style, 0);
-    lv_style_set_border_opa(style, 0);
-    lv_style_set_border_color(style, lv_color_hex(theme_colors[active_theme_index][2]));
-    lv_style_set_border_width(style, 2);
-    lv_style_set_pad_column(style, 14);
-};
-
-lv_style_t *get_style_button_preset_list_MAIN_DEFAULT() {
-    static lv_style_t *style;
-    if (!style) {
-        style = (lv_style_t *)lv_mem_alloc(sizeof(lv_style_t));
-        lv_style_init(style);
-        init_style_button_preset_list_MAIN_DEFAULT(style);
-    }
-    return style;
-};
-
-void init_style_button_preset_list_MAIN_CHECKED(lv_style_t *style) {
-    lv_style_set_bg_opa(style, 0);
-    lv_style_set_border_opa(style, 255);
-};
-
-lv_style_t *get_style_button_preset_list_MAIN_CHECKED() {
-    static lv_style_t *style;
-    if (!style) {
-        style = (lv_style_t *)lv_mem_alloc(sizeof(lv_style_t));
-        lv_style_init(style);
-        init_style_button_preset_list_MAIN_CHECKED(style);
-    }
-    return style;
-};
-
-void add_style_button_preset_list(lv_obj_t *obj) {
-    (void)obj;
-    lv_obj_add_style(obj, get_style_button_preset_list_MAIN_DEFAULT(), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_add_style(obj, get_style_button_preset_list_MAIN_CHECKED(), LV_PART_MAIN | LV_STATE_CHECKED);
-};
-
-void remove_style_button_preset_list(lv_obj_t *obj) {
-    (void)obj;
-    lv_obj_remove_style(obj, get_style_button_preset_list_MAIN_DEFAULT(), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_remove_style(obj, get_style_button_preset_list_MAIN_CHECKED(), LV_PART_MAIN | LV_STATE_CHECKED);
-};
-
-//
 // Style: Container Preset List Cell
 //
 
 void init_style_container_preset_list_cell_MAIN_DEFAULT(lv_style_t *style) {
-    lv_style_set_layout(style, LV_LAYOUT_FLEX);
-    {
-        static lv_coord_t dsc[] = {0, LV_GRID_TEMPLATE_LAST};
-        lv_style_set_grid_row_dsc_array(style, dsc);
-    }
-    {
-        static lv_coord_t dsc[] = {0, LV_GRID_TEMPLATE_LAST};
-        lv_style_set_grid_column_dsc_array(style, dsc);
-    }
-    lv_style_set_flex_flow(style, LV_FLEX_FLOW_ROW);
-    lv_style_set_flex_cross_place(style, LV_FLEX_ALIGN_CENTER);
     lv_style_set_bg_color(style, lv_color_hex(theme_colors[active_theme_index][0]));
     lv_style_set_bg_opa(style, 255);
-    lv_style_set_radius(style, 12);
-    lv_style_set_pad_column(style, 0);
-    lv_style_set_min_height(style, 75);
-    lv_style_set_clip_corner(style, true);
+    lv_style_set_text_color(style, lv_color_hex(0xffffff));
+    lv_style_set_text_font(style, &ui_font_ibm_22);
+    lv_style_set_min_height(style, 64);
 };
 
 lv_style_t *get_style_container_preset_list_cell_MAIN_DEFAULT() {
@@ -990,14 +865,32 @@ lv_style_t *get_style_container_preset_list_cell_MAIN_DEFAULT() {
     return style;
 };
 
+void init_style_container_preset_list_cell_MAIN_CHECKED(lv_style_t *style) {
+    lv_style_set_bg_color(style, lv_color_hex(theme_colors[active_theme_index][1]));
+    lv_style_set_bg_opa(style, 255);
+    lv_style_set_text_color(style, lv_color_hex(theme_colors[active_theme_index][2]));
+};
+
+lv_style_t *get_style_container_preset_list_cell_MAIN_CHECKED() {
+    static lv_style_t *style;
+    if (!style) {
+        style = (lv_style_t *)lv_mem_alloc(sizeof(lv_style_t));
+        lv_style_init(style);
+        init_style_container_preset_list_cell_MAIN_CHECKED(style);
+    }
+    return style;
+};
+
 void add_style_container_preset_list_cell(lv_obj_t *obj) {
     (void)obj;
     lv_obj_add_style(obj, get_style_container_preset_list_cell_MAIN_DEFAULT(), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_add_style(obj, get_style_container_preset_list_cell_MAIN_CHECKED(), LV_PART_MAIN | LV_STATE_CHECKED);
 };
 
 void remove_style_container_preset_list_cell(lv_obj_t *obj) {
     (void)obj;
     lv_obj_remove_style(obj, get_style_container_preset_list_cell_MAIN_DEFAULT(), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_remove_style(obj, get_style_container_preset_list_cell_MAIN_CHECKED(), LV_PART_MAIN | LV_STATE_CHECKED);
 };
 
 //
@@ -1489,6 +1382,7 @@ void remove_style_dropdown_list_sub_settings(lv_obj_t *obj) {
 void init_style_textarea_settings_MAIN_DEFAULT(lv_style_t *style) {
     lv_style_set_bg_color(style, lv_color_hex(0x000000));
     lv_style_set_border_color(style, lv_color_hex(theme_colors[active_theme_index][1]));
+    lv_style_set_text_font(style, &ui_font_ibm_22);
 };
 
 lv_style_t *get_style_textarea_settings_MAIN_DEFAULT() {
@@ -1674,6 +1568,67 @@ void remove_style_button_settings_color(lv_obj_t *obj) {
 };
 
 //
+// Style: Keyboard
+//
+
+void init_style_keyboard_MAIN_DEFAULT(lv_style_t *style) {
+    lv_style_set_text_font(style, &lv_font_montserrat_30);
+    lv_style_set_bg_color(style, lv_color_hex(theme_colors[active_theme_index][1]));
+};
+
+lv_style_t *get_style_keyboard_MAIN_DEFAULT() {
+    static lv_style_t *style;
+    if (!style) {
+        style = (lv_style_t *)lv_mem_alloc(sizeof(lv_style_t));
+        lv_style_init(style);
+        init_style_keyboard_MAIN_DEFAULT(style);
+    }
+    return style;
+};
+
+void init_style_keyboard_ITEMS_DEFAULT(lv_style_t *style) {
+    lv_style_set_bg_color(style, lv_color_hex(theme_colors[active_theme_index][3]));
+};
+
+lv_style_t *get_style_keyboard_ITEMS_DEFAULT() {
+    static lv_style_t *style;
+    if (!style) {
+        style = (lv_style_t *)lv_mem_alloc(sizeof(lv_style_t));
+        lv_style_init(style);
+        init_style_keyboard_ITEMS_DEFAULT(style);
+    }
+    return style;
+};
+
+void init_style_keyboard_ITEMS_CHECKED(lv_style_t *style) {
+    lv_style_set_bg_color(style, lv_color_hex(theme_colors[active_theme_index][0]));
+};
+
+lv_style_t *get_style_keyboard_ITEMS_CHECKED() {
+    static lv_style_t *style;
+    if (!style) {
+        style = (lv_style_t *)lv_mem_alloc(sizeof(lv_style_t));
+        lv_style_init(style);
+        init_style_keyboard_ITEMS_CHECKED(style);
+    }
+    return style;
+};
+
+void add_style_keyboard(lv_obj_t *obj) {
+    (void)obj;
+    lv_obj_add_style(obj, get_style_keyboard_MAIN_DEFAULT(), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_add_style(obj, get_style_keyboard_ITEMS_DEFAULT(), LV_PART_ITEMS | LV_STATE_DEFAULT);
+    lv_obj_add_style(obj, get_style_keyboard_ITEMS_CHECKED(), LV_PART_ITEMS | LV_STATE_CHECKED);
+};
+
+void remove_style_keyboard(lv_obj_t *obj) {
+    (void)obj;
+    lv_obj_remove_style(obj, get_style_keyboard_MAIN_DEFAULT(), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_remove_style(obj, get_style_keyboard_ITEMS_DEFAULT(), LV_PART_ITEMS | LV_STATE_DEFAULT);
+    lv_obj_remove_style(obj, get_style_keyboard_ITEMS_CHECKED(), LV_PART_ITEMS | LV_STATE_CHECKED);
+};
+
+//
 //
 //
 
@@ -1684,7 +1639,6 @@ void add_style(lv_obj_t *obj, int32_t styleIndex) {
         add_style_button_basic,
         add_style_button_secondary,
         add_style_button_highlighted,
-        add_style_button_preset_list_options,
         add_style_button_chain,
         add_style_container_preset_small,
         add_style_button_preset,
@@ -1697,7 +1651,6 @@ void add_style(lv_obj_t *obj, int32_t styleIndex) {
         add_style_tab_sub_settings,
         add_style_tab_settings,
         add_style_arc_settings,
-        add_style_button_preset_list,
         add_style_container_preset_list_cell,
         add_style_switch_default,
         add_style_switch_dark,
@@ -1712,6 +1665,7 @@ void add_style(lv_obj_t *obj, int32_t styleIndex) {
         add_style_checkbox_settings,
         add_style_panel_preset_list_color,
         add_style_button_settings_color,
+        add_style_keyboard,
     };
     add_style_funcs[styleIndex](obj);
 }
@@ -1723,7 +1677,6 @@ void remove_style(lv_obj_t *obj, int32_t styleIndex) {
         remove_style_button_basic,
         remove_style_button_secondary,
         remove_style_button_highlighted,
-        remove_style_button_preset_list_options,
         remove_style_button_chain,
         remove_style_container_preset_small,
         remove_style_button_preset,
@@ -1736,7 +1689,6 @@ void remove_style(lv_obj_t *obj, int32_t styleIndex) {
         remove_style_tab_sub_settings,
         remove_style_tab_settings,
         remove_style_arc_settings,
-        remove_style_button_preset_list,
         remove_style_container_preset_list_cell,
         remove_style_switch_default,
         remove_style_switch_dark,
@@ -1751,6 +1703,7 @@ void remove_style(lv_obj_t *obj, int32_t styleIndex) {
         remove_style_checkbox_settings,
         remove_style_panel_preset_list_color,
         remove_style_button_settings_color,
+        remove_style_keyboard,
     };
     remove_style_funcs[styleIndex](obj);
 }
