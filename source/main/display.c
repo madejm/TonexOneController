@@ -16,6 +16,7 @@ limitations under the License.
 */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include "sdkconfig.h"
 #include <math.h>
 #include "freertos/FreeRTOS.h"
@@ -124,7 +125,10 @@ enum UIElements
     UI_ELEMENT_PRESET_LIST,
     UI_ELEMENT_SETTINGS_CLIPBOARD,
     UI_ELEMENT_TUNER_FREQ,
-    UI_ELEMENT_TUNER_STATE
+    UI_ELEMENT_TUNER_STATE,
+    UI_ELEMENT_PROGRESS_BAR,
+    UI_ELEMENT_PROGRESS_BAR_HIDE,
+    UI_ELEMENT_LOG
 };
 
 enum UIAction
@@ -1541,13 +1545,6 @@ void action_save_wifi_settings(lv_event_t * e)
     char *WifiPassword = (char*)lv_textarea_get_text(objects.ui_wifi_password_textarea);
     char *MDNSName = (char*)lv_textarea_get_text(objects.ui_mdns_name_textarea);
 
-    // char msg[33];
-    // sprintf(msg, "WIFI: %u, %u", WiFiMode, WifiTxPower);
-    // wifi_log_msg(msg);
-    // wifi_log_msg(WifiSSID);
-    // wifi_log_msg(WifiPassword);
-    // wifi_log_msg(MDNSName);
-
     lv_scr_load_anim(objects.settings, LV_SCR_LOAD_ANIM_FADE_IN, 0, 0, false);
 
     control_set_config_item_int(CONFIG_ITEM_WIFI_MODE, WiFiMode);
@@ -1872,6 +1869,101 @@ void UI_SetTunerState(uint8_t state)
     {
         ESP_LOGE(TAG, "UI SetTunerState queue send failed!");            
     }
+}
+
+static char *log_cache;
+static size_t log_cache_count = 0;
+
+static void UI_LogCacheAdd(const char *text)
+{
+    char *new_cache = realloc(log_cache, (log_cache_count + 1) * MAX_UI_TEXT);
+    if (new_cache == NULL)
+    {
+        ESP_LOGW(TAG, "Unable to cache early UI log message");
+        return;
+    }
+
+    log_cache = new_cache;
+    snprintf(&log_cache[log_cache_count * MAX_UI_TEXT], MAX_UI_TEXT, "%s", text);
+    log_cache_count++;
+}
+
+void UI_Log(char *text)
+{
+    if (ui_update_queue == NULL)
+    {
+        UI_LogCacheAdd(text);
+        return;
+    }
+
+    tUIUpdate ui_update;
+
+    // build command
+    ui_update.ElementID = UI_ELEMENT_LOG;
+    ui_update.Action = UI_ACTION_NONE;
+    sprintf(ui_update.Text, text);
+
+    // send to queue
+    if (xQueueSend(ui_update_queue, (void*)&ui_update, 0) != pdPASS)
+    {
+        ESP_LOGE(TAG, "UI SetTunerState queue send failed!");            
+    }
+}
+
+/****************************************************************************
+* NAME:
+* DESCRIPTION:
+* PARAMETERS:
+* RETURN:
+* NOTES:
+*****************************************************************************/
+void UI_SetProgressBar(uint8_t progress)
+{
+#if CONFIG_TONEX_CONTROLLER_HAS_DISPLAY
+    tUIUpdate ui_update;
+
+    if (ui_update_queue == NULL)
+    {
+        ESP_LOGW(TAG, "UI progress bar unavailable");
+        return;
+    }
+
+    ui_update.ElementID = UI_ELEMENT_PROGRESS_BAR;
+    ui_update.Action = UI_ACTION_NONE;
+    ui_update.Value = MIN(progress, 100);
+
+    if (xQueueSend(ui_update_queue, (void*)&ui_update, 0) != pdPASS)
+    {
+        ESP_LOGE(TAG, "UI progress bar queue send failed!");
+    }
+#endif
+}
+
+/****************************************************************************
+* NAME:
+* DESCRIPTION:
+* PARAMETERS:
+* RETURN:
+* NOTES:
+*****************************************************************************/
+void UI_HideProgressBar(void)
+{
+#if CONFIG_TONEX_CONTROLLER_HAS_DISPLAY
+    tUIUpdate ui_update;
+
+    if (ui_update_queue == NULL)
+    {
+        return;
+    }
+
+    ui_update.ElementID = UI_ELEMENT_PROGRESS_BAR_HIDE;
+    ui_update.Action = UI_ACTION_NONE;
+
+    if (xQueueSend(ui_update_queue, (void*)&ui_update, 0) != pdPASS)
+    {
+        ESP_LOGE(TAG, "UI progress bar queue send failed!");
+    }
+#endif
 }
 
 /****************************************************************************
@@ -2589,6 +2681,41 @@ static  __attribute__((unused)) uint8_t update_ui_element(tUIUpdate* update)
 #endif  //CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI          
         } break;
 
+        case UI_ELEMENT_PROGRESS_BAR:
+        {
+#if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+            if ((objects.ui_progress_bar != NULL) && lv_obj_is_valid(objects.ui_progress_bar))
+            {
+                lv_bar_set_value(objects.ui_progress_bar, update->Value, LV_ANIM_ON);
+                lv_obj_clear_flag(objects.ui_progress_bar, LV_OBJ_FLAG_HIDDEN);
+            }
+            else
+            {
+                ESP_LOGW(TAG, "Progress bar object unavailable");
+            }
+#endif
+        } break;
+
+        case UI_ELEMENT_PROGRESS_BAR_HIDE:
+        {
+#if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+            if ((objects.ui_progress_bar != NULL) && lv_obj_is_valid(objects.ui_progress_bar))
+            {
+                lv_obj_add_flag(objects.ui_progress_bar, LV_OBJ_FLAG_HIDDEN);
+            }
+#endif
+        } break;
+
+        case UI_ELEMENT_LOG:
+        {
+            static char buf[320];
+            char *text = lv_label_get_text(objects.ui_debug_text);
+            snprintf(buf, sizeof(buf), "%s\n%s", text, update->Text);
+            
+            lv_label_set_text(objects.ui_debug_text, buf);
+            lv_obj_clear_flag(objects.ui_debug_text, LV_OBJ_FLAG_HIDDEN);
+        } break;
+
         default:
         {
             ESP_LOGE(TAG, "Unknown display elment %d", update->ElementID);     
@@ -3131,4 +3258,12 @@ void display_init(i2c_master_bus_handle_t bus_handle, SemaphoreHandle_t I2CMutex
 #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
     customize_ui();
 #endif // CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+
+    for (size_t index = 0; index < log_cache_count; index++)
+    {
+        UI_Log(&log_cache[index * MAX_UI_TEXT]);
+    }
+    free(log_cache);
+    log_cache = NULL;
+    log_cache_count = 0;
 }

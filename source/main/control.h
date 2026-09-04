@@ -17,6 +17,9 @@ limitations under the License.
 
 #pragma once
 
+#include "params_common.h"
+#include "scenes.h"
+
 void control_init(void);
 void control_load_config(void);
 
@@ -305,37 +308,16 @@ enum IOExpanderPins
     IO_EXPANDER_PIN_16
 };
 
-typedef enum
-{
-    MODELLER_PARAM_TYPE_SWITCH,        // on/off
-    MODELLER_PARAM_TYPE_SELECT,        // 0,1,2,3 etc
-    MODELLER_PARAM_TYPE_RANGE          // floating point range
-} ParamType_t;
-
 typedef enum {
     FX_SELECTED_VALUE_NONE,
     FX_SELECTED_VALUE_1,
     FX_SELECTED_VALUE_2
 } FxSelectedValueIndex_t;
 
-#define MAX_PARAM_NAME          12
-
 // special cases for handling effect switches that use Midi but don't change a parameter
 #define TONEX_UNKNOWN           0xFFFF
 
 typedef uint8_t MidiValue_t;
-
-typedef struct
-{
-    float Value;
-    float Min;
-    float Max;
-    char Name[MAX_PARAM_NAME];
-    ParamType_t Type;
-    uint8_t Data1;  // usage depends on connected modeller
-    uint8_t Data2;  // usage depends on connected modeller
-    uint8_t Data3;  // usage depends on connected modeller
-} tModellerParameter;
 
 typedef struct __attribute__ ((packed)) 
 {
@@ -357,18 +339,9 @@ typedef struct __attribute__ ((packed))
 #define MAX_EXTERNAL_EFFECT_FOOTSWITCHES        9
 #define MAX_INTERNAL_EFFECT_FOOTSWITCHES        4
 #define SWITCH_NOT_USED                         0xFF
-#define MAX_SUPPORTED_PRESETS                   150
 #define MAX_PRESET_NAME_LENGTH                  33
 #define MAX_PC_MAP                              128 // 0 to 127, matches Midi values
 #define MAX_BT_PERIPHERAL_NAME                  25    
-#define MAX_SCENES                              4
-#define MAX_SCENE_NAME                          30
-
-typedef struct __attribute__ ((packed)) 
-{
-    char Name[MAX_SCENE_NAME];
-    uint8_t PresetOrder[MAX_SUPPORTED_PRESETS];
-} tScene;
 
 // thread safe public API
 void control_request_preset_up(void);
@@ -397,13 +370,6 @@ void control_trigger_tap_tempo_at(uint32_t tick_count);
 void control_refresh_preset_order();
 void control_set_preset_order(uint8_t* order);
 uint8_t* control_get_preset_order(void);
-tScene* control_get_scene(uint8_t index);
-uint8_t control_get_selected_scene();
-void control_select_scene(uint8_t index);
-uint8_t control_get_scenes_count();
-bool control_create_scene();
-void control_delete_scene(uint8_t index);
-void control_set_scene_name(uint8_t index, char *name);
 void control_set_pc_map(uint8_t* map);
 uint8_t* control_get_pc_map(void);
 void control_set_sync_complete(void);

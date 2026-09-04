@@ -50,6 +50,7 @@ limitations under the License.
 #include "freertos/FreeRTOS.h"
 #include "freertos/semphr.h"
 #include "freertos/ringbuf.h"
+#include "esp_heap_caps.h"
 #include "esp_log.h"
 #include "usb/usb_host.h"
 #include "usb/cdc_acm_host.h"
@@ -74,6 +75,7 @@ static const uint8_t ToneOnePresetByteMarker[] = {0xB9, 0x04, 0xB9, 0x02, 0xBC, 
 #define MAX_INPUT_BUFFERS                           3
 
 #define MAX_STATE_DATA                              512
+#define TONEX_ONE_CDC_RX_TRANSFER_SIZE              4096
 
 // credit to https://github.com/vit3k/tonex_controller for some of the below details and implementation
 enum CommsState
@@ -136,6 +138,11 @@ typedef struct __attribute__ ((packed))
     uint8_t PresetData[TONEX_MAX_SHORT_PRESET_DATA];
     uint16_t PresetDataLength;
     uint16_t PresetParameterStartOffset;
+
+    // storage for current preset details data (full version)
+    uint8_t FullPresetData[TONEX_MAX_FULL_PRESET_DATA];
+    uint16_t FullPresetDataLength;
+    uint16_t FullPresetParameterStartOffset;
 } tPedalData;
 
 typedef struct __attribute__ ((packed)) 
@@ -177,6 +184,35 @@ static uint8_t boot_init_needed = 0;
 static uint8_t boot_global_request = 0;
 static uint8_t boot_preset_request = 0;
 static volatile tInputBufferEntry* InputBuffers;
+
+static void __attribute__((noreturn)) usb_tonex_one_debug_halt(const char *reason, size_t requested_size)
+{
+    size_t free_psram = heap_caps_get_free_size(MALLOC_CAP_SPIRAM);
+    size_t largest_block = heap_caps_get_largest_free_block(MALLOC_CAP_SPIRAM);
+    size_t free_dma = heap_caps_get_free_size(MALLOC_CAP_DMA | MALLOC_CAP_INTERNAL);
+    size_t largest_dma_block = heap_caps_get_largest_free_block(MALLOC_CAP_DMA | MALLOC_CAP_INTERNAL);
+
+    ESP_LOGE(TAG, "Diagnostic halt: %s, requested=%u, PSRAM free=%u largest=%u, DMA free=%u largest=%u",
+             reason, (unsigned)requested_size, (unsigned)free_psram, (unsigned)largest_block,
+             (unsigned)free_dma, (unsigned)largest_dma_block);
+    wifi_log_msg("TONEX HALT %s req=%u psram=%u/%u dma=%u/%u",
+                 reason, (unsigned)requested_size, (unsigned)free_psram, (unsigned)largest_block,
+                 (unsigned)free_dma, (unsigned)largest_dma_block);
+
+    while (1)
+    {
+        vTaskDelay(pdMS_TO_TICKS(1000));
+    }
+}
+
+static void usb_tonex_one_debug_check(esp_err_t result, const char *operation)
+{
+    if (result != ESP_OK)
+    {
+        wifi_log_msg("TONEX init failed: %s: %s", operation, esp_err_to_name(result));
+        usb_tonex_one_debug_halt(operation, 0);
+    }
+}
 
 static tSettingsClipboard settingsClipboard = {
     .type = CLIPBOARD_NONE
@@ -642,6 +678,35 @@ static esp_err_t __attribute__((unused)) usb_tonex_one_request_preset_details(ui
 
     // add framing
     outlength = tonex_common_add_framing(request, sizeof(request), FramedBuffer);
+
+    // send it
+    return tonex_common_transmit(cdc_dev, FramedBuffer, outlength, TONEX_USB_TX_BUFFER_SIZE);
+}
+
+/****************************************************************************
+* NAME:        
+* DESCRIPTION: 
+* PARAMETERS:  
+* RETURN:      
+* NOTES:       
+*****************************************************************************/
+static esp_err_t usb_tonex_one_send_parameters(void)
+{
+    uint16_t outlength;
+
+    // Build message, length to 0 for now                    len LSB  len MSB
+    uint8_t message[] = {0xb9, 0x03, 0x81, 0x03, 0x03, 0x82, 0,       0,       0x80, 0x0B, 0x03};
+
+    // set length 
+    message[6] = TonexData->Message.PedalData.FullPresetDataLength & 0xFF;
+    message[7] = (TonexData->Message.PedalData.FullPresetDataLength >> 8) & 0xFF;
+
+    // build total message
+    memcpy((void*)TxBuffer, (void*)message, sizeof(message));
+    memcpy((void*)&TxBuffer[sizeof(message)], (void*)TonexData->Message.PedalData.FullPresetData, TonexData->Message.PedalData.FullPresetDataLength);
+
+    // add framing
+    outlength = tonex_common_add_framing(TxBuffer, sizeof(message) + TonexData->Message.PedalData.FullPresetDataLength, FramedBuffer);
 
     // send it
     return tonex_common_transmit(cdc_dev, FramedBuffer, outlength, TONEX_USB_TX_BUFFER_SIZE);
@@ -1350,6 +1415,46 @@ static TonexStatus usb_tonex_one_parse_preset_details(uint8_t* unframed, uint16_
 * RETURN:      
 * NOTES:       
 *****************************************************************************/
+static TonexStatus usb_tonex_one_parse_preset_full_details(uint8_t* unframed, uint16_t length, uint16_t index)
+{
+    uint8_t param_start_marker[] = {0xBA, 0x03, 0xBA, 0x6D}; 
+
+    TonexData->Message.Header.type = TYPE_STATE_PRESET_DETAILS_FULL;
+
+    TonexData->Message.PedalData.FullPresetDataLength = length - index;
+    memcpy((void*)TonexData->Message.PedalData.FullPresetData, (void*)&unframed[index], TonexData->Message.PedalData.FullPresetDataLength);
+    ESP_LOGI(TAG, "Saved Full Preset Details: %d", TonexData->Message.PedalData.FullPresetDataLength);
+    
+    // try to locate the start of the first parameter block 
+    uint8_t* temp_ptr = memmem((void*)TonexData->Message.PedalData.FullPresetData, TonexData->Message.PedalData.FullPresetDataLength, (void*)param_start_marker, sizeof(param_start_marker));
+    if (temp_ptr != NULL)
+    {
+        // skip the start marker
+        temp_ptr += sizeof(param_start_marker);
+
+        // save the offset where the parameters start
+        TonexData->Message.PedalData.FullPresetParameterStartOffset = temp_ptr - TonexData->Message.PedalData.FullPresetData;
+        ESP_LOGI(TAG, "Found start of preset params in full data at %d", TonexData->Message.PedalData.FullPresetParameterStartOffset);
+    }
+    else
+    {
+        ESP_LOGW(TAG, "Could not find start of preset parameters in full data!");
+    }
+    
+    // debug
+    //ESP_LOGI(TAG, "Full Preset Data Rx: %d %d", (int)length, (int)index);
+    //ESP_LOG_BUFFER_HEXDUMP(TAG, TonexData->Message.PedalData.FullPresetData, TonexData->Message.PedalData.FullPresetDataLength, ESP_LOG_INFO);
+
+    return STATUS_OK;
+}
+
+/****************************************************************************
+* NAME:        
+* DESCRIPTION: 
+* PARAMETERS:  
+* RETURN:      
+* NOTES:       
+*****************************************************************************/
 static TonexStatus usb_tonex_one_parse_param_changed(uint8_t* unframed, uint16_t length, uint16_t index)
 {
     uint16_t param_index;
@@ -1706,8 +1811,7 @@ static TonexStatus usb_tonex_one_parse(uint8_t* message, uint16_t inlength)
 
         case TYPE_STATE_PRESET_DETAILS_FULL:
         {
-            // don't need to process this anymore, thanks to IK new parameter comms :)
-            return STATUS_OK;
+            return usb_tonex_one_parse_preset_full_details(FramedBuffer, out_len, index);
         }
 
         case TYPE_PARAM_CHANGED:
@@ -1806,6 +1910,8 @@ static esp_err_t usb_tonex_one_process_single_message(uint8_t* data, uint16_t le
                         // save preset name 
                         control_sync_preset_name(boot_preset_request, preset_name);
 
+                        UI_SetProgressBar(((boot_preset_request + 1) * 100) / MAX_PRESETS_TONEX_ONE);
+
                         // get next preset name
                         boot_preset_request++;
                         usb_tonex_one_request_preset_details(boot_preset_request, 0);
@@ -1849,6 +1955,7 @@ static esp_err_t usb_tonex_one_process_single_message(uint8_t* data, uint16_t le
                         }
 
                         control_set_sync_complete();
+                        UI_HideProgressBar();
                         
                         // debug dump parameters
                         //tonex_dump_parameters();
@@ -1867,6 +1974,8 @@ static esp_err_t usb_tonex_one_process_single_message(uint8_t* data, uint16_t le
                     boot_init_needed = 1;
                     boot_global_request = 1;
                     boot_preset_request = 0;
+
+                    UI_SetProgressBar(0);
 
 #if CONFIG_TONEX_CONTROLLER_HAS_DISPLAY
                     // show sync message
@@ -2185,8 +2294,9 @@ void usb_tonex_one_init(class_driver_t* driver_obj, QueueHandle_t comms_queue)
     InputBuffers = heap_caps_malloc(sizeof(tInputBufferEntry) * MAX_INPUT_BUFFERS, MALLOC_CAP_SPIRAM);
     if (InputBuffers == NULL)
     {
-        ESP_LOGE(TAG, "Failed to allocate input buffers!");
-        return;
+        // ESP_LOGE(TAG, "Failed to allocate input buffers!");
+        // return;
+        usb_tonex_one_debug_halt("InputBuffers", sizeof(tInputBufferEntry) * MAX_INPUT_BUFFERS);
     }
 
     // set all buffers as ready for writing
@@ -2201,22 +2311,25 @@ void usb_tonex_one_init(class_driver_t* driver_obj, QueueHandle_t comms_queue)
     TxBuffer = heap_caps_malloc(TONEX_RX_TEMP_BUFFER_SIZE, MALLOC_CAP_SPIRAM);
     if (TxBuffer == NULL)
     {
-        ESP_LOGE(TAG, "Failed to allocate TxBuffer buffer!");
-        return;
+        // ESP_LOGE(TAG, "Failed to allocate TxBuffer buffer!");
+        // return;
+        usb_tonex_one_debug_halt("TxBuffer", TONEX_RX_TEMP_BUFFER_SIZE);
     }
     
     FramedBuffer = heap_caps_malloc(TONEX_RX_TEMP_BUFFER_SIZE, MALLOC_CAP_SPIRAM);
     if (FramedBuffer == NULL)
     {
-        ESP_LOGE(TAG, "Failed to allocate FramedBuffer buffer!");
-        return;
+        // ESP_LOGE(TAG, "Failed to allocate FramedBuffer buffer!");
+        // return;
+        usb_tonex_one_debug_halt("FramedBuffer", TONEX_RX_TEMP_BUFFER_SIZE);
     }
 
     TonexData = heap_caps_malloc(sizeof(tTonexData), MALLOC_CAP_SPIRAM);
     if (TonexData == NULL)
     {
-        ESP_LOGE(TAG, "Failed to allocate TonexData buffer!");
-        return;
+        // ESP_LOGE(TAG, "Failed to allocate TonexData buffer!");
+        // return;
+        usb_tonex_one_debug_halt("TonexData", sizeof(tTonexData));
     }
 
     memset((void*)TonexData, 0, sizeof(tTonexData));
@@ -2244,7 +2357,7 @@ void usb_tonex_one_init(class_driver_t* driver_obj, QueueHandle_t comms_queue)
     // 0x0200	wMaxPacketSize    (512 bytes)   <= invalid for full speed mode we are using here
     // 0x00	bInterval         
     const usb_config_desc_t* config_desc;
-    ESP_ERROR_CHECK(usb_host_get_active_config_descriptor(driver_obj->dev_hdl, &config_desc));
+    usb_tonex_one_debug_check(usb_host_get_active_config_descriptor(driver_obj->dev_hdl, &config_desc), "get config descriptor");
 
     // fix wMaxPacketSize
     int off = 0;
@@ -2270,7 +2383,7 @@ void usb_tonex_one_init(class_driver_t* driver_obj, QueueHandle_t comms_queue)
     // code from forums, work around end
 
     // install CDC host driver
-    ESP_ERROR_CHECK(cdc_acm_host_install(NULL));
+    usb_tonex_one_debug_check(cdc_acm_host_install(NULL), "install CDC");
 
     ESP_LOGI(TAG, "Opening CDC ACM device 0x%04X:0x%04X", IK_MULTIMEDIA_USB_VENDOR, TONEX_ONE_PRODUCT_ID);
 
@@ -2278,7 +2391,7 @@ void usb_tonex_one_init(class_driver_t* driver_obj, QueueHandle_t comms_queue)
     const cdc_acm_host_device_config_t dev_config = {
         .connection_timeout_ms = 1000,
         .out_buffer_size = TONEX_USB_TX_BUFFER_SIZE,
-        .in_buffer_size = TONEX_RX_TEMP_BUFFER_SIZE,
+        .in_buffer_size = TONEX_ONE_CDC_RX_TRANSFER_SIZE,
         .user_arg = NULL,
         .event_cb = NULL,
         .data_cb = usb_tonex_one_handle_rx
@@ -2291,7 +2404,7 @@ void usb_tonex_one_init(class_driver_t* driver_obj, QueueHandle_t comms_queue)
     //heap_caps_print_heap_info(MALLOC_CAP_DMA);
 
     // open it
-    ESP_ERROR_CHECK(cdc_acm_host_open(IK_MULTIMEDIA_USB_VENDOR, TONEX_ONE_PRODUCT_ID, TONEX_ONE_CDC_INTERFACE_INDEX, &dev_config, &cdc_dev));
+    usb_tonex_one_debug_check(cdc_acm_host_open(IK_MULTIMEDIA_USB_VENDOR, TONEX_ONE_PRODUCT_ID, TONEX_ONE_CDC_INTERFACE_INDEX, &dev_config, &cdc_dev), "open CDC");
     assert(cdc_dev);
     
     //cdc_acm_host_desc_print(cdc_dev);
@@ -2300,7 +2413,7 @@ void usb_tonex_one_init(class_driver_t* driver_obj, QueueHandle_t comms_queue)
     ESP_LOGI(TAG, "Setting up line coding");
 
     cdc_acm_line_coding_t line_coding;
-    ESP_ERROR_CHECK(cdc_acm_host_line_coding_get(cdc_dev, &line_coding));
+    usb_tonex_one_debug_check(cdc_acm_host_line_coding_get(cdc_dev, &line_coding), "get line coding");
     ESP_LOGI(TAG, "Line Get: Rate: %d, Stop bits: %d, Parity: %d, Databits: %d", (int)line_coding.dwDTERate, (int)line_coding.bCharFormat, (int)line_coding.bParityType, (int)line_coding.bDataBits);
 
     // set line coding
@@ -2312,17 +2425,11 @@ void usb_tonex_one_init(class_driver_t* driver_obj, QueueHandle_t comms_queue)
         .bDataBits = 8
     };
 
-    if (cdc_acm_host_line_coding_set(cdc_dev, &new_line_coding) != ESP_OK)
-    {
-        ESP_LOGE(TAG, "Set line coding failed");
-    }
+    usb_tonex_one_debug_check(cdc_acm_host_line_coding_set(cdc_dev, &new_line_coding), "set line coding");
 
     // disable flow control
     ESP_LOGI(TAG, "Set line state");
-    if (cdc_acm_host_set_control_line_state(cdc_dev, true, true) != ESP_OK)
-    {
-        ESP_LOGE(TAG, "Set line state failed");
-    }
+    usb_tonex_one_debug_check(cdc_acm_host_set_control_line_state(cdc_dev, true, true), "set line state");
 
     // let things finish init and settle
     vTaskDelay(pdMS_TO_TICKS(250));
@@ -2362,6 +2469,7 @@ void usb_tonex_one_deinit(void)
     boot_init_needed = 0;
     boot_global_request = 0;
     boot_preset_request = 0;
+    UI_HideProgressBar();
 
     // preallocate big memory again, ready for freeing on reconnect
     tonex_common_preallocate_memory();

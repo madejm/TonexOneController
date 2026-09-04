@@ -7,6 +7,7 @@
 #include "display_helpers.h"
 #include "eq_canvas.h"
 #include "tonex_params.h"
+#include "control.h"
 
 #define CANVAS_ARC_DRAG_UPDATE_PERIOD_MS 750
 #define CANVAS_ARC_IDLE_UPDATE_DELAY_MS  150

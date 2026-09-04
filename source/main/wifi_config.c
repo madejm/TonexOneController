@@ -46,6 +46,7 @@ limitations under the License.
 #include "mdns.h"
 #include <esp_http_server.h>
 #include "control.h"
+#include "scenes.h"
 #include "wifi_config.h"
 #include "midi_control.h"
 #include "usb_comms.h"
@@ -493,6 +494,8 @@ void wifi_log_msg(const char *format, ...)
     va_start(args, format);
     vsnprintf(buffer, sizeof(buffer), format, args);
     va_end(args);
+
+    UI_Log(buffer);
 
     wifi_request_sync(WIFI_SYNC_TYPE_LOG, buffer, 0);
 }
@@ -1013,7 +1016,7 @@ static void wifi_process_json_command(const char *payload, wifi_json_sender_t se
                     preset_order[i] = value;
                 }
                 control_set_preset_order(preset_order);
-                control_save_user_data(0);
+                scenes_save();
                 UI_UpdatePresetList();
             }
         }

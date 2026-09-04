@@ -11,11 +11,17 @@
 #include "usb_tonex_one.h"
 #include "usb_tonex.h"
 #include "control.h"
+#include "scenes.h"
 #include "wifi_config.h"
 #include "tonex_params.h"
 #include "display_scenes.h"
 
 static const char *TAG = "app_display_preset_list";
+
+#define OPTION_SAVE         "Save"
+#define OPTION_INSERT       "Insert before..."
+#define OPTION_SWAP         "Swap with..."
+#define OPTION_CHANGE_COLOR "Change color"
 
 #if CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI
 typedef enum
@@ -88,20 +94,26 @@ void updatePresetListColors()
     lv_panel_set_preset_color(objects.ui_preset_list_element_9__color, pageStart + 9);
 }
 
+static void updatePresetName(lv_obj_t* label, uint8_t index, bool saved)
+{
+    lv_label_set_preset_name(label, index);
+    lv_obj_set_checked(label, !saved);
+}
+
 void updatePresetListNames()
 {
     uint8_t pageStart = preset_list_page * PRESET_LIST_PRESETS_PER_PAGE;
 
-    lv_label_set_preset_name(objects.ui_preset_list_element_0__label, pageStart + 0);
-    lv_label_set_preset_name(objects.ui_preset_list_element_1__label, pageStart + 1);
-    lv_label_set_preset_name(objects.ui_preset_list_element_2__label, pageStart + 2);
-    lv_label_set_preset_name(objects.ui_preset_list_element_3__label, pageStart + 3);
-    lv_label_set_preset_name(objects.ui_preset_list_element_4__label, pageStart + 4);
-    lv_label_set_preset_name(objects.ui_preset_list_element_5__label, pageStart + 5);
-    lv_label_set_preset_name(objects.ui_preset_list_element_6__label, pageStart + 6);
-    lv_label_set_preset_name(objects.ui_preset_list_element_7__label, pageStart + 7);
-    lv_label_set_preset_name(objects.ui_preset_list_element_8__label, pageStart + 8);
-    lv_label_set_preset_name(objects.ui_preset_list_element_9__label, pageStart + 9);
+    updatePresetName(objects.ui_preset_list_element_0__label, pageStart + 0, true);
+    updatePresetName(objects.ui_preset_list_element_1__label, pageStart + 1, true);
+    updatePresetName(objects.ui_preset_list_element_2__label, pageStart + 2, true);
+    updatePresetName(objects.ui_preset_list_element_3__label, pageStart + 3, true);
+    updatePresetName(objects.ui_preset_list_element_4__label, pageStart + 4, true);
+    updatePresetName(objects.ui_preset_list_element_5__label, pageStart + 5, true);
+    updatePresetName(objects.ui_preset_list_element_6__label, pageStart + 6, true);
+    updatePresetName(objects.ui_preset_list_element_7__label, pageStart + 7, true);
+    updatePresetName(objects.ui_preset_list_element_8__label, pageStart + 8, true);
+    updatePresetName(objects.ui_preset_list_element_9__label, pageStart + 9, true);
     
     updatePresetListColors();
 }
@@ -119,7 +131,13 @@ void action_open_presets_page(lv_event_t * e)
     updatePresetListSelection();
     updatePresetListNames();
 
-    const char *options = "Insert before...\nSwap with...\nChange color";
+    const char *options;
+    if (false) {
+        options = OPTION_SAVE "\n" OPTION_INSERT "\n" OPTION_SWAP "\n" OPTION_CHANGE_COLOR;
+    } else {
+        options = OPTION_INSERT "\n" OPTION_SWAP "\n" OPTION_CHANGE_COLOR;
+    }
+    
     lv_dropdown_set_options(objects.ui_preset_list_element_0__options, options);
     lv_dropdown_set_options(objects.ui_preset_list_element_1__options, options);
     lv_dropdown_set_options(objects.ui_preset_list_element_2__options, options);
@@ -188,7 +206,7 @@ void selectPresetListPreset(uint8_t buttonIndex)
         }
 
         control_set_preset_order(newPresetOrder);
-        control_save_user_data(0);
+        scenes_save();
         wifi_request_sync(WIFI_SYNC_TYPE_CONFIG, NULL, NULL);
         
         preset_list_edit_index = -1;
@@ -269,7 +287,7 @@ static void setDialogColorButton(int index, uint32_t rawColor)
     lv_obj_set_checked(button, mapping.rawColor == rawColor);
 }
 
-void presetOptionsSelected(uint8_t buttonIndex, uint16_t option)
+void presetOptionsSelected(uint8_t buttonIndex, const char *option)
 {
     if (preset_list_edit_index > -1) {
         return;
@@ -277,26 +295,35 @@ void presetOptionsSelected(uint8_t buttonIndex, uint16_t option)
 
     preset_list_edit_index = preset_list_page * PRESET_LIST_PRESETS_PER_PAGE + buttonIndex;
 
-    switch (option) {
-        case 0:
-        case 1: {
-            preset_list_insert_mode = option == 0 ? PRESET_LIST_INSERT_MODE_INSERT : PRESET_LIST_INSERT_MODE_SWAP;
+    if (strcmp(option, OPTION_SAVE) == 0)
+    {
+        
+    }
+    else if (strcmp(option, OPTION_INSERT) == 0)
+    {
+            preset_list_insert_mode = PRESET_LIST_INSERT_MODE_INSERT;
 
             lv_obj_clear_flag(objects.ui_preset_list_cancel_button, LV_OBJ_FLAG_HIDDEN);
             updatePresetListSelection();
-        } break;
+    }
+    else if (strcmp(option, OPTION_SWAP) == 0)
+    {
+            preset_list_insert_mode = PRESET_LIST_INSERT_MODE_SWAP;
 
-        case 2: {
-            lv_label_set_preset_name(objects.ui_preset_list_color_dialog_name, preset_list_edit_index);
+            lv_obj_clear_flag(objects.ui_preset_list_cancel_button, LV_OBJ_FLAG_HIDDEN);
+            updatePresetListSelection();
+    }
+    else if (strcmp(option, OPTION_CHANGE_COLOR) == 0)
+    {
+        lv_label_set_preset_name(objects.ui_preset_list_color_dialog_name, preset_list_edit_index);
 
-            uint32_t rawColor = get_preset_color_raw(preset_list_edit_index);
+        uint32_t rawColor = get_preset_color_raw(preset_list_edit_index);
 
-            for (int i = 0; i <= 20; i++) {
-                setDialogColorButton(i, rawColor);
-            }
+        for (int i = 0; i <= 20; i++) {
+            setDialogColorButton(i, rawColor);
+        }
 
-            lv_obj_clear_flag(objects.ui_preset_list_color_dialog, LV_OBJ_FLAG_HIDDEN);
-        } break;
+        lv_obj_clear_flag(objects.ui_preset_list_color_dialog, LV_OBJ_FLAG_HIDDEN);
     }
 }
 

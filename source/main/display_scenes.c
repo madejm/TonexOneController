@@ -13,16 +13,20 @@
 #include "usb_tonex_one.h"
 #include "usb_tonex.h"
 #include "control.h"
+#include "scenes.h"
 #include "wifi_config.h"
 #include "tonex_params.h"
 
 // static const char *TAG = "app_display_scenes";
 
+#define OPTION_RENAME "Rename"
+#define OPTION_DELETE "Delete"
+
 static int16_t updatingScene = -1;
 
 static void updateSceneElementName(
     uint8_t index,
-    char *name
+    const char *name
 ) {
     lv_obj_t *obj;
     switch (index) {
@@ -121,7 +125,8 @@ static void updateSceneElementVisible(
 }
 
 static void populateSceneElementOptions(
-    uint8_t index
+    uint8_t index,
+    uint8_t scenesCount
 ) {
     lv_obj_t *obj;
     switch (index) {
@@ -148,13 +153,17 @@ static void populateSceneElementOptions(
         default: return;
     }
 
-    lv_dropdown_set_options(obj, "Rename\nDelete");
+    if (scenesCount > 1) {
+        lv_dropdown_set_options(obj, OPTION_RENAME "\n" OPTION_DELETE);
+    } else {
+        lv_dropdown_set_options(obj, OPTION_RENAME);
+    }
 }
 
 // static void updateScenesListSelected()
 // {
-//     uint8_t scenesCount = control_get_scenes_count();
-//     uint8_t selectedScene = control_get_selected_scene();
+//     uint8_t scenesCount = scenes_get_count();
+//     uint8_t selectedScene = scenes_get_selected();
 
 //     for (uint8_t index = 0; index < MAX_SCENES; index++)
 //     {
@@ -168,21 +177,21 @@ static void populateSceneElementOptions(
 
 static void updateScenesList()
 {
-    uint8_t scenesCount = control_get_scenes_count();
-    uint8_t selectedScene = control_get_selected_scene();
+    uint8_t scenesCount = scenes_get_count();
+    uint8_t selectedScene = scenes_get_selected();
 
     for (uint8_t index = 0; index < 20; index++)
     {
         bool visible = index < scenesCount;
         updateSceneElementVisible(index, visible);
-        populateSceneElementOptions(index);
+        populateSceneElementOptions(index, scenesCount);
 
         if (visible) {
             updateSceneElementSelected(index, index == selectedScene);
             
-            tScene *scene = control_get_scene(index);
-            if (scene != NULL) {
-                updateSceneElementName(index, scene->Name);
+            const char *name = scenes_get_name(index);
+            if (name != NULL) {
+                updateSceneElementName(index, name);
             }
         }
     }
@@ -208,10 +217,10 @@ void action_close_scenes_page(lv_event_t *e)
 
 void action_new_scene(lv_event_t *e)
 {
-    if (control_create_scene())
+    if (scenes_create())
     {
-        control_select_scene(control_get_scenes_count() - 1);
-        control_save_user_data(false);
+        scenes_select(scenes_get_count() - 1);
+        scenes_save();
 
         updateScenesList();
     }
@@ -219,21 +228,21 @@ void action_new_scene(lv_event_t *e)
 
 void selectScene(uint8_t index)
 {
-    control_select_scene(index);
+    scenes_select(index);
     control_refresh_preset_order();
 
     updatePresetListSelection();
     updatePresetListColors();
     updatePresetListNames();
 
-    control_save_user_data(false);
+    scenes_save();
     
     action_open_presets_page(NULL);
 }
 
-void sceneOptionsSelected(uint8_t index, uint16_t option)
+void sceneOptionsSelected(uint8_t index, const char *option)
 {
-    uint8_t scenesCount = control_get_scenes_count();
+    uint8_t scenesCount = scenes_get_count();
 
     if (index >= scenesCount) {
         return;
@@ -241,39 +250,36 @@ void sceneOptionsSelected(uint8_t index, uint16_t option)
     if (updatingScene > -1) {
         return;
     }
-    tScene *scene = control_get_scene(index);
+    const char *name = scenes_get_name(index);
 
-    if (scene == NULL) {
+    if (name == NULL) {
         return;
     }
+    
+    if (strcmp(option, OPTION_RENAME) == 0)
+    {
+        updatingScene = index;
 
-    switch (option) {
-        case 0: {
-            updatingScene = index;
+        lv_textarea_set_text(objects.ui_scene_rename_dialog_textarea, name);
+        lv_obj_add_state(objects.ui_scene_rename_dialog_textarea, LV_STATE_FOCUSED);
 
-            const char *name = scene->Name;
-            lv_textarea_set_text(objects.ui_scene_rename_dialog_textarea, name);
-            lv_obj_add_state(objects.ui_scene_rename_dialog_textarea, LV_STATE_FOCUSED);
-
-            if (strlen(name) == 0) {
-                lv_keyboard_set_mode(objects.ui_scene_rename_dialog_keyboard, LV_KEYBOARD_MODE_TEXT_UPPER);
-            } else {
-                lv_keyboard_set_mode(objects.ui_scene_rename_dialog_keyboard, LV_KEYBOARD_MODE_TEXT_LOWER);
-            }
-            
-            lv_obj_clear_flag(objects.ui_scene_rename_dialog, LV_OBJ_FLAG_HIDDEN);
-        } break;
-
-        case 1: {
-            if (scenesCount <= 1) {
-                return;
-            }
-            updatingScene = index;
-            
-            const char *name = scene->Name;
-            lv_label_set_text(objects.ui_scene_delete_dialog_name, name);
-            lv_obj_clear_flag(objects.ui_scene_delete_dialog, LV_OBJ_FLAG_HIDDEN);
-        } break;
+        if (strlen(name) == 0) {
+            lv_keyboard_set_mode(objects.ui_scene_rename_dialog_keyboard, LV_KEYBOARD_MODE_TEXT_UPPER);
+        } else {
+            lv_keyboard_set_mode(objects.ui_scene_rename_dialog_keyboard, LV_KEYBOARD_MODE_TEXT_LOWER);
+        }
+        
+        lv_obj_clear_flag(objects.ui_scene_rename_dialog, LV_OBJ_FLAG_HIDDEN);
+    }
+    else if (strcmp(option, OPTION_DELETE) == 0)
+    {
+        if (scenesCount <= 1) {
+            return;
+        }
+        updatingScene = index;
+        
+        lv_label_set_text(objects.ui_scene_delete_dialog_name, name);
+        lv_obj_clear_flag(objects.ui_scene_delete_dialog, LV_OBJ_FLAG_HIDDEN);
     }
 }
 
@@ -287,8 +293,8 @@ void action_scene_rename_dialog_keyboard_ok(lv_event_t * e)
 {
     if (updatingScene > -1) {
         char *name = (char *)lv_textarea_get_text(objects.ui_scene_rename_dialog_textarea);
-        control_set_scene_name(updatingScene, name);
-        control_save_user_data(false);
+        scenes_set_name(updatingScene, name);
+        scenes_save();
 
         updateSceneElementName(updatingScene, name);
     }
@@ -304,8 +310,7 @@ void action_scene_delete_dialog_cancel(lv_event_t *e) {
 
 void action_scene_delete_dialog_delete(lv_event_t *e) {
     if (updatingScene > -1) {
-        control_delete_scene(updatingScene);
-        control_save_user_data(false);
+        scenes_delete(updatingScene);
 
         updateScenesList();
     }

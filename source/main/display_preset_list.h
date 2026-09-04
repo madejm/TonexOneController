@@ -8,7 +8,7 @@ extern "C" {
 #include "lvgl.h"
 
 void selectPresetListPreset(uint8_t buttonIndex);
-void presetOptionsSelected(uint8_t buttonIndex, uint16_t option);
+void presetOptionsSelected(uint8_t buttonIndex, const char *option);
 void updatePresetListSelection();
 void updatePresetListColors();
 void updatePresetListNames();

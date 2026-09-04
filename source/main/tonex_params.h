@@ -24,7 +24,7 @@ extern "C" {
 #endif
 
 #include "esp_err.h"
-#include "control.h"
+#include "params_common.h"
 
 enum TonexReverbModels
 {

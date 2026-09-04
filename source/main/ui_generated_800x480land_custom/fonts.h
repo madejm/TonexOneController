@@ -12,6 +12,8 @@ extern const lv_font_t ui_font_ibm_36;
 extern const lv_font_t ui_font_ibm_32;
 extern const lv_font_t ui_font_ibm_22;
 extern const lv_font_t ui_font_ibm_18;
+extern const lv_font_t ui_font_ibm_22_italic;
+extern const lv_font_t ui_font_ibm_36_italic;
 
 #ifndef EXT_FONT_DESC_T
 #define EXT_FONT_DESC_T

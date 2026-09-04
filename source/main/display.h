@@ -63,6 +63,9 @@ void UI_ShowToast(char* text);
 void UI_SettingsCopied(Clipboard_t type);
 void UI_SetTunerFrequencies(float error, float ref_freq, uint8_t midi_note);
 void UI_SetTunerState(uint8_t state);
+void UI_SetProgressBar(uint8_t progress);
+void UI_HideProgressBar(void);
+void UI_Log(char *text);
 
 #ifdef __cplusplus
 } /*extern "C"*/

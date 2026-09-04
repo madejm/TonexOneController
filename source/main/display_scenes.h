@@ -8,7 +8,7 @@ extern "C" {
 #include "lvgl.h"
 
 void selectScene(uint8_t index);
-void sceneOptionsSelected(uint8_t index, uint16_t option);
+void sceneOptionsSelected(uint8_t index, const char *option);
 
 #ifdef __cplusplus
 } /*extern "C"*/

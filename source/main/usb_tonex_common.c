@@ -34,6 +34,8 @@ limitations under the License.
 
 static const char *TAG = "app_TonexCommon";
 
+#define TONEX_CDC_DMA_RESERVATION_SIZE  (TONEX_RX_TEMP_BUFFER_SIZE + TONEX_USB_TX_BUFFER_SIZE + 4096)
+
 static uint8_t* PreallocatedMemory;
 
 /****************************************************************************
@@ -340,8 +342,10 @@ void tonex_common_preallocate_memory(void)
     // and leave us with no spaces big enough to hold the buffers.
     // Work around here: preallocate the buffers we need, and then free them just before the CDC allocation,
     // effectively reserving them and then other parts of system can use different heap areas.
-    // +256 here just to be sure.
-    PreallocatedMemory = heap_caps_malloc(TONEX_RX_TEMP_BUFFER_SIZE + TONEX_USB_TX_BUFFER_SIZE + 256, MALLOC_CAP_DMA);
+    // CDC first allocates several small internal/DMA objects before its 8 KB
+    // receive transfer. Reserve enough space for all of them so those small
+    // allocations cannot split the receive-transfer block.
+    PreallocatedMemory = heap_caps_malloc(TONEX_CDC_DMA_RESERVATION_SIZE, MALLOC_CAP_DMA);
     if (PreallocatedMemory == NULL)
     {
         ESP_LOGE(TAG, "Failed to allocate PreallocatedMemory!");

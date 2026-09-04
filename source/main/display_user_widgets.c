@@ -52,7 +52,9 @@ void action_preset_button(lv_event_t * e)
 void action_preset_button_options(lv_event_t * e)
 {
     lv_obj_t *dropdown = lv_event_get_target(e);
-    uint16_t option = lv_dropdown_get_selected(dropdown);
+    char option[64];
+    lv_dropdown_get_selected_str(dropdown, option, sizeof(option));
+
     if      (dropdown == objects.ui_preset_list_element_0__options) { presetOptionsSelected(0, option); }
     else if (dropdown == objects.ui_preset_list_element_1__options) { presetOptionsSelected(1, option); }
     else if (dropdown == objects.ui_preset_list_element_2__options) { presetOptionsSelected(2, option); }

@@ -23,6 +23,7 @@ typedef struct _objects_t {
     lv_obj_t *settings;
     lv_obj_t *presets;
     lv_obj_t *scenes;
+    lv_obj_t *ui_progress_bar;
     lv_obj_t *obj0;
     lv_obj_t *ui_usb_button;
     lv_obj_t *ui_wi_fi_button;
@@ -112,6 +113,7 @@ typedef struct _objects_t {
     lv_obj_t *ui_icon_image_delay;
     lv_obj_t *ui_icon_reverb;
     lv_obj_t *ui_icon_image_reverb;
+    lv_obj_t *ui_debug_text;
     lv_obj_t *ui_settings_tab_view;
     lv_obj_t *obj2;
     lv_obj_t *ui_gate_tab;

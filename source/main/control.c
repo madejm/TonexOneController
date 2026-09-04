@@ -29,6 +29,7 @@ limitations under the License.
 #include "usb/usb_host.h"
 #include "driver/i2c_master.h"
 #include "nvs_flash.h"
+#include "esp_heap_caps.h"
 #include "esp_vfs.h"
 #include "esp_vfs_fat.h"
 #include "esp_ota_ops.h"
@@ -46,6 +47,7 @@ limitations under the License.
 #include "valeton_params.h"
 #include "midi_helper.h"
 #include "leds.h"
+#include "scenes.h"
 
 #define CTRL_TASK_STACK_SIZE                (3 * 1024)
 
@@ -58,8 +60,6 @@ limitations under the License.
 #define NVS_USERDATA_WIFI_CONF              "wificonf"
 #define NVS_USERDATA_PRESET_ORDER_CONF      "porderconf"
 #define NVS_USERDATA_PC_MAP_CONF            "pcmapconf"
-#define NVS_USERDATA_SCENES                 "scenesconf"
-
 #define MAX_TEXT_LENGTH                     128
 #define MAX_BT_CUSTOM_NAME                  25    
 #define MAX_PRESET_USER_TEXT_LENGTH         32
@@ -240,13 +240,6 @@ typedef struct __attribute__ ((packed))
     uint8_t SkinIndex[MAX_SUPPORTED_PRESETS];
 } tSkinConfig;
 
-typedef struct __attribute__ ((packed)) 
-{
-    uint8_t ScenesCount;
-    uint8_t SelectedScene;
-    tScene Scenes[MAX_SCENES];
-} tScenesConfig;
-
 typedef struct 
 {
     tBluetoothConfig BTConfig;
@@ -257,7 +250,6 @@ typedef struct
     // tPresetOrderMappingConfig PresetOrderMappingConfig;
     tSkinConfig SkinConfig;
     tPCMapConfig PCMapConfig;
-    tScenesConfig ScenesConfig;
 } tConfigData;
 
 #define TAP_TEMPO_MAX_COUNT 6
@@ -298,11 +290,6 @@ static void DumpUserConfig(void);
 static uint8_t MigrateUserData(void);
 static void UpdateFootswitchLeds(void);
 
-static tScene * currentScene()
-{
-    return &ControlData.ConfigData.ScenesConfig.Scenes[ControlData.ConfigData.ScenesConfig.SelectedScene];
-}
-
 /****************************************************************************
 * NAME:        
 * DESCRIPTION: 
@@ -327,7 +314,7 @@ static uint8_t process_control_command(tControlMessage* message)
                 if (control_get_config_item_int(CONFIG_ITEM_LOOP_AROUND))
                 {
                     uint8_t newIndex = (mappedIndex) ? (mappedIndex - 1) : (usb_get_max_presets_for_connected_modeller() - 1);
-                    uint8_t preset = currentScene()->PresetOrder[newIndex];
+                    uint8_t preset = scenes_get_current()->PresetOrder[newIndex];
 
                     // send message to USB
                     usb_set_preset(preset);
@@ -340,7 +327,7 @@ static uint8_t process_control_command(tControlMessage* message)
                 else if (mappedIndex > 0)
                 {
                     uint8_t newIndex = mappedIndex - 1;
-                    uint8_t preset = currentScene()->PresetOrder[newIndex];
+                    uint8_t preset = scenes_get_current()->PresetOrder[newIndex];
                     
                     // send message to USB
                     usb_set_preset(preset);
@@ -363,7 +350,7 @@ static uint8_t process_control_command(tControlMessage* message)
                 if (control_get_config_item_int(CONFIG_ITEM_LOOP_AROUND))
                 {
                     uint8_t newIndex = (mappedIndex < (usb_get_max_presets_for_connected_modeller() - 1)) ? (mappedIndex + 1) : 0;
-                    uint8_t preset = currentScene()->PresetOrder[newIndex];
+                    uint8_t preset = scenes_get_current()->PresetOrder[newIndex];
                     
                     // send message to USB
                     usb_set_preset(preset);
@@ -376,7 +363,7 @@ static uint8_t process_control_command(tControlMessage* message)
                 else if (mappedIndex < (usb_get_max_presets_for_connected_modeller() - 1))
                 {
                     uint8_t newIndex = mappedIndex + 1;
-                    uint8_t preset = currentScene()->PresetOrder[newIndex];
+                    uint8_t preset = scenes_get_current()->PresetOrder[newIndex];
                     
                     // send message to USB
                     usb_set_preset(preset);
@@ -415,7 +402,7 @@ static uint8_t process_control_command(tControlMessage* message)
             ESP_LOGI(TAG, "EVENT_PRESET_INDEX");
             if (ControlData.USBStatus != 0)
             {
-                uint8_t preset = currentScene()->PresetOrder[message->Value];
+                uint8_t preset = scenes_get_current()->PresetOrder[message->Value];
 
                 // send message to USB
                 usb_set_preset(preset);
@@ -428,7 +415,7 @@ static uint8_t process_control_command(tControlMessage* message)
             if (ControlData.USBStatus != 0)
             {
                 uint8_t index = (ControlData.BankIndex * 4) + message->Value;
-                uint8_t preset = currentScene()->PresetOrder[index];
+                uint8_t preset = scenes_get_current()->PresetOrder[index];
 
                 // send message to USB
                 usb_set_preset(preset);
@@ -1901,7 +1888,7 @@ void control_update_footswitch_leds(void)
 *****************************************************************************/
 uint32_t control_get_current_preset_index(void)
 {
-    return currentScene()->PresetOrder[ControlData.PresetIndex];
+    return scenes_get_current()->PresetOrder[ControlData.PresetIndex];
 }
 
 /****************************************************************************
@@ -1938,7 +1925,7 @@ void control_get_current_preset_name(char* dest)
 *****************************************************************************/
 void control_get_preset_name(uint8_t index, char* dest)
 {
-    uint8_t presetIndex = currentScene()->PresetOrder[index];
+    uint8_t presetIndex = scenes_get_current()->PresetOrder[index];
     memcpy((void*)dest, (void*)ControlData.PresetNames[presetIndex], MAX_PRESET_NAME_LENGTH);
     dest[MAX_PRESET_NAME_LENGTH - 1] = 0;
 }
@@ -2686,79 +2673,8 @@ void control_refresh_preset_order()
 
 void control_set_preset_order(uint8_t* order)
 {
-    for (uint8_t index = 0; index < usb_get_max_presets_for_connected_modeller(); index++)
-    {
-        currentScene()->PresetOrder[index] = order[index];
-    }
-
+    scenes_set_preset_order(order, usb_get_max_presets_for_connected_modeller());
     control_refresh_preset_order();
-}
-
-tScene* control_get_scene(uint8_t index)
-{
-    if (index >= ControlData.ConfigData.ScenesConfig.ScenesCount) {
-        return NULL;
-    }
-    return &ControlData.ConfigData.ScenesConfig.Scenes[index];
-}
-
-uint8_t control_get_selected_scene()
-{
-    return ControlData.ConfigData.ScenesConfig.SelectedScene;
-}
-
-void control_select_scene(uint8_t index)
-{
-    if (index >= ControlData.ConfigData.ScenesConfig.ScenesCount) {
-        return;
-    }
-    ControlData.ConfigData.ScenesConfig.SelectedScene = index;
-}
-
-uint8_t control_get_scenes_count()
-{
-    return ControlData.ConfigData.ScenesConfig.ScenesCount;
-}
-
-bool control_create_scene()
-{
-    if (ControlData.ConfigData.ScenesConfig.ScenesCount >= MAX_SCENES) {
-        return false;
-    }
-
-    ControlData.ConfigData.ScenesConfig.ScenesCount++;
-
-    return true;
-}
-
-void control_delete_scene(uint8_t index)
-{
-    if (ControlData.ConfigData.ScenesConfig.ScenesCount <= 1) {
-        return;
-    }
-
-    for (int16_t scene = index; scene < MAX_SCENES - 1; scene++)
-    {
-        ControlData.ConfigData.ScenesConfig.Scenes[scene] = ControlData.ConfigData.ScenesConfig.Scenes[scene+1];
-    }
-    ControlData.ConfigData.ScenesConfig.ScenesCount--;
-
-    if (ControlData.ConfigData.ScenesConfig.SelectedScene == index) {
-        ControlData.ConfigData.ScenesConfig.SelectedScene = 0;
-    }
-}
-
-void control_set_scene_name(uint8_t index, char *name)
-{
-    if (index >= ControlData.ConfigData.ScenesConfig.ScenesCount) {
-        return;
-    }
-
-    snprintf(
-        ControlData.ConfigData.ScenesConfig.Scenes[index].Name, 
-        sizeof(ControlData.ConfigData.ScenesConfig.Scenes[index].Name),
-        name
-    );
 }
 
 /****************************************************************************
@@ -2770,7 +2686,7 @@ void control_set_scene_name(uint8_t index, char *name)
 *****************************************************************************/
 uint8_t* control_get_preset_order(void)
 {
-    return currentScene()->PresetOrder;
+    return scenes_get_preset_order();
 }
 
 /****************************************************************************
@@ -2849,7 +2765,7 @@ void control_set_skin_previous(void)
 *****************************************************************************/
 uint8_t control_get_skin_index(uint8_t index)
 {
-    uint8_t presetIndex = currentScene()->PresetOrder[index];
+    uint8_t presetIndex = scenes_get_current()->PresetOrder[index];
     return ControlData.ConfigData.SkinConfig.SkinIndex[presetIndex];
 }
 
@@ -2889,7 +2805,7 @@ static uint8_t PresetIndexForOrderValue(uint8_t value)
 {
     for (uint8_t i = 0; i < usb_get_max_presets_for_connected_modeller(); i++)
     {
-        if (currentScene()->PresetOrder[i] == value)
+        if (scenes_get_current()->PresetOrder[i] == value)
         {
             return i;
         }
@@ -2931,7 +2847,6 @@ static esp_err_t LoadUserConfigItem(void* item, size_t item_length, char* key)
                 nvs_close(my_handle);
 
                 ESP_LOGI(TAG, "LoadUserConfigItem OK");
-                wifi_log_msg("LoadUserConfigItem OK");
 
                 result = ESP_OK;
             } break;
@@ -2939,7 +2854,6 @@ static esp_err_t LoadUserConfigItem(void* item, size_t item_length, char* key)
             case ESP_ERR_NVS_NOT_FOUND:
             {
                 ESP_LOGW(TAG, "LoadUserConfigItem not found");
-                wifi_log_msg("LoadUserConfigItem not found");
 
                 // close
                 nvs_close(my_handle);
@@ -2948,7 +2862,6 @@ static esp_err_t LoadUserConfigItem(void* item, size_t item_length, char* key)
             default:
             {
                 ESP_LOGE(TAG, "LoadUserConfigItem Error (%s)", esp_err_to_name(err));
-                wifi_log_msg("LoadUserConfigItem Error (%s)", esp_err_to_name(err));
 
                 // close
                 nvs_close(my_handle);
@@ -2958,7 +2871,6 @@ static esp_err_t LoadUserConfigItem(void* item, size_t item_length, char* key)
     else
     {
         ESP_LOGE(TAG, "LoadUserConfigItem failed to open nvs");
-        wifi_log_msg("LoadUserConfigItem failed to open nvs");
     }
 
     return result;
@@ -2999,7 +2911,6 @@ static esp_err_t SaveUserConfigItem(void* item, size_t item_length, char* key)
                 nvs_close(my_handle);
 
                 ESP_LOGI(TAG, "SaveUserConfigItem OK");
-                wifi_log_msg("SaveUserConfigItem OK");
 
                 result = ESP_OK;
             } break;
@@ -3007,7 +2918,6 @@ static esp_err_t SaveUserConfigItem(void* item, size_t item_length, char* key)
             case ESP_ERR_NVS_NOT_FOUND:
             {
                 ESP_LOGE(TAG, "SaveUserConfigItem Not found: %s", key);
-                wifi_log_msg("SaveUserConfigItem Not found: %s", key);
 
                 // close
                 nvs_close(my_handle);
@@ -3016,7 +2926,6 @@ static esp_err_t SaveUserConfigItem(void* item, size_t item_length, char* key)
             default:
             {
                 ESP_LOGE(TAG, "SaveUserConfigItem Error (%s)", esp_err_to_name(err));
-                wifi_log_msg("SaveUserConfigItem Error (%s)", esp_err_to_name(err));
 
                 // close
                 nvs_close(my_handle);
@@ -3026,7 +2935,6 @@ static esp_err_t SaveUserConfigItem(void* item, size_t item_length, char* key)
     else
     {
         ESP_LOGE(TAG, "SaveUserConfigItem failed to open nvs");
-        wifi_log_msg("SaveUserConfigItem failed to open nvs");
     }
 
     return result;
@@ -3108,16 +3016,6 @@ static uint8_t MigrateUserData(void)
                 ControlData.ConfigData.FootSwitchConfig.InternalFootswitchPresetLayout = LegacyConfigData->InternalFootswitchPresetLayout;
                 memcpy((void*)ControlData.ConfigData.FootSwitchConfig.InternalFootswitchEffectConfig, (void*)LegacyConfigData->InternalFootswitchEffectConfig, sizeof(ControlData.ConfigData.FootSwitchConfig.InternalFootswitchEffectConfig));
 
-                // // preset order mapping
-                // // start with 1:1 mapping
-                // for (uint32_t loop = 0; loop < MAX_SUPPORTED_PRESETS; loop++)
-                // {
-                //     currentScene()->PresetOrder[loop] = loop;
-                // }
-
-                // // copy in legacy config
-                // memcpy((void*)ControlData.ConfigData.PresetOrderMappingConfig.PresetOrder, (void*)LegacyConfigData->PresetOrder, LEGACY_CONFIG_USER_COUNT);
-
                 // skins
                 for (uint8_t loop = 0; loop < LEGACY_CONFIG_USER_COUNT; loop++)
                 {
@@ -3170,7 +3068,6 @@ static uint8_t SaveUserData(void)
     // SaveUserConfigItem((void*)&ControlData.ConfigData.PresetOrderMappingConfig, sizeof(ControlData.ConfigData.PresetOrderMappingConfig), NVS_USERDATA_PRESET_ORDER_CONF);
     SaveUserConfigItem((void*)&ControlData.ConfigData.SkinConfig, sizeof(ControlData.ConfigData.SkinConfig), NVS_USERDATA_SKIN_CONF);
     SaveUserConfigItem((void*)&ControlData.ConfigData.PCMapConfig.PCMap, sizeof(ControlData.ConfigData.PCMapConfig.PCMap), NVS_USERDATA_PC_MAP_CONF);
-    SaveUserConfigItem((void*)&ControlData.ConfigData.ScenesConfig, sizeof(ControlData.ConfigData.ScenesConfig), NVS_USERDATA_SCENES);
 
     return 1;
 }
@@ -3233,12 +3130,6 @@ static uint8_t LoadUserData(void)
         SaveUserConfigItem((void*)&ControlData.ConfigData.PCMapConfig.PCMap, sizeof(ControlData.ConfigData.PCMapConfig.PCMap), NVS_USERDATA_PC_MAP_CONF);
     }
 
-    // Scenes
-    if (LoadUserConfigItem((void*)&ControlData.ConfigData.ScenesConfig, sizeof(ControlData.ConfigData.ScenesConfig), NVS_USERDATA_SCENES) != ESP_OK)
-    {
-        SaveUserConfigItem((void*)&ControlData.ConfigData.ScenesConfig, sizeof(ControlData.ConfigData.ScenesConfig), NVS_USERDATA_SCENES);
-    }
-
     // perform sanity check on values
     if (ControlData.ConfigData.BTConfig.BTMode > BT_MODE_PERIPHERAL)
     {
@@ -3284,42 +3175,6 @@ static uint8_t LoadUserData(void)
         }
     }
     
-    bool save_scenes = false;
-
-    for (uint8_t scene = 0; scene < MAX_SCENES; scene++) 
-    {
-        bool reset_order = false;
-
-        // check the preset order
-        for (uint8_t loop = 0; loop < MAX_SUPPORTED_PRESETS; loop++)
-        {
-            // check for any invalid values
-            if (ControlData.ConfigData.ScenesConfig.Scenes[scene].PresetOrder[loop] > MAX_SUPPORTED_PRESETS)
-            {
-                reset_order = true;
-                save_scenes = true;
-                break;
-            }
-        }
-
-        if (reset_order)
-        {
-            ESP_LOGW(TAG, "Repairing preset layout");
-
-            // fix corrupted preset order
-            for (uint8_t loop = 0; loop < MAX_SUPPORTED_PRESETS; loop++)
-            {
-                ControlData.ConfigData.ScenesConfig.Scenes[scene].PresetOrder[loop] = loop;
-            }
-
-        }
-    }
-
-    if (save_scenes)
-    {
-        SaveUserConfigItem((void*)&ControlData.ConfigData.ScenesConfig, sizeof(ControlData.ConfigData.ScenesConfig), NVS_USERDATA_SCENES);
-    }
-
     // show the config
     DumpUserConfig();
 
@@ -3831,24 +3686,6 @@ void control_set_default_config(void)
         ControlData.ConfigData.FootSwitchConfig.InternalFootswitchAltEffectConfig[loop].Switch = SWITCH_NOT_USED;
     }
 
-    ControlData.ConfigData.ScenesConfig.ScenesCount = 1;
-    ControlData.ConfigData.ScenesConfig.SelectedScene = 0;
-
-    for (uint8_t scene = 0; scene < MAX_SCENES; scene++)
-    {
-        snprintf(
-            ControlData.ConfigData.ScenesConfig.Scenes[scene].Name, 
-            sizeof(ControlData.ConfigData.ScenesConfig.Scenes[scene].Name),
-            "Scene %u", scene + 1
-        );
-
-        // default to 1:1 mappings
-        for (uint8_t loop = 0; loop < MAX_SUPPORTED_PRESETS; loop++)
-        {
-            ControlData.ConfigData.ScenesConfig.Scenes[scene].PresetOrder[loop] = loop;
-        }
-    }
-    
     for (uint8_t loop = 0; loop < MAX_PC_MAP; loop++)
     {
         // issue here, really need to use (loop + usb_get_first_preset_index_for_connected_modeller()) but modeller may not yet be connected
@@ -4056,7 +3893,7 @@ void control_load_config(void)
     esp_err_t ret;
 
     memset((void*)&ControlData, 0, sizeof(ControlData));
- 
+
     // default config, will be overwritten or used as default
     control_set_default_config();
    
@@ -4070,6 +3907,16 @@ void control_load_config(void)
     if (ret != ESP_OK)
     {
         ESP_LOGE(TAG, "Failed to init NVS");
+    }
+
+    ret = scenes_init();
+    if (ret != ESP_OK)
+    {
+        ESP_LOGE(TAG, "Failed to init scenes storage (%s)", esp_err_to_name(ret));
+        if (ret == ESP_ERR_NO_MEM)
+        {
+            abort();
+        }
     }
 
     // check if we need to migrate user data from old scheme to new scheme
