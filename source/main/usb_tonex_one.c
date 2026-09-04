@@ -62,6 +62,7 @@ limitations under the License.
 #include "display.h"
 #include "wifi_config.h"
 #include "tonex_params.h"
+#include "scenes.h"
 
 static const char *TAG = "app_TonexOne";
 
@@ -137,12 +138,10 @@ typedef struct __attribute__ ((packed))
     // storage for current preset details data (short version)
     uint8_t PresetData[TONEX_MAX_SHORT_PRESET_DATA];
     uint16_t PresetDataLength;
-    uint16_t PresetParameterStartOffset;
 
     // storage for current preset details data (full version)
     uint8_t FullPresetData[TONEX_MAX_FULL_PRESET_DATA];
     uint16_t FullPresetDataLength;
-    uint16_t FullPresetParameterStartOffset;
 } tPedalData;
 
 typedef struct __attribute__ ((packed)) 
@@ -183,7 +182,12 @@ static QueueHandle_t input_queue;
 static uint8_t boot_init_needed = 0;
 static uint8_t boot_global_request = 0;
 static uint8_t boot_preset_request = 0;
+static uint8_t scene_sync_preset_request = 0;
+static bool scene_sync_in_progress = false;
+static uint8_t scene_save_preset_request = 0;
+static bool scene_save_preset_in_progress = false;
 static volatile tInputBufferEntry* InputBuffers;
+static float* PresetParamsBuffer;
 
 static void __attribute__((noreturn)) usb_tonex_one_debug_halt(const char *reason, size_t requested_size)
 {
@@ -226,6 +230,7 @@ static esp_err_t usb_tonex_one_set_active_slot(Slot newSlot);
 static esp_err_t usb_tonex_one_set_preset_in_slot(uint16_t preset, Slot newSlot, uint8_t selectSlot);
 static esp_err_t usb_tonex_one_set_ab_slots(uint16_t preset_a, uint16_t preset_b);
 static uint16_t usb_tonex_one_get_current_active_preset(void);
+static void usb_tonex_one_mark_current_scene_preset_modified(void);
 static esp_err_t usb_tonex_one_send_single_parameter(uint16_t index, float value);
 
 static esp_err_t clipboard_copy(Clipboard_t type)
@@ -1095,40 +1100,68 @@ static esp_err_t usb_tonex_one_set_ab_slots(uint16_t preset_a, uint16_t preset_b
 *****************************************************************************/
 static bool usb_tonex_one_handle_rx(const uint8_t* data, size_t data_len, void* arg)
 {
+    tInputBufferEntry *input_buffer = NULL;
+
     // debug
     //ESP_LOGI(TAG, "CDC Data received %d", (int)data_len);
     //ESP_LOG_BUFFER_HEXDUMP(TAG, data, data_len, ESP_LOG_INFO);
 
-    if (data_len > TONEX_RX_TEMP_BUFFER_SIZE)
+    if ((data_len == 0) || (data_len > TONEX_RX_TEMP_BUFFER_SIZE))
     {
         ESP_LOGE(TAG, "usb_tonex_one_handle_rx data too long! %d", (int)data_len);
         return false;
     }
-    else
+
+    // Continue an incomplete frame before taking an unused buffer.
+    for (uint8_t loop = 0; loop < MAX_INPUT_BUFFERS; loop++)
     {
-        // locate a buffer to put it
+        if ((InputBuffers[loop].ReadyToWrite == 0) && (InputBuffers[loop].ReadyToRead == 0))
+        {
+            input_buffer = (tInputBufferEntry *)&InputBuffers[loop];
+            break;
+        }
+    }
+
+    if (input_buffer == NULL)
+    {
         for (uint8_t loop = 0; loop < MAX_INPUT_BUFFERS; loop++)
         {
-            if (InputBuffers[loop].ReadyToWrite == 1)
+            if ((InputBuffers[loop].ReadyToWrite == 1) && (InputBuffers[loop].ReadyToRead == 0))
             {
-                // grab data
-                memcpy((void*)InputBuffers[loop].Data, (void*)data, data_len);
-
-                // set buffer as used
-                InputBuffers[loop].Length = data_len;
-                InputBuffers[loop].ReadyToWrite = 0;
-                InputBuffers[loop].ReadyToRead = 1;      
-                
-                // debug
-                //ESP_LOGI(TAG, "CDC Data buffered into %d", (int)loop);
-
-                return true;
+                input_buffer = (tInputBufferEntry *)&InputBuffers[loop];
+                input_buffer->Length = 0;
+                input_buffer->ReadyToWrite = 0;
+                break;
             }
         }
     }
 
-    ESP_LOGE(TAG, "usb_tonex_one_handle_rx no available buffers!");
-    return false;
+    if (input_buffer == NULL)
+    {
+        ESP_LOGE(TAG, "usb_tonex_one_handle_rx no available buffers!");
+        return false;
+    }
+
+    if ((input_buffer->Length + data_len) > TONEX_RX_TEMP_BUFFER_SIZE)
+    {
+        ESP_LOGE(TAG, "usb_tonex_one_handle_rx frame too long! %u + %u",
+                 input_buffer->Length, (unsigned)data_len);
+        input_buffer->Length = 0;
+        input_buffer->ReadyToWrite = 1;
+        return false;
+    }
+
+    memcpy(&input_buffer->Data[input_buffer->Length], data, data_len);
+    input_buffer->Length += data_len;
+
+    // The TONEX protocol uses 0x7E as its end-of-frame delimiter. Keep the
+    // buffer private until the final CDC chunk arrives.
+    if (data[data_len - 1] == 0x7E)
+    {
+        input_buffer->ReadyToRead = 1;
+    }
+
+    return true;
 }
 
 /****************************************************************************
@@ -1417,30 +1450,17 @@ static TonexStatus usb_tonex_one_parse_preset_details(uint8_t* unframed, uint16_
 *****************************************************************************/
 static TonexStatus usb_tonex_one_parse_preset_full_details(uint8_t* unframed, uint16_t length, uint16_t index)
 {
-    uint8_t param_start_marker[] = {0xBA, 0x03, 0xBA, 0x6D}; 
-
     TonexData->Message.Header.type = TYPE_STATE_PRESET_DETAILS_FULL;
 
     TonexData->Message.PedalData.FullPresetDataLength = length - index;
+    if (TonexData->Message.PedalData.FullPresetDataLength > sizeof(TonexData->Message.PedalData.FullPresetData))
+    {
+        ESP_LOGE(TAG, "Full preset details exceed buffer: %u", TonexData->Message.PedalData.FullPresetDataLength);
+        return STATUS_INVALID_FRAME;
+    }
     memcpy((void*)TonexData->Message.PedalData.FullPresetData, (void*)&unframed[index], TonexData->Message.PedalData.FullPresetDataLength);
     ESP_LOGI(TAG, "Saved Full Preset Details: %d", TonexData->Message.PedalData.FullPresetDataLength);
-    
-    // try to locate the start of the first parameter block 
-    uint8_t* temp_ptr = memmem((void*)TonexData->Message.PedalData.FullPresetData, TonexData->Message.PedalData.FullPresetDataLength, (void*)param_start_marker, sizeof(param_start_marker));
-    if (temp_ptr != NULL)
-    {
-        // skip the start marker
-        temp_ptr += sizeof(param_start_marker);
 
-        // save the offset where the parameters start
-        TonexData->Message.PedalData.FullPresetParameterStartOffset = temp_ptr - TonexData->Message.PedalData.FullPresetData;
-        ESP_LOGI(TAG, "Found start of preset params in full data at %d", TonexData->Message.PedalData.FullPresetParameterStartOffset);
-    }
-    else
-    {
-        ESP_LOGW(TAG, "Could not find start of preset parameters in full data!");
-    }
-    
     // debug
     //ESP_LOGI(TAG, "Full Preset Data Rx: %d %d", (int)length, (int)index);
     //ESP_LOG_BUFFER_HEXDUMP(TAG, TonexData->Message.PedalData.FullPresetData, TonexData->Message.PedalData.FullPresetDataLength, ESP_LOG_INFO);
@@ -1511,6 +1531,7 @@ static TonexStatus usb_tonex_one_parse_param_changed(uint8_t* unframed, uint16_t
                             param_ptr[param_index].Value = value;
                             tonex_params_release_locked_access();
 
+                            usb_tonex_one_mark_current_scene_preset_modified();
                             sync_param_index = param_index;
                             ESP_LOGI(TAG, "Got preset param: %d raw:%3.2f", (int)param_index, value);
                         }
@@ -1609,6 +1630,24 @@ static uint16_t usb_tonex_one_get_current_active_preset(void)
     return result;
 }
 
+static void usb_tonex_one_mark_current_scene_preset_modified(void)
+{
+    tScene *scene = scenes_get_current();
+    uint16_t preset = usb_tonex_one_get_current_active_preset();
+
+    if ((scene == NULL) || (preset >= MAX_SUPPORTED_PRESETS) || scene->Presets[preset].Modified)
+    {
+        return;
+    }
+
+    scene->Presets[preset].Modified = true;
+
+    char current_preset_name[MAX_PRESET_NAME_LENGTH];
+    control_get_current_preset_name(current_preset_name);
+    UI_SetPresetLabel(control_get_current_preset_mapped_index(), current_preset_name);
+    UI_UpdatePresetList();
+}
+
 /****************************************************************************
 * NAME:        
 * DESCRIPTION: 
@@ -1652,10 +1691,11 @@ static Slot usb_tonex_one_slot_for_saving_preset(void)
 * RETURN:      
 * NOTES:       
 *****************************************************************************/
-static void usb_tonex_one_parse_preset_parameters(uint8_t* raw_data, uint16_t length)
+static bool usb_tonex_one_parse_preset_parameters(uint8_t* raw_data, uint16_t length, float *preset_params, bool update_live_params)
 {
     uint8_t param_start_marker[] = {0xBA, 0x03, 0xBA, 0x6D}; 
     tModellerParameter* param_ptr = NULL;
+    bool parsed = true;
 
     ESP_LOGI(TAG, "Parsing Preset parameters");
 
@@ -1666,42 +1706,58 @@ static void usb_tonex_one_parse_preset_parameters(uint8_t* raw_data, uint16_t le
         // skip the start marker
         temp_ptr += sizeof(param_start_marker);
 
-        // save the offset where the parameters start
-        TonexData->Message.PedalData.PresetParameterStartOffset = temp_ptr - raw_data;
-        ESP_LOGI(TAG, "Preset parameters offset: %d", (int)TonexData->Message.PedalData.PresetParameterStartOffset);
-
-        if (tonex_params_get_locked_access(&param_ptr) == ESP_OK)
+        if (update_live_params && (tonex_params_get_locked_access(&param_ptr) != ESP_OK))
         {
-            // params here are start marker of 0x88, followed by a 4-byte float
-            for (uint32_t loop = 0; loop < TONEX_PARAM_LAST; loop++)
+            return false;
+        }
+
+        for (uint32_t loop = 0; loop < TONEX_PARAM_LAST; loop++)
+        {
+            if ((temp_ptr + 1 + sizeof(float)) > (raw_data + length))
             {
-                if (*temp_ptr == 0x88)
-                {
-                    // skip the marker
-                    temp_ptr++;
-
-                    // get the value
-                    memcpy((void*)&param_ptr[loop].Value, (void*)temp_ptr, sizeof(float));
-
-                    // skip the float
-                    temp_ptr += sizeof(float);
-                }
-                else
-                {
-                    ESP_LOGW(TAG, "Unexpected value during Param parse: %d, %d", (int)loop, (int)*temp_ptr);  
-                    break;
-                }
+                ESP_LOGW(TAG, "Preset parameters end unexpectedly at %d", (int)loop);
+                parsed = false;
+                break;
             }
 
+            if (*temp_ptr != 0x88)
+            {
+                ESP_LOGW(TAG, "Unexpected value during Param parse: %d, %d", (int)loop, (int)*temp_ptr);
+                parsed = false;
+                break;
+            }
+
+            temp_ptr++;
+            float value;
+            memcpy(&value, temp_ptr, sizeof(value));
+            if (update_live_params)
+            {
+                param_ptr[loop].Value = value;
+            }
+            if (preset_params != NULL)
+            {
+                preset_params[loop] = value;
+            }
+            temp_ptr += sizeof(value);
+        }
+
+        if (update_live_params)
+        {
             tonex_params_release_locked_access();
         }
 
-        ESP_LOGI(TAG, "Parsing Preset parameters complete");
+        if (parsed)
+        {
+            ESP_LOGI(TAG, "Parsing Preset parameters complete");
+            return true;
+        }
     }
     else
     {
         ESP_LOGW(TAG, "Parsing Preset parameters failed to find start marker");
     }
+
+    return false;
 }
 
 /****************************************************************************
@@ -1905,8 +1961,36 @@ static esp_err_t usb_tonex_one_process_single_message(uint8_t* data, uint16_t le
 
                     current_preset = usb_tonex_one_get_current_active_preset();
 
-                    if (boot_preset_request < MAX_PRESETS_TONEX_ONE) 
+                    if (scene_save_preset_in_progress)
                     {
+                        scene_save_preset_in_progress = false;
+
+                        if (usb_tonex_one_parse_preset_parameters(data, length, PresetParamsBuffer, false) &&
+                            (scenes_save_preset_params(scene_save_preset_request, PresetParamsBuffer) == ESP_OK))
+                        {
+                            char current_preset_name[MAX_PRESET_NAME_LENGTH];
+                            control_get_current_preset_name(current_preset_name);
+                            UI_SetPresetLabel(control_get_current_preset_mapped_index(), current_preset_name);
+                            UI_UpdatePresetList();
+                        }
+                        else
+                        {
+                            ESP_LOGE(TAG, "Failed to save scene preset %u", scene_save_preset_request);
+                        }
+                    }
+                    else if (boot_preset_request < MAX_PRESETS_TONEX_ONE)
+                    {
+                        if (usb_tonex_one_parse_preset_parameters(data, length, PresetParamsBuffer, true))
+                        {
+                            tScene *scene = scenes_get_current();
+                            if (scene != NULL)
+                            {
+                                uint32_t preset_hash = scenes_hash_preset_params(PresetParamsBuffer);
+                                scene->Presets[boot_preset_request].Modified =
+                                    (preset_hash != scene->Presets[boot_preset_request].PresetParamsHash);
+                            }
+                        }
+
                         // save preset name 
                         control_sync_preset_name(boot_preset_request, preset_name);
 
@@ -1930,7 +2014,7 @@ static esp_err_t usb_tonex_one_process_single_message(uint8_t* data, uint16_t le
                         control_sync_preset_details(current_preset, preset_name);
 
                         // read the preset params
-                        usb_tonex_one_parse_preset_parameters(data, length);
+                        usb_tonex_one_parse_preset_parameters(data, length, NULL, true);
 
                         // if we have messages waiting in the queue, it will trigger another
                         // change that will overwrite this one. Skip the UI refresh to save time
@@ -1985,8 +2069,46 @@ static esp_err_t usb_tonex_one_process_single_message(uint8_t* data, uint16_t le
 
                 case TYPE_STATE_PRESET_DETAILS_FULL:
                 {
-                    // ignore
                     ESP_LOGI(TAG, "Received Preset details full");
+
+                    if (scene_sync_in_progress)
+                    {
+                        tScene *scene = scenes_get_current();
+
+                        if ((scene == NULL) || !usb_tonex_one_parse_preset_parameters(data, length, PresetParamsBuffer, false))
+                        {
+                            ESP_LOGE(TAG, "Failed to compare scene preset %u", scene_sync_preset_request);
+                            scene_sync_in_progress = false;
+                            UI_HideProgressBar();
+                            break;
+                        }
+
+                        uint32_t preset_hash = scenes_hash_preset_params(PresetParamsBuffer);
+                        scene->Presets[scene_sync_preset_request].Modified =
+                            (preset_hash != scene->Presets[scene_sync_preset_request].PresetParamsHash);
+
+                        scene_sync_preset_request++;
+                        UI_SetProgressBar((scene_sync_preset_request * 100) / MAX_PRESETS_TONEX_ONE);
+
+                        if (scene_sync_preset_request < MAX_PRESETS_TONEX_ONE)
+                        {
+                            if (usb_tonex_one_request_preset_details(scene_sync_preset_request, 1) != ESP_OK)
+                            {
+                                ESP_LOGE(TAG, "Failed to request scene preset %u", scene_sync_preset_request);
+                                scene_sync_in_progress = false;
+                                UI_HideProgressBar();
+                            }
+                        }
+                        else
+                        {
+                            char current_preset_name[MAX_PRESET_NAME_LENGTH];
+                            scene_sync_in_progress = false;
+                            control_get_current_preset_name(current_preset_name);
+                            UI_SetPresetLabel(control_get_current_preset_mapped_index(), current_preset_name);
+                            UI_UpdatePresetList();
+                            UI_HideProgressBar();
+                        }
+                    }
                 } break;
 
                 case TYPE_PARAM_CHANGED:
@@ -2048,7 +2170,8 @@ void usb_tonex_one_handle(class_driver_t* driver_obj)
         case COMMS_STATE_READY:
         {
             // check for any input messages
-            if (xQueueReceive(input_queue, (void*)&message, 0) == pdPASS)
+            if (!scene_save_preset_in_progress && !scene_sync_in_progress &&
+                (xQueueReceive(input_queue, (void*)&message, 0) == pdPASS))
             {
                 ESP_LOGI(TAG, "Got Input message: %d. Queue: %d", message.Command, uxQueueMessagesWaiting(input_queue));
 
@@ -2153,10 +2276,13 @@ void usb_tonex_one_handle(class_driver_t* driver_obj)
                         if (message.Payload < TONEX_PARAM_LAST)
                         {
                             // modify the param
-                            tonex_common_modify_parameter(message.Payload, message.PayloadFloat);
+                            if (tonex_common_modify_parameter(message.Payload, message.PayloadFloat) == ESP_OK)
+                            {
+                                usb_tonex_one_mark_current_scene_preset_modified();
 
-                            // send it
-                            usb_tonex_one_send_single_parameter(message.Payload, message.PayloadFloat);
+                                // send it
+                                usb_tonex_one_send_single_parameter(message.Payload, message.PayloadFloat);
+                            }
                         }
                         else if (message.Payload < TONEX_GLOBAL_LAST)
                         {
@@ -2209,6 +2335,37 @@ void usb_tonex_one_handle(class_driver_t* driver_obj)
                     {
                         usb_tonex_one_request_tuner((uint8_t)message.Payload);
                     } break;
+
+                    case USB_COMMAND_SYNC_SCENE_PRESETS:
+                    {
+                        scene_sync_preset_request = 0;
+                        scene_sync_in_progress = true;
+                        UI_SetProgressBar(0);
+
+                        if (usb_tonex_one_request_preset_details(scene_sync_preset_request, 1) != ESP_OK)
+                        {
+                            ESP_LOGE(TAG, "Failed to start scene preset sync");
+                            scene_sync_in_progress = false;
+                            UI_HideProgressBar();
+                        }
+                    } break;
+
+                    case USB_COMMAND_SAVE_SCENE_PRESET_PARAMS:
+                    {
+                        if (message.Payload >= MAX_PRESETS_TONEX_ONE)
+                        {
+                            ESP_LOGE(TAG, "Invalid scene preset %u", (unsigned)message.Payload);
+                            break;
+                        }
+
+                        scene_save_preset_request = (uint8_t)message.Payload;
+                        scene_save_preset_in_progress = true;
+                        if (usb_tonex_one_request_preset_details(scene_save_preset_request, 0) != ESP_OK)
+                        {
+                            ESP_LOGE(TAG, "Failed to request scene preset %u", scene_save_preset_request);
+                            scene_save_preset_in_progress = false;
+                        }
+                    } break;
                 }
             }
         } break;
@@ -2238,7 +2395,8 @@ void usb_tonex_one_handle(class_driver_t* driver_obj)
             do
             {    
                 // locate the end of the message
-                end_marker_pos = tonex_common_locate_message_end(rx_entry_ptr, rx_entry_length);
+                uint16_t remaining_length = rx_entry_length - bytes_consumed;
+                end_marker_pos = tonex_common_locate_message_end(rx_entry_ptr, remaining_length);
 
                 if (end_marker_pos == 0)
                 {
@@ -2299,6 +2457,13 @@ void usb_tonex_one_init(class_driver_t* driver_obj, QueueHandle_t comms_queue)
         usb_tonex_one_debug_halt("InputBuffers", sizeof(tInputBufferEntry) * MAX_INPUT_BUFFERS);
     }
 
+    PresetParamsBuffer = heap_caps_malloc(sizeof(*PresetParamsBuffer) * TONEX_PARAM_LAST,
+                                          MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT);
+    if (PresetParamsBuffer == NULL)
+    {
+        usb_tonex_one_debug_halt("PresetParamsBuffer", sizeof(*PresetParamsBuffer) * TONEX_PARAM_LAST);
+    }
+
     // set all buffers as ready for writing
     for (uint8_t loop = 0; loop < MAX_INPUT_BUFFERS; loop++)
     {
@@ -2334,6 +2499,10 @@ void usb_tonex_one_init(class_driver_t* driver_obj, QueueHandle_t comms_queue)
 
     memset((void*)TonexData, 0, sizeof(tTonexData));
     TonexData->TonexState = COMMS_STATE_IDLE;
+    scene_sync_preset_request = 0;
+    scene_sync_in_progress = false;
+    scene_save_preset_request = 0;
+    scene_save_preset_in_progress = false;
 
     // code from ESP support forums, work around start. Refer to https://www.esp32.com/viewtopic.php?t=30601
     // Relates to this:
@@ -2457,6 +2626,9 @@ void usb_tonex_one_deinit(void)
     free((void*)InputBuffers);
     InputBuffers = NULL;
 
+    heap_caps_free(PresetParamsBuffer);
+    PresetParamsBuffer = NULL;
+
     free((void*)TxBuffer);    
     TxBuffer = NULL;
 
@@ -2469,6 +2641,10 @@ void usb_tonex_one_deinit(void)
     boot_init_needed = 0;
     boot_global_request = 0;
     boot_preset_request = 0;
+    scene_sync_preset_request = 0;
+    scene_sync_in_progress = false;
+    scene_save_preset_request = 0;
+    scene_save_preset_in_progress = false;
     UI_HideProgressBar();
 
     // preallocate big memory again, ready for freeing on reconnect

@@ -12,6 +12,7 @@ void presetOptionsSelected(uint8_t buttonIndex, const char *option);
 void updatePresetListSelection();
 void updatePresetListColors();
 void updatePresetListNames();
+void updatePresetListOptions();
 
 #ifdef __cplusplus
 } /*extern "C"*/

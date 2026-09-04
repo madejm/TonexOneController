@@ -644,6 +644,41 @@ void usb_request_tuner(uint8_t state)
     }
 }
 
+void usb_sync_scene_presets(void)
+{
+    tUSBMessage message = { 0 };
+
+    if (usb_input_queue == NULL)
+    {
+        ESP_LOGE(TAG, "usb_sync_scene_presets queue null");
+        return;
+    }
+
+    message.Command = USB_COMMAND_SYNC_SCENE_PRESETS;
+    if (xQueueSend(usb_input_queue, (void*)&message, 0) != pdPASS)
+    {
+        ESP_LOGE(TAG, "usb_sync_scene_presets queue send failed!");
+    }
+}
+
+void usb_save_scene_preset_params(uint8_t preset_index)
+{
+    tUSBMessage message = { 0 };
+
+    if (usb_input_queue == NULL)
+    {
+        ESP_LOGE(TAG, "usb_save_scene_preset_params queue null");
+        return;
+    }
+
+    message.Command = USB_COMMAND_SAVE_SCENE_PRESET_PARAMS;
+    message.Payload = preset_index;
+    if (xQueueSend(usb_input_queue, (void*)&message, 0) != pdPASS)
+    {
+        ESP_LOGE(TAG, "usb_save_scene_preset_params queue send failed!");
+    }
+}
+
 /****************************************************************************
 * NAME:        
 * DESCRIPTION: 

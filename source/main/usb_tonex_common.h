@@ -25,7 +25,7 @@ extern "C" {
 
 #include "usb/cdc_host_types.h"
 
-#define TONEX_RX_TEMP_BUFFER_SIZE                    8192   // even multiple of 64 CDC transfer size
+#define TONEX_RX_TEMP_BUFFER_SIZE                    32768   // holds one complete full preset-details response
 #define TONEX_USB_TX_BUFFER_SIZE                     512    // even multiple of 64 CDC transfer size
 #define TONEX_MAX_SHORT_PRESET_DATA                  3072
 #define TONEX_MAX_FULL_PRESET_DATA                   TONEX_RX_TEMP_BUFFER_SIZE

@@ -59,7 +59,9 @@ enum USB_Commands
     USB_COMMAND_COPY_SETTINGS,
     USB_COMMAND_PASTE_SETTINGS,
     USB_COMMAND_SET_AB_SLOTS,
-    USB_COMMAND_REQUEST_TUNER
+    USB_COMMAND_REQUEST_TUNER,
+    USB_COMMAND_SYNC_SCENE_PRESETS,
+    USB_COMMAND_SAVE_SCENE_PRESET_PARAMS
 };
 
 typedef struct 
@@ -122,6 +124,8 @@ uint8_t usb_get_max_presets_for_connected_modeller(void);
 uint8_t usb_get_first_preset_index_for_connected_modeller(void);
 uint8_t usb_get_connected_modeller_type(void);
 void usb_request_tuner(uint8_t state);
+void usb_sync_scene_presets(void);
+void usb_save_scene_preset_params(uint8_t preset_index);
 
 #ifdef __cplusplus
 } /*extern "C"*/

@@ -222,6 +222,11 @@ void action_new_scene(lv_event_t *e)
         scenes_select(scenes_get_count() - 1);
         scenes_save();
 
+        if (usb_get_connected_modeller_type() == AMP_MODELLER_TONEX_ONE)
+        {
+            usb_sync_scene_presets();
+        }
+
         updateScenesList();
     }
 }
@@ -231,13 +236,17 @@ void selectScene(uint8_t index)
     scenes_select(index);
     control_refresh_preset_order();
 
-    updatePresetListSelection();
-    updatePresetListColors();
-    updatePresetListNames();
+    // updatePresetListSelection();
+    // updatePresetListColors();
+    // updatePresetListNames();
 
     scenes_save();
+    if (usb_get_connected_modeller_type() == AMP_MODELLER_TONEX_ONE)
+    {
+        usb_sync_scene_presets();
+    }
     
-    action_open_presets_page(NULL);
+    lv_scr_load_anim(objects.screen1, LV_SCR_LOAD_ANIM_FADE_IN, 0, 0, false);
 }
 
 void sceneOptionsSelected(uint8_t index, const char *option)

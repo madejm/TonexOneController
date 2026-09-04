@@ -85,6 +85,7 @@ limitations under the License.
 #include "display_helpers.h"
 #include "display_preset_list.h"
 #include "display_settings.h"
+#include "scenes.h"
 
 static const char *TAG = "app_display";
 
@@ -1976,13 +1977,21 @@ void UI_HideProgressBar(void)
 void UI_SetPresetLabel(uint16_t index, char* name)
 {
     tUIUpdate ui_update;
+    bool modified = false;
+    tScene *scene = scenes_get_current();
+    if ((scene != NULL) && (index < MAX_SUPPORTED_PRESETS))
+    {
+        uint8_t preset_index = scene->PresetOrder[index];
+        modified = scene->Presets[preset_index].Modified;
+    }
 
     // build command
     ui_update.ElementID = UI_ELEMENT_PRESET_NAME;
     ui_update.Action = UI_ACTION_SET_LABEL_TEXT;
     ui_update.Value = index;
+    ui_update.State = modified;
     #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
-    sprintf(ui_update.Text, name);
+    snprintf(ui_update.Text, sizeof(ui_update.Text), "%s%s", name, modified ? "*" : "");
     #else
     sprintf(ui_update.Text, "%d: ", (int)index + usb_get_first_preset_index_for_connected_modeller());
     strncat(ui_update.Text, name, MAX_UI_TEXT - 1);
@@ -2129,6 +2138,7 @@ void UI_UpdatePresetList()
     tUIUpdate ui_update;
     
     ui_update.ElementID = UI_ELEMENT_PRESET_LIST;
+    ui_update.Action = UI_ACTION_NONE;
 
     // send to queue
     if (xQueueSend(ui_update_queue, (void*)&ui_update, 0) != pdPASS)
@@ -2150,6 +2160,7 @@ void UI_UpdateFSButtons()
 
     // build commands
     ui_update.ElementID = UI_ELEMENT_FS_BUTTONS;
+    ui_update.Action = UI_ACTION_NONE;
 
     // send to queue
     if (xQueueSend(ui_update_queue, (void*)&ui_update, 0) != pdPASS)
@@ -2488,6 +2499,7 @@ static  __attribute__((unused)) uint8_t update_ui_element(tUIUpdate* update)
         case UI_ELEMENT_PRESET_NAME:
         {
             element_1 = objects.ui_preset_heading_label;
+            lv_obj_set_checked(element_1, update->State != 0);
             ui_PresetIndex = update->Value;
 #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
             updatePresetNumberLabel();
@@ -2606,6 +2618,7 @@ static  __attribute__((unused)) uint8_t update_ui_element(tUIUpdate* update)
             if (lv_scr_act() == objects.presets) {
                 updatePresetListSelection();
                 updatePresetListNames();
+                updatePresetListOptions();
             }
         } break;
 
@@ -2684,25 +2697,15 @@ static  __attribute__((unused)) uint8_t update_ui_element(tUIUpdate* update)
         case UI_ELEMENT_PROGRESS_BAR:
         {
 #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
-            if ((objects.ui_progress_bar != NULL) && lv_obj_is_valid(objects.ui_progress_bar))
-            {
-                lv_bar_set_value(objects.ui_progress_bar, update->Value, LV_ANIM_ON);
-                lv_obj_clear_flag(objects.ui_progress_bar, LV_OBJ_FLAG_HIDDEN);
-            }
-            else
-            {
-                ESP_LOGW(TAG, "Progress bar object unavailable");
-            }
+            lv_bar_set_value(objects.ui_progress_bar, update->Value, LV_ANIM_ON);
+            lv_obj_clear_flag(objects.ui_progress_dialog, LV_OBJ_FLAG_HIDDEN);
 #endif
         } break;
 
         case UI_ELEMENT_PROGRESS_BAR_HIDE:
         {
 #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
-            if ((objects.ui_progress_bar != NULL) && lv_obj_is_valid(objects.ui_progress_bar))
-            {
-                lv_obj_add_flag(objects.ui_progress_bar, LV_OBJ_FLAG_HIDDEN);
-            }
+            lv_obj_add_flag(objects.ui_progress_dialog, LV_OBJ_FLAG_HIDDEN);
 #endif
         } break;
 

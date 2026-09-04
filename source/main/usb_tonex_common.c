@@ -34,7 +34,10 @@ limitations under the License.
 
 static const char *TAG = "app_TonexCommon";
 
-#define TONEX_CDC_DMA_RESERVATION_SIZE  (TONEX_RX_TEMP_BUFFER_SIZE + TONEX_USB_TX_BUFFER_SIZE + 4096)
+// The 32 KB TONEX_RX_TEMP_BUFFER_SIZE is used for PSRAM frame assembly.
+// The CDC driver itself still allocates an 8 KB DMA receive transfer.
+#define TONEX_CDC_DMA_RX_TRANSFER_SIZE  8192
+#define TONEX_CDC_DMA_RESERVATION_SIZE  (TONEX_CDC_DMA_RX_TRANSFER_SIZE + TONEX_USB_TX_BUFFER_SIZE + 4096)
 
 static uint8_t* PreallocatedMemory;
 

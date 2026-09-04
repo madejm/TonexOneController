@@ -288,6 +288,47 @@ esp_err_t scenes_save(void)
     return (err != ESP_OK) ? err : catalog_err;
 }
 
+// FNV-1a hash
+uint32_t scenes_hash_preset_params(const float preset_params[TONEX_PARAM_LAST])
+{
+    uint32_t hash = 2166136261u;
+
+    for (uint16_t index = 0; index < TONEX_PARAM_LAST; index++)
+    {
+        uint32_t value_bits;
+        memcpy(&value_bits, &preset_params[index], sizeof(value_bits));
+
+        for (uint8_t byte = 0; byte < sizeof(value_bits); byte++)
+        {
+            hash ^= (value_bits >> (byte * 8)) & 0xFFu;
+            hash *= 16777619u;
+        }
+    }
+
+    return hash;
+}
+
+esp_err_t scenes_save_preset_params(uint8_t preset_index, const float preset_params[TONEX_PARAM_LAST])
+{
+    if ((CurrentScene == NULL) || (preset_params == NULL) || (preset_index >= MAX_SUPPORTED_PRESETS))
+    {
+        return ESP_ERR_INVALID_ARG;
+    }
+
+    tScenePreset *scene_preset = &CurrentScene->Presets[preset_index];
+    memcpy(scene_preset->PresetParams, preset_params, sizeof(scene_preset->PresetParams));
+    scene_preset->PresetParamsHash = scenes_hash_preset_params(scene_preset->PresetParams);
+    scene_preset->Modified = false;
+    CurrentSceneNeedsSave = true;
+
+    esp_err_t err = scenes_save();
+    if (err != ESP_OK)
+    {
+        scene_preset->Modified = true;
+    }
+    return err;
+}
+
 tScene *scenes_get_current(void)
 {
     return CurrentScene;

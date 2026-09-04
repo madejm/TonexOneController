@@ -31,6 +31,8 @@ typedef struct
 
 esp_err_t scenes_init(void);
 esp_err_t scenes_save(void);
+uint32_t scenes_hash_preset_params(const float preset_params[TONEX_PARAM_LAST]);
+esp_err_t scenes_save_preset_params(uint8_t preset_index, const float preset_params[TONEX_PARAM_LAST]);
 
 tScene *scenes_get_current(void);
 const char *scenes_get_name(uint8_t index);
