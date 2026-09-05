@@ -1889,8 +1889,15 @@ static void UI_LogCacheAdd(const char *text)
     log_cache_count++;
 }
 
-void UI_Log(char *text)
+void UI_Log(const char *format, ...)
 {
+    char text[MAX_UI_TEXT];
+
+    va_list args;
+    va_start(args, format);
+    vsnprintf(text, sizeof(text), format, args);
+    va_end(args);
+
     if (ui_update_queue == NULL)
     {
         UI_LogCacheAdd(text);
@@ -1918,7 +1925,7 @@ void UI_Log(char *text)
 * RETURN:
 * NOTES:
 *****************************************************************************/
-void UI_SetProgressBar(uint8_t progress)
+void UI_SetProgressBar(uint8_t progress, char *title)
 {
 #if CONFIG_TONEX_CONTROLLER_HAS_DISPLAY
     tUIUpdate ui_update;
@@ -1932,6 +1939,7 @@ void UI_SetProgressBar(uint8_t progress)
     ui_update.ElementID = UI_ELEMENT_PROGRESS_BAR;
     ui_update.Action = UI_ACTION_NONE;
     ui_update.Value = MIN(progress, 100);
+    strncpy(ui_update.Text, title, MAX_UI_TEXT - 1);
 
     if (xQueueSend(ui_update_queue, (void*)&ui_update, 0) != pdPASS)
     {
@@ -2697,6 +2705,7 @@ static  __attribute__((unused)) uint8_t update_ui_element(tUIUpdate* update)
         case UI_ELEMENT_PROGRESS_BAR:
         {
 #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+            lv_label_set_text(objects.ui_progress_label, update->Text);
             lv_bar_set_value(objects.ui_progress_bar, update->Value, LV_ANIM_ON);
             lv_obj_clear_flag(objects.ui_progress_dialog, LV_OBJ_FLAG_HIDDEN);
 #endif
@@ -2712,11 +2721,20 @@ static  __attribute__((unused)) uint8_t update_ui_element(tUIUpdate* update)
         case UI_ELEMENT_LOG:
         {
             static char buf[320];
-            char *text = lv_label_get_text(objects.ui_debug_text);
+            const char *text = lv_label_get_text(objects.ui_debug_text);
+            size_t text_length = strlen(text);
+            size_t update_length = strnlen(update->Text, sizeof(update->Text));
+
+            if ((text_length + 1 + update_length) >= sizeof(buf))
+            {
+                size_t retained_text_length = sizeof(buf) - update_length - 2;
+                text += text_length - retained_text_length;
+            }
+
             snprintf(buf, sizeof(buf), "%s\n%s", text, update->Text);
             
             lv_label_set_text(objects.ui_debug_text, buf);
-            lv_obj_clear_flag(objects.ui_debug_text, LV_OBJ_FLAG_HIDDEN);
+            lv_obj_clear_flag(objects.ui_debug_container, LV_OBJ_FLAG_HIDDEN);
         } break;
 
         default:

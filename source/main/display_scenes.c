@@ -219,14 +219,6 @@ void action_new_scene(lv_event_t *e)
 {
     if (scenes_create())
     {
-        scenes_select(scenes_get_count() - 1);
-        scenes_save();
-
-        if (usb_get_connected_modeller_type() == AMP_MODELLER_TONEX_ONE)
-        {
-            usb_sync_scene_presets();
-        }
-
         updateScenesList();
     }
 }
@@ -319,9 +311,18 @@ void action_scene_delete_dialog_cancel(lv_event_t *e) {
 
 void action_scene_delete_dialog_delete(lv_event_t *e) {
     if (updatingScene > -1) {
+        bool deleting_selected_scene = updatingScene == scenes_get_selected();
+        uint8_t scenes_count = scenes_get_count();
         scenes_delete(updatingScene);
 
-        updateScenesList();
+        if (deleting_selected_scene && scenes_get_count() < scenes_count)
+        {
+            selectScene(0);
+        }
+        else
+        {
+            updateScenesList();
+        }
     }
 
     updatingScene = -1;

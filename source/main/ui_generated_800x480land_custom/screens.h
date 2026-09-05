@@ -112,9 +112,11 @@ typedef struct _objects_t {
     lv_obj_t *ui_icon_image_delay;
     lv_obj_t *ui_icon_reverb;
     lv_obj_t *ui_icon_image_reverb;
-    lv_obj_t *ui_debug_text;
     lv_obj_t *ui_progress_dialog;
+    lv_obj_t *ui_progress_label;
     lv_obj_t *ui_progress_bar;
+    lv_obj_t *ui_debug_container;
+    lv_obj_t *ui_debug_text;
     lv_obj_t *ui_settings_tab_view;
     lv_obj_t *obj2;
     lv_obj_t *ui_gate_tab;

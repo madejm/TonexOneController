@@ -78,6 +78,9 @@ static const uint8_t ToneOnePresetByteMarker[] = {0xB9, 0x04, 0xB9, 0x02, 0xBC, 
 #define MAX_STATE_DATA                              512
 #define TONEX_ONE_CDC_RX_TRANSFER_SIZE              4096
 
+#define PROGRESS_SYNC_INIT  "Synchronizing presets"
+#define PROGRESS_SYNC_SCENE "Uploading scene presets to Tonex"
+
 // credit to https://github.com/vit3k/tonex_controller for some of the below details and implementation
 enum CommsState
 {
@@ -695,26 +698,85 @@ static esp_err_t __attribute__((unused)) usb_tonex_one_request_preset_details(ui
 * RETURN:      
 * NOTES:       
 *****************************************************************************/
-static esp_err_t usb_tonex_one_send_parameters(void)
+static esp_err_t usb_tonex_one_send_full_preset_data(void)
 {
-    uint16_t outlength;
+    // Build message, length to 0 for now                                 len LSB  len MSB
+    static const uint8_t message[] = {0xb9, 0x03, 0x81, 0x03, 0x03, 0x82, 0,       0,       0x80, 0x0B, 0x03};
+    const uint16_t preset_data_length = TonexData->Message.PedalData.FullPresetDataLength;
+    const size_t message_length = sizeof(message) + preset_data_length;
+    size_t framed_length = 1; // opening frame marker
 
-    // Build message, length to 0 for now                    len LSB  len MSB
-    uint8_t message[] = {0xb9, 0x03, 0x81, 0x03, 0x03, 0x82, 0,       0,       0x80, 0x0B, 0x03};
+    if (message_length > TONEX_RX_TEMP_BUFFER_SIZE)
+    {
+        wifi_log_msg("Full preset message too large: %u", (unsigned)message_length);
+        ESP_LOGE(TAG, "Full preset message too large: %u", (unsigned)message_length);
+        return ESP_ERR_INVALID_SIZE;
+    }
 
-    // set length 
-    message[6] = TonexData->Message.PedalData.FullPresetDataLength & 0xFF;
-    message[7] = (TonexData->Message.PedalData.FullPresetDataLength >> 8) & 0xFF;
+    memcpy(TxBuffer, message, sizeof(message));
+    TxBuffer[6] = preset_data_length & 0xFF;
+    TxBuffer[7] = (preset_data_length >> 8) & 0xFF;
+    memcpy(&TxBuffer[sizeof(message)], TonexData->Message.PedalData.FullPresetData, preset_data_length);
 
-    // build total message
-    memcpy((void*)TxBuffer, (void*)message, sizeof(message));
-    memcpy((void*)&TxBuffer[sizeof(message)], (void*)TonexData->Message.PedalData.FullPresetData, TonexData->Message.PedalData.FullPresetDataLength);
+    for (size_t index = 0; index < message_length; index++)
+    {
+        framed_length += (TxBuffer[index] == 0x7E || TxBuffer[index] == 0x7D) ? 2 : 1;
+    }
 
-    // add framing
-    outlength = tonex_common_add_framing(TxBuffer, sizeof(message) + TonexData->Message.PedalData.FullPresetDataLength, FramedBuffer);
+    uint16_t crc = tonex_common_calculate_CRC(TxBuffer, message_length);
+    framed_length += ((crc & 0xFF) == 0x7E || (crc & 0xFF) == 0x7D) ? 2 : 1;
+    framed_length += ((crc >> 8) == 0x7E || (crc >> 8) == 0x7D) ? 2 : 1;
+    framed_length++; // closing frame marker
 
-    // send it
-    return tonex_common_transmit(cdc_dev, FramedBuffer, outlength, TONEX_USB_TX_BUFFER_SIZE);
+    if (framed_length > TONEX_RX_TEMP_BUFFER_SIZE)
+    {
+        wifi_log_msg("Framed full preset message too large: %u", (unsigned)framed_length);
+        ESP_LOGE(TAG, "Framed full preset message too large: %u", (unsigned)framed_length);
+        return ESP_ERR_INVALID_SIZE;
+    }
+
+    return tonex_common_transmit(cdc_dev, FramedBuffer,
+                                 tonex_common_add_framing(TxBuffer, message_length, FramedBuffer),
+                                 TONEX_USB_TX_BUFFER_SIZE);
+}
+
+/****************************************************************************
+* NAME:
+* DESCRIPTION:
+* PARAMETERS:
+* RETURN:
+* NOTES:
+*****************************************************************************/
+static bool usb_tonex_one_replace_full_preset_parameters(const float preset_params[TONEX_PARAM_LAST])
+{
+    static const uint8_t param_start_marker[] = {0xBA, 0x03, 0xBA, 0x6D};
+    uint8_t *data = TonexData->Message.PedalData.FullPresetData;
+    const uint16_t length = TonexData->Message.PedalData.FullPresetDataLength;
+    uint8_t *parameter = memmem(data, length, param_start_marker, sizeof(param_start_marker));
+
+    if (parameter == NULL)
+    {
+        wifi_log_msg("Full preset parameters marker not found");
+        ESP_LOGE(TAG, "Full preset parameters marker not found");
+        return false;
+    }
+
+    parameter += sizeof(param_start_marker);
+    for (uint16_t index = 0; index < TONEX_PARAM_LAST; index++)
+    {
+        if ((parameter + 1 + sizeof(float)) > (data + length) || *parameter != 0x88)
+        {
+            wifi_log_msg("Invalid full preset parameter %u", index);
+            ESP_LOGE(TAG, "Invalid full preset parameter %u", index);
+            return false;
+        }
+
+        parameter++;
+        memcpy(parameter, &preset_params[index], sizeof(preset_params[index]));
+        parameter += sizeof(preset_params[index]);
+    }
+
+    return true;
 }
 
 /****************************************************************************
@@ -1949,6 +2011,8 @@ static esp_err_t usb_tonex_one_process_single_message(uint8_t* data, uint16_t le
 
                 case TYPE_STATE_PRESET_DETAILS:
                 {
+                    // UI_Log_Delay("PARTIAL %d %d", scene_sync_in_progress, scene_sync_preset_request);
+
                     // locate the ToneOnePresetByteMarker[] to get preset name
                     temp_ptr = memmem((void*)data, length, (void*)ToneOnePresetByteMarker, sizeof(ToneOnePresetByteMarker));
                     if (temp_ptr != NULL)
@@ -1994,7 +2058,7 @@ static esp_err_t usb_tonex_one_process_single_message(uint8_t* data, uint16_t le
                         // save preset name 
                         control_sync_preset_name(boot_preset_request, preset_name);
 
-                        UI_SetProgressBar(((boot_preset_request + 1) * 100) / MAX_PRESETS_TONEX_ONE);
+                        UI_SetProgressBar(((boot_preset_request + 1) * 100) / MAX_PRESETS_TONEX_ONE, PROGRESS_SYNC_INIT);
 
                         // get next preset name
                         boot_preset_request++;
@@ -2039,7 +2103,10 @@ static esp_err_t usb_tonex_one_process_single_message(uint8_t* data, uint16_t le
                         }
 
                         control_set_sync_complete();
-                        UI_HideProgressBar();
+
+                        if (!scene_sync_in_progress) {
+                            UI_HideProgressBar();
+                        }
                         
                         // debug dump parameters
                         //tonex_dump_parameters();
@@ -2059,7 +2126,7 @@ static esp_err_t usb_tonex_one_process_single_message(uint8_t* data, uint16_t le
                     boot_global_request = 1;
                     boot_preset_request = 0;
 
-                    UI_SetProgressBar(0);
+                    UI_SetProgressBar(0, PROGRESS_SYNC_INIT);
 
 #if CONFIG_TONEX_CONTROLLER_HAS_DISPLAY
                     // show sync message
@@ -2069,32 +2136,36 @@ static esp_err_t usb_tonex_one_process_single_message(uint8_t* data, uint16_t le
 
                 case TYPE_STATE_PRESET_DETAILS_FULL:
                 {
+                    // UI_Log_Delay("FULL %d %d", scene_sync_in_progress, scene_sync_preset_request);
                     ESP_LOGI(TAG, "Received Preset details full");
 
                     if (scene_sync_in_progress)
                     {
                         tScene *scene = scenes_get_current();
 
-                        if ((scene == NULL) || !usb_tonex_one_parse_preset_parameters(data, length, PresetParamsBuffer, false))
+                        if ((scene == NULL) ||
+                            !usb_tonex_one_replace_full_preset_parameters(
+                                scene->Presets[scene_sync_preset_request].PresetParams) ||
+                            (usb_tonex_one_send_full_preset_data() != ESP_OK))
                         {
-                            ESP_LOGE(TAG, "Failed to compare scene preset %u", scene_sync_preset_request);
+                            wifi_log_msg("Failed to apply scene preset %u", scene_sync_preset_request);
+                            ESP_LOGE(TAG, "Failed to apply scene preset %u", scene_sync_preset_request);
                             scene_sync_in_progress = false;
                             UI_HideProgressBar();
                             break;
                         }
 
-                        uint32_t preset_hash = scenes_hash_preset_params(PresetParamsBuffer);
-                        scene->Presets[scene_sync_preset_request].Modified =
-                            (preset_hash != scene->Presets[scene_sync_preset_request].PresetParamsHash);
+                        scene->Presets[scene_sync_preset_request].Modified = false;
 
                         scene_sync_preset_request++;
-                        UI_SetProgressBar((scene_sync_preset_request * 100) / MAX_PRESETS_TONEX_ONE);
+                        UI_SetProgressBar((scene_sync_preset_request * 100) / MAX_PRESETS_TONEX_ONE, PROGRESS_SYNC_SCENE);
 
                         if (scene_sync_preset_request < MAX_PRESETS_TONEX_ONE)
                         {
                             if (usb_tonex_one_request_preset_details(scene_sync_preset_request, 1) != ESP_OK)
                             {
                                 ESP_LOGE(TAG, "Failed to request scene preset %u", scene_sync_preset_request);
+                                wifi_log_msg("Failed to request scene preset %u", scene_sync_preset_request);
                                 scene_sync_in_progress = false;
                                 UI_HideProgressBar();
                             }
@@ -2107,6 +2178,17 @@ static esp_err_t usb_tonex_one_process_single_message(uint8_t* data, uint16_t le
                             UI_SetPresetLabel(control_get_current_preset_mapped_index(), current_preset_name);
                             UI_UpdatePresetList();
                             UI_HideProgressBar();
+
+                            // Refresh the active preset from TONEX after all full preset
+                            // updates have been applied. This updates the live parameters and
+                            // all dependent UI from the pedal's response.
+                            // current_preset = usb_tonex_one_get_current_active_preset();
+                            // if (usb_tonex_one_request_preset_details(current_preset, 0) != ESP_OK)
+                            // {
+                            //     wifi_log_msg("Failed to refresh active preset after scene sync");
+                            //     ESP_LOGE(TAG, "Failed to refresh active preset after scene sync");
+                            //     UI_HideProgressBar();
+                            // }
                         }
                     }
                 } break;
@@ -2340,7 +2422,7 @@ void usb_tonex_one_handle(class_driver_t* driver_obj)
                     {
                         scene_sync_preset_request = 0;
                         scene_sync_in_progress = true;
-                        UI_SetProgressBar(0);
+                        UI_SetProgressBar(0, PROGRESS_SYNC_SCENE);
 
                         if (usb_tonex_one_request_preset_details(scene_sync_preset_request, 1) != ESP_OK)
                         {

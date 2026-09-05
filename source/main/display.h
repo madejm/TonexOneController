@@ -63,9 +63,15 @@ void UI_ShowToast(char* text);
 void UI_SettingsCopied(Clipboard_t type);
 void UI_SetTunerFrequencies(float error, float ref_freq, uint8_t midi_note);
 void UI_SetTunerState(uint8_t state);
-void UI_SetProgressBar(uint8_t progress);
+void UI_SetProgressBar(uint8_t progress, char *title);
 void UI_HideProgressBar(void);
-void UI_Log(char *text);
+void UI_Log(const char *format, ...);
+
+#define UI_Log_Delay(...) \
+    { \
+        UI_Log(__VA_ARGS__); \
+        vTaskDelay(pdMS_TO_TICKS(300)); \
+    }
 
 #ifdef __cplusplus
 } /*extern "C"*/

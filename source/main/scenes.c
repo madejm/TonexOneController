@@ -453,8 +453,11 @@ void scenes_delete(uint8_t index)
 
     if (selected_scene == index)
     {
-        uint8_t replacement_source_index = (index < scenes_count - 1) ? (index + 1) : (index - 1);
-        uint8_t replacement_storage_id = ScenesCatalog.Scenes[replacement_source_index].StorageId;
+        uint8_t replacement_storage_id = ScenesCatalog.Scenes[0].StorageId;
+        if (index == 0)
+        {
+            replacement_storage_id = ScenesCatalog.Scenes[1].StorageId;
+        }
         if (LoadScene(replacement_storage_id, CurrentScene) != ESP_OK)
         {
             ESP_LOGE(TAG, "Failed to load replacement for deleted scene");
@@ -473,7 +476,7 @@ void scenes_delete(uint8_t index)
 
     if (selected_scene == index)
     {
-        ScenesCatalog.Config.SelectedScene = (index < ScenesCatalog.Config.ScenesCount) ? index : (index - 1);
+        ScenesCatalog.Config.SelectedScene = 0;
     }
     else if (selected_scene > index)
     {
