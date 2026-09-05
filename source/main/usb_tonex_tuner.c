@@ -22,6 +22,7 @@ limitations under the License.
 
 #include "esp_log.h"
 #include "esp_heap_caps.h"
+#include "esp_timer.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/stream_buffer.h"
 #include "freertos/task.h"
@@ -48,6 +49,10 @@ limitations under the License.
 #define AUDIO_CAPTURE_SECONDS           2U
 #define AUDIO_CAPTURE_BYTES             \
     (AUDIO_SAMPLE_RATE * AUDIO_CHANNELS * 4U * AUDIO_CAPTURE_SECONDS)
+#define AUDIO_CAPTURE_TRACE_RECORD_BYTES 8U
+#define AUDIO_CAPTURE_TRACE_RECORDS     4096U
+#define AUDIO_CAPTURE_TRACE_BYTES       \
+    (AUDIO_CAPTURE_TRACE_RECORD_BYTES * AUDIO_CAPTURE_TRACE_RECORDS)
 
 #define TUNER_WINDOW_SIZE               2048U
 #define TUNER_HOP_SIZE                  512U
@@ -63,6 +68,7 @@ limitations under the License.
 #define USB_SUBCLASS_AUDIOSTREAMING     0x02U
 #define USB_SUBCLASS_AUDIOCONTROL       0x01U
 #define USB_PROTOCOL_UAC2               0x20U
+#define USB_PROTOCOL_UAC1               0x00U
 #define USB_CS_INTERFACE                0x24U
 #define UAC_AS_GENERAL                  0x01U
 #define UAC_FORMAT_TYPE                 0x02U
@@ -92,6 +98,8 @@ typedef struct {
     uint8_t audio_channels;
     uint8_t audio_subslot_size;
     uint8_t audio_bit_resolution;
+    uint8_t audio_protocol;
+    uint32_t audio_sample_rate;
     uint8_t audio_control_interface;
     uint8_t clock_source_id;
     bool clock_frequency_writable;
@@ -147,14 +155,18 @@ typedef enum {
 /* Keep a completed diagnostic capture available after USB disconnect. */
 static uint8_t *s_capture_data;
 static size_t s_capture_length;
+static uint8_t *s_capture_packet_trace;
+static size_t s_capture_packet_trace_length;
 static volatile audio_capture_state_t s_capture_state;
 static volatile uint32_t s_capture_readers;
 static TickType_t s_capture_start_tick;
+static int64_t s_capture_start_us;
 static uint32_t s_capture_wall_ms;
 static bool s_capture_started;
 static uint32_t s_capture_packets_40;
 static uint32_t s_capture_packets_48;
 static uint32_t s_capture_packets_56;
+static uint32_t s_capture_packets_96;
 static uint32_t s_capture_packets_352;
 static uint32_t s_capture_packets_360;
 static uint32_t s_capture_packets_other;
@@ -180,14 +192,24 @@ static bool capture_prepare(void)
             return false;
         }
     }
+    if (s_capture_packet_trace == NULL) {
+        s_capture_packet_trace = heap_caps_malloc(
+            AUDIO_CAPTURE_TRACE_BYTES, MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT);
+        if (s_capture_packet_trace == NULL) {
+            return false;
+        }
+    }
 
     s_capture_length = 0U;
+    s_capture_packet_trace_length = 0U;
     s_capture_start_tick = 0;
+    s_capture_start_us = 0;
     s_capture_wall_ms = 0U;
     s_capture_started = false;
     s_capture_packets_40 = 0U;
     s_capture_packets_48 = 0U;
     s_capture_packets_56 = 0U;
+    s_capture_packets_96 = 0U;
     s_capture_packets_352 = 0U;
     s_capture_packets_360 = 0U;
     s_capture_packets_other = 0U;
@@ -399,11 +421,15 @@ static inline int16_t unpack_audio_sample(const uint8_t *data)
         return (int16_t)(sample >> 16);
     }
 
-    const uint32_t packed = (uint32_t)data[0]
+    if (s_tuner.audio_subslot_size == 3U) {
+        const uint32_t packed = (uint32_t)data[0]
                           | ((uint32_t)data[1] << 8)
                           | ((uint32_t)data[2] << 16);
-    int32_t sample = (int32_t)(packed << 8) >> 8;
-    return (int16_t)(sample >> 8);
+        int32_t sample = (int32_t)(packed << 8) >> 8;
+        return (int16_t)(sample >> 8);
+    }
+
+    return (int16_t)((uint16_t)data[0] | ((uint16_t)data[1] << 8));
 }
 
 static inline float biquad_process(biquad_t *filter, float input)
@@ -617,7 +643,7 @@ static void tuner_task(void *arg)
     TickType_t stats_tick = xTaskGetTickCount();
     uint32_t previous_total_frames = s_tuner.total_frame_count;
 
-    biquad_init_lowpass(&lowpass, 2000.0f, (float)AUDIO_SAMPLE_RATE);
+    biquad_init_lowpass(&lowpass, 2000.0f, (float)s_tuner.audio_sample_rate);
     if (!capture_owns_tuner_ui()) {
         UI_SetTunerResult("--", 0.0f, false, 0U, 0U);
     }
@@ -724,10 +750,30 @@ static void audio_capture_complete(usb_transfer_t *transfer)
     }
 
     if (transfer->status == USB_TRANSFER_STATUS_COMPLETED) {
+        const int64_t callback_us = esp_timer_get_time();
         size_t offset = 0;
         for (int packet_index = 0; packet_index < transfer->num_isoc_packets; ++packet_index) {
             usb_isoc_packet_desc_t *packet = &transfer->isoc_packet_desc[packet_index];
             if (s_capture_state == AUDIO_CAPTURE_RECORDING) {
+                if (!s_capture_started) {
+                    s_capture_start_tick = xTaskGetTickCount();
+                    s_capture_start_us = callback_us;
+                    s_capture_started = true;
+                }
+                if (s_capture_packet_trace_length + AUDIO_CAPTURE_TRACE_RECORD_BYTES <=
+                    AUDIO_CAPTURE_TRACE_BYTES) {
+                    uint8_t *record = s_capture_packet_trace + s_capture_packet_trace_length;
+                    const uint32_t elapsed_us = (uint32_t)(callback_us - s_capture_start_us);
+                    record[0] = (uint8_t)elapsed_us;
+                    record[1] = (uint8_t)(elapsed_us >> 8);
+                    record[2] = (uint8_t)(elapsed_us >> 16);
+                    record[3] = (uint8_t)(elapsed_us >> 24);
+                    record[4] = (uint8_t)packet->actual_num_bytes;
+                    record[5] = (uint8_t)((uint32_t)packet->actual_num_bytes >> 8);
+                    record[6] = (uint8_t)packet->status;
+                    record[7] = (uint8_t)packet_index;
+                    s_capture_packet_trace_length += AUDIO_CAPTURE_TRACE_RECORD_BYTES;
+                }
                 if (packet->status == USB_TRANSFER_STATUS_COMPLETED) {
                     ++s_capture_packets_completed;
                 } else if (packet->status == USB_TRANSFER_STATUS_SKIPPED) {
@@ -745,10 +791,6 @@ static void audio_capture_complete(usb_transfer_t *transfer)
 
                 if (s_capture_state == AUDIO_CAPTURE_RECORDING) {
                     const TickType_t now = xTaskGetTickCount();
-                    if (!s_capture_started) {
-                        s_capture_start_tick = now;
-                        s_capture_started = true;
-                    }
                     const size_t remaining = AUDIO_CAPTURE_BYTES - s_capture_length;
                     const size_t packet_size = (size_t)packet->actual_num_bytes;
                     const size_t copy_size = packet_size < remaining ? packet_size : remaining;
@@ -760,6 +802,8 @@ static void audio_capture_complete(usb_transfer_t *transfer)
                         ++s_capture_packets_48;
                     } else if (packet->actual_num_bytes == 56) {
                         ++s_capture_packets_56;
+                    } else if (packet->actual_num_bytes == 96) {
+                        ++s_capture_packets_96;
                     } else if (packet->actual_num_bytes == 352) {
                         ++s_capture_packets_352;
                     } else if (packet->actual_num_bytes == 360) {
@@ -827,7 +871,8 @@ static void audio_capture_complete(usb_transfer_t *transfer)
     }
 }
 
-static bool find_capture_endpoint(const usb_config_desc_t *config)
+static bool find_capture_endpoint(const usb_config_desc_t *config,
+                                  tuner_context_t *target)
 {
     const usb_standard_desc_t *descriptor = (const usb_standard_desc_t *)config;
     const usb_intf_desc_t *interface = NULL;
@@ -835,6 +880,7 @@ static bool find_capture_endpoint(const usb_config_desc_t *config)
     uint8_t channels = 0;
     uint8_t subslot_size = 0;
     uint8_t bit_resolution = 0;
+    uint32_t sample_rate = 0;
     bool found = false;
 
     while (descriptor != NULL && offset < config->wTotalLength) {
@@ -843,22 +889,37 @@ static bool find_capture_endpoint(const usb_config_desc_t *config)
             channels = 0;
             subslot_size = 0;
             bit_resolution = 0;
+            sample_rate = 0;
         } else if (descriptor->bDescriptorType == USB_CS_INTERFACE && interface != NULL &&
                    interface->bInterfaceClass == USB_CLASS_AUDIO &&
                    interface->bInterfaceSubClass == USB_SUBCLASS_AUDIOSTREAMING) {
             const uint8_t *raw = (const uint8_t *)descriptor;
-            if (descriptor->bLength >= 11U && raw[2] == UAC_AS_GENERAL) {
+            if (interface->bInterfaceProtocol == USB_PROTOCOL_UAC2 &&
+                descriptor->bLength >= 11U && raw[2] == UAC_AS_GENERAL) {
                 channels = raw[10];
-            } else if (descriptor->bLength >= 6U && raw[2] == UAC_FORMAT_TYPE &&
+            } else if (interface->bInterfaceProtocol == USB_PROTOCOL_UAC2 &&
+                       descriptor->bLength >= 6U && raw[2] == UAC_FORMAT_TYPE &&
                        raw[3] == UAC_FORMAT_TYPE_I) {
                 subslot_size = raw[4];
                 bit_resolution = raw[5];
+            } else if (interface->bInterfaceProtocol == USB_PROTOCOL_UAC1 &&
+                       descriptor->bLength >= 11U && raw[2] == UAC_FORMAT_TYPE &&
+                       raw[3] == UAC_FORMAT_TYPE_I) {
+                channels = raw[4];
+                subslot_size = raw[5];
+                bit_resolution = raw[6];
+                if (raw[7] > 0U) {
+                    sample_rate = (uint32_t)raw[8]
+                                | ((uint32_t)raw[9] << 8)
+                                | ((uint32_t)raw[10] << 16);
+                }
             }
         } else if (descriptor->bDescriptorType == USB_B_DESCRIPTOR_TYPE_ENDPOINT &&
                    interface != NULL &&
                    interface->bInterfaceClass == USB_CLASS_AUDIO &&
                    interface->bInterfaceSubClass == USB_SUBCLASS_AUDIOSTREAMING &&
-                   interface->bInterfaceProtocol == USB_PROTOCOL_UAC2 &&
+                   (interface->bInterfaceProtocol == USB_PROTOCOL_UAC2 ||
+                    interface->bInterfaceProtocol == USB_PROTOCOL_UAC1) &&
                    interface->bAlternateSetting != 0U) {
             const usb_ep_desc_t *endpoint = (const usb_ep_desc_t *)descriptor;
             const bool is_input = (endpoint->bEndpointAddress & USB_B_ENDPOINT_ADDRESS_EP_DIR_MASK) != 0U;
@@ -866,19 +927,28 @@ static bool find_capture_endpoint(const usb_config_desc_t *config)
             const bool is_audio_data = USB_EP_DESC_GET_USAGETYPE(endpoint) == 0U;
             const uint16_t mps = USB_EP_DESC_GET_MPS(endpoint);
 
-            if (is_input && is_isochronous && is_audio_data && mps >= AUDIO_CHANNELS * 3U) {
-                const bool exact_format = channels == AUDIO_CHANNELS &&
-                                          (subslot_size == 3U || subslot_size == 4U) &&
-                                          bit_resolution == 24U;
-                if (!found || exact_format || mps < s_tuner.endpoint_mps) {
-                    s_tuner.interface_number = interface->bInterfaceNumber;
-                    s_tuner.alternate_setting = interface->bAlternateSetting;
-                    s_tuner.endpoint_address = endpoint->bEndpointAddress;
-                    s_tuner.endpoint_mps = mps;
-                    s_tuner.endpoint_interval = endpoint->bInterval;
-                    s_tuner.audio_channels = channels;
-                    s_tuner.audio_subslot_size = subslot_size;
-                    s_tuner.audio_bit_resolution = bit_resolution;
+            if (is_input && is_isochronous && is_audio_data && channels > 0U &&
+                subslot_size >= 2U && subslot_size <= 4U && mps >= channels * subslot_size) {
+                const bool exact_format =
+                    (interface->bInterfaceProtocol == USB_PROTOCOL_UAC2 &&
+                     channels == AUDIO_CHANNELS &&
+                     (subslot_size == 3U || subslot_size == 4U) &&
+                     bit_resolution == 24U) ||
+                    (interface->bInterfaceProtocol == USB_PROTOCOL_UAC1 &&
+                     channels == 1U && subslot_size == 2U &&
+                     bit_resolution == 16U && sample_rate == 48000U);
+                if (!found || exact_format || mps < target->endpoint_mps) {
+                    target->interface_number = interface->bInterfaceNumber;
+                    target->alternate_setting = interface->bAlternateSetting;
+                    target->endpoint_address = endpoint->bEndpointAddress;
+                    target->endpoint_mps = mps;
+                    target->endpoint_interval = endpoint->bInterval;
+                    target->audio_channels = channels;
+                    target->audio_subslot_size = subslot_size;
+                    target->audio_bit_resolution = bit_resolution;
+                    target->audio_protocol = interface->bInterfaceProtocol;
+                    target->audio_sample_rate = sample_rate != 0U
+                                              ? sample_rate : AUDIO_SAMPLE_RATE;
                     found = true;
                     if (exact_format) {
                         break;
@@ -918,48 +988,6 @@ static void find_audio_clock_source(const usb_config_desc_t *config)
                 s_tuner.audio_control_interface = interface->bInterfaceNumber;
                 s_tuner.clock_source_id = raw[3];
                 s_tuner.clock_frequency_writable = (raw[5] & 0x03U) == 0x03U;
-                return;
-            }
-        }
-
-        int next_offset = offset;
-        descriptor = usb_parse_next_descriptor(descriptor, config->wTotalLength, &next_offset);
-        if (descriptor == NULL || next_offset <= offset) {
-            return;
-        }
-        offset = (uint16_t)next_offset;
-    }
-}
-
-static void patch_capture_endpoint_for_full_speed(const usb_config_desc_t *config)
-{
-    const usb_standard_desc_t *descriptor = (const usb_standard_desc_t *)config;
-    const usb_intf_desc_t *interface = NULL;
-    uint16_t offset = 0;
-    const uint16_t required_mps = (uint16_t)(
-        ((AUDIO_SAMPLE_RATE + 999U) / 1000U) * audio_frame_bytes());
-
-    while (descriptor != NULL && offset < config->wTotalLength) {
-        if (descriptor->bDescriptorType == USB_B_DESCRIPTOR_TYPE_INTERFACE) {
-            interface = (const usb_intf_desc_t *)descriptor;
-        } else if (descriptor->bDescriptorType == USB_B_DESCRIPTOR_TYPE_ENDPOINT &&
-                   interface != NULL &&
-                   interface->bInterfaceNumber == s_tuner.interface_number &&
-                   interface->bAlternateSetting == s_tuner.alternate_setting) {
-            usb_ep_desc_t *endpoint = (usb_ep_desc_t *)descriptor;
-            if (endpoint->bEndpointAddress == s_tuner.endpoint_address) {
-                if (USB_EP_DESC_GET_MPS(endpoint) < required_mps) {
-                    ESP_LOGW(TAG, "Correcting full-speed capture MPS from %u to %u",
-                             USB_EP_DESC_GET_MPS(endpoint), required_mps);
-                    endpoint->wMaxPacketSize = required_mps;
-                    s_tuner.endpoint_mps = required_mps;
-                }
-                if (endpoint->bInterval != 1U) {
-                    ESP_LOGW(TAG, "Correcting full-speed capture interval from %u to 1",
-                             endpoint->bInterval);
-                    endpoint->bInterval = 1U;
-                    s_tuner.endpoint_interval = 1U;
-                }
                 return;
             }
         }
@@ -1039,18 +1067,18 @@ esp_err_t usb_tonex_tuner_init(class_driver_t *driver_obj)
         UI_SetTunerStatus("NO USB DESCRIPTOR", true);
         return result;
     }
-    if (!find_capture_endpoint(config)) {
-        ESP_LOGE(TAG, "No 24-bit UAC2 capture endpoint found");
+    if (!find_capture_endpoint(config, &s_tuner)) {
+        ESP_LOGE(TAG, "No supported USB audio capture endpoint found");
         usb_print_config_descriptor(config, NULL);
-        UI_SetTunerStatus("NO UAC2 INPUT", true);
+        UI_SetTunerStatus("NO USB AUDIO INPUT", true);
         return ESP_ERR_NOT_FOUND;
     }
-    if (s_tuner.audio_channels != AUDIO_CHANNELS ||
-        (s_tuner.audio_subslot_size != 3U && s_tuner.audio_subslot_size != 4U) ||
-        s_tuner.audio_bit_resolution != 24U) {
+    if (s_tuner.audio_channels == 0U || s_tuner.audio_subslot_size < 2U ||
+        s_tuner.audio_subslot_size > 4U || s_tuner.audio_sample_rate == 0U) {
         UI_SetTunerStatus("UNSUPPORTED FORMAT", true);
         return ESP_ERR_NOT_SUPPORTED;
     }
+    s_tuner.input_sample_rate = (float)s_tuner.audio_sample_rate;
     find_audio_clock_source(config);
 
     result = usb_host_device_info(s_tuner.dev_hdl, &device_info);
@@ -1060,14 +1088,17 @@ esp_err_t usb_tonex_tuner_init(class_driver_t *driver_obj)
     }
     if (device_info.speed == USB_SPEED_FULL) {
         probe_speed_descriptors();
-        patch_capture_endpoint_for_full_speed(config);
+        /* Keep the endpoint exactly as advertised. Enlarging the cached MPS
+           cannot make the device repacketize its stream and changes the HCD's
+           scheduling and DMA allocation without changing anything on-wire. */
     }
 
-    ESP_LOGI(TAG, "Capture interface=%u alt=%u endpoint=0x%02x mps=%u interval=%u format=%uch/%ubyte/%ubit",
+    ESP_LOGI(TAG, "Capture UAC%u interface=%u alt=%u endpoint=0x%02x mps=%u interval=%u format=%uch/%ubyte/%ubit/%luHz",
+             s_tuner.audio_protocol == USB_PROTOCOL_UAC2 ? 2U : 1U,
              s_tuner.interface_number, s_tuner.alternate_setting,
              s_tuner.endpoint_address, s_tuner.endpoint_mps, s_tuner.endpoint_interval,
              s_tuner.audio_channels, s_tuner.audio_subslot_size,
-             s_tuner.audio_bit_resolution);
+             s_tuner.audio_bit_resolution, (unsigned long)s_tuner.audio_sample_rate);
 
     /* Audio samples are consumed by the CPU and are not USB DMA buffers, so keep
        their relatively large FIFO in PSRAM and preserve internal RAM for USB. */
@@ -1118,7 +1149,7 @@ esp_err_t usb_tonex_tuner_init(class_driver_t *driver_obj)
         return result;
     }
 
-    if (s_tuner.audio_subslot_size != 4U || !capture_prepare()) {
+    if (!capture_prepare()) {
         usb_tonex_tuner_deinit();
         UI_SetTunerStatus("CAPTURE BUFFER FAILED", true);
         return ESP_ERR_NO_MEM;
@@ -1211,6 +1242,26 @@ bool usb_tonex_tuner_is_active(void)
     return s_tuner.active;
 }
 
+bool usb_tonex_tuner_is_uac1_capture_device(class_driver_t *driver_obj)
+{
+    if (driver_obj == NULL || driver_obj->dev_hdl == NULL) {
+        return false;
+    }
+
+    const usb_config_desc_t *config = NULL;
+    tuner_context_t candidate = {0};
+    if (usb_host_get_active_config_descriptor(driver_obj->dev_hdl, &config) != ESP_OK ||
+        !find_capture_endpoint(config, &candidate)) {
+        return false;
+    }
+
+    return candidate.audio_protocol == USB_PROTOCOL_UAC1 &&
+           candidate.audio_channels == 1U &&
+           candidate.audio_subslot_size == 2U &&
+           candidate.audio_bit_resolution == 16U &&
+           candidate.audio_sample_rate == 48000U;
+}
+
 bool usb_tonex_tuner_capture_acquire(usb_tonex_capture_view_t *view)
 {
     if (view == NULL) {
@@ -1225,14 +1276,18 @@ bool usb_tonex_tuner_capture_acquire(usb_tonex_capture_view_t *view)
     ++s_capture_readers;
     view->data = s_capture_data;
     view->data_size = s_capture_length;
-    view->sample_rate = AUDIO_SAMPLE_RATE;
-    view->channels = AUDIO_CHANNELS;
-    view->subslot_size = 4U;
-    view->valid_bits = 24U;
+    view->packet_trace = s_capture_packet_trace;
+    view->packet_trace_size = s_capture_packet_trace_length;
+    view->packet_trace_record_size = AUDIO_CAPTURE_TRACE_RECORD_BYTES;
+    view->sample_rate = s_tuner.audio_sample_rate;
+    view->channels = s_tuner.audio_channels;
+    view->subslot_size = s_tuner.audio_subslot_size;
+    view->valid_bits = s_tuner.audio_bit_resolution;
     view->capture_wall_ms = s_capture_wall_ms;
     view->packets_40 = s_capture_packets_40;
     view->packets_48 = s_capture_packets_48;
     view->packets_56 = s_capture_packets_56;
+    view->packets_96 = s_capture_packets_96;
     view->packets_352 = s_capture_packets_352;
     view->packets_360 = s_capture_packets_360;
     view->packets_other = s_capture_packets_other;

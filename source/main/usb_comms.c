@@ -58,6 +58,10 @@ limitations under the License.
 #define CLIENT_NUM_EVENT_MSG            5
 #define CLASS_DRIVER_ACTION_NONE        0
 
+/* Diagnostic A/B: claim only TONEX's audio interface. This determines whether
+   the simultaneous CDC driver/handler is starving the isochronous pipe. */
+#define TONEX_AUDIO_CAPTURE_ONLY_TEST   1
+
 // action bits
 #define CLASS_DRIVER_ACTION_OPEN_DEV    1
 #define CLASS_DRIVER_ACTION_READ_DEV    2
@@ -196,7 +200,11 @@ void class_driver_task(void *arg)
                 AmpModellerType = AMP_MODELLER_TONEX_ONE;
 
                 UI_SetTunerStatus("STARTING USB AUDIO", false);
+#if TONEX_AUDIO_CAPTURE_ONLY_TEST
+                tonex_common_release_memory();
+#else
                 usb_tonex_one_init(&driver_obj, usb_input_queue);
+#endif
 
                 // POC: start clean UAC2 capture and the chromatic tuner immediately.
                 // Later this will be gated by the TONEX ONE tuner state.
@@ -205,6 +213,12 @@ void class_driver_task(void *arg)
                 {
                     ESP_LOGE(TAG, "TONEX tuner capture init failed: %s", esp_err_to_name(err));
                 }
+#if TONEX_AUDIO_CAPTURE_ONLY_TEST
+                else
+                {
+                    control_set_usb_status(1);
+                }
+#endif
             }
             else if ((dev_desc->idVendor == IK_MULTIMEDIA_USB_VENDOR) && (dev_desc->idProduct == TONEX_PRODUCT_ID))
             {
@@ -221,6 +235,26 @@ void class_driver_task(void *arg)
                 AmpModellerType = AMP_MODELLER_VALETON_GP5;
 
                 usb_valeton_gp5_init(&driver_obj, usb_input_queue);
+            }
+            else if (usb_tonex_tuner_is_uac1_capture_device(&driver_obj))
+            {
+                // UC02 proof device: Full-Speed UAC1, mono 16-bit/48 kHz input.
+                ESP_LOGI(TAG, "Found UC02 USB audio test device");
+                AmpModellerType = AMP_MODELLER_USB_AUDIO_TEST;
+                UI_SetTunerStatus("STARTING UAC1 AUDIO", false);
+                err = usb_tonex_tuner_init(&driver_obj);
+                if (err != ESP_OK)
+                {
+                    ESP_LOGE(TAG, "UAC1 capture init failed: %s", esp_err_to_name(err));
+                    AmpModellerType = AMP_MODELLER_NONE;
+                    usb_host_device_close(driver_obj.client_hdl, driver_obj.dev_hdl);
+                    driver_obj.dev_hdl = NULL;
+                    driver_obj.dev_addr = 0;
+                }
+                else
+                {
+                    control_set_usb_status(1);
+                }
             }
             else
             {
@@ -252,7 +286,11 @@ void class_driver_task(void *arg)
                 case AMP_MODELLER_TONEX_ONE:
                 {
                     usb_tonex_tuner_deinit();
+#if TONEX_AUDIO_CAPTURE_ONLY_TEST
+                    tonex_common_preallocate_memory();
+#else
                     usb_tonex_one_deinit();
+#endif
                 } break;
 
                 case AMP_MODELLER_TONEX:
@@ -263,6 +301,11 @@ void class_driver_task(void *arg)
                 case AMP_MODELLER_VALETON_GP5:
                 {
                     usb_valeton_gp5_deinit();
+                } break;
+
+                case AMP_MODELLER_USB_AUDIO_TEST:
+                {
+                    usb_tonex_tuner_deinit();
                 } break;
 
                 default:
@@ -291,7 +334,9 @@ void class_driver_task(void *arg)
         {
             case AMP_MODELLER_TONEX_ONE:        // fallthrough
             {
+#if !TONEX_AUDIO_CAPTURE_ONLY_TEST
                 usb_tonex_one_handle(&driver_obj);
+#endif
             } break;
 
             case AMP_MODELLER_TONEX:
@@ -312,8 +357,7 @@ void class_driver_task(void *arg)
 
         /* The client event handler already blocks for up to 1 ms. Extra sleeps
            leave gaps between isochronous URBs while the tuner is capturing. */
-        if (AmpModellerType != AMP_MODELLER_TONEX_ONE ||
-            !usb_tonex_tuner_is_active()) {
+        if (!usb_tonex_tuner_is_active()) {
             vTaskDelay(pdMS_TO_TICKS(1));
         }
     }

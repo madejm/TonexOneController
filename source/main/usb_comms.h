@@ -37,7 +37,8 @@ enum AmpModellers
     AMP_MODELLER_NONE,
     AMP_MODELLER_TONEX_ONE,
     AMP_MODELLER_TONEX,     // full size pedal with 3 footswitches
-    AMP_MODELLER_VALETON_GP5
+    AMP_MODELLER_VALETON_GP5,
+    AMP_MODELLER_USB_AUDIO_TEST
 };
 
 enum USB_Commands

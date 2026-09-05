@@ -1707,28 +1707,34 @@ static esp_err_t send_tonex_capture_wav(httpd_req_t *req)
     const uint16_t block_align = capture.channels * capture.subslot_size;
     const uint32_t byte_rate = capture.sample_rate * block_align;
     const uint32_t data_size = (uint32_t)capture.data_size;
+    const uint32_t packet_trace_size = (uint32_t)capture.packet_trace_size;
     const uint32_t received_frames = data_size / block_align;
     const uint32_t received_rate = capture.capture_wall_ms > 0U
         ? received_frames * 1000U / capture.capture_wall_ms : 0U;
-    char metadata[384];
+    char metadata[448];
     const int metadata_length = snprintf(
         metadata, sizeof(metadata),
         "{\"wall_ms\":%lu,\"received_sps\":%lu,\"packet_40\":%lu,\"packet_48\":%lu,"
-        "\"packet_56\":%lu,\"packet_352\":%lu,\"packet_360\":%lu,"
+        "\"packet_56\":%lu,\"packet_96\":%lu,\"packet_352\":%lu,\"packet_360\":%lu,"
         "\"packet_other\":%lu,\"packet_completed\":%lu,\"packet_skipped\":%lu,"
-        "\"packet_failed\":%lu,\"qualifier_status\":%u,\"qualifier_length\":%u,"
+        "\"packet_failed\":%lu,\"packet_trace_records\":%lu,"
+        "\"packet_trace_record_size\":%u,\"qualifier_status\":%u,\"qualifier_length\":%u,"
         "\"other_speed_status\":%u,\"other_speed_length\":%u}\n",
         (unsigned long)capture.capture_wall_ms,
         (unsigned long)received_rate,
         (unsigned long)capture.packets_40,
         (unsigned long)capture.packets_48,
         (unsigned long)capture.packets_56,
+        (unsigned long)capture.packets_96,
         (unsigned long)capture.packets_352,
         (unsigned long)capture.packets_360,
         (unsigned long)capture.packets_other,
         (unsigned long)capture.packets_completed,
         (unsigned long)capture.packets_skipped,
         (unsigned long)capture.packets_failed,
+        (unsigned long)(capture.packet_trace_record_size > 0U
+                        ? capture.packet_trace_size / capture.packet_trace_record_size : 0U),
+        capture.packet_trace_record_size,
         capture.qualifier_status,
         capture.qualifier_length,
         capture.other_speed_status,
@@ -1738,7 +1744,9 @@ static esp_err_t send_tonex_capture_wav(httpd_req_t *req)
         ? (uint32_t)metadata_length : 0U;
     const uint32_t padded_metadata_size = (metadata_size + 1U) & ~1U;
     memcpy(&header[0], "RIFF", 4);
-    wav_write_u32(&header[4], 36U + data_size + 8U + padded_metadata_size);
+    wav_write_u32(&header[4], 36U + data_size +
+                              8U + packet_trace_size +
+                              8U + padded_metadata_size);
     memcpy(&header[8], "WAVEfmt ", 8);
     wav_write_u32(&header[16], 16U);
     wav_write_u16(&header[20], 1U); /* PCM; USB byte layout remains untouched. */
@@ -1769,6 +1777,20 @@ static esp_err_t send_tonex_capture_wav(httpd_req_t *req)
         const size_t chunk_size = remaining < (16U * 1024U) ? remaining : (16U * 1024U);
         result = httpd_resp_send_chunk(
             req, (const char *)capture.data + offset, chunk_size);
+        offset += chunk_size;
+    }
+    if (result == ESP_OK) {
+        uint8_t trace_header[8];
+        memcpy(&trace_header[0], "tpk1", 4);
+        wav_write_u32(&trace_header[4], packet_trace_size);
+        result = httpd_resp_send_chunk(
+            req, (const char *)trace_header, sizeof(trace_header));
+    }
+    for (size_t offset = 0; result == ESP_OK && offset < capture.packet_trace_size;) {
+        const size_t remaining = capture.packet_trace_size - offset;
+        const size_t chunk_size = remaining < (16U * 1024U) ? remaining : (16U * 1024U);
+        result = httpd_resp_send_chunk(
+            req, (const char *)capture.packet_trace + offset, chunk_size);
         offset += chunk_size;
     }
     if (result == ESP_OK) {

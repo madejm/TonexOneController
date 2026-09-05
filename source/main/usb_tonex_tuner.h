@@ -31,6 +31,9 @@ extern "C" {
 typedef struct {
     const uint8_t *data;
     size_t data_size;
+    const uint8_t *packet_trace;
+    size_t packet_trace_size;
+    uint16_t packet_trace_record_size;
     uint32_t sample_rate;
     uint16_t channels;
     uint16_t subslot_size;
@@ -39,6 +42,7 @@ typedef struct {
     uint32_t packets_40;
     uint32_t packets_48;
     uint32_t packets_56;
+    uint32_t packets_96;
     uint32_t packets_352;
     uint32_t packets_360;
     uint32_t packets_other;
@@ -52,12 +56,13 @@ typedef struct {
 } usb_tonex_capture_view_t;
 
 /*
- * Proof-of-concept TONEX ONE UAC2 capture and chromatic tuner.
+ * Proof-of-concept TONEX ONE UAC2 / UC02 UAC1 capture and chromatic tuner.
  * Capture is started immediately by init; tuner-mode gating can be added later.
  */
 esp_err_t usb_tonex_tuner_init(class_driver_t *driver_obj);
 void usb_tonex_tuner_deinit(void);
 bool usb_tonex_tuner_is_active(void);
+bool usb_tonex_tuner_is_uac1_capture_device(class_driver_t *driver_obj);
 
 /* A successful acquire pins the capture until the matching release call. */
 bool usb_tonex_tuner_capture_acquire(usb_tonex_capture_view_t *view);
