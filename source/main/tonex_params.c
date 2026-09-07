@@ -28,7 +28,7 @@ limitations under the License.
 #include "control.h"
 #include "tonex_params.h"
 #include "screens.h"
-
+#include "images.h"
 
 #define PARAM_MUTEX_TIMEOUT         2000        // msec
 
@@ -225,8 +225,11 @@ static const char *Style_ReverbModels[] = {
 static const char *Style_ReverbModels_Short[] = {
     "SPR 1", "SPR 2", "SPR 3", "SPR 4", "ROOM", "PLATE"
 };
-static const char *Style_ModModels[] = {
+static const char *Style_ModModels_Full[] = {
     "CHORUS", "TREMOLO", "PHASER", "FLANGER", "ROTARY"
+};
+static const char *Style_ModModels_Mid[] = {
+    "CHORS", "TREM", "PHASER", "FLANG", "ROTARY"
 };
 static const char *Style_ModModels_Short[] = {
     "CHOR", "TREM", "PHAS", "FLAN", "ROT"
@@ -271,6 +274,7 @@ void tonex_params_get_ui_style(
     char const **name,
     char const **value1,
     char const **value2,
+    const lv_img_dsc_t **image,
     const tModellerParameter *allParameters
 ) {
     if (param >= TONEX_GLOBAL_BPM) {
@@ -285,6 +289,7 @@ void tonex_params_get_ui_style(
                 break;
             case TONEX_GLOBAL_CABSIM_BYPASS:
                 *name = "CABSIM";
+                *image = &img_cab;
                 break;
             case TONEX_GLOBAL_TEMPO_SOURCE:
                 *name = shorten ? "TEMP" : "TEMPO";
@@ -309,6 +314,16 @@ void tonex_params_get_ui_style(
         }
     } else if (param >= TONEX_PARAM_DELAY_POST) {
         *color = theme_colors[THEME_ID_DEFAULT][COLOR_ID_DELAY];
+        uint8_t delayIndex = (uint8_t)allParameters[TONEX_PARAM_DELAY_MODEL].Value;
+
+        switch (delayIndex) {
+            case TONEX_DELAY_DIGITAL:
+                *image = &img_delay_digital;
+                break;
+            case TONEX_DELAY_TAPE:
+                *image = &img_delay_tape;
+                break;
+        }
 
         switch (param) {
             case TONEX_PARAM_DELAY_POST:
@@ -340,7 +355,7 @@ void tonex_params_get_ui_style(
                 break;
             case TONEX_PARAM_DELAY_DIGITAL_FEEDBACK:
             case TONEX_PARAM_DELAY_TAPE_FEEDBACK:
-                *name = shorten ? "DLY FBCK" : "DELAY FEEDBACK";
+                *name = shorten ? "DLY FBCK" : "DELAY FDBCK";
                 break;
             case TONEX_PARAM_DELAY_DIGITAL_MODE:
             case TONEX_PARAM_DELAY_TAPE_MODE:
@@ -360,54 +375,94 @@ void tonex_params_get_ui_style(
         *color = theme_colors[THEME_ID_DEFAULT][COLOR_ID_MODULATION];
         uint8_t modIndex = (uint8_t)allParameters[TONEX_PARAM_MODULATION_MODEL].Value;
 
+        switch (modIndex) {
+            case TONEX_MODULATION_CHORUS:
+                *image = &img_mod_chorus;
+                break;
+            case TONEX_MODULATION_TREMOLO:
+                *image = &img_mod_tremolo;
+                break;
+            case TONEX_MODULATION_PHASER:
+                *image = &img_mod_phaser;
+                break;
+            case TONEX_MODULATION_FLANGER:
+                *image = &img_mod_flanger;
+                break;
+            case TONEX_MODULATION_ROTARY:
+                *image = &img_mod_rotary;
+                break;
+        }
+
         switch (param) {
             case TONEX_PARAM_MODULATION_POST:
-                *name = (shorten ? Style_ModModels_Short : Style_ModModels)[modIndex];
+                *name = (shorten ? Style_ModModels_Short : Style_ModModels_Mid)[modIndex];
                 *value1 = "PRE";
                 *value2 = "POST";
                 break;
             case TONEX_PARAM_MODULATION_ENABLE:
-                *name = Style_ModModels[modIndex];
+                *name = Style_ModModels_Mid[modIndex];
                 break;
             case TONEX_PARAM_MODULATION_MODEL:
                 *name = "MOD";
-                *value1 = (shorten ? Style_ModModels_Short : Style_ModModels)[paramValue1];
-                *value2 = (shorten ? Style_ModModels_Short : Style_ModModels)[paramValue2];
+                *value1 = (shorten ? Style_ModModels_Short : Style_ModModels_Full)[paramValue1];
+                *value2 = (shorten ? Style_ModModels_Short : Style_ModModels_Full)[paramValue2];
                 break;
-            case TONEX_PARAM_MODULATION_CHORUS_SYNC:      *name = shorten ? "CHOR SNC" : "CHORUS SYNC";      break;
-            case TONEX_PARAM_MODULATION_CHORUS_TS:        *name = shorten ? "CHOR TS"  : "CHORUS TS";        break;
-            case TONEX_PARAM_MODULATION_CHORUS_RATE:      *name = shorten ? "CHOR RAT" : "CHORUS RATE";      break;
-            case TONEX_PARAM_MODULATION_CHORUS_DEPTH:     *name = shorten ? "CHOR DEP" : "CHORUS DEPTH";     break;
-            case TONEX_PARAM_MODULATION_CHORUS_LEVEL:     *name = shorten ? "CHOR LVL" : "CHORUS LEVEL";     break;
-            case TONEX_PARAM_MODULATION_TREMOLO_SYNC:     *name = shorten ? "TREM SNC" : "TREMOLO SYNC";     break;
-            case TONEX_PARAM_MODULATION_TREMOLO_TS:       *name = shorten ? "TREM TS"  : "TREMOLO TS";       break;
-            case TONEX_PARAM_MODULATION_TREMOLO_RATE:     *name = shorten ? "TREM RAT" : "TREMOLO RATE";     break;
-            case TONEX_PARAM_MODULATION_TREMOLO_SHAPE:    *name = shorten ? "TREM SHA" : "TREMOLO SHAPE";    break;
-            case TONEX_PARAM_MODULATION_TREMOLO_SPREAD:   *name = shorten ? "TREM SPR" : "TREMOLO SPREAD";   break;
-            case TONEX_PARAM_MODULATION_TREMOLO_LEVEL:    *name = shorten ? "TREM LVL" : "TREMOLO LEVEL";    break;
-            case TONEX_PARAM_MODULATION_PHASER_SYNC:      *name = shorten ? "PHAS SNC" : "PHASER_SYNC";      break;
-            case TONEX_PARAM_MODULATION_PHASER_TS:        *name = shorten ? "PHAS TS"  : "PHASER_TS";        break;
-            case TONEX_PARAM_MODULATION_PHASER_RATE:      *name = shorten ? "PHAS RAT" : "PHASER_RATE";      break;
-            case TONEX_PARAM_MODULATION_PHASER_DEPTH:     *name = shorten ? "PHAS DEP" : "PHASER_DEPTH";     break;
-            case TONEX_PARAM_MODULATION_PHASER_LEVEL:     *name = shorten ? "PHAS LVL" : "PHASER_LEVEL";     break;
-            case TONEX_PARAM_MODULATION_FLANGER_SYNC:     *name = shorten ? "FLAN SNC" : "FLANGER SYNC";     break;
-            case TONEX_PARAM_MODULATION_FLANGER_TS:       *name = shorten ? "FLAN TS"  : "FLANGER TS";       break;
-            case TONEX_PARAM_MODULATION_FLANGER_RATE:     *name = shorten ? "FLAN RAT" : "FLANGER RATE";     break;
-            case TONEX_PARAM_MODULATION_FLANGER_DEPTH:    *name = shorten ? "FLAN DEP" : "FLANGER DEPTH";    break;
-            case TONEX_PARAM_MODULATION_FLANGER_FEEDBACK: *name = shorten ? "FLAN FDK" : "FLANGER FEEDBACK"; break;
-            case TONEX_PARAM_MODULATION_FLANGER_LEVEL:    *name = shorten ? "FLAN LVL" : "FLANGER LEVEL";    break;
-            case TONEX_PARAM_MODULATION_ROTARY_SYNC:      *name = shorten ? "ROT SNC"  : "ROTARY SYNC";      break;
-            case TONEX_PARAM_MODULATION_ROTARY_TS:        *name = shorten ? "ROT TS"   : "ROTARY TS";        break;
-            case TONEX_PARAM_MODULATION_ROTARY_SPEED:     *name = shorten ? "ROT SPD"  : "ROTARY SPEED";     break;
-            case TONEX_PARAM_MODULATION_ROTARY_RADIUS:    *name = shorten ? "ROT RAD"  : "ROTARY RADIUS";    break;
-            case TONEX_PARAM_MODULATION_ROTARY_SPREAD:    *name = shorten ? "ROT SPR"  : "ROTARY SPREAD";    break;
-            case TONEX_PARAM_MODULATION_ROTARY_LEVEL:     *name = shorten ? "ROT LVL"  : "ROTARY LEVEL";     break;
+            case TONEX_PARAM_MODULATION_CHORUS_SYNC:      *name = shorten ? "CHOR SNC" : "CHORUS SYNC";   break;
+            case TONEX_PARAM_MODULATION_CHORUS_TS:        *name = shorten ? "CHOR TS"  : "CHORUS TS";     break;
+            case TONEX_PARAM_MODULATION_CHORUS_RATE:      *name = shorten ? "CHOR RAT" : "CHORUS RATE";   break;
+            case TONEX_PARAM_MODULATION_CHORUS_DEPTH:     *name = shorten ? "CHOR DEP" : "CHORUS DEPTH";  break;
+            case TONEX_PARAM_MODULATION_CHORUS_LEVEL:     *name = shorten ? "CHOR LVL" : "CHORUS LEVEL";  break;
+            case TONEX_PARAM_MODULATION_TREMOLO_SYNC:     *name = shorten ? "TREM SNC" : "TREMOLO SYNC";  break;
+            case TONEX_PARAM_MODULATION_TREMOLO_TS:       *name = shorten ? "TREM TS"  : "TREM TS";       break;
+            case TONEX_PARAM_MODULATION_TREMOLO_RATE:     *name = shorten ? "TREM RAT" : "TREM RATE";     break;
+            case TONEX_PARAM_MODULATION_TREMOLO_SHAPE:    *name = shorten ? "TREM SHA" : "TREM SHAPE";    break;
+            case TONEX_PARAM_MODULATION_TREMOLO_SPREAD:   *name = shorten ? "TREM SPR" : "TREM SPREAD";   break;
+            case TONEX_PARAM_MODULATION_TREMOLO_LEVEL:    *name = shorten ? "TREM LVL" : "TREM LEVEL";    break;
+            case TONEX_PARAM_MODULATION_PHASER_SYNC:      *name = shorten ? "PHAS SNC" : "PHASER SYNC";   break;
+            case TONEX_PARAM_MODULATION_PHASER_TS:        *name = shorten ? "PHAS TS"  : "PHASER TS";     break;
+            case TONEX_PARAM_MODULATION_PHASER_RATE:      *name = shorten ? "PHAS RAT" : "PHASER RATE";   break;
+            case TONEX_PARAM_MODULATION_PHASER_DEPTH:     *name = shorten ? "PHAS DEP" : "PHASER DEPTH";  break;
+            case TONEX_PARAM_MODULATION_PHASER_LEVEL:     *name = shorten ? "PHAS LVL" : "PHASER LEVEL";  break;
+            case TONEX_PARAM_MODULATION_FLANGER_SYNC:     *name = shorten ? "FLAN SNC" : "FLANG SYNC";    break;
+            case TONEX_PARAM_MODULATION_FLANGER_TS:       *name = shorten ? "FLAN TS"  : "FLANG TS";      break;
+            case TONEX_PARAM_MODULATION_FLANGER_RATE:     *name = shorten ? "FLAN RAT" : "FLANG RATE";    break;
+            case TONEX_PARAM_MODULATION_FLANGER_DEPTH:    *name = shorten ? "FLAN DEP" : "FLANG DEPTH";   break;
+            case TONEX_PARAM_MODULATION_FLANGER_FEEDBACK: *name = shorten ? "FLAN FDK" : "FLANG FDBCK";   break;
+            case TONEX_PARAM_MODULATION_FLANGER_LEVEL:    *name = shorten ? "FLAN LVL" : "FLANG LEVEL";   break;
+            case TONEX_PARAM_MODULATION_ROTARY_SYNC:      *name = shorten ? "ROT SNC"  : "ROTARY SYNC";   break;
+            case TONEX_PARAM_MODULATION_ROTARY_TS:        *name = shorten ? "ROT TS"   : "ROTARY TS";     break;
+            case TONEX_PARAM_MODULATION_ROTARY_SPEED:     *name = shorten ? "ROT SPD"  : "ROTARY SPEED";  break;
+            case TONEX_PARAM_MODULATION_ROTARY_RADIUS:    *name = shorten ? "ROT RAD"  : "ROTARY RADIUS"; break;
+            case TONEX_PARAM_MODULATION_ROTARY_SPREAD:    *name = shorten ? "ROT SPR"  : "ROTARY SPREAD"; break;
+            case TONEX_PARAM_MODULATION_ROTARY_LEVEL:     *name = shorten ? "ROT LVL"  : "ROTARY LEVEL";  break;
             default:
                 *name = "MOD ?";
                 break;
         }
     } else if (param >= TONEX_PARAM_REVERB_POSITION) {
         *color = theme_colors[THEME_ID_DEFAULT][COLOR_ID_REVERB];
+        uint8_t reverbIndex = (uint8_t)allParameters[TONEX_PARAM_REVERB_MODEL].Value;
+
+        switch (reverbIndex) {
+            case TONEX_REVERB_SPRING_1:
+                *image = &img_reverb_spring_1;
+                break;
+            case TONEX_REVERB_SPRING_2:
+                *image = &img_reverb_spring_2;
+                break;
+            case TONEX_REVERB_SPRING_3:
+                *image = &img_reverb_spring_3;
+                break;
+            case TONEX_REVERB_SPRING_4:
+                *image = &img_reverb_spring_4;
+                break;
+            case TONEX_REVERB_ROOM:
+                *image = &img_reverb_room;
+                break;
+            case TONEX_REVERB_PLATE:
+                *image = &img_reverb_plate;
+                break;
+        }
 
         switch (param) {
             case TONEX_PARAM_REVERB_POSITION:
@@ -437,7 +492,7 @@ void tonex_params_get_ui_style(
             case TONEX_PARAM_REVERB_SPRING4_PREDELAY:
             case TONEX_PARAM_REVERB_ROOM_PREDELAY:
             case TONEX_PARAM_REVERB_PLATE_PREDELAY:
-                *name = shorten ? "REV PRDL" : "REVERB PREDELAY";
+                *name = shorten ? "REV PRDL" : "REVERB PREDLY";
                 break;
             case TONEX_PARAM_REVERB_SPRING1_COLOR:
             case TONEX_PARAM_REVERB_SPRING2_COLOR:
@@ -464,17 +519,21 @@ void tonex_params_get_ui_style(
 
         switch (param) {
             case TONEX_PARAM_MODEL_GAIN:
-                *name = shorten ? "PRES" : "PRESENCE";
+                *name = shorten ? "PRES" : "PRESNC";
+                *image = &img_eq;
                 break;
             case TONEX_PARAM_MODEL_VOLUME:
                 *name = "DEPTH";
+                *image = &img_eq;
                 break;
             default:
                 *name = "AMP ?";
+                *image = &img_amp;
                 break;
         }
     } else if (param >= TONEX_PARAM_CABINET_UNKNOWN) {
         *color = theme_colors[THEME_ID_DEFAULT][COLOR_ID_CABINET];
+        *image = &img_cab;
 
         switch (param) {
             case TONEX_PARAM_CABINET_TYPE:
@@ -488,6 +547,7 @@ void tonex_params_get_ui_style(
         }
     } else if (param >= TONEX_PARAM_MODEL_AMP_ENABLE) {
         *color = theme_colors[THEME_ID_DEFAULT][COLOR_ID_AMPLIFIER];
+        *image = &img_amp;
 
         switch (param) {
             case TONEX_PARAM_MODEL_AMP_ENABLE:
@@ -497,7 +557,7 @@ void tonex_params_get_ui_style(
                 *name = "GAIN";
                 break;
             case TONEX_PARAM_MODEL_VOLUME:
-                *name = shorten ? "VOL" : "VOLUME";
+                *name = shorten ? "VOL" : "VOLUM";
                 break;
             case TONEX_PARAM_MODEX_MIX:
                 *name = "MIX";
@@ -508,6 +568,7 @@ void tonex_params_get_ui_style(
         }
     } else if (param >= TONEX_PARAM_EQ_POST) {
         *color = theme_colors[THEME_ID_DEFAULT][COLOR_ID_DEFAULT_GRAY];
+        *image = &img_eq;
 
         switch (param) {
             case TONEX_PARAM_EQ_POST:
@@ -521,6 +582,7 @@ void tonex_params_get_ui_style(
         }
     } else if (param >= TONEX_PARAM_COMP_POST) {
         *color = theme_colors[THEME_ID_DEFAULT][COLOR_ID_COMPRESSOR];
+        *image = &img_comp;
 
         switch (param) {
             case TONEX_PARAM_COMP_POST:
@@ -546,6 +608,7 @@ void tonex_params_get_ui_style(
         }
     } else { // param >= TONEX_PARAM_NOISE_GATE_POST
         *color = theme_colors[THEME_ID_DEFAULT][COLOR_ID_NOISE_GATE];
+        *image = &img_gate;
 
         switch (param) {
             case TONEX_PARAM_NOISE_GATE_POST:

@@ -257,30 +257,34 @@ void sceneOptionsSelected(uint8_t index, const char *option)
         return;
     }
     
-    if (strcmp(option, OPTION_RENAME) == 0)
+    str_switch(option)
     {
-        updatingScene = index;
+        str_case(OPTION_RENAME)
+        {
+            updatingScene = index;
 
-        lv_textarea_set_text(objects.ui_scene_rename_dialog_textarea, name);
-        lv_obj_add_state(objects.ui_scene_rename_dialog_textarea, LV_STATE_FOCUSED);
+            lv_textarea_set_text(objects.ui_scene_rename_dialog_textarea, name);
+            lv_obj_add_state(objects.ui_scene_rename_dialog_textarea, LV_STATE_FOCUSED);
 
-        if (strlen(name) == 0) {
-            lv_keyboard_set_mode(objects.ui_scene_rename_dialog_keyboard, LV_KEYBOARD_MODE_TEXT_UPPER);
-        } else {
-            lv_keyboard_set_mode(objects.ui_scene_rename_dialog_keyboard, LV_KEYBOARD_MODE_TEXT_LOWER);
+            if (strlen(name) == 0) {
+                lv_keyboard_set_mode(objects.ui_scene_rename_dialog_keyboard, LV_KEYBOARD_MODE_TEXT_UPPER);
+            } else {
+                lv_keyboard_set_mode(objects.ui_scene_rename_dialog_keyboard, LV_KEYBOARD_MODE_TEXT_LOWER);
+            }
+            
+            lv_obj_clear_flag(objects.ui_scene_rename_dialog, LV_OBJ_FLAG_HIDDEN);
         }
         
-        lv_obj_clear_flag(objects.ui_scene_rename_dialog, LV_OBJ_FLAG_HIDDEN);
-    }
-    else if (strcmp(option, OPTION_DELETE) == 0)
-    {
-        if (scenesCount <= 1) {
-            return;
+        str_case(OPTION_DELETE)
+        {
+            if (scenesCount <= 1) {
+                return;
+            }
+            updatingScene = index;
+            
+            lv_label_set_text(objects.ui_scene_delete_dialog_name, name);
+            lv_obj_clear_flag(objects.ui_scene_delete_dialog, LV_OBJ_FLAG_HIDDEN);
         }
-        updatingScene = index;
-        
-        lv_label_set_text(objects.ui_scene_delete_dialog_name, name);
-        lv_obj_clear_flag(objects.ui_scene_delete_dialog, LV_OBJ_FLAG_HIDDEN);
     }
 }
 

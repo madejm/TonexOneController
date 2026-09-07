@@ -34,6 +34,46 @@ extern "C" {
 
 #endif
 
+/*
+shorthand macros for switching on strings
+
+    str_switch(option)
+    {
+        str_case("val a") {
+            function_a();
+        }
+        
+        str_case("val a") {
+            function_a();
+        }
+
+        str_default {
+            function_a();
+        }
+    }
+
+expands into:
+
+    const char *_s=x;
+    if (0) {
+    } else if (strcmp(_s, "val a") == 0) {
+        {
+            function_a();
+        }
+    } else if (strcmp(_s, "val b") == 0) {
+        {
+            function_b();
+        }
+    } else {
+        {
+            function_c();
+        }
+    }
+*/
+#define str_switch(x)   const char *_s=x; if (0)
+#define str_case(y)     } else if (strcmp(_s, y) == 0) {
+#define str_default     } else {
+
 typedef struct {
     const char *format;
     float multiplier;

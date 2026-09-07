@@ -25,6 +25,7 @@ extern "C" {
 
 #include "esp_err.h"
 #include "params_common.h"
+#include "lvgl.h"
 
 enum TonexReverbModels
 {
@@ -242,6 +243,7 @@ void tonex_params_get_ui_style(
     char const **name,
     char const **value1,
     char const **value2,
+    const lv_img_dsc_t **image,
     const tModellerParameter *allParameters
 );
 

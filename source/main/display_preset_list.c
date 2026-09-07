@@ -322,40 +322,46 @@ void presetOptionsSelected(uint8_t buttonIndex, const char *option)
 
     preset_list_edit_index = preset_list_page * PRESET_LIST_PRESETS_PER_PAGE + buttonIndex;
 
-    if (strcmp(option, OPTION_SAVE) == 0)
+    str_switch(option)
     {
-        uint8_t *preset_order = control_get_preset_order();
-        uint8_t preset_index = preset_order[preset_list_edit_index];
-        usb_save_scene_preset_params(preset_index);
+        str_case(OPTION_SAVE)
+        {
+            uint8_t *preset_order = control_get_preset_order();
+            uint8_t preset_index = preset_order[preset_list_edit_index];
+            usb_save_scene_preset_params(preset_index);
 
-        preset_list_edit_index = -1;
-        lv_obj_add_flag(objects.ui_preset_list_cancel_button, LV_OBJ_FLAG_HIDDEN);
-    }
-    else if (strcmp(option, OPTION_INSERT) == 0)
-    {
-        preset_list_insert_mode = PRESET_LIST_INSERT_MODE_INSERT;
-
-        lv_obj_clear_flag(objects.ui_preset_list_cancel_button, LV_OBJ_FLAG_HIDDEN);
-        updatePresetListSelection();
-    }
-    else if (strcmp(option, OPTION_SWAP) == 0)
-    {
-        preset_list_insert_mode = PRESET_LIST_INSERT_MODE_SWAP;
-
-        lv_obj_clear_flag(objects.ui_preset_list_cancel_button, LV_OBJ_FLAG_HIDDEN);
-        updatePresetListSelection();
-    }
-    else if (strcmp(option, OPTION_CHANGE_COLOR) == 0)
-    {
-        lv_label_set_preset_name(objects.ui_preset_list_color_dialog_name, preset_list_edit_index, false);
-
-        uint32_t rawColor = get_preset_color_raw(preset_list_edit_index);
-
-        for (int i = 0; i <= 20; i++) {
-            setDialogColorButton(i, rawColor);
+            preset_list_edit_index = -1;
+            lv_obj_add_flag(objects.ui_preset_list_cancel_button, LV_OBJ_FLAG_HIDDEN);
         }
 
-        lv_obj_clear_flag(objects.ui_preset_list_color_dialog, LV_OBJ_FLAG_HIDDEN);
+        str_case(OPTION_INSERT)
+        {
+            preset_list_insert_mode = PRESET_LIST_INSERT_MODE_INSERT;
+
+            lv_obj_clear_flag(objects.ui_preset_list_cancel_button, LV_OBJ_FLAG_HIDDEN);
+            updatePresetListSelection();
+        }
+        
+        str_case(OPTION_SWAP)
+        {
+            preset_list_insert_mode = PRESET_LIST_INSERT_MODE_SWAP;
+
+            lv_obj_clear_flag(objects.ui_preset_list_cancel_button, LV_OBJ_FLAG_HIDDEN);
+            updatePresetListSelection();
+        }
+        
+        str_case(OPTION_CHANGE_COLOR)
+        {
+            lv_label_set_preset_name(objects.ui_preset_list_color_dialog_name, preset_list_edit_index, false);
+
+            uint32_t rawColor = get_preset_color_raw(preset_list_edit_index);
+
+            for (int i = 0; i <= 20; i++) {
+                setDialogColorButton(i, rawColor);
+            }
+
+            lv_obj_clear_flag(objects.ui_preset_list_color_dialog, LV_OBJ_FLAG_HIDDEN);
+        }
     }
 }
 
