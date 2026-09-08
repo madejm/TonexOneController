@@ -487,13 +487,16 @@ void display_preset_buttons_updateFSButtons(
                                 default: {
                                     float value_1 = midi_helper_scale_midi_to_float(param, config.Value_1);
                                     float value_2 = midi_helper_scale_midi_to_float(param, config.Value_2);
-                                    if ((param_entry.Max - param_entry.Min) > 10.0f) {
-                                        sprintf(buffer1, "%.0f", value_1);
-                                        sprintf(buffer2, "%.0f", value_2);
-                                    } else {
-                                        sprintf(buffer1, "%.1f", value_1);
-                                        sprintf(buffer2, "%.1f", value_2);
+                                    const char *format = (param_entry.Max - param_entry.Min) > 10.0f ? "%.0f" : "%.1f";
+                                    
+                                    sprintf(buffer1, format, value_1);
+                                    sprintf(buffer2, format, value_2);
+
+                                    if (value1 != NULL) {
+                                        strncat(buffer1, value1, sizeof(buffer1) - strlen(buffer1) - 1);
+                                        strncat(buffer2, value1, sizeof(buffer2) - strlen(buffer2) - 1);
                                     }
+                                    
                                     value1 = buffer1;
                                     value2 = buffer2;
                                 } break;

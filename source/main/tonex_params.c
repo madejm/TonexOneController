@@ -286,6 +286,7 @@ void tonex_params_get_ui_style(
                 break;
             case TONEX_GLOBAL_INPUT_TRIM:
                 *name = "INPUT TRIM";
+                *value1 = " dB";
                 break;
             case TONEX_GLOBAL_CABSIM_BYPASS:
                 *name = "CABSIM";
@@ -298,6 +299,7 @@ void tonex_params_get_ui_style(
                 break;
             case TONEX_GLOBAL_TUNING_REFERENCE:
                 *name = "TUNING";
+                *value1 = " Hz";
                 break;
             case TONEX_GLOBAL_BYPASS:
                 *name = "BYPASS";
@@ -352,10 +354,12 @@ void tonex_params_get_ui_style(
             case TONEX_PARAM_DELAY_DIGITAL_TIME:
             case TONEX_PARAM_DELAY_TAPE_TIME:
                 *name = shorten ? "DLY" : "DELAY TIME";
+                *value1 = " ms";
                 break;
             case TONEX_PARAM_DELAY_DIGITAL_FEEDBACK:
             case TONEX_PARAM_DELAY_TAPE_FEEDBACK:
                 *name = shorten ? "DLY FBCK" : "DELAY FDBCK";
+                *value1 = " %";
                 break;
             case TONEX_PARAM_DELAY_DIGITAL_MODE:
             case TONEX_PARAM_DELAY_TAPE_MODE:
@@ -366,6 +370,7 @@ void tonex_params_get_ui_style(
             case TONEX_PARAM_DELAY_DIGITAL_MIX:
             case TONEX_PARAM_DELAY_TAPE_MIX:
                 *name = shorten ? "DLY MX" : "DELAY MIX";
+                *value1 = " %";
                 break;
             default:
                 *name = "DELAY ?";
@@ -407,34 +412,34 @@ void tonex_params_get_ui_style(
                 *value1 = (shorten ? Style_ModModels_Short : Style_ModModels_Full)[paramValue1];
                 *value2 = (shorten ? Style_ModModels_Short : Style_ModModels_Full)[paramValue2];
                 break;
-            case TONEX_PARAM_MODULATION_CHORUS_SYNC:      *name = shorten ? "CHOR SNC" : "CHORUS SYNC";   break;
-            case TONEX_PARAM_MODULATION_CHORUS_TS:        *name = shorten ? "CHOR TS"  : "CHORUS TS";     break;
-            case TONEX_PARAM_MODULATION_CHORUS_RATE:      *name = shorten ? "CHOR RAT" : "CHORUS RATE";   break;
-            case TONEX_PARAM_MODULATION_CHORUS_DEPTH:     *name = shorten ? "CHOR DEP" : "CHORUS DEPTH";  break;
-            case TONEX_PARAM_MODULATION_CHORUS_LEVEL:     *name = shorten ? "CHOR LVL" : "CHORUS LEVEL";  break;
-            case TONEX_PARAM_MODULATION_TREMOLO_SYNC:     *name = shorten ? "TREM SNC" : "TREMOLO SYNC";  break;
-            case TONEX_PARAM_MODULATION_TREMOLO_TS:       *name = shorten ? "TREM TS"  : "TREM TS";       break;
-            case TONEX_PARAM_MODULATION_TREMOLO_RATE:     *name = shorten ? "TREM RAT" : "TREM RATE";     break;
-            case TONEX_PARAM_MODULATION_TREMOLO_SHAPE:    *name = shorten ? "TREM SHA" : "TREM SHAPE";    break;
-            case TONEX_PARAM_MODULATION_TREMOLO_SPREAD:   *name = shorten ? "TREM SPR" : "TREM SPREAD";   break;
-            case TONEX_PARAM_MODULATION_TREMOLO_LEVEL:    *name = shorten ? "TREM LVL" : "TREM LEVEL";    break;
-            case TONEX_PARAM_MODULATION_PHASER_SYNC:      *name = shorten ? "PHAS SNC" : "PHASER SYNC";   break;
-            case TONEX_PARAM_MODULATION_PHASER_TS:        *name = shorten ? "PHAS TS"  : "PHASER TS";     break;
-            case TONEX_PARAM_MODULATION_PHASER_RATE:      *name = shorten ? "PHAS RAT" : "PHASER RATE";   break;
-            case TONEX_PARAM_MODULATION_PHASER_DEPTH:     *name = shorten ? "PHAS DEP" : "PHASER DEPTH";  break;
-            case TONEX_PARAM_MODULATION_PHASER_LEVEL:     *name = shorten ? "PHAS LVL" : "PHASER LEVEL";  break;
-            case TONEX_PARAM_MODULATION_FLANGER_SYNC:     *name = shorten ? "FLAN SNC" : "FLANG SYNC";    break;
-            case TONEX_PARAM_MODULATION_FLANGER_TS:       *name = shorten ? "FLAN TS"  : "FLANG TS";      break;
-            case TONEX_PARAM_MODULATION_FLANGER_RATE:     *name = shorten ? "FLAN RAT" : "FLANG RATE";    break;
-            case TONEX_PARAM_MODULATION_FLANGER_DEPTH:    *name = shorten ? "FLAN DEP" : "FLANG DEPTH";   break;
-            case TONEX_PARAM_MODULATION_FLANGER_FEEDBACK: *name = shorten ? "FLAN FDK" : "FLANG FDBCK";   break;
-            case TONEX_PARAM_MODULATION_FLANGER_LEVEL:    *name = shorten ? "FLAN LVL" : "FLANG LEVEL";   break;
-            case TONEX_PARAM_MODULATION_ROTARY_SYNC:      *name = shorten ? "ROT SNC"  : "ROTARY SYNC";   break;
-            case TONEX_PARAM_MODULATION_ROTARY_TS:        *name = shorten ? "ROT TS"   : "ROTARY TS";     break;
-            case TONEX_PARAM_MODULATION_ROTARY_SPEED:     *name = shorten ? "ROT SPD"  : "ROTARY SPEED";  break;
-            case TONEX_PARAM_MODULATION_ROTARY_RADIUS:    *name = shorten ? "ROT RAD"  : "ROTARY RADIUS"; break;
-            case TONEX_PARAM_MODULATION_ROTARY_SPREAD:    *name = shorten ? "ROT SPR"  : "ROTARY SPREAD"; break;
-            case TONEX_PARAM_MODULATION_ROTARY_LEVEL:     *name = shorten ? "ROT LVL"  : "ROTARY LEVEL";  break;
+            case TONEX_PARAM_MODULATION_CHORUS_SYNC:      *name = shorten ? "CHOR SNC" : "CHORUS SYNC";                     break;
+            case TONEX_PARAM_MODULATION_CHORUS_TS:        *name = shorten ? "CHOR TS"  : "CHORUS TS";                       break;
+            case TONEX_PARAM_MODULATION_CHORUS_RATE:      *name = shorten ? "CHOR RAT" : "CHORUS RATE";   *value1 = " Hz";  break;
+            case TONEX_PARAM_MODULATION_CHORUS_DEPTH:     *name = shorten ? "CHOR DEP" : "CHORUS DEPTH";  *value1 = " %";   break;
+            case TONEX_PARAM_MODULATION_CHORUS_LEVEL:     *name = shorten ? "CHOR LVL" : "CHORUS LEVEL";  *value1 = " dB";  break;
+            case TONEX_PARAM_MODULATION_TREMOLO_SYNC:     *name = shorten ? "TREM SNC" : "TREMOLO SYNC";                    break;
+            case TONEX_PARAM_MODULATION_TREMOLO_TS:       *name = shorten ? "TREM TS"  : "TREM TS";                         break;
+            case TONEX_PARAM_MODULATION_TREMOLO_RATE:     *name = shorten ? "TREM RAT" : "TREM RATE";     *value1 = " Hz";  break;
+            case TONEX_PARAM_MODULATION_TREMOLO_SHAPE:    *name = shorten ? "TREM SHA" : "TREM SHAPE";    *value1 = " t";   break;
+            case TONEX_PARAM_MODULATION_TREMOLO_SPREAD:   *name = shorten ? "TREM SPR" : "TREM SPREAD";   *value1 = " %";   break;
+            case TONEX_PARAM_MODULATION_TREMOLO_LEVEL:    *name = shorten ? "TREM LVL" : "TREM LEVEL";    *value1 = " dB";  break;
+            case TONEX_PARAM_MODULATION_PHASER_SYNC:      *name = shorten ? "PHAS SNC" : "PHASER SYNC";                     break;
+            case TONEX_PARAM_MODULATION_PHASER_TS:        *name = shorten ? "PHAS TS"  : "PHASER TS";                       break;
+            case TONEX_PARAM_MODULATION_PHASER_RATE:      *name = shorten ? "PHAS RAT" : "PHASER RATE";   *value1 = " Hz";  break;
+            case TONEX_PARAM_MODULATION_PHASER_DEPTH:     *name = shorten ? "PHAS DEP" : "PHASER DEPTH";  *value1 = " %";   break;
+            case TONEX_PARAM_MODULATION_PHASER_LEVEL:     *name = shorten ? "PHAS LVL" : "PHASER LEVEL";  *value1 = " dB";  break;
+            case TONEX_PARAM_MODULATION_FLANGER_SYNC:     *name = shorten ? "FLAN SNC" : "FLANG SYNC";                      break;
+            case TONEX_PARAM_MODULATION_FLANGER_TS:       *name = shorten ? "FLAN TS"  : "FLANG TS";                        break;
+            case TONEX_PARAM_MODULATION_FLANGER_RATE:     *name = shorten ? "FLAN RAT" : "FLANG RATE";    *value1 = " Hz";  break;
+            case TONEX_PARAM_MODULATION_FLANGER_DEPTH:    *name = shorten ? "FLAN DEP" : "FLANG DEPTH";   *value1 = " %";   break;
+            case TONEX_PARAM_MODULATION_FLANGER_FEEDBACK: *name = shorten ? "FLAN FDK" : "FLANG FDBCK";   *value1 = " %";   break;
+            case TONEX_PARAM_MODULATION_FLANGER_LEVEL:    *name = shorten ? "FLAN LVL" : "FLANG LEVEL";   *value1 = " dB";  break;
+            case TONEX_PARAM_MODULATION_ROTARY_SYNC:      *name = shorten ? "ROT SNC"  : "ROTARY SYNC";                     break;
+            case TONEX_PARAM_MODULATION_ROTARY_TS:        *name = shorten ? "ROT TS"   : "ROTARY TS";                       break;
+            case TONEX_PARAM_MODULATION_ROTARY_SPEED:     *name = shorten ? "ROT SPD"  : "ROTARY SPEED";  *value1 = " RPM"; break;
+            case TONEX_PARAM_MODULATION_ROTARY_RADIUS:    *name = shorten ? "ROT RAD"  : "ROTARY RADIUS"; *value1 = " mm";  break;
+            case TONEX_PARAM_MODULATION_ROTARY_SPREAD:    *name = shorten ? "ROT SPR"  : "ROTARY SPREAD"; *value1 = " %";   break;
+            case TONEX_PARAM_MODULATION_ROTARY_LEVEL:     *name = shorten ? "ROT LVL"  : "ROTARY LEVEL";  *value1 = " dB";  break;
             default:
                 *name = "MOD ?";
                 break;
@@ -485,6 +490,7 @@ void tonex_params_get_ui_style(
             case TONEX_PARAM_REVERB_ROOM_TIME:
             case TONEX_PARAM_REVERB_PLATE_TIME:
                 *name = shorten ? "REV T" : "REVERB TIME";
+                *value1 = " s";
                 break;
             case TONEX_PARAM_REVERB_SPRING1_PREDELAY:
             case TONEX_PARAM_REVERB_SPRING2_PREDELAY:
@@ -493,6 +499,7 @@ void tonex_params_get_ui_style(
             case TONEX_PARAM_REVERB_ROOM_PREDELAY:
             case TONEX_PARAM_REVERB_PLATE_PREDELAY:
                 *name = shorten ? "REV PRDL" : "REVERB PREDLY";
+                *value1 = " ms";
                 break;
             case TONEX_PARAM_REVERB_SPRING1_COLOR:
             case TONEX_PARAM_REVERB_SPRING2_COLOR:
@@ -509,6 +516,7 @@ void tonex_params_get_ui_style(
             case TONEX_PARAM_REVERB_ROOM_MIX:
             case TONEX_PARAM_REVERB_PLATE_MIX:
                 *name = shorten ? "REV MX" : "REVERB MIX";
+                *value1 = " %";
                 break;
             default:
                 *name = "REVERB ?";
@@ -561,6 +569,7 @@ void tonex_params_get_ui_style(
                 break;
             case TONEX_PARAM_MODEX_MIX:
                 *name = "MIX";
+                *value1 = " %";
                 break;
             default:
                 *name = "AMP ?";

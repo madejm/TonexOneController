@@ -558,6 +558,15 @@
       "componentGroups": [],
       "userProperties": [],
       "name": "SceneDeleteDialogDelete"
+    },
+    {
+      "objID": "cc33a1dd-939d-4197-ac99-eb4f7c3599f0",
+      "components": [],
+      "connectionLines": [],
+      "localVariables": [],
+      "componentGroups": [],
+      "userProperties": [],
+      "name": "PresetListButtonOptionsReleased"
     }
   ],
   "userPages": [
@@ -19657,7 +19666,7 @@
                     "conditionalStyles": [],
                     "childStyles": []
                   },
-                  "hiddenInEditor": false,
+                  "hiddenInEditor": true,
                   "timeline": [],
                   "eventHandlers": [],
                   "identifier": "ui_WiFiTab",
@@ -19681,7 +19690,7 @@
                         "conditionalStyles": [],
                         "childStyles": []
                       },
-                      "hiddenInEditor": false,
+                      "hiddenInEditor": true,
                       "timeline": [],
                       "eventHandlers": [],
                       "leftUnit": "px",
@@ -19704,7 +19713,7 @@
                             "conditionalStyles": [],
                             "childStyles": []
                           },
-                          "hiddenInEditor": false,
+                          "hiddenInEditor": true,
                           "timeline": [],
                           "eventHandlers": [],
                           "leftUnit": "px",
@@ -19727,7 +19736,7 @@
                                 "conditionalStyles": [],
                                 "childStyles": []
                               },
-                              "hiddenInEditor": false,
+                              "hiddenInEditor": true,
                               "timeline": [],
                               "eventHandlers": [],
                               "leftUnit": "px",
@@ -19750,7 +19759,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [],
                                   "identifier": "",
@@ -19795,7 +19804,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [],
                                   "identifier": "ui_WIFIModeDropdown",
@@ -19819,7 +19828,7 @@
                                         "conditionalStyles": [],
                                         "childStyles": []
                                       },
-                                      "hiddenInEditor": false,
+                                      "hiddenInEditor": true,
                                       "timeline": [],
                                       "eventHandlers": [],
                                       "leftUnit": "px",
@@ -19885,7 +19894,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [],
                                   "identifier": "",
@@ -19930,7 +19939,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [],
                                   "identifier": "ui_WIFIPowerDropdown",
@@ -19954,7 +19963,7 @@
                                         "conditionalStyles": [],
                                         "childStyles": []
                                       },
-                                      "hiddenInEditor": false,
+                                      "hiddenInEditor": true,
                                       "timeline": [],
                                       "eventHandlers": [],
                                       "leftUnit": "px",
@@ -20047,7 +20056,7 @@
                                 "conditionalStyles": [],
                                 "childStyles": []
                               },
-                              "hiddenInEditor": false,
+                              "hiddenInEditor": true,
                               "timeline": [],
                               "eventHandlers": [],
                               "leftUnit": "px",
@@ -20070,7 +20079,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [],
                                   "identifier": "",
@@ -20122,7 +20131,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [
                                     {
@@ -20179,7 +20188,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [],
                                   "leftUnit": "px",
@@ -20202,7 +20211,7 @@
                                         "conditionalStyles": [],
                                         "childStyles": []
                                       },
-                                      "hiddenInEditor": false,
+                                      "hiddenInEditor": true,
                                       "timeline": [],
                                       "eventHandlers": [],
                                       "identifier": "",
@@ -20247,7 +20256,7 @@
                                         "conditionalStyles": [],
                                         "childStyles": []
                                       },
-                                      "hiddenInEditor": false,
+                                      "hiddenInEditor": true,
                                       "timeline": [],
                                       "eventHandlers": [
                                         {
@@ -20327,7 +20336,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [
                                     {
@@ -20385,7 +20394,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [],
                                   "identifier": "",
@@ -20430,7 +20439,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [
                                     {
@@ -20541,7 +20550,7 @@
                             "conditionalStyles": [],
                             "childStyles": []
                           },
-                          "hiddenInEditor": false,
+                          "hiddenInEditor": true,
                           "timeline": [],
                           "eventHandlers": [],
                           "leftUnit": "px",
@@ -20564,7 +20573,7 @@
                                 "conditionalStyles": [],
                                 "childStyles": []
                               },
-                              "hiddenInEditor": false,
+                              "hiddenInEditor": true,
                               "timeline": [],
                               "eventHandlers": [],
                               "leftUnit": "px",
@@ -20587,7 +20596,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [],
                                   "identifier": "",
@@ -20640,7 +20649,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [
                                     {
@@ -20718,7 +20727,7 @@
                                 "conditionalStyles": [],
                                 "childStyles": []
                               },
-                              "hiddenInEditor": false,
+                              "hiddenInEditor": true,
                               "timeline": [],
                               "eventHandlers": [
                                 {
@@ -20749,7 +20758,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [],
                                   "leftUnit": "px",
@@ -22469,7 +22478,7 @@
                       "groupIndex": 0
                     }
                   ],
-                  "widgetFlags": "CLICK_FOCUSABLE|GESTURE_BUBBLE|PRESS_LOCK|SCROLLABLE|SCROLL_CHAIN_HOR|SCROLL_CHAIN_VER|SCROLL_ELASTIC|SCROLL_MOMENTUM|SCROLL_WITH_ARROW|SNAPPABLE",
+                  "widgetFlags": "CLICK_FOCUSABLE|GESTURE_BUBBLE|PRESS_LOCK|SCROLL_CHAIN_HOR|SCROLL_CHAIN_VER|SCROLL_MOMENTUM|SCROLL_WITH_ARROW|SNAPPABLE",
                   "hiddenFlagType": "literal",
                   "clickableFlag": true,
                   "clickableFlagType": "literal",
@@ -23033,12 +23042,12 @@
                           }
                         }
                       ],
-                      "widgetFlags": "CLICK_FOCUSABLE|GESTURE_BUBBLE|PRESS_LOCK|SCROLLABLE|SCROLL_CHAIN_HOR|SCROLL_CHAIN_VER|SCROLL_ELASTIC|SCROLL_MOMENTUM|SCROLL_WITH_ARROW|SNAPPABLE",
+                      "widgetFlags": "CLICK_FOCUSABLE|GESTURE_BUBBLE|PRESS_LOCK|SNAPPABLE",
                       "hiddenFlagType": "literal",
                       "clickableFlag": true,
                       "clickableFlagType": "literal",
-                      "flagScrollbarMode": "",
-                      "flagScrollDirection": "",
+                      "flagScrollbarMode": "off",
+                      "flagScrollDirection": "none",
                       "scrollSnapX": "",
                       "scrollSnapY": "",
                       "checkedStateType": "literal",
@@ -23062,13 +23071,12 @@
                       "groupIndex": 0
                     }
                   ],
-                  "widgetFlags": "CLICK_FOCUSABLE|GESTURE_BUBBLE|PRESS_LOCK|SCROLLABLE|SCROLL_CHAIN_HOR|SCROLL_CHAIN_VER|SCROLL_ELASTIC|SCROLL_MOMENTUM|SCROLL_WITH_ARROW|SNAPPABLE",
+                  "widgetFlags": "CLICK_FOCUSABLE|PRESS_LOCK|SNAPPABLE|GESTURE_BUBBLE",
                   "hiddenFlagType": "literal",
                   "clickableFlag": true,
                   "clickableFlagType": "literal",
-                  "flagScrollbarMode": "",
-                  "flagScrollDirection": "",
-                  "scrollSnapX": "",
+                  "flagScrollbarMode": "off",
+                  "flagScrollDirection": "none",
                   "scrollSnapY": "",
                   "checkedStateType": "literal",
                   "disabledStateType": "literal",
@@ -23091,12 +23099,12 @@
                   "groupIndex": 0
                 }
               ],
-              "widgetFlags": "CLICK_FOCUSABLE|GESTURE_BUBBLE|PRESS_LOCK|SCROLLABLE|SCROLL_CHAIN_HOR|SCROLL_CHAIN_VER|SCROLL_ELASTIC|SCROLL_MOMENTUM|SCROLL_WITH_ARROW|SNAPPABLE",
+              "widgetFlags": "CLICK_FOCUSABLE|GESTURE_BUBBLE|PRESS_LOCK|SNAPPABLE",
               "hiddenFlagType": "literal",
               "clickableFlag": true,
               "clickableFlagType": "literal",
-              "flagScrollbarMode": "",
-              "flagScrollDirection": "",
+              "flagScrollbarMode": "off",
+              "flagScrollDirection": "none",
               "scrollSnapX": "",
               "scrollSnapY": "",
               "checkedStateType": "literal",
@@ -26012,7 +26020,7 @@
                 }
               ],
               "widgetFlags": "CLICK_FOCUSABLE|GESTURE_BUBBLE|PRESS_LOCK|SCROLL_CHAIN_HOR|SCROLL_CHAIN_VER|SCROLL_ELASTIC|SCROLL_MOMENTUM|SCROLL_WITH_ARROW|SNAPPABLE",
-              "hiddenFlag": false,
+              "hiddenFlag": true,
               "hiddenFlagType": "literal",
               "clickableFlag": true,
               "clickableFlagType": "literal",
@@ -26038,10 +26046,12 @@
               "groupIndex": 0
             }
           ],
-          "widgetFlags": "CLICKABLE|PRESS_LOCK|CLICK_FOCUSABLE|GESTURE_BUBBLE|SNAPPABLE|SCROLLABLE|SCROLL_ELASTIC|SCROLL_MOMENTUM|SCROLL_CHAIN_HOR|SCROLL_CHAIN_VER",
+          "widgetFlags": "CLICKABLE|PRESS_LOCK|CLICK_FOCUSABLE|GESTURE_BUBBLE|SNAPPABLE",
           "hiddenFlagType": "literal",
           "clickableFlag": true,
           "clickableFlagType": "literal",
+          "flagScrollbarMode": "off",
+          "flagScrollDirection": "none",
           "checkedStateType": "literal",
           "disabledStateType": "literal",
           "states": "",
@@ -27121,7 +27131,8 @@
                       "layout": "FLEX",
                       "flex_flow": "ROW",
                       "flex_main_place": "CENTER",
-                      "pad_top": 60
+                      "pad_top": 60,
+                      "pad_bottom": 16
                     }
                   }
                 }
@@ -27257,6 +27268,154 @@
                           "flex_flow": "ROW",
                           "flex_main_place": "CENTER",
                           "align": "TOP_LEFT"
+                        }
+                      }
+                    }
+                  },
+                  "group": "",
+                  "groupIndex": 0
+                },
+                {
+                  "objID": "39cafe3c-6367-4e7d-dc4c-e8e795e3e85f",
+                  "type": "LVGLContainerWidget",
+                  "left": 0,
+                  "top": 0,
+                  "width": 218,
+                  "height": 44,
+                  "customInputs": [],
+                  "customOutputs": [],
+                  "style": {
+                    "objID": "97da16e6-2a07-4e5c-8292-6257d8098170",
+                    "useStyle": "default",
+                    "conditionalStyles": [],
+                    "childStyles": []
+                  },
+                  "hiddenInEditor": false,
+                  "timeline": [],
+                  "eventHandlers": [],
+                  "leftUnit": "px",
+                  "topUnit": "px",
+                  "widthUnit": "content",
+                  "heightUnit": "content",
+                  "children": [
+                    {
+                      "objID": "f0caabcf-b408-493d-8a5e-1f3d883c5308",
+                      "type": "LVGLLabelWidget",
+                      "left": 13,
+                      "top": -148,
+                      "width": 127,
+                      "height": 23,
+                      "customInputs": [],
+                      "customOutputs": [],
+                      "style": {
+                        "objID": "e37fc4d9-11c0-48ce-a30c-3db056797d4a",
+                        "useStyle": "default",
+                        "conditionalStyles": [],
+                        "childStyles": []
+                      },
+                      "hiddenInEditor": false,
+                      "timeline": [],
+                      "eventHandlers": [],
+                      "identifier": "",
+                      "leftUnit": "px",
+                      "topUnit": "px",
+                      "widthUnit": "content",
+                      "heightUnit": "content",
+                      "children": [],
+                      "widgetFlags": "CLICK_FOCUSABLE|GESTURE_BUBBLE|PRESS_LOCK|SCROLL_CHAIN_HOR|SCROLL_CHAIN_VER|SCROLL_ELASTIC|SCROLL_MOMENTUM|SCROLL_WITH_ARROW|SNAPPABLE",
+                      "hiddenFlagType": "literal",
+                      "clickableFlagType": "literal",
+                      "flagScrollbarMode": "",
+                      "flagScrollDirection": "",
+                      "scrollSnapX": "",
+                      "scrollSnapY": "",
+                      "checkedStateType": "literal",
+                      "disabledStateType": "literal",
+                      "states": "",
+                      "localStyles": {
+                        "objID": "f6d35604-7c35-4d3f-ee65-80158f290240",
+                        "definition": {
+                          "MAIN": {
+                            "DEFAULT": {
+                              "align": "LEFT_MID",
+                              "text_color": "#FFFFFF",
+                              "text_font": "IBM 22"
+                            }
+                          }
+                        }
+                      },
+                      "group": "",
+                      "groupIndex": 0,
+                      "text": "Sync presets",
+                      "textType": "literal",
+                      "longMode": "WRAP",
+                      "recolor": false,
+                      "useStaticText": true
+                    },
+                    {
+                      "objID": "c0773708-57ce-49f5-cddf-2b7661daedbd",
+                      "type": "LVGLSwitchWidget",
+                      "left": 168,
+                      "top": -148,
+                      "width": 80,
+                      "height": 44,
+                      "customInputs": [],
+                      "customOutputs": [],
+                      "style": {
+                        "objID": "6c42e705-8b34-473c-f05e-798c71756d65",
+                        "useStyle": "default",
+                        "conditionalStyles": [],
+                        "childStyles": []
+                      },
+                      "hiddenInEditor": false,
+                      "timeline": [],
+                      "eventHandlers": [],
+                      "identifier": "ui_ScenesSyncPresetsSwitch",
+                      "leftUnit": "px",
+                      "topUnit": "px",
+                      "widthUnit": "content",
+                      "heightUnit": "content",
+                      "children": [],
+                      "widgetFlags": "CHECKABLE|CLICK_FOCUSABLE|GESTURE_BUBBLE|PRESS_LOCK|SCROLL_CHAIN_HOR|SCROLL_CHAIN_VER|SCROLL_ELASTIC|SCROLL_MOMENTUM|SCROLL_ON_FOCUS|SCROLL_WITH_ARROW|SNAPPABLE",
+                      "hiddenFlagType": "literal",
+                      "clickableFlag": true,
+                      "clickableFlagType": "literal",
+                      "flagScrollbarMode": "",
+                      "flagScrollDirection": "",
+                      "scrollSnapX": "",
+                      "scrollSnapY": "",
+                      "checkedState": false,
+                      "checkedStateType": "literal",
+                      "disabledStateType": "literal",
+                      "states": "",
+                      "useStyle": "Switch Default",
+                      "localStyles": {
+                        "objID": "55040095-da60-4831-aa6c-2d0e3fb5b927"
+                      },
+                      "group": "",
+                      "groupIndex": 0
+                    }
+                  ],
+                  "widgetFlags": "CLICK_FOCUSABLE|GESTURE_BUBBLE|PRESS_LOCK|SCROLLABLE|SCROLL_CHAIN_HOR|SCROLL_CHAIN_VER|SCROLL_ELASTIC|SCROLL_MOMENTUM|SCROLL_WITH_ARROW|SNAPPABLE",
+                  "hiddenFlagType": "literal",
+                  "clickableFlag": true,
+                  "clickableFlagType": "literal",
+                  "flagScrollbarMode": "",
+                  "flagScrollDirection": "",
+                  "scrollSnapX": "",
+                  "scrollSnapY": "",
+                  "checkedStateType": "literal",
+                  "disabledStateType": "literal",
+                  "states": "",
+                  "localStyles": {
+                    "objID": "c5c32289-6db6-4180-d625-71ea14e58728",
+                    "definition": {
+                      "MAIN": {
+                        "DEFAULT": {
+                          "layout": "FLEX",
+                          "flex_flow": "ROW",
+                          "flex_cross_place": "CENTER",
+                          "align": "CENTER"
                         }
                       }
                     }
@@ -27908,7 +28067,7 @@
                 }
               ],
               "widgetFlags": "CLICK_FOCUSABLE|GESTURE_BUBBLE|PRESS_LOCK|SCROLL_CHAIN_HOR|SCROLL_CHAIN_VER|SCROLL_ELASTIC|SCROLL_MOMENTUM|SCROLL_WITH_ARROW|SNAPPABLE",
-              "hiddenFlag": false,
+              "hiddenFlag": true,
               "hiddenFlagType": "literal",
               "clickableFlag": true,
               "clickableFlagType": "literal",
@@ -28366,7 +28525,7 @@
                 }
               ],
               "widgetFlags": "CLICK_FOCUSABLE|GESTURE_BUBBLE|PRESS_LOCK|SCROLL_CHAIN_HOR|SCROLL_CHAIN_VER|SCROLL_ELASTIC|SCROLL_MOMENTUM|SCROLL_WITH_ARROW|SNAPPABLE",
-              "hiddenFlag": false,
+              "hiddenFlag": true,
               "hiddenFlagType": "literal",
               "clickableFlag": true,
               "clickableFlagType": "literal",
@@ -28406,6 +28565,10 @@
               "MAIN": {
                 "DEFAULT": {
                   "bg_color": "#000000"
+                },
+                "CHECKED": {
+                  "text_font": "IBM 22",
+                  "text_color": "#ffffff"
                 }
               }
             }
@@ -28614,6 +28777,13 @@
                       "handlerType": "action",
                       "action": "PresetListButtonOptions",
                       "userData": 0
+                    },
+                    {
+                      "objID": "5c92b044-67fe-4400-be7f-0659f8cde5f8",
+                      "eventName": "RELEASED",
+                      "handlerType": "action",
+                      "action": "PresetListButtonOptionsReleased",
+                      "userData": 0
                     }
                   ],
                   "identifier": "Options",
@@ -28664,8 +28834,8 @@
                               "text_font": "IBM 22",
                               "text_color": "#ffffff",
                               "bg_color": "button secondary",
-                              "border_width": 0,
-                              "text_line_space": 34
+                              "text_line_space": 34,
+                              "border_color": "label gray"
                             }
                           },
                           "SELECTED": {

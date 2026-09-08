@@ -109,3 +109,31 @@ void action_preset_list_button_options(lv_event_t * e)
         ptr_case(objects.ui_scene_list_element_19__options) { sceneOptionsSelected(19, option); }
     }
 }
+
+void action_preset_list_button_options_released(lv_event_t * e)
+{
+    lv_obj_t *dropdown = lv_event_get_target(e);
+    if (!lv_dropdown_is_open(dropdown)) {
+        return;
+    }
+
+    lv_obj_t *list = lv_dropdown_get_list(dropdown);
+    lv_obj_update_layout(list);
+
+    lv_area_t bounds;
+    lv_obj_get_coords(list, &bounds);
+
+    lv_coord_t screen_width = lv_disp_get_hor_res(lv_obj_get_disp(dropdown));
+
+    lv_coord_t shift = 0;
+    if (bounds.x2 >= screen_width) {
+        shift = screen_width - 1 - bounds.x2;
+    }
+    if (bounds.x1 + shift < 0) {
+        shift = -bounds.x1;
+    }
+
+    if (shift != 0) {
+        lv_obj_set_x(list, lv_obj_get_x(list) + shift);
+    }
+}

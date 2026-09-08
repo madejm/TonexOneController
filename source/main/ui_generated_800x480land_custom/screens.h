@@ -526,15 +526,17 @@ typedef struct _objects_t {
     lv_obj_t *ui_scene_list_element_19__options;
     lv_obj_t *ui_scene_list_element_19__obj0;
     lv_obj_t *ui_new_scene_button;
-    lv_obj_t *ui_scene_delete_dialog;
     lv_obj_t *obj48;
-    lv_obj_t *ui_scene_delete_dialog_name;
+    lv_obj_t *ui_scenes_sync_presets_switch;
+    lv_obj_t *ui_scene_delete_dialog;
     lv_obj_t *obj49;
-    lv_obj_t *ui_scene_rename_dialog;
+    lv_obj_t *ui_scene_delete_dialog_name;
     lv_obj_t *obj50;
+    lv_obj_t *ui_scene_rename_dialog;
     lv_obj_t *obj51;
-    lv_obj_t *ui_scene_rename_dialog_textarea;
     lv_obj_t *obj52;
+    lv_obj_t *ui_scene_rename_dialog_textarea;
+    lv_obj_t *obj53;
     lv_obj_t *ui_scene_rename_dialog_keyboard;
 } objects_t;
 

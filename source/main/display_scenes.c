@@ -233,7 +233,10 @@ void selectScene(uint8_t index)
     // updatePresetListNames();
 
     scenes_save();
-    if (usb_get_connected_modeller_type() == AMP_MODELLER_TONEX_ONE)
+
+    bool syncPresets = lv_obj_has_state(objects.ui_scenes_sync_presets_switch, LV_STATE_CHECKED);
+
+    if (syncPresets && usb_get_connected_modeller_type() == AMP_MODELLER_TONEX_ONE)
     {
         usb_sync_scene_presets();
     }
