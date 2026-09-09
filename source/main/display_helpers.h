@@ -7,18 +7,34 @@ extern "C" {
 #endif
 
 #include "lvgl.h"
+#include "display_custom_arc.h"
+
+#define _MAKE_COMPONENT(obj, component) obj##component
+#define OBJ_VALUE(label)                _MAKE_COMPONENT(label, _value)
+#define OBJ_SLIDER(label)               _MAKE_COMPONENT(label, _slider)
+#define ARC_ARC(arc)                    _MAKE_COMPONENT(arc, __arc)
+#define ARC_VALUE(arc)                  _MAKE_COMPONENT(arc, __value)
+#define ARC_UNIT(arc)                   _MAKE_COMPONENT(arc, __unit)
+#define ARC_DRAG(arc)                   _MAKE_COMPONENT(arc, __drag)
+#define ARC_CONTENT(arc)                _MAKE_COMPONENT(arc, __content)
 
 #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
 
 #define LV_SLIDER_SET_RANGE(obj, param_entry, mult) \
-    lv_arc_set_range(obj, round(param_entry->Min * mult), round(param_entry->Max * mult))
+    lv_arc_set_range(ARC_ARC(obj), round(param_entry->Min * mult), round(param_entry->Max * mult))
 
 #define LV_SLIDER_SET_VALUE(obj, val, mult) \
-    lv_arc_set_value(obj, round(val * mult))
+    lv_arc_set_value(ARC_ARC(obj), round(val * mult))
 
-#define LV_SLIDER_GET_VALUE(obj) ((float)lv_arc_get_value(obj))
+#define LV_SLIDER_GET_VALUE(obj) ((float)lv_custom_arc_get_value(obj))
 #define FRMT(fmt, unit) fmt
 #define FRMT_NS(fmt, unit) fmt
+
+#define LV_LABEL_SET_TEXT(label, value) \
+    lv_label_set_text(ARC_VALUE(OBJ_SLIDER(label)), value)
+
+#define LV_OBJ_SET_USER_DATA(label, value) \
+    lv_obj_set_user_data(ARC_VALUE(OBJ_SLIDER(label)), value)
 
 #else
 
@@ -31,6 +47,12 @@ extern "C" {
 #define LV_SLIDER_GET_VALUE(obj) ((float)lv_slider_get_value(obj))
 #define FRMT(fmt, unit) fmt " " unit
 #define FRMT_NS(fmt, unit) fmt unit
+
+#define LV_LABEL_SET_TEXT(label, value) \
+    lv_label_set_text(OBJ_VALUE(label), value)
+
+#define LV_OBJ_SET_USER_DATA(label, value) \
+    lv_obj_set_user_data(OBJ_VALUE(label), value)
 
 #endif
 
@@ -73,11 +95,6 @@ expands into:
 #define str_switch(x)   const char *_s=x; if (0)
 #define str_case(y)     } else if (strcmp(_s, y) == 0) {
 #define str_default     } else {
-
-typedef struct {
-    const char *format;
-    float multiplier;
-} TonexParamFormat_t;
 
 typedef struct {
     TonexParamFormat_t GATE_THRESHOLD;

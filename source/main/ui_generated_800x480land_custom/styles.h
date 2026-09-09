@@ -55,13 +55,6 @@ lv_style_t *get_style_tab_settings_MAIN_DEFAULT();
 void add_style_tab_settings(lv_obj_t *obj);
 void remove_style_tab_settings(lv_obj_t *obj);
 
-// Style: Arc Settings
-lv_style_t *get_style_arc_settings_KNOB_DEFAULT();
-lv_style_t *get_style_arc_settings_INDICATOR_DEFAULT();
-lv_style_t *get_style_arc_settings_MAIN_DEFAULT();
-void add_style_arc_settings(lv_obj_t *obj);
-void remove_style_arc_settings(lv_obj_t *obj);
-
 // Style: Container Preset List Cell
 lv_style_t *get_style_container_preset_list_cell_MAIN_DEFAULT();
 lv_style_t *get_style_container_preset_list_cell_MAIN_CHECKED();
@@ -83,11 +76,6 @@ lv_style_t *get_style_switch_dark_KNOB_CHECKED();
 lv_style_t *get_style_switch_dark_INDICATOR_CHECKED();
 void add_style_switch_dark(lv_obj_t *obj);
 void remove_style_switch_dark(lv_obj_t *obj);
-
-// Style: Label Arc Value
-lv_style_t *get_style_label_arc_value_MAIN_DEFAULT();
-void add_style_label_arc_value(lv_obj_t *obj);
-void remove_style_label_arc_value(lv_obj_t *obj);
 
 // Style: Tabview Sub Settings
 lv_style_t *get_style_tabview_sub_settings_MAIN_DEFAULT();

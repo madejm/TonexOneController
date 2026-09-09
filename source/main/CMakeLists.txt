@@ -2,7 +2,7 @@ idf_component_register(SRCS "platform_ws35.c" "usb_tonex_plug.c" "usb_tonex_one_
                             "usb_comms.c" "usb_tonex_one.c" "usb_tonex_common.c" "usb_tonex.c" "usb_valeton_gp5.c" "CH422G.c" "midi_serial.c" "wifi_config.c" "leds.c" "midi_helper.c" "midi_helper_tonex.c" "midi_helper_valeton.c" "LP5562.c"
                             "platform_devkitc.c" "platform_lgtdisps3.c" "platform_m5atoms3r.c" "platform_ws19t.c" "platform_ws43.c" "platform_wszero.c" "platform_ws169.c" 
                             "platform_ws35b.c" "platform_jc3248w.c" "platform_ws7.c" "fx_handler_helper.c"
-                            "display_helpers.c" "display_preset_list.c" "display_settings.c" "eq_canvas.c" "display_scenes.c" "display_user_widgets.c" "scenes.c" "display_preset_buttons.c"
+                            "display_helpers.c" "display_preset_list.c" "display_settings.c" "eq_canvas.c" "display_scenes.c" "display_user_widgets.c" "scenes.c" "display_preset_buttons.c" "display_custom_arc.c"
                             INCLUDE_DIRS "." "./" 
                             EMBED_FILES
                                 "web/index.html" "web/amp_disabled.png" "web/amp_off.png" "web/amp_on.png" "web/cab_disabled.png" "web/cab_off.png" "web/cab_on.png"
