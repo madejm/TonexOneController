@@ -74,7 +74,8 @@ static inline void lv_label_set_preset_name(lv_obj_t* label, uint8_t index, bool
 
 static inline void lv_panel_set_preset_color(lv_obj_t* colorPanel, uint8_t index)
 {
-    uint32_t color = get_preset_color(index);
+    uint32_t rawColor = get_preset_color_raw(index);
+    uint32_t color = getCustomPresetColorMapping(rawColor).onColor;
     lv_obj_set_style_outline_color(colorPanel, lv_color_hex(color), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_clear_flag(colorPanel, LV_OBJ_FLAG_HIDDEN);
 }
@@ -306,10 +307,11 @@ static void setDialogColorButton(int index, uint32_t rawColor)
         default: return;
     }
 
-    lv_color_t bgColor = lv_obj_get_style_bg_color(button, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_color(button, bgColor, LV_PART_MAIN | LV_STATE_CHECKED);
+    const tCustomPresetColorMapping mapping = CustomColorMap[index];
 
-    const tTonexPresetColorMapping mapping = TonexColorMap[index];
+    lv_color_t bgColor = lv_color_hex(mapping.onColor);
+    lv_obj_set_style_bg_color(button, bgColor, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(button, bgColor, LV_PART_MAIN | LV_STATE_CHECKED);
 
     lv_obj_set_checked(button, mapping.rawColor == rawColor);
 }
@@ -356,7 +358,7 @@ void presetOptionsSelected(uint8_t buttonIndex, const char *option)
 
             uint32_t rawColor = get_preset_color_raw(preset_list_edit_index);
 
-            for (int i = 0; i <= 20; i++) {
+            for (int i = 0; i < TONEX_COLORS_COUNT; i++) {
                 setDialogColorButton(i, rawColor);
             }
 

@@ -22120,7 +22120,7 @@
                 }
               ],
               "widgetFlags": "CLICK_FOCUSABLE|GESTURE_BUBBLE|PRESS_LOCK|SCROLL_CHAIN_HOR|SCROLL_CHAIN_VER|SCROLL_ELASTIC|SCROLL_MOMENTUM|SCROLL_WITH_ARROW|SNAPPABLE",
-              "hiddenFlag": true,
+              "hiddenFlag": false,
               "hiddenFlagType": "literal",
               "clickableFlag": true,
               "clickableFlagType": "literal",
@@ -25556,7 +25556,6 @@
                       "pad_row": 0,
                       "pad_column": 0,
                       "bg_color": "button primary",
-                      "bg_opa": 76,
                       "text_color": "#ffffff",
                       "text_font": "IBM 36",
                       "text_align": "LEFT",
@@ -25564,7 +25563,6 @@
                     },
                     "CHECKED": {
                       "bg_color": "#FFFFFF",
-                      "bg_opa": 255,
                       "text_color": "#000000"
                     },
                     "PRESSED": {
@@ -25670,17 +25668,16 @@
                       "pad_left": 4,
                       "pad_right": 4,
                       "bg_color": "button secondary",
-                      "bg_opa": 76,
                       "text_align": "CENTER",
                       "text_font": "IBM 22",
                       "text_color": "#ffffff",
                       "clip_corner": true,
                       "radius": 8,
-                      "pad_bottom": 0
+                      "pad_bottom": 0,
+                      "bg_opa": 255
                     },
                     "CHECKED": {
                       "bg_color": "#ffffff",
-                      "bg_opa": 255,
                       "text_color": "#000000"
                     }
                   }

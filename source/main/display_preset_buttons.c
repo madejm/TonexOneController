@@ -98,7 +98,8 @@ void display_preset_buttons_updatePresetNumberLabel(uint8_t ui_PresetIndex)
 
 static void setFSSmallButton(
     uint32_t buttonIndex,
-    lv_color_t color,
+    lv_color_t colorOn,
+    lv_color_t colorOff,
     FxSelectedValueIndex_t selectedValueIndex,
     const char *title,
     const char *value1,
@@ -152,8 +153,8 @@ static void setFSSmallButton(
         return;
     }
 
-    lv_obj_set_style_bg_color(smallButton, color, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_color(smallButton, color, LV_PART_MAIN | LV_STATE_CHECKED);
+    lv_obj_set_style_bg_color(smallButton, colorOff, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(smallButton, colorOn, LV_PART_MAIN | LV_STATE_CHECKED);
 
     char buffer[MAX_UI_TEXT];
     sprintf(buffer, "%s", title);
@@ -189,7 +190,8 @@ static void setFSSmallButton(
 
 static void setFSBigButton(
     uint32_t buttonIndex,
-    lv_color_t color,
+    lv_color_t colorOn,
+    lv_color_t colorOff,
     FxSelectedValueIndex_t selectedValueIndex,
     const char *title,
     const char *index,
@@ -293,8 +295,8 @@ static void setFSBigButton(
     }
 
     lv_label_set_text(nameLabel, title);
-    lv_obj_set_style_bg_color(button, color, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_color(button, color, LV_PART_MAIN | LV_STATE_CHECKED);
+    lv_obj_set_style_bg_color(button, colorOff, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(button, colorOn, LV_PART_MAIN | LV_STATE_CHECKED);
 
     if (selectedValueIndex == FX_SELECTED_VALUE_2) {
         lv_obj_add_state(button, LV_STATE_CHECKED);
@@ -306,7 +308,7 @@ static void setFSBigButton(
 
     if (index != NULL) {
         lv_label_set_text(indexLabel, index);
-        lv_obj_set_style_text_color(indexLabel, color, LV_PART_MAIN | LV_STATE_DEFAULT);
+        lv_obj_set_style_text_color(indexLabel, colorOn, LV_PART_MAIN | LV_STATE_DEFAULT);
         lv_obj_clear_flag(indexLabel, LV_OBJ_FLAG_HIDDEN);
     } else {
         lv_obj_add_flag(indexLabel, LV_OBJ_FLAG_HIDDEN);
@@ -329,14 +331,14 @@ static void setFSBigButton(
     switch (selectedValueIndex) {
         case FX_SELECTED_VALUE_NONE: {
             lv_obj_set_style_opa(offLabel, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-            lv_obj_set_style_text_color(offLabel, color, LV_PART_MAIN | LV_STATE_DEFAULT);
-            lv_obj_set_style_text_color(onLabel, color, LV_PART_MAIN | LV_STATE_DEFAULT);
+            lv_obj_set_style_text_color(offLabel, colorOn, LV_PART_MAIN | LV_STATE_DEFAULT);
+            lv_obj_set_style_text_color(onLabel, colorOn, LV_PART_MAIN | LV_STATE_DEFAULT);
         } break;
 
         case FX_SELECTED_VALUE_1: {
             lv_obj_set_style_opa(offLabel, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
             lv_obj_set_style_text_color(offLabel, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
-            lv_obj_set_style_text_color(onLabel, color, LV_PART_MAIN | LV_STATE_DEFAULT);
+            lv_obj_set_style_text_color(onLabel, colorOn, LV_PART_MAIN | LV_STATE_DEFAULT);
         } break;
 
         case FX_SELECTED_VALUE_2: {
@@ -352,8 +354,8 @@ static void setFSBigButton(
         lv_obj_add_flag(iconButton, LV_OBJ_FLAG_HIDDEN);
     } else {
         lv_obj_clear_flag(iconButton, LV_OBJ_FLAG_HIDDEN);
-        lv_obj_set_style_bg_color(iconButton, lv_color_darken(color, 204), LV_PART_MAIN | LV_STATE_CHECKED);
-        lv_obj_set_style_border_color(iconButton, color, LV_PART_MAIN | LV_STATE_CHECKED);
+        lv_obj_set_style_bg_color(iconButton, lv_color_darken(colorOn, 204), LV_PART_MAIN | LV_STATE_CHECKED);
+        lv_obj_set_style_border_color(iconButton, colorOn, LV_PART_MAIN | LV_STATE_CHECKED);
         lv_img_set_src(iconImage, image);
     }
 }
@@ -381,7 +383,8 @@ void display_preset_buttons_updateFSButtons(
 
             if (alt && buttonIndex < 6) {
                 FxSelectedValueIndex_t selectedValueIndex = FX_SELECTED_VALUE_NONE;
-                uint32_t color;
+                lv_color_t colorOn;
+                lv_color_t colorOff;
                 char *name = NULL;
                 const char *presetIndex = NULL;
 
@@ -408,16 +411,21 @@ void display_preset_buttons_updateFSButtons(
                     control_get_preset_name(presetIndexValue, buffer2);
                     name = buffer2;
 
-                    color = get_preset_color(presetIndexValue);
+                    uint32_t rawColor = get_preset_color_raw(presetIndexValue);
+                    tCustomPresetColorMapping colorMapping = getCustomPresetColorMapping(rawColor);
+                    // tCustomPresetColorMapping colorMapping = CustomColorMap[presetIndexValue];
+                    colorOn = lv_color_hex(colorMapping.onColor);
+                    colorOff = lv_color_hex(colorMapping.offColor);
                 } else {
                     name = buttonIndex == 4 ? "↓" : "↑";
-                    color = theme_colors[THEME_ID_DEFAULT][COLOR_ID_DEFAULT_GRAY];
+                    colorOn = lv_color_darken(lv_color_hex(theme_colors[THEME_ID_DEFAULT][COLOR_ID_DEFAULT_GRAY]), 179);
+                    colorOff = colorOn;
                 }
 
                 if (small) {
-                    setFSSmallButton(buttonIndex, lv_color_hex(color), selectedValueIndex, name, NULL, NULL, true);
+                    setFSSmallButton(buttonIndex, colorOn, colorOff, selectedValueIndex, name, NULL, NULL, true);
                 } else {
-                    setFSBigButton(buttonIndex, lv_color_hex(color), selectedValueIndex, name, presetIndex, NULL, NULL, NULL, true);
+                    setFSBigButton(buttonIndex, colorOn, colorOff, selectedValueIndex, name, presetIndex, NULL, NULL, NULL, true);
                 }
 
                 didSet = true;
@@ -504,10 +512,13 @@ void display_preset_buttons_updateFSButtons(
                         } break;
                     }
 
+                    lv_color_t colorOn = lv_color_hex(color);
+                    lv_color_t colorOff = lv_color_darken(lv_color_hex(color), 179);
+                    
                     if (small) {
-                        setFSSmallButton(buttonIndex, lv_color_hex(color), selectedValueIndex, name, value1, value2, true);
+                        setFSSmallButton(buttonIndex, colorOn, colorOff, selectedValueIndex, name, value1, value2, true);
                     } else {
-                        setFSBigButton(buttonIndex, lv_color_hex(color), selectedValueIndex, name, NULL, value1, value2, image, true);
+                        setFSBigButton(buttonIndex, colorOn, colorOff, selectedValueIndex, name, NULL, value1, value2, image, true);
                     }
 
                     // done, break for loop and go to next buttonIndex
@@ -518,9 +529,9 @@ void display_preset_buttons_updateFSButtons(
 
             if (!didSet) {
                 if (small) {
-                    setFSSmallButton(buttonIndex, lv_color_hex(0), FX_SELECTED_VALUE_NONE, NULL, NULL, NULL, false);
+                    setFSSmallButton(buttonIndex, lv_color_hex(0), lv_color_hex(0), FX_SELECTED_VALUE_NONE, NULL, NULL, NULL, false);
                 } else {
-                    setFSBigButton(buttonIndex, lv_color_hex(0), FX_SELECTED_VALUE_NONE, NULL, NULL, NULL, NULL, NULL, false);
+                    setFSBigButton(buttonIndex, lv_color_hex(0), lv_color_hex(0), FX_SELECTED_VALUE_NONE, NULL, NULL, NULL, NULL, NULL, false);
                 }
             }
         }

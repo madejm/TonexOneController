@@ -8,6 +8,7 @@ extern "C" {
 
 #include "lvgl.h"
 #include "display_custom_arc.h"
+#include "tonex_params.h"
 
 #define _MAKE_COMPONENT(obj, component) obj##component
 #define OBJ_VALUE(label)                _MAKE_COMPONENT(label, _value)
@@ -95,6 +96,16 @@ expands into:
 #define str_switch(x)   const char *_s=x; if (0)
 #define str_case(y)     } else if (strcmp(_s, y) == 0) {
 #define str_default     } else {
+
+typedef struct {
+    uint32_t rawColor;
+    uint32_t onColor;
+    uint32_t offColor;
+} tCustomPresetColorMapping;
+
+extern const tCustomPresetColorMapping CustomColorMap[TONEX_COLORS_COUNT];
+
+tCustomPresetColorMapping getCustomPresetColorMapping(uint32_t rawColor);
 
 typedef struct {
     TonexParamFormat_t GATE_THRESHOLD;

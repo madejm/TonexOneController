@@ -26,6 +26,43 @@ void lv_obj_set_disabled(lv_obj_t * obj, bool disabled) {
     }
 }
 
+const tCustomPresetColorMapping CustomColorMap[TONEX_COLORS_COUNT] = {
+    {0xFF0000, 0xE61E2D, 0x6E0B14}, // red
+    {0xFF3F00, 0xF26500, 0x6A2B00}, // orange
+    {0x9FFF00, 0xD4C200, 0x5B4E00}, // yellow
+    {0x00FF00, 0x00C853, 0x005E1F}, // green
+    {0x0FFF2F, 0x00CFA6, 0x005A4E}, // cyan
+    {0x00FFFF, 0x0096DC, 0x00547E}, // azure
+    {0x0000FF, 0x4B5CF0, 0x252B70}, // blue
+    {0x2F00FF, 0xA84BE5, 0x54216F}, // purple
+    {0xFF00FF, 0xD03AB4, 0x68045E}, // magenta
+    {0xBFBFBF, 0xF06F9D, 0x861E49}, // pink
+
+    {0x110000, 0xB64F4F, 0x673232}, // dark red
+    {0x111100, 0xA76542, 0x6A4A35}, // dark orange
+    {0x112200, 0x9A8F59, 0x625A34}, // dark yellow
+    {0x001100, 0x748E62, 0x40533A}, // dark green
+    {0x002206, 0x559486, 0x35605A}, // dark cyan
+    {0x001919, 0x4B8EAF, 0x285A70}, // dark azure
+    {0x000011, 0x6B76B8, 0x3A426F}, // dark blue
+    {0x050011, 0x8C63B5, 0x493B64}, // dark purple
+    {0x0A000A, 0xA866A0, 0x593953}, // dark magenta
+    {0x0B0B0B, 0xC67C90, 0x76515A}, // dark pink
+
+    {0x000000, 0x7A7A7A, 0x303030}, // grey
+};
+
+tCustomPresetColorMapping getCustomPresetColorMapping(uint32_t rawColor)
+{
+    for (uint8_t i = 0; i < TONEX_COLORS_COUNT; i++) {
+        if (CustomColorMap[i].rawColor == rawColor) {
+            return CustomColorMap[i];
+        }
+    }
+
+    return CustomColorMap[TONEX_COLORS_COUNT - 1];
+}
+
 const TonexParamFormatValues_t ParamFormats = {
     .GATE_THRESHOLD =       { .format = "%1.0f", .multiplier = 1.0f  },
     .GATE_RELEASE =         { .format = "%1.0f", .multiplier = 1.0f  },
