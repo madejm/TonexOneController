@@ -120,6 +120,11 @@ typedef struct {
     TonexParamFormat_t AMP_VOLUME;
     TonexParamFormat_t AMP_DEPTH;
     TonexParamFormat_t AMP_PRESENCE;
+    TonexParamFormat_t AMP_MIX;
+
+    TonexParamFormat_t CAB_VIR_RESONANCE;
+    TonexParamFormat_t CAB_VIR_MIC_BLEND;
+    TonexParamFormat_t CAB_VIR_MIC_POS;
 
     TonexParamFormat_t EQ_BASS_FREQ;
     TonexParamFormat_t EQ_BASS;

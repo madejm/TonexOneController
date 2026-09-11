@@ -78,6 +78,7 @@ limitations under the License.
 #include "tonex_params.h"
 #include "platform_common.h"
 #include "display_helpers.h"
+#include "display_cab_vir.h"
 
 static const char __attribute__((unused)) *TAG = "app_display_tonex";
 
@@ -107,10 +108,15 @@ void tonex_show_settings_tab(lv_event_t * e)
         // show gate settings
         lv_tabview_set_act(objects.ui_settings_tab_view, CONFIG_TAB_GATE, LV_ANIM_OFF);
     }
-    else if ((target == objects.ui_icon_amp) || (target == objects.ui_icon_cab))
+    else if (target == objects.ui_icon_amp)
     {
         // show amp settings
         lv_tabview_set_act(objects.ui_settings_tab_view, CONFIG_TAB_AMPLIFIER, LV_ANIM_OFF);
+    }
+    else if (target == objects.ui_icon_cab)
+    {
+        // show cab settings
+        lv_tabview_set_act(objects.ui_settings_tab_view, CONFIG_TAB_CAB, LV_ANIM_OFF);
     }
     else if (target == objects.ui_icon_comp)
     {
@@ -878,6 +884,50 @@ void tonex_action_parameter_changed(lv_event_t * e)
     {
         usb_modify_parameter(TONEX_PARAM_MODEL_DEPTH, LV_SLIDER_GET_VALUE(obj)/ParamFormats.AMP_DEPTH.multiplier);
     }
+    #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+    else if (obj == objects.ui_amplifier_mix_slider)
+    {
+        usb_modify_parameter(TONEX_PARAM_MODEX_MIX, LV_SLIDER_GET_VALUE(obj)/ParamFormats.AMP_MIX.multiplier);
+    }
+    else if (obj == objects.ui_cabinet_vir_button_matrix)
+    {
+        setVirCabSelectedButtonIndex(lv_btnmatrix_get_selected_btn(obj));
+        usb_modify_parameter(TONEX_PARAM_VIR_CABINET_MODEL, getVirCabSelectedModelIndex());
+        lv_obj_add_flag(objects.ui_settings_vir_cab_dialog, LV_OBJ_FLAG_HIDDEN);
+    }
+    else if (obj == objects.ui_cabinet_vir_resonance_slider)
+    {
+        usb_modify_parameter(TONEX_PARAM_VIR_RESO, LV_SLIDER_GET_VALUE(obj)/ParamFormats.CAB_VIR_RESONANCE.multiplier);
+    }
+    else if (obj == objects.ui_cabinet_vir_mic1_dropdown)
+    {
+        usb_modify_parameter(TONEX_PARAM_VIR_MIC_1, lv_dropdown_get_selected(obj));
+    }
+    else if (obj == objects.ui_cabinet_vir_mic1_x_slider)
+    {
+        usb_modify_parameter(TONEX_PARAM_VIR_MIC_1_X, LV_SLIDER_GET_VALUE(obj)/ParamFormats.CAB_VIR_MIC_POS.multiplier);
+    }
+    else if (obj == objects.ui_cabinet_vir_mic1_z_slider)
+    {
+        usb_modify_parameter(TONEX_PARAM_VIR_MIC_1_Z, LV_SLIDER_GET_VALUE(obj)/ParamFormats.CAB_VIR_MIC_POS.multiplier);
+    }
+    else if (obj == objects.ui_cabinet_vir_mic2_dropdown)
+    {
+        usb_modify_parameter(TONEX_PARAM_VIR_MIC_2, lv_dropdown_get_selected(obj));
+    }
+    else if (obj == objects.ui_cabinet_vir_mic2_x_slider)
+    {
+        usb_modify_parameter(TONEX_PARAM_VIR_MIC_2_X, LV_SLIDER_GET_VALUE(obj)/ParamFormats.CAB_VIR_MIC_POS.multiplier);
+    }
+    else if (obj == objects.ui_cabinet_vir_mic2_z_slider)
+    {
+        usb_modify_parameter(TONEX_PARAM_VIR_MIC_2_Z, LV_SLIDER_GET_VALUE(obj)/ParamFormats.CAB_VIR_MIC_POS.multiplier);
+    }
+    else if (obj == objects.ui_cabinet_vir_blend_slider)
+    {
+        usb_modify_parameter(TONEX_PARAM_VIR_BLEND, LV_SLIDER_GET_VALUE(obj)/ParamFormats.CAB_VIR_MIC_BLEND.multiplier);
+    }
+    #endif //CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
     else if (obj == objects.ui_bpm_slider)
     {
         usb_modify_parameter(TONEX_GLOBAL_BPM, LV_SLIDER_GET_VALUE(obj)/ParamFormats.BPM.multiplier);
@@ -1392,7 +1442,18 @@ uint8_t tonex_update_ui_parameters(void)
 
                 case TONEX_PARAM_MODEX_MIX:
                 {
-                    // not exposed via UI
+                    #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+                    TonexParamFormat_t format = ParamFormats.AMP_MIX;
+                    LV_SLIDER_SET_RANGE(objects.ui_amplifier_mix_slider, param_entry, format.multiplier);
+                    LV_SLIDER_SET_VALUE(objects.ui_amplifier_mix_slider, param_entry->Value, format.multiplier);
+
+                    // show value and units
+                    sprintf(value_string, format.format, param_entry->Value);
+                    LV_LABEL_SET_TEXT(objects.ui_amplifier_mix, value_string);        
+                    
+                    // set user data for later use
+                    LV_OBJ_SET_USER_DATA(objects.ui_amplifier_mix, (void*)(uintptr_t)TONEX_PARAM_MODEX_MIX);
+                    #endif //CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
                 } break;
 
                 case TONEX_PARAM_MODEL_PRESENCE:
@@ -1417,10 +1478,12 @@ uint8_t tonex_update_ui_parameters(void)
                     // not exposed via UI 
                 //} break;
 
-                //case TONEX_PARAM_VIR_CABINET:
-                //{
-                    // not exposed via UI
-                //} break;
+                case TONEX_PARAM_VIR_CABINET_MODEL:
+                {
+                    #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+                    setVirCabSelectedModelIndex(param_entry->Value);
+                    #endif //CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+                } break;
 
                 case TONEX_PARAM_MODEL_DEPTH:
                 {
@@ -1441,44 +1504,117 @@ uint8_t tonex_update_ui_parameters(void)
 
                 case TONEX_PARAM_VIR_RESO:
                 {
-                    // not exposed via UI
+                    #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+                    TonexParamFormat_t format = ParamFormats.CAB_VIR_RESONANCE;
+                    LV_SLIDER_SET_RANGE(objects.ui_cabinet_vir_resonance_slider, param_entry, format.multiplier);
+                    LV_SLIDER_SET_VALUE(objects.ui_cabinet_vir_resonance_slider, param_entry->Value, format.multiplier);
+
+                    // show value and units
+                    sprintf(value_string, format.format, param_entry->Value);
+                    LV_LABEL_SET_TEXT(objects.ui_cabinet_vir_resonance, value_string);        
+                    
+                    // set user data for later use
+                    LV_OBJ_SET_USER_DATA(objects.ui_cabinet_vir_resonance, (void*)(uintptr_t)TONEX_PARAM_VIR_RESO);
+                    #endif //CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
                 } break;
 
                 case TONEX_PARAM_VIR_MIC_1:
                 {
-                    // not exposed via UI
+                    #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+                    lv_dropdown_set_selected(objects.ui_cabinet_vir_mic1_dropdown, param_entry->Value);
+                    #endif //CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
                 } break;
 
                 case TONEX_PARAM_VIR_MIC_1_X:
                 {
-                    // not exposed via UI
+                    #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+                    // min 0, max 10
+                    TonexParamFormat_t format = ParamFormats.CAB_VIR_MIC_POS;
+                    LV_SLIDER_SET_RANGE(objects.ui_cabinet_vir_mic1_x_slider, param_entry, format.multiplier);
+                    LV_SLIDER_SET_VALUE(objects.ui_cabinet_vir_mic1_x_slider, param_entry->Value, format.multiplier);
+
+                    // show value and units
+                    sprintf(value_string, format.format, param_entry->Value);
+                    LV_LABEL_SET_TEXT(objects.ui_cabinet_vir_mic1_x, value_string);        
+                    
+                    // set user data for later use
+                    LV_OBJ_SET_USER_DATA(objects.ui_cabinet_vir_mic1_x, (void*)(uintptr_t)TONEX_PARAM_VIR_MIC_1_X);
+                    #endif //CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
                 } break;
 
                 case TONEX_PARAM_VIR_MIC_1_Z:
                 {
-                    // not exposed via UI
+                    #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+                    TonexParamFormat_t format = ParamFormats.CAB_VIR_MIC_POS;
+                    LV_SLIDER_SET_RANGE(objects.ui_cabinet_vir_mic1_z_slider, param_entry, format.multiplier);
+                    LV_SLIDER_SET_VALUE(objects.ui_cabinet_vir_mic1_z_slider, param_entry->Value, format.multiplier);
+
+                    // show value and units
+                    sprintf(value_string, format.format, param_entry->Value);
+                    LV_LABEL_SET_TEXT(objects.ui_cabinet_vir_mic1_z, value_string);        
+                    
+                    // set user data for later use
+                    LV_OBJ_SET_USER_DATA(objects.ui_cabinet_vir_mic1_z, (void*)(uintptr_t)TONEX_PARAM_VIR_MIC_1_Z);
+                    #endif //CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
                 } break;
 
                 case TONEX_PARAM_VIR_MIC_2:
                 {
-                    // not exposed via UI
+                    #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+                    lv_dropdown_set_selected(objects.ui_cabinet_vir_mic2_dropdown, param_entry->Value);
+                    #endif //CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
                 } break;
 
                 case TONEX_PARAM_VIR_MIC_2_X:
                 {
-                    // not exposed via UI
+                    #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+                    // min 0, max 2 - incorrectly sent instead of 10
+                    TonexParamFormat_t format = ParamFormats.CAB_VIR_MIC_POS;
+                    lv_arc_set_range(ARC_ARC(objects.ui_cabinet_vir_mic2_x_slider), round(param_entry->Min * format.multiplier), round(param_entry->Max * format.multiplier * 5));
+                    // LV_SLIDER_SET_RANGE(objects.ui_cabinet_vir_mic2_x_slider, param_entry, format.multiplier);
+                    LV_SLIDER_SET_VALUE(objects.ui_cabinet_vir_mic2_x_slider, param_entry->Value, format.multiplier);
+
+                    // show value and units
+                    sprintf(value_string, format.format, param_entry->Value);
+                    LV_LABEL_SET_TEXT(objects.ui_cabinet_vir_mic2_x, value_string);        
+                    
+                    // set user data for later use
+                    LV_OBJ_SET_USER_DATA(objects.ui_cabinet_vir_mic2_x, (void*)(uintptr_t)TONEX_PARAM_VIR_MIC_2_X);
+                    #endif //CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
                 } break;
 
                 case TONEX_PARAM_VIR_MIC_2_Z:
                 {
-                    // not exposed via UI
+                    #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+                    TonexParamFormat_t format = ParamFormats.CAB_VIR_MIC_POS;
+                    LV_SLIDER_SET_RANGE(objects.ui_cabinet_vir_mic2_z_slider, param_entry, format.multiplier);
+                    LV_SLIDER_SET_VALUE(objects.ui_cabinet_vir_mic2_z_slider, param_entry->Value, format.multiplier);
+
+                    // show value and units
+                    sprintf(value_string, format.format, param_entry->Value);
+                    LV_LABEL_SET_TEXT(objects.ui_cabinet_vir_mic2_z, value_string);        
+                    
+                    // set user data for later use
+                    LV_OBJ_SET_USER_DATA(objects.ui_cabinet_vir_mic2_z, (void*)(uintptr_t)TONEX_PARAM_VIR_MIC_2_Z);
+                    #endif //CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
                 } break;
 
                 case TONEX_PARAM_VIR_BLEND:
                 {
-                    // not exposed via UI
+                    #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+                    TonexParamFormat_t format = ParamFormats.CAB_VIR_MIC_BLEND;
+                    LV_SLIDER_SET_RANGE(objects.ui_cabinet_vir_blend_slider, param_entry, format.multiplier);
+                    LV_SLIDER_SET_VALUE(objects.ui_cabinet_vir_blend_slider, param_entry->Value, format.multiplier);
+
+                    // show value and units
+                    sprintf(value_string, format.format, param_entry->Value);
+                    LV_LABEL_SET_TEXT(objects.ui_cabinet_vir_blend, value_string);        
+                    
+                    // set user data for later use
+                    LV_OBJ_SET_USER_DATA(objects.ui_cabinet_vir_blend, (void*)(uintptr_t)TONEX_PARAM_VIR_BLEND);
+                    #endif //CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
                 } break;
-                
+
                 case TONEX_PARAM_REVERB_POSITION:
                 {
                     if (param_entry->Value)

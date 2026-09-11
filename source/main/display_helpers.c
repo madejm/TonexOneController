@@ -1,14 +1,14 @@
-
+#include "display_helpers.h"
 #include <stdio.h>
 #include "sdkconfig.h"
 #include <math.h>
 #include "lvgl.h"
 #include "screens.h"
-#include "display_helpers.h"
 #include "eq_canvas.h"
 #include "tonex_params.h"
 #include "control.h"
 #include "actions.h"
+#include "display_cab_vir.h"
 
 void lv_obj_set_checked(lv_obj_t * obj, bool checked) {
     if (checked) {
@@ -76,6 +76,11 @@ const TonexParamFormatValues_t ParamFormats = {
     .AMP_VOLUME =           { .format = "%1.1f", .multiplier = 10.0f },
     .AMP_DEPTH =            { .format = "%1.1f", .multiplier = 10.0f },
     .AMP_PRESENCE =         { .format = "%1.1f", .multiplier = 10.0f },
+    .AMP_MIX =              { .format = "%1.0f", .multiplier = 1.0f },
+
+    .CAB_VIR_RESONANCE =    { .format = "%1.1f", .multiplier = 10.0f },
+    .CAB_VIR_MIC_BLEND =    { .format = "%1.0f", .multiplier = 1.0f },
+    .CAB_VIR_MIC_POS =      { .format = "%1.1f", .multiplier = 10.0f },
 
     .EQ_BASS_FREQ =         { .format = "%1.0f", .multiplier = 0.2f  },
     .EQ_BASS =              { .format = "%1.1f", .multiplier = 10.0f },
@@ -186,14 +191,23 @@ void customize_ui() {
     SETUP_ARC(objects.ui_compressor_attack_slider,       ParamFormats.COMPRESSOR_ATTACK,    "ms",    5);
 
     SETUP_ARC(objects.ui_amplifier_gain_slider,          ParamFormats.AMP_GAIN,             "dB",    5);
+    SETUP_ARC(objects.ui_amplifier_mix_slider,           ParamFormats.AMP_MIX,              "%",   100);
     SETUP_ARC(objects.ui_amplifier_volume_slider,        ParamFormats.AMP_VOLUME,           "dB",    5);
     SETUP_ARC_CANV(objects.ui_amplifier_depth_slider,    ParamFormats.AMP_DEPTH,            "dB",    5, eq_canvas_update_depth_gain_opt);
     SETUP_ARC_CANV(objects.ui_amplifier_presense_slider, ParamFormats.AMP_PRESENCE,         "dB",    5, eq_canvas_update_presence_gain_opt);
 
+    SETUP_ARC(objects.ui_cabinet_vir_resonance_slider,   ParamFormats.CAB_VIR_RESONANCE,    NULL,    5);
+    SETUP_ARC(objects.ui_cabinet_vir_blend_slider,       ParamFormats.CAB_VIR_MIC_BLEND,    NULL,    0);
+    lv_arc_set_mode(objects.ui_cabinet_vir_blend_slider__arc, LV_ARC_MODE_SYMMETRICAL);
+    SETUP_ARC(objects.ui_cabinet_vir_mic1_x_slider,      ParamFormats.CAB_VIR_MIC_POS,      "X",     0);
+    SETUP_ARC(objects.ui_cabinet_vir_mic1_z_slider,      ParamFormats.CAB_VIR_MIC_POS,      "Z",     0);
+    SETUP_ARC(objects.ui_cabinet_vir_mic2_x_slider,      ParamFormats.CAB_VIR_MIC_POS,      "X",     0);
+    SETUP_ARC(objects.ui_cabinet_vir_mic2_z_slider,      ParamFormats.CAB_VIR_MIC_POS,      "Z",     0);
+
     SETUP_ARC_CANV(objects.ui_eq_bass_freq_slider,       ParamFormats.EQ_BASS_FREQ,         "Hz",  300, eq_canvas_update_bass_frequency);
     SETUP_ARC_CANV(objects.ui_eq_bass_slider,            ParamFormats.EQ_BASS,              "dB",    5, eq_canvas_update_bass_gain);
     SETUP_ARC_CANV(objects.ui_eq_mid_freq_slider,        ParamFormats.EQ_MID_FREQ,          "Hz",  750, eq_canvas_update_mid_frequency);
-    SETUP_ARC_CANV(objects.ui_eq_mid_qslider,            ParamFormats.EQ_MID_Q,             "Q",  0.7, eq_canvas_update_mid_q);
+    SETUP_ARC_CANV(objects.ui_eq_mid_qslider,            ParamFormats.EQ_MID_Q,             "Q",   0.7, eq_canvas_update_mid_q);
     SETUP_ARC_CANV(objects.ui_eq_mid_slider,             ParamFormats.EQ_MID,               "dB",    5, eq_canvas_update_mid_gain);
     SETUP_ARC_CANV(objects.ui_eq_treble_freq_slider,     ParamFormats.EQ_TREBLE_FREQ,       "Hz", 2000, eq_canvas_update_treble_frequency);
     SETUP_ARC_CANV(objects.ui_eq_treble_slider,          ParamFormats.EQ_TREBLE,            "dB",    5, eq_canvas_update_treble_gain);

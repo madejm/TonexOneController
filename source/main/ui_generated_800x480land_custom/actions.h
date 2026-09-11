@@ -57,6 +57,11 @@ extern void action_scene_rename_dialog_close(lv_event_t * e);
 extern void action_scene_delete_dialog_cancel(lv_event_t * e);
 extern void action_scene_delete_dialog_delete(lv_event_t * e);
 extern void action_preset_list_button_options_released(lv_event_t * e);
+extern void action_settings_copy_cab(lv_event_t * e);
+extern void action_settings_vir_dialog_close(lv_event_t * e);
+extern void action_settings_vir_dialog_open(lv_event_t * e);
+extern void action_settings_vir_dialog_page_next(lv_event_t * e);
+extern void action_settings_vir_dialog_page_previous(lv_event_t * e);
 
 #ifdef __cplusplus
 }

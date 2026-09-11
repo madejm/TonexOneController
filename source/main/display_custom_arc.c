@@ -90,27 +90,57 @@ static bool arc_dragging = false;
 typedef struct {
     lv_obj_t *parent;
     lv_align_t align;
-    lv_coord_t x;
-    lv_coord_t y;
+    // lv_coord_t x;
+    // lv_coord_t y;
+    lv_obj_t *container;
 } lv_obj_overlay_state_t;
 
 static lv_obj_overlay_state_t overlayState;
 
+#define CONTAINER_SIZE 100
+#define CONTAINER_Y_DELTA 120
+
 static void move_to_top(lv_obj_t *obj)
 {
     overlayState.parent = lv_obj_get_parent(obj);
-    overlayState.x = lv_obj_get_x(obj);
-    overlayState.y = lv_obj_get_y(obj);
+    // overlayState.x = lv_obj_get_x(obj);
+    // overlayState.y = lv_obj_get_y(obj);
     overlayState.align = lv_obj_get_style_align(obj, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    // Make sure content-sized/layout-controlled dimensions are resolved
+    lv_obj_update_layout(obj);
 
     lv_area_t area;
     lv_obj_get_coords(obj, &area);
 
-    lv_obj_set_parent(obj, lv_layer_top());
+    lv_coord_t center_x = area.x1 + lv_obj_get_width(obj) / 2;
+    lv_coord_t center_y = area.y1 + lv_obj_get_height(obj) / 2;
 
-    lv_obj_set_pos(obj, area.x1, area.y1 - 120);
-    lv_obj_set_style_align(obj, LV_ALIGN_DEFAULT, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_move_foreground(obj);
+    if (overlayState.container == NULL) {
+        overlayState.container = lv_obj_create(lv_layer_top());
+
+        lv_obj_set_size(overlayState.container, CONTAINER_SIZE, CONTAINER_SIZE);
+
+        lv_obj_set_style_bg_opa(overlayState.container, LV_OPA_TRANSP, 0);
+        lv_obj_set_style_border_width(overlayState.container, 0, 0);
+        lv_obj_set_style_pad_all(overlayState.container, 0, 0);
+        lv_obj_clear_flag(overlayState.container, LV_OBJ_FLAG_SCROLLABLE);
+    }
+
+    lv_obj_clear_flag(overlayState.container, LV_OBJ_FLAG_HIDDEN);
+
+    // Position container so its center is at the object's old center
+    lv_obj_set_pos(
+        overlayState.container,
+        center_x - CONTAINER_SIZE / 2,
+        center_y - CONTAINER_SIZE / 2 - CONTAINER_Y_DELTA
+    );
+
+    lv_obj_set_parent(obj, overlayState.container);
+    lv_obj_set_style_align(obj, LV_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_pos(obj, 0, 0);
+
+    lv_obj_move_foreground(overlayState.container);
 }
 
 static void restore_from_top(lv_obj_t *obj) {
@@ -118,9 +148,13 @@ static void restore_from_top(lv_obj_t *obj) {
         return;
     }
     lv_obj_set_parent(obj, overlayState.parent);
-    lv_obj_set_pos(obj, overlayState.x, overlayState.y);
-    lv_obj_set_style_align(obj, overlayState.align, LV_PART_MAIN | LV_STATE_DEFAULT);
+    // lv_obj_set_pos(obj, overlayState.x, overlayState.y);
     lv_obj_set_pos(obj, 0, 0);
+    lv_obj_set_style_align(obj, overlayState.align, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    lv_obj_add_flag(overlayState.container, LV_OBJ_FLAG_HIDDEN);
+
+    overlayState.parent = NULL;
 }
 
 static void arc_pressed_cb(lv_event_t * e)
@@ -130,6 +164,7 @@ static void arc_pressed_cb(lv_event_t * e)
 
     lv_obj_t * content = data->content;
     lv_obj_set_style_bg_opa(content, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_shadow_opa(content, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     move_to_top(content);
 }
 
@@ -199,6 +234,7 @@ static void drag_released_cb(lv_event_t * e)
 
     lv_obj_t * content = data->content;
     lv_obj_set_style_bg_opa(content, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_shadow_opa(content, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     restore_from_top(content);
 
     lv_event_send(data->arc, LV_EVENT_RELEASED, NULL);

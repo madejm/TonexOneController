@@ -269,6 +269,18 @@ static esp_err_t clipboard_copy(Clipboard_t type)
             settingsClipboard.param4 = param_ptr[TONEX_PARAM_VIR_CABINET_MODEL].Value;
         } break;
 
+        case CLIPBOARD_CAB: {
+            settingsClipboard.param1 = param_ptr[TONEX_PARAM_VIR_CABINET_MODEL].Value;
+            settingsClipboard.param2 = param_ptr[TONEX_PARAM_VIR_RESO].Value;
+            settingsClipboard.param3 = param_ptr[TONEX_PARAM_VIR_MIC_1].Value;
+            settingsClipboard.param4 = param_ptr[TONEX_PARAM_VIR_MIC_1_X].Value;
+            settingsClipboard.param5 = param_ptr[TONEX_PARAM_VIR_MIC_1_Z].Value;
+            settingsClipboard.param6 = param_ptr[TONEX_PARAM_VIR_MIC_2].Value;
+            settingsClipboard.param7 = param_ptr[TONEX_PARAM_VIR_MIC_2_X].Value;
+            settingsClipboard.param8 = param_ptr[TONEX_PARAM_VIR_MIC_2_Z].Value;
+            settingsClipboard.param9 = param_ptr[TONEX_PARAM_VIR_BLEND].Value;
+        } break;
+
         case CLIPBOARD_EQ: {
             settingsClipboard.param1 = param_ptr[TONEX_PARAM_EQ_BASS].Value;
             settingsClipboard.param2 = param_ptr[TONEX_PARAM_EQ_BASS_FREQ].Value;
@@ -462,6 +474,18 @@ static esp_err_t clipboard_paste()
             res |= clipboard_paste_param(TONEX_PARAM_MODEL_VOLUME, settingsClipboard.param2);
             res |= clipboard_paste_param(TONEX_PARAM_MODEX_MIX, settingsClipboard.param3);
             res |= clipboard_paste_param(TONEX_PARAM_VIR_CABINET_MODEL, settingsClipboard.param4);
+        } break;
+
+        case CLIPBOARD_CAB: {
+            res |= clipboard_paste_param(TONEX_PARAM_VIR_CABINET_MODEL, settingsClipboard.param1);
+            res |= clipboard_paste_param(TONEX_PARAM_VIR_RESO, settingsClipboard.param2);
+            res |= clipboard_paste_param(TONEX_PARAM_VIR_MIC_1, settingsClipboard.param3);
+            res |= clipboard_paste_param(TONEX_PARAM_VIR_MIC_1_X, settingsClipboard.param4);
+            res |= clipboard_paste_param(TONEX_PARAM_VIR_MIC_1_Z, settingsClipboard.param5);
+            res |= clipboard_paste_param(TONEX_PARAM_VIR_MIC_2, settingsClipboard.param6);
+            res |= clipboard_paste_param(TONEX_PARAM_VIR_MIC_2_X, settingsClipboard.param7);
+            res |= clipboard_paste_param(TONEX_PARAM_VIR_MIC_2_Z, settingsClipboard.param8);
+            res |= clipboard_paste_param(TONEX_PARAM_VIR_BLEND, settingsClipboard.param9);
         } break;
 
         case CLIPBOARD_EQ: {

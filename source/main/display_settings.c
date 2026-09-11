@@ -26,6 +26,10 @@ void action_settings_copy_amp(lv_event_t * e)
 {
     usb_copy_settings(CLIPBOARD_AMP);
 }
+void action_settings_copy_cab(lv_event_t *e)
+{
+    usb_copy_settings(CLIPBOARD_CAB);
+}
 void action_settings_copy_eq(lv_event_t * e)
 {
     usb_copy_settings(CLIPBOARD_EQ);
@@ -53,6 +57,7 @@ void updateSettingsClipboard(Clipboard_t type)
     lv_obj_set_disabled(objects.ui_settings_paste_gate, type != CLIPBOARD_GATE);
     lv_obj_set_disabled(objects.ui_settings_paste_compressor, type != CLIPBOARD_COMPRESSOR);
     lv_obj_set_disabled(objects.ui_settings_paste_amp, type != CLIPBOARD_AMP);
+    lv_obj_set_disabled(objects.ui_settings_paste_cab, type != CLIPBOARD_CAB);
     lv_obj_set_disabled(objects.ui_settings_paste_eq, type != CLIPBOARD_EQ);
     lv_obj_set_disabled(objects.ui_settings_paste_modulation, type != CLIPBOARD_MODULATION);
     lv_obj_set_disabled(objects.ui_settings_paste_delay, type != CLIPBOARD_DELAY);
