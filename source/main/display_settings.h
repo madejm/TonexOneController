@@ -9,6 +9,8 @@ extern "C" {
 #include "usb_comms.h"
 
 void updateSettingsClipboard(Clipboard_t type);
+void customize_ui_settings();
+void loadSavedTheme();
 
 #ifdef __cplusplus
 } /*extern "C"*/

@@ -23,13 +23,12 @@ typedef struct _objects_t {
     lv_obj_t *settings;
     lv_obj_t *presets;
     lv_obj_t *scenes;
-    lv_obj_t *obj0;
     lv_obj_t *ui_usb_button;
     lv_obj_t *ui_wi_fi_button;
     lv_obj_t *ui_bt_midi_button;
     lv_obj_t *ui_bt_app_button;
     lv_obj_t *ui_bpm_button;
-    lv_obj_t *ui_bpm_title_label_1;
+    lv_obj_t *obj0;
     lv_obj_t *ui_bpm_value_label;
     lv_obj_t *ui_bpm_indicator;
     lv_obj_t *ui_settings_button;
@@ -276,6 +275,7 @@ typedef struct _objects_t {
     lv_obj_t *ui_cabinet_vir_mic2_z_slider__unit;
     lv_obj_t *ui_eq_tab;
     lv_obj_t *ui_eq_canvas;
+    lv_obj_t *ui_settings_eq_tabview;
     lv_obj_t *ui_amplifier_depth_slider;
     lv_obj_t *ui_amplifier_depth_slider__drag;
     lv_obj_t *ui_amplifier_depth_slider__arc;
@@ -485,20 +485,22 @@ typedef struct _objects_t {
     lv_obj_t *obj49;
     lv_obj_t *ui_wi_fi_switch;
     lv_obj_t *ui_usb_tab;
+    lv_obj_t *obj50;
+    lv_obj_t *ui_theme_dropdown;
     lv_obj_t *ui_usb_reboot_button;
     lv_obj_t *ui_usb_flash_button;
-    lv_obj_t *obj50;
-    lv_obj_t *ui_controller_dialog;
     lv_obj_t *obj51;
+    lv_obj_t *ui_controller_dialog;
+    lv_obj_t *obj52;
     lv_obj_t *ui_controller_dialog_entry;
     lv_obj_t *ui_controller_dialog_keyboard;
     lv_obj_t *ui_settings_dialog;
     lv_obj_t *ui_settings_text_entry;
     lv_obj_t *ui_settings_keyboard;
     lv_obj_t *ui_settings_vir_cab_dialog;
-    lv_obj_t *obj52;
-    lv_obj_t *ui_cabinet_vir_button_matrix;
     lv_obj_t *obj53;
+    lv_obj_t *ui_cabinet_vir_button_matrix;
+    lv_obj_t *obj54;
     lv_obj_t *ui_preset_list_cancel_button;
     lv_obj_t *ui_preset_list_scenes_button;
     lv_obj_t *ui_preset_list_element_0;
@@ -562,7 +564,7 @@ typedef struct _objects_t {
     lv_obj_t *ui_preset_list_element_9__options;
     lv_obj_t *ui_preset_list_element_9__obj0;
     lv_obj_t *ui_preset_list_color_dialog;
-    lv_obj_t *obj54;
+    lv_obj_t *obj55;
     lv_obj_t *ui_preset_list_color_dialog_name;
     lv_obj_t *ui_preset_list_color0;
     lv_obj_t *ui_preset_list_color1;
@@ -585,7 +587,7 @@ typedef struct _objects_t {
     lv_obj_t *ui_preset_list_color18;
     lv_obj_t *ui_preset_list_color19;
     lv_obj_t *ui_preset_list_color20;
-    lv_obj_t *obj55;
+    lv_obj_t *obj56;
     lv_obj_t *ui_scene_list_element_0;
     lv_obj_t *ui_scene_list_element_0__button;
     lv_obj_t *ui_scene_list_element_0__color;
@@ -707,12 +709,11 @@ typedef struct _objects_t {
     lv_obj_t *ui_scene_list_element_19__options;
     lv_obj_t *ui_scene_list_element_19__obj0;
     lv_obj_t *ui_new_scene_button;
-    lv_obj_t *obj56;
+    lv_obj_t *obj57;
     lv_obj_t *ui_scenes_sync_presets_switch;
     lv_obj_t *ui_scene_delete_dialog;
-    lv_obj_t *obj57;
-    lv_obj_t *ui_scene_delete_dialog_name;
     lv_obj_t *obj58;
+    lv_obj_t *ui_scene_delete_dialog_name;
     lv_obj_t *ui_scene_rename_dialog;
     lv_obj_t *obj59;
     lv_obj_t *obj60;
@@ -753,12 +754,22 @@ void create_screens();
 
 enum Themes {
     THEME_ID_DEFAULT,
+    THEME_ID_NDSP,
+    THEME_ID_I_OS,
+    THEME_ID_DUSK,
 };
 enum Colors {
+    COLOR_ID_WHITE,
+    COLOR_ID_BLACK,
     COLOR_ID_BUTTON_PRIMARY,
     COLOR_ID_BUTTON_SECONDARY,
-    COLOR_ID_HIGHLIGHT,
+    COLOR_ID_HIGHLIGHT_YELLOW,
+    COLOR_ID_HIGHLIGHT_GREEN,
+    COLOR_ID_HIGHLIGHT_BLUE,
+    COLOR_ID_HIGHLIGHT_PURPLE,
+    COLOR_ID_HIGHLIGHT_RED,
     COLOR_ID_LABEL_GRAY,
+    COLOR_ID_LABEL_GRAY_LIGHT,
     COLOR_ID_NOISE_GATE,
     COLOR_ID_NOISE_GATE_1,
     COLOR_ID_COMPRESSOR,
@@ -770,7 +781,7 @@ enum Colors {
     COLOR_ID_REVERB,
 };
 void change_color_theme(uint32_t themeIndex);
-extern uint32_t theme_colors[1][13];
+extern uint32_t theme_colors[4][20];
 extern uint32_t active_theme_index;
 
 #ifdef __cplusplus

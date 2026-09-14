@@ -278,7 +278,7 @@ void tonex_params_get_ui_style(
     const tModellerParameter *allParameters
 ) {
     if (param >= TONEX_GLOBAL_BPM) {
-        *color = theme_colors[THEME_ID_DEFAULT][COLOR_ID_DEFAULT_GRAY];
+        *color = theme_colors[active_theme_index][COLOR_ID_DEFAULT_GRAY];
         
         switch (param) {
             case TONEX_GLOBAL_BPM:
@@ -315,7 +315,7 @@ void tonex_params_get_ui_style(
                 break;
         }
     } else if (param >= TONEX_PARAM_DELAY_POST) {
-        *color = theme_colors[THEME_ID_DEFAULT][COLOR_ID_DELAY];
+        *color = theme_colors[active_theme_index][COLOR_ID_DELAY];
         uint8_t delayIndex = (uint8_t)allParameters[TONEX_PARAM_DELAY_MODEL].Value;
 
         switch (delayIndex) {
@@ -377,7 +377,7 @@ void tonex_params_get_ui_style(
                 break;
         }
     } else if (param >= TONEX_PARAM_MODULATION_POST) {
-        *color = theme_colors[THEME_ID_DEFAULT][COLOR_ID_MODULATION];
+        *color = theme_colors[active_theme_index][COLOR_ID_MODULATION];
         uint8_t modIndex = (uint8_t)allParameters[TONEX_PARAM_MODULATION_MODEL].Value;
 
         switch (modIndex) {
@@ -445,7 +445,7 @@ void tonex_params_get_ui_style(
                 break;
         }
     } else if (param >= TONEX_PARAM_REVERB_POSITION) {
-        *color = theme_colors[THEME_ID_DEFAULT][COLOR_ID_REVERB];
+        *color = theme_colors[active_theme_index][COLOR_ID_REVERB];
         uint8_t reverbIndex = (uint8_t)allParameters[TONEX_PARAM_REVERB_MODEL].Value;
 
         switch (reverbIndex) {
@@ -523,7 +523,7 @@ void tonex_params_get_ui_style(
                 break;
         }
     } else if (param >= TONEX_PARAM_MODEL_PRESENCE) {
-        *color = theme_colors[THEME_ID_DEFAULT][COLOR_ID_AMPLIFIER];
+        *color = theme_colors[active_theme_index][COLOR_ID_AMPLIFIER];
 
         switch (param) {
             case TONEX_PARAM_MODEL_GAIN:
@@ -540,7 +540,7 @@ void tonex_params_get_ui_style(
                 break;
         }
     } else if (param >= TONEX_PARAM_CABINET_UNKNOWN) {
-        *color = theme_colors[THEME_ID_DEFAULT][COLOR_ID_CABINET];
+        *color = theme_colors[active_theme_index][COLOR_ID_CABINET];
         *image = &img_cab;
 
         switch (param) {
@@ -554,7 +554,7 @@ void tonex_params_get_ui_style(
                 break;
         }
     } else if (param >= TONEX_PARAM_MODEL_AMP_ENABLE) {
-        *color = theme_colors[THEME_ID_DEFAULT][COLOR_ID_AMPLIFIER];
+        *color = theme_colors[active_theme_index][COLOR_ID_AMPLIFIER];
         *image = &img_amp;
 
         switch (param) {
@@ -576,7 +576,7 @@ void tonex_params_get_ui_style(
                 break;
         }
     } else if (param >= TONEX_PARAM_EQ_POST) {
-        *color = theme_colors[THEME_ID_DEFAULT][COLOR_ID_DEFAULT_GRAY];
+        *color = theme_colors[active_theme_index][COLOR_ID_DEFAULT_GRAY];
         *image = &img_eq;
 
         switch (param) {
@@ -590,7 +590,7 @@ void tonex_params_get_ui_style(
                 break;
         }
     } else if (param >= TONEX_PARAM_COMP_POST) {
-        *color = theme_colors[THEME_ID_DEFAULT][COLOR_ID_COMPRESSOR];
+        *color = theme_colors[active_theme_index][COLOR_ID_COMPRESSOR];
         *image = &img_comp;
 
         switch (param) {
@@ -616,7 +616,7 @@ void tonex_params_get_ui_style(
                 break;
         }
     } else { // param >= TONEX_PARAM_NOISE_GATE_POST
-        *color = theme_colors[THEME_ID_DEFAULT][COLOR_ID_NOISE_GATE];
+        *color = theme_colors[active_theme_index][COLOR_ID_NOISE_GATE];
         *image = &img_gate;
 
         switch (param) {

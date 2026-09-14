@@ -486,7 +486,7 @@ static void updatePresetNumberLabel()
     display_preset_buttons_updatePresetNumberLabel(ui_PresetIndex);
 }
 
-static void updateFSButtons()
+void updateFSButtons()
 {
     display_preset_buttons_updateFSButtons(
         ui_AltMode,
@@ -2772,6 +2772,7 @@ void display_init(i2c_master_bus_handle_t bus_handle, SemaphoreHandle_t I2CMutex
 
 #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
     customize_ui();
+    loadSavedTheme();
 #endif // CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
 
     for (size_t index = 0; index < log_cache_count; index++)

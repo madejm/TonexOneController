@@ -9,6 +9,7 @@
 #include "control.h"
 #include "actions.h"
 #include "display_cab_vir.h"
+#include "display_settings.h"
 
 void lv_obj_set_checked(lv_obj_t * obj, bool checked) {
     if (checked) {
@@ -232,6 +233,20 @@ void customize_ui() {
     SETUP_ARC_FORMAT_CB(objects.ui_modulation_param4_slider,    mod_format_cb);
 
     lv_keyboard_set_custom_map(objects.ui_scene_rename_dialog_keyboard);
+
+    lv_dropdown_set_options(
+        objects.ui_theme_dropdown,
+        "Default"   "\n"
+        "NDSP"      "\n"
+        "iOS"       "\n"
+        "Dusk"
+    );
+
+    customize_ui_settings();
+
+    lv_obj_add_flag(objects.ui_controller_dialog, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_add_flag(objects.ui_settings_dialog, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_add_flag(objects.ui_settings_vir_cab_dialog, LV_OBJ_FLAG_HIDDEN);
 
     eq_canvas_setup();
 }

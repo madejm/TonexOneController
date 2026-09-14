@@ -7,12 +7,29 @@
 extern "C" {
 #endif
 
-// Style: Button Selectable
-lv_style_t *get_style_button_selectable_MAIN_DEFAULT();
-lv_style_t *get_style_button_selectable_MAIN_PRESSED();
-lv_style_t *get_style_button_selectable_MAIN_CHECKED();
-void add_style_button_selectable(lv_obj_t *obj);
-void remove_style_button_selectable(lv_obj_t *obj);
+// Style: Button Selectable Green
+lv_style_t *get_style_button_selectable_green_MAIN_DEFAULT();
+lv_style_t *get_style_button_selectable_green_MAIN_CHECKED();
+void add_style_button_selectable_green(lv_obj_t *obj);
+void remove_style_button_selectable_green(lv_obj_t *obj);
+
+// Style: Button Selectable Blue
+lv_style_t *get_style_button_selectable_blue_MAIN_DEFAULT();
+lv_style_t *get_style_button_selectable_blue_MAIN_CHECKED();
+void add_style_button_selectable_blue(lv_obj_t *obj);
+void remove_style_button_selectable_blue(lv_obj_t *obj);
+
+// Style: Button Selectable Purple
+lv_style_t *get_style_button_selectable_purple_MAIN_DEFAULT();
+lv_style_t *get_style_button_selectable_purple_MAIN_CHECKED();
+void add_style_button_selectable_purple(lv_obj_t *obj);
+void remove_style_button_selectable_purple(lv_obj_t *obj);
+
+// Style: Button Selectable Yellow
+lv_style_t *get_style_button_selectable_yellow_MAIN_DEFAULT();
+lv_style_t *get_style_button_selectable_yellow_MAIN_CHECKED();
+void add_style_button_selectable_yellow(lv_obj_t *obj);
+void remove_style_button_selectable_yellow(lv_obj_t *obj);
 
 // Style: Button Basic
 lv_style_t *get_style_button_basic_MAIN_DEFAULT();
@@ -26,11 +43,35 @@ lv_style_t *get_style_button_secondary_MAIN_PRESSED();
 void add_style_button_secondary(lv_obj_t *obj);
 void remove_style_button_secondary(lv_obj_t *obj);
 
-// Style: Button Highlighted
-lv_style_t *get_style_button_highlighted_MAIN_DEFAULT();
-lv_style_t *get_style_button_highlighted_MAIN_PRESSED();
-void add_style_button_highlighted(lv_obj_t *obj);
-void remove_style_button_highlighted(lv_obj_t *obj);
+// Style: Button Highlighted Green
+lv_style_t *get_style_button_highlighted_green_MAIN_DEFAULT();
+lv_style_t *get_style_button_highlighted_green_MAIN_PRESSED();
+void add_style_button_highlighted_green(lv_obj_t *obj);
+void remove_style_button_highlighted_green(lv_obj_t *obj);
+
+// Style: Button Highlighted Yellow
+lv_style_t *get_style_button_highlighted_yellow_MAIN_DEFAULT();
+lv_style_t *get_style_button_highlighted_yellow_MAIN_PRESSED();
+void add_style_button_highlighted_yellow(lv_obj_t *obj);
+void remove_style_button_highlighted_yellow(lv_obj_t *obj);
+
+// Style: Button Highlighted Purple
+lv_style_t *get_style_button_highlighted_purple_MAIN_DEFAULT();
+lv_style_t *get_style_button_highlighted_purple_MAIN_PRESSED();
+void add_style_button_highlighted_purple(lv_obj_t *obj);
+void remove_style_button_highlighted_purple(lv_obj_t *obj);
+
+// Style: Button Highlighted Blue
+lv_style_t *get_style_button_highlighted_blue_MAIN_DEFAULT();
+lv_style_t *get_style_button_highlighted_blue_MAIN_PRESSED();
+void add_style_button_highlighted_blue(lv_obj_t *obj);
+void remove_style_button_highlighted_blue(lv_obj_t *obj);
+
+// Style: Button Highlighted Red
+lv_style_t *get_style_button_highlighted_red_MAIN_DEFAULT();
+lv_style_t *get_style_button_highlighted_red_MAIN_PRESSED();
+void add_style_button_highlighted_red(lv_obj_t *obj);
+void remove_style_button_highlighted_red(lv_obj_t *obj);
 
 // Style: Button Chain
 lv_style_t *get_style_button_chain_MAIN_DEFAULT();
@@ -123,11 +164,6 @@ lv_style_t *get_style_checkbox_settings_INDICATOR_DEFAULT();
 lv_style_t *get_style_checkbox_settings_INDICATOR_CHECKED();
 void add_style_checkbox_settings(lv_obj_t *obj);
 void remove_style_checkbox_settings(lv_obj_t *obj);
-
-// Style: Panel Preset List Color
-lv_style_t *get_style_panel_preset_list_color_MAIN_DEFAULT();
-void add_style_panel_preset_list_color(lv_obj_t *obj);
-void remove_style_panel_preset_list_color(lv_obj_t *obj);
 
 // Style: Button Settings Color
 lv_style_t *get_style_button_settings_color_MAIN_DEFAULT();

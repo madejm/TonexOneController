@@ -418,7 +418,7 @@ void display_preset_buttons_updateFSButtons(
                     colorOff = lv_color_hex(colorMapping.offColor);
                 } else {
                     name = buttonIndex == 4 ? "↓" : "↑";
-                    colorOn = lv_color_darken(lv_color_hex(theme_colors[THEME_ID_DEFAULT][COLOR_ID_DEFAULT_GRAY]), 179);
+                    colorOn = lv_color_darken(lv_color_hex(theme_colors[active_theme_index][COLOR_ID_DEFAULT_GRAY]), 179);
                     colorOff = colorOn;
                 }
 

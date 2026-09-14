@@ -45,6 +45,7 @@ bool display_notify_lvgl_flush_ready(esp_lcd_panel_io_handle_t panel_io, esp_lcd
 bool display_on_vsync_event(esp_lcd_panel_handle_t panel, const esp_lcd_rgb_panel_event_data_t *event_data, void *user_data);
 void ui_BPMAnimate(lv_obj_t *target_obj, uint32_t duration);
 bool display_get_alt_Mode();
+void updateFSButtons();
 
 // thread-safe API for other tasks to update the UI
 void UI_SetUSBStatus(uint8_t state);
