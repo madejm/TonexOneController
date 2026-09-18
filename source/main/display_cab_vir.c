@@ -41,18 +41,18 @@ static const char * vir_cabs_page_1[VIR_CABS_ARRAY_SIZE] = {
     "2x12 Silvertone",
     "2x12 Orange PPC 212",
     "\n",
-    "2x12 Mesa Recto Horiz",
+    "2x12 Mesa Recto Horiz V30",
     "2x12 Dr. Z Z-Wreck",
-    "4x12 Marsh 1960AV",
+    "4x12 Marsh 1960AV G12-Vint",
     "\n",
     "4x12 Marsh 1960A V30",
     "4x12 Marsh 1960 VG12-80",
-    "4x12 Marsh 1960A T75",
+    "4x12 Marsh 1960A G12T-75",
     ""
 };
 
 static const char * vir_cabs_page_2[VIR_CABS_ARRAY_SIZE] = {
-    "4x12 Marsh 2551A",
+    "4x12 Marsh 2551A G12-Vint",
     "4x12 Randall 412 JB",
     "4x12 Hiwatt",
     "\n",
