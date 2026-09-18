@@ -27,8 +27,10 @@ limitations under the License.
 #include "usb_tonex_one.h"
 #include "control.h"
 #include "tonex_params.h"
-#include "screens.h"
-#include "images.h"
+#if CONFIG_TONEX_CONTROLLER_HAS_DISPLAY
+    #include "screens.h"
+    #include "images.h"
+#endif
 
 #define PARAM_MUTEX_TIMEOUT         2000        // msec
 
@@ -219,6 +221,7 @@ const tTonexPresetColorMapping TonexColorMap[TONEX_COLORS_COUNT] = {
     {0x000000, 0x595959}, // grey
 };
 
+#if CONFIG_TONEX_CONTROLLER_HAS_DISPLAY
 static const char *Style_ReverbModels[] = {
     "SPRING 1", "SPRING 2", "SPRING 3", "SPRING 4", "ROOM", "PLATE"
 };
@@ -643,6 +646,7 @@ void tonex_params_get_ui_style(
         }
     }
 }
+#endif // CONFIG_TONEX_CONTROLLER_HAS_DISPLAY
 
 /****************************************************************************
 * NAME:        

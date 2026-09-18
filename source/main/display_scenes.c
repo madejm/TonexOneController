@@ -19,6 +19,8 @@
 
 // static const char *TAG = "app_display_scenes";
 
+#if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+
 #define OPTION_RENAME "Rename"
 #define OPTION_DELETE "Delete"
 
@@ -335,3 +337,4 @@ void action_scene_delete_dialog_delete(lv_event_t *e) {
     updatingScene = -1;
     lv_obj_add_flag(objects.ui_scene_delete_dialog, LV_OBJ_FLAG_HIDDEN);
 }
+#endif // CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM

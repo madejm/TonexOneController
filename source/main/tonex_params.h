@@ -234,6 +234,8 @@ esp_err_t tonex_params_colors_get_locked_access(tTonexPresetColor** color_ptr);
 esp_err_t tonex_params_colors_get_color(uint16_t preset_index, uint32_t* preset_color);
 esp_err_t tonex_params_colors_get_color_raw(uint16_t preset_index, uint32_t* preset_color);
 
+
+#if CONFIG_TONEX_CONTROLLER_HAS_DISPLAY
 void tonex_params_get_ui_style(
     TonexParameter_t param,
     uint8_t paramValue1,
@@ -246,6 +248,7 @@ void tonex_params_get_ui_style(
     const lv_img_dsc_t **image,
     const tModellerParameter *allParameters
 );
+#endif
 
 #ifdef __cplusplus
 } /*extern "C"*/

@@ -175,11 +175,11 @@ static SemaphoreHandle_t lvgl_mux = NULL;
 static lv_disp_drv_t* disp_drv; 
 static msgbox_data_t msgbox_data;
 
+#if CONFIG_TONEX_CONTROLLER_HAS_DISPLAY
 static bool ui_AltMode = false;
 static uint8_t ui_PresetIndex = 0;
 static uint8_t ui_BankIndex = 0;
 
-#if CONFIG_TONEX_CONTROLLER_HAS_DISPLAY
 static void ui_show_toast(char* contents);
 
 #if CONFIG_TONEX_CONTROLLER_HAS_TOUCH

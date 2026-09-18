@@ -17,6 +17,7 @@
 #include "display_scenes.h"
 #include "display.h"
 
+#if CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI
 static const char *TAG = "app_display_preset_list";
 
 #define OPTION_SAVE         "Save"
@@ -24,7 +25,6 @@ static const char *TAG = "app_display_preset_list";
 #define OPTION_SWAP         "Swap with..."
 #define OPTION_CHANGE_COLOR "Change color"
 
-#if CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI
 typedef enum
 {
     PRESET_LIST_INSERT_MODE_INSERT,
@@ -36,7 +36,6 @@ static int16_t preset_list_edit_index = -1;
 
 #define PRESET_LIST_PRESETS_PER_PAGE 10
 static uint8_t preset_list_page = 0;
-#endif // CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI
 
 // ====== UPDATES ======
 
@@ -399,3 +398,4 @@ void action_preset_list_cancel(lv_event_t * e)
 
     updatePresetListSelection();
 }
+#endif // CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI

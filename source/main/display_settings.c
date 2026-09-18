@@ -17,6 +17,7 @@
 #include "nvs_flash.h"
 #include "esp_log.h"
 
+#if CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI
 static const char *TAG = "display_settings";
 
 #define THEME_STORAGE   "theme_storage"
@@ -237,3 +238,4 @@ void loadSavedTheme()
     setTheme(themeId);
     lv_dropdown_set_selected(objects.ui_theme_dropdown, themeId);
 }
+#endif // CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI

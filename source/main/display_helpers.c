@@ -3,14 +3,17 @@
 #include "sdkconfig.h"
 #include <math.h>
 #include "lvgl.h"
-#include "screens.h"
+#if CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI
+    #include "screens.h"
+    #include "actions.h"
+#endif
 #include "eq_canvas.h"
 #include "tonex_params.h"
 #include "control.h"
-#include "actions.h"
 #include "display_cab_vir.h"
 #include "display_settings.h"
 
+#if CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI
 void lv_obj_set_checked(lv_obj_t * obj, bool checked) {
     if (checked) {
         lv_obj_add_state(obj, LV_STATE_CHECKED);
@@ -163,6 +166,7 @@ static format_data_t mod_format_cb(lv_obj_t *label)
         default:                         return (format_data_t){ .format = { .format = "%1.0f", .multiplier = 1.0f },  .defaultValue = 5 };
     }
 }
+#endif // CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI
 
 #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
 

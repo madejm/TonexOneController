@@ -3,13 +3,16 @@
 #include "sdkconfig.h"
 #include <math.h>
 #include "lvgl.h"
-#include "screens.h"
+#if CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI
+    #include "screens.h"
+    #include "actions.h"
+#endif
 #include "display_helpers.h"
 #include "eq_canvas.h"
 #include "tonex_params.h"
 #include "control.h"
-#include "actions.h"
 
+#if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
 #define VIR_CABS_PAGES          2
 #define VIR_CABS_GROUP_SIZE     3
 #define VIR_CABS_GROUPS_COUNT   7
@@ -200,3 +203,4 @@ void action_settings_vir_dialog_page_previous(lv_event_t * e)
     }
     updateVIRCabButtonMatrixElements();
 }
+#endif // CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM

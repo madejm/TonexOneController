@@ -10,6 +10,7 @@
 #include "display_scenes.h"
 #include "display_preset_buttons.h"
 
+#if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
 #define ptr_switch(x)   const void *_p=x; if (0)
 #define ptr_case(y)     } else if (_p == y) {
 #define ptr_default     } else {
@@ -137,3 +138,4 @@ void action_preset_list_button_options_released(lv_event_t * e)
         lv_obj_set_x(list, lv_obj_get_x(list) + shift);
     }
 }
+#endif // CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM

@@ -1,11 +1,15 @@
 #include "display_custom_arc.h"
 #include <math.h>
-#include "screens.h"
+#if CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI
+    #include "screens.h"
+    #include "actions.h"
+#endif
 #include "display_helpers.h"
 #include "eq_canvas.h"
 #include "tonex_params.h"
 #include "control.h"
-#include "actions.h"
+
+#if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
 
 #define CANVAS_ARC_DRAG_UPDATE_PERIOD_MS 750
 #define CANVAS_ARC_IDLE_UPDATE_DELAY_MS  150
@@ -375,3 +379,4 @@ void setup_arc_elements_format_cb(
     update_unit(unitLabel, "");
     add_arc_callbacks(drag, data);
 }
+#endif // CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM

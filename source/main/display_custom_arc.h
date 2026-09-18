@@ -7,6 +7,8 @@ extern "C" {
 
 #include "lvgl.h"
 
+#if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+
 #define SETUP_ARC(arc, format, unit, defaultValue) \
     setup_arc_elements(arc, ARC_ARC(arc), ARC_VALUE(arc), ARC_UNIT(arc), ARC_DRAG(arc), ARC_CONTENT(arc), format, unit, defaultValue, NULL)
 
@@ -55,6 +57,7 @@ void setup_arc_elements_format_cb(
     lv_obj_t *content,
     format_cb_t format_cb
 );
+#endif // CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
 
 #ifdef __cplusplus
 } /*extern "C"*/

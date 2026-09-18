@@ -10,6 +10,8 @@ extern "C" {
 #include "display_custom_arc.h"
 #include "tonex_params.h"
 
+#if CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI
+
 #define _MAKE_COMPONENT(obj, component) obj##component
 #define OBJ_VALUE(label)                _MAKE_COMPONENT(label, _value)
 #define OBJ_SLIDER(label)               _MAKE_COMPONENT(label, _slider)
@@ -176,6 +178,8 @@ extern const TonexParamFormatValues_t ParamFormats;
 
 void lv_obj_set_checked(lv_obj_t * obj, bool checked);
 void lv_obj_set_disabled(lv_obj_t * obj, bool disabled);
+
+#endif // CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI
 
 #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
 void customize_ui();
