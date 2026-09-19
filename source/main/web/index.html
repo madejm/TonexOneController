@@ -12,7 +12,7 @@
   
   <body class="bg">    
     <link rel="stylesheet" href="bootstrap.css">
-    <link rel="stylesheet" href="index.css">
+    <link rel="stylesheet" href="index.css?v=txp1">
     <script src="bootstrap.js"></script>
     <script src="jquery.js"></script>
               
@@ -1295,6 +1295,7 @@
         <div id="Presets" class="content-section">
             <div class="col py-3 text-white">
             <h5 class="selected_text">Presets</h5>
+                <p id="preset-import-status" role="status" aria-live="polite"></p>
                 <p class="lead">
                     <div class="container">
                         <div class="row">
@@ -2656,6 +2657,27 @@
     
     <div id="toast"></div>
 
+    <div id="preset-import-confirm" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="preset-import-title" aria-describedby="preset-import-message">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 id="preset-import-title" class="modal-title">Load preset</h5>
+                </div>
+                <div id="preset-import-message" class="modal-body" style="white-space: pre-line"></div>
+                <div class="modal-body pt-0">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" role="switch" id="preset-import-keep-parameters">
+                        <label class="form-check-label" for="preset-import-keep-parameters">Keep current preset parameters</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" id="preset-import-yes" class="btn btn-primary">Yes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div id="modConnectionFault" class="modal fade" role="dialog">
         <div class="modal-dialog">
 
@@ -2691,5 +2713,6 @@
 
 
   </body>
-  <script src="script.js" defer></script>
+  <script src="txp.js" defer></script>
+  <script src="script.js?v=txp1" defer></script>
 </html>

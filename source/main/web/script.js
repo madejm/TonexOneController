@@ -1476,12 +1476,211 @@ function sendWS(data) {
     }
 }
 
+let presetImportBusy = false;
+let presetExportBusy = false;
+
+function supportsTonexOneTXPTransfer() {
+    return modellerType === AMP_MODELLER_TONEX_ONE;
+}
+
+function updatePresetTransferControls() {
+    const enabled = supportsTonexOneTXPTransfer();
+    document.querySelectorAll('.preset-transfer-button').forEach(button => {
+        button.disabled = !enabled;
+        button.title = enabled ? 'Export preset as TXP' : 'TXP import and export are available for TONEX ONE only';
+    });
+    document.querySelectorAll('#preset-order-list > .row').forEach(row => {
+        row.classList.toggle('preset-txp-disabled', !enabled);
+    });
+}
+
+function confirmPresetImport(slot, currentName) {
+    const element = document.getElementById('preset-import-confirm');
+    const yes = document.getElementById('preset-import-yes');
+    const modal = bootstrap.Modal.getOrCreateInstance(element);
+    document.getElementById('preset-import-message').textContent =
+        `Do you want to load preset into slot ${slot}?\nThis will override preset ${currentName}!`;
+    const keepParameters = document.getElementById('preset-import-keep-parameters');
+    keepParameters.checked = false;
+    return new Promise(resolve => {
+        let selection = null;
+        const accept = () => {
+            selection = {keepParameters: keepParameters.checked};
+            modal.hide();
+        };
+        yes.addEventListener('click', accept);
+        element.addEventListener('hidden.bs.modal', () => {
+            yes.removeEventListener('click', accept);
+            resolve(selection);
+        }, {once: true});
+        modal.show();
+    });
+}
+
+function presetImportStatus(message) {
+    document.getElementById('preset-import-status').textContent = message;
+}
+
+async function exportPresetFile(row) {
+    if (presetExportBusy) return;
+    if (!supportsTonexOneTXPTransfer() || SocketConnected !== 1 || isSyncDone !== 1) {
+        alert('Wait for the controller and TONEX ONE to finish connecting.');
+        return;
+    }
+    const slot = Number(row.getAttribute('order_value'));
+    const displaySlot = slot + startPreset;
+    const presetName = presetOrderElementName(row).textContent.trim() || `Preset ${displaySlot}`;
+    presetExportBusy = true;
+    try {
+        presetImportStatus(`Reading preset from slot ${displaySlot}…`);
+        const {id} = await presetImportRequest(`/api/preset-export?slot=${slot}`, {method: 'POST'});
+        const deadline = Date.now() + 30000;
+        while (Date.now() < deadline) {
+            await new Promise(resolve => setTimeout(resolve, 500));
+            const result = await presetImportRequest(`/api/preset-export?id=${id}`);
+            if (result.status === 'failed') throw new Error('The pedal did not return the preset.');
+            if (result.status !== 'ready') continue;
+            const response = await fetch(`/api/preset-export?id=${id}&download=1`, {cache: 'no-store'});
+            if (!response.ok) throw new Error(await response.text());
+            presetImportStatus(`Creating ${presetName}.txp…`);
+            const txp = TonexTXP.exportFile(new Uint8Array(await response.arrayBuffer()));
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(new Blob([txp], {type: 'application/octet-stream'}));
+            link.download = `${presetName.replace(/[\\/:*?"<>|]/g, '_')}.txp`;
+            link.click();
+            setTimeout(() => URL.revokeObjectURL(link.href), 0);
+            presetImportStatus(`Exported ${link.download}.`);
+            return;
+        }
+        throw new Error('Timed out waiting for the preset.');
+    } catch (error) {
+        presetImportStatus(error.message);
+        alert(error.message);
+    } finally {
+        presetExportBusy = false;
+    }
+}
+
+async function presetImportRequest(url, options = {}) {
+    const abort = new AbortController();
+    const timeout = setTimeout(() => abort.abort(), 15000);
+    try {
+        const response = await fetch(url, {...options, signal: abort.signal, cache: 'no-store'});
+        if (!response.ok) throw new Error(await response.text());
+        return await response.json();
+    } finally {
+        clearTimeout(timeout);
+    }
+}
+
+async function dropPresetFile(event, row) {
+    event.preventDefault();
+    event.stopPropagation();
+    row.classList.remove('preset-drop-target');
+    if (!supportsTonexOneTXPTransfer()) return;
+    const files = event.dataTransfer.files;
+    if (files.length !== 1 || !/\.txp$/i.test(files[0].name)) {
+        alert('Drop one .txp preset file onto a preset slot.');
+        return;
+    }
+    importPresetFile(files[0], row);
+}
+
+function choosePresetImportFile(input) {
+    input.value = '';
+    input.click();
+}
+
+async function importPresetFile(file, row) {
+    if (presetImportBusy) return;
+    if (!supportsTonexOneTXPTransfer()) return;
+    if (SocketConnected !== 1 || isSyncDone !== 1) {
+        alert('Wait for the controller and pedal to finish connecting.');
+        return;
+    }
+    if (!/\.txp$/i.test(file.name)) {
+        alert('Select a .txp preset file.');
+        return;
+    }
+    if (file.size === 0 || file.size > 40000) {
+        alert('Unsupported TXP size; only version-3 presets are supported.');
+        return;
+    }
+    // order_value follows the preset when the user reorders rows; the DOM ID does not.
+    const slot = Number(row.getAttribute('order_value'));
+    const displaySlot = slot + startPreset;
+    const currentName = presetOrderElementName(row).textContent;
+    presetImportBusy = true;
+    let uploadStarted = false;
+    try {
+        const selection = await confirmPresetImport(displaySlot, currentName);
+        if (selection === null) return;
+        presetImportStatus('Converting preset…');
+        const body = TonexTXP.convert(await file.text(), slot);
+        if (SocketConnected !== 1 || !supportsTonexOneTXPTransfer() || isSyncDone !== 1) {
+            throw new Error('The pedal disconnected. Nothing was uploaded.');
+        }
+        presetImportStatus(selection.keepParameters ?
+            `Reading current parameters from slot ${displaySlot}…` :
+            `Sending preset to slot ${displaySlot}…`);
+        uploadStarted = true;
+        const {id} = await presetImportRequest(`/api/preset-import?slot=${slot}&keep_parameters=${selection.keepParameters ? 1 : 0}`, {
+            method: 'POST', headers: {'Content-Type': 'application/octet-stream'}, body
+        });
+        const deadline = Date.now() + 30000;
+        while (Date.now() < deadline) {
+            await new Promise(resolve => setTimeout(resolve, 500));
+            const result = await presetImportRequest(`/api/preset-import?id=${id}`);
+            if (result.status === 'sent') {
+                presetImportStatus(`Preset sent to slot ${displaySlot}.`);
+                sendWS({CMD: 'GETPRESETNAMES'});
+                return;
+            }
+            if (result.status === 'failed') throw new Error('Preset transfer failed or the pedal disconnected.');
+        }
+        throw new Error('Timed out waiting for the preset transfer.');
+    } catch (error) {
+        const message = error.name === 'AbortError' ? 'The controller did not respond.' : error.message;
+        const detail = uploadStarted ? `${message}\nCheck the pedal before retrying.` : message;
+        presetImportStatus(detail);
+        alert(detail);
+    } finally {
+        presetImportBusy = false;
+    }
+}
+
+function enablePresetFileDrop(row) {
+    const isFile = event => Array.from(event.dataTransfer?.types || []).includes('Files');
+    row.addEventListener('dragover', event => {
+        if (!isFile(event) || !supportsTonexOneTXPTransfer()) return;
+        event.preventDefault();
+        event.dataTransfer.dropEffect = presetImportBusy ? 'none' : 'copy';
+        if (!presetImportBusy) row.classList.add('preset-drop-target');
+    });
+    row.addEventListener('dragleave', event => {
+        if (!row.contains(event.relatedTarget)) row.classList.remove('preset-drop-target');
+    });
+    row.addEventListener('drop', event => {
+        if (isFile(event) && supportsTonexOneTXPTransfer()) dropPresetFile(event, row);
+    });
+}
+
+// A missed drop must not navigate away from the controller to the local file.
+document.addEventListener('dragover', event => {
+    if (Array.from(event.dataTransfer?.types || []).includes('Files')) event.preventDefault();
+});
+document.addEventListener('drop', event => {
+    if (Array.from(event.dataTransfer?.types || []).includes('Files')) event.preventDefault();
+    document.querySelectorAll('.preset-drop-target').forEach(row => row.classList.remove('preset-drop-target'));
+});
+
 function createPresetOrderRow(parent, preset, enable_up, enable_down) {
     // Create the outer div with class "row" and attributes
     const rowDiv = document.createElement('div');
     rowDiv.className = 'row';
     rowDiv.id = 'preset-order-' + preset;
     rowDiv.setAttribute('order_value', preset);
+    enablePresetFileDrop(rowDiv);
 
     // Create the inner div with class "col d-flex align-items-center preset-order-item"
     const colDiv = document.createElement('div');
@@ -1525,6 +1724,47 @@ function createPresetOrderRow(parent, preset, enable_up, enable_down) {
         downButton.textContent = '↓';
     }
 
+    const transferMenu = document.createElement('div');
+    transferMenu.className = 'dropdown';
+
+    const transferButton = document.createElement('button');
+    transferButton.className = 'btn btn-dark dropdown-toggle preset-transfer-button';
+    transferButton.type = 'button';
+    transferButton.textContent = '...';
+    transferButton.setAttribute('data-bs-toggle', 'dropdown');
+    transferButton.setAttribute('aria-expanded', 'false');
+    transferButton.title = 'Preset import and export';
+
+    const menu = document.createElement('ul');
+    menu.className = 'dropdown-menu';
+
+    const exportItem = document.createElement('button');
+    exportItem.className = 'dropdown-item';
+    exportItem.type = 'button';
+    exportItem.innerHTML = '<i class="bi bi-box-arrow-right" aria-hidden="true"></i> Export';
+    exportItem.onclick = () => exportPresetFile(rowDiv);
+
+    const importInput = document.createElement('input');
+    importInput.type = 'file';
+    importInput.accept = '.txp';
+    importInput.hidden = true;
+    importInput.onchange = () => {
+        if (importInput.files.length === 1) importPresetFile(importInput.files[0], rowDiv);
+    };
+
+    const importItem = document.createElement('button');
+    importItem.className = 'dropdown-item';
+    importItem.type = 'button';
+    importItem.textContent = 'Import new preset';
+    importItem.onclick = () => choosePresetImportFile(importInput);
+
+    for (const item of [exportItem, importItem]) {
+        const listItem = document.createElement('li');
+        listItem.appendChild(item);
+        menu.appendChild(listItem);
+    }
+    transferMenu.append(transferButton, menu, importInput);
+
     //console.log("createPresetOrderRow");
     //console.log(upButton);
     //console.log(downButton);
@@ -1533,6 +1773,7 @@ function createPresetOrderRow(parent, preset, enable_up, enable_down) {
     colDiv.appendChild(bulletSpan);
     colDiv.appendChild(space);
     colDiv.appendChild(textSpan);
+    colDiv.appendChild(transferMenu);
     colDiv.appendChild(upButton);
     colDiv.appendChild(downButton);
 
@@ -1540,6 +1781,8 @@ function createPresetOrderRow(parent, preset, enable_up, enable_down) {
     rowDiv.appendChild(colDiv);
 
     parent.appendChild(rowDiv); 
+    transferButton.dropdown = new bootstrap.Dropdown(transferButton);
+    updatePresetTransferControls();
 }
 
 // Function that receives the message from the ESP32
@@ -3690,6 +3933,7 @@ function processReturnCmd(data) {
 
             // set modeller type
             modellerType = data['MODELLER_TYPE'];
+            updatePresetTransferControls();
 
             console.log("Modeller Data: max:", maxPresets, "start:", startPreset, "type:", modellerType);
 
@@ -3897,7 +4141,7 @@ function processReturnCmd(data) {
             // update the list to have the preset names
             for (var index in data['PRESET_NAMES']) {
                 let name = data['PRESET_NAMES'][index];
-                var option_entry = document.getElementById("set_preset").options[index]
+                var option_entry = Array.from(document.getElementById("set_preset").options).find(option => option.value === String(index));
 
                 if (option_entry == null) {
                     console.log("null option_entry:")
@@ -3912,7 +4156,7 @@ function processReturnCmd(data) {
                     //console.log(index);
                     //console.log(element);
                     if (element != null) {
-                        presetOrderElementName(element).innerHTML = name;
+                        presetOrderElementName(element).textContent = name;
                     }
                 }                       
             }

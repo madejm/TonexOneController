@@ -23,12 +23,44 @@ limitations under the License.
 extern "C" {
 #endif
 
+#include <stddef.h>
+#include <stdint.h>
+#include <stdbool.h>
+
 #define MAX_PRESETS_TONEX_ONE             20
 
 void usb_tonex_one_handle(class_driver_t* driver_obj);
 void usb_tonex_one_init(class_driver_t* driver_obj, QueueHandle_t comms_queue);
 void usb_tonex_one_deinit(void);
 void usb_tonex_one_preallocate_memory(void);
+
+typedef enum
+{
+    TONEX_IMPORT_NONE,
+    TONEX_IMPORT_QUEUED,
+    TONEX_IMPORT_WAITING_FOR_PARAMETERS,
+    TONEX_IMPORT_SENDING,
+    TONEX_IMPORT_SENT,
+    TONEX_IMPORT_FAILED
+} usb_tonex_one_import_state_t;
+
+typedef enum
+{
+    TONEX_EXPORT_NONE,
+    TONEX_EXPORT_QUEUED,
+    TONEX_EXPORT_WAITING_FOR_PRESET,
+    TONEX_EXPORT_READY,
+    TONEX_EXPORT_FAILED
+} usb_tonex_one_export_state_t;
+
+// On ESP_OK ownership of body passes to USB. On error the caller must free it.
+// SENT means USB transfer completed, not a verified pedal flash readback.
+esp_err_t usb_tonex_one_import_preset(uint8_t *body, size_t length, uint8_t slot,
+                                      bool keep_parameters, uint32_t *id);
+usb_tonex_one_import_state_t usb_tonex_one_import_status(uint32_t id);
+esp_err_t usb_tonex_one_export_preset(uint8_t slot, uint32_t *id);
+usb_tonex_one_export_state_t usb_tonex_one_export_status(uint32_t id);
+esp_err_t usb_tonex_one_export_take(uint32_t id, uint8_t **body, size_t *length);
 
 // MIDI CC slot targeting functions
 esp_err_t usb_tonex_one_load_preset_to_slot_a(uint16_t preset);

@@ -47,6 +47,7 @@ limitations under the License.
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <math.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/semphr.h"
 #include "freertos/ringbuf.h"
@@ -191,6 +192,222 @@ static uint8_t scene_save_preset_request = 0;
 static bool scene_save_preset_in_progress = false;
 static volatile tInputBufferEntry* InputBuffers;
 static float* PresetParamsBuffer;
+
+// One owned upload at a time. HTTP only publishes a buffer; USB alone sends it.
+static portMUX_TYPE import_lock = portMUX_INITIALIZER_UNLOCKED;
+static uint8_t *import_body;
+static size_t import_length;
+static uint8_t import_slot;
+static bool import_keep_parameters;
+static uint32_t import_id;
+static TickType_t import_queued_at;
+static bool import_ready;
+static usb_tonex_one_import_state_t import_state = TONEX_IMPORT_NONE;
+static uint8_t *export_body;
+static size_t export_length;
+static uint8_t export_slot;
+static uint32_t export_id;
+static TickType_t export_queued_at;
+static usb_tonex_one_export_state_t export_state = TONEX_EXPORT_NONE;
+
+typedef struct
+{
+    const uint8_t *data;
+    size_t length;
+    size_t offset;
+} tPresetImportReader;
+
+static bool import_expect(tPresetImportReader *reader, uint8_t value)
+{
+    if (reader->offset >= reader->length || reader->data[reader->offset] != value)
+        return false;
+    reader->offset++;
+    return true;
+}
+
+static bool import_list(tPresetImportReader *reader, uint8_t tag, uint8_t count)
+{
+    return import_expect(reader, tag) && import_expect(reader, count);
+}
+
+static bool import_blob(tPresetImportReader *reader, size_t count)
+{
+    if (!import_expect(reader, 0xBC)) return false;
+    if (count < 128)
+    {
+        if (!import_expect(reader, count)) return false;
+    }
+    else if (!import_expect(reader, 0x81) || !import_expect(reader, count & 255) ||
+             !import_expect(reader, count >> 8)) return false;
+    if (count > reader->length - reader->offset) return false;
+    reader->offset += count;
+    return true;
+}
+
+static bool import_detail(tPresetImportReader *reader, size_t capacity, bool opaque)
+{
+    if (!import_list(reader, 0xB9, 2) || !import_blob(reader, capacity)) return false;
+    size_t start = reader->offset - capacity;
+    if (reader->offset >= reader->length) return false;
+    uint8_t length = reader->data[reader->offset++];
+    if (length >= capacity) return false;
+    // One editor metadata field deliberately has length zero with opaque bytes.
+    return opaque ? length == 0 :
+        (reader->data[start + length] == 0 && memchr(reader->data + start, 0, length) == NULL);
+}
+
+static bool import_floats(tPresetImportReader *reader, uint8_t count)
+{
+    if (!import_list(reader, 0xBA, count)) return false;
+    for (uint8_t i = 0; i < count; i++)
+    {
+        if (!import_expect(reader, 0x88) || reader->length - reader->offset < sizeof(float)) return false;
+        float value;
+        memcpy(&value, reader->data + reader->offset, sizeof(value));
+        if (!isfinite(value)) return false;
+        reader->offset += sizeof(value);
+    }
+    return true;
+}
+
+static bool import_boolean(tPresetImportReader *reader)
+{
+    if (reader->offset >= reader->length || reader->data[reader->offset] > 1) return false;
+    reader->offset++;
+    return true;
+}
+
+static bool import_asset(tPresetImportReader *reader, bool empty)
+{
+    if (!import_list(reader, 0xB9, 5) || !import_blob(reader, 16) ||
+        !import_detail(reader, 33, false) || reader->offset >= reader->length) return false;
+    uint8_t type = reader->data[reader->offset++];
+    if (empty ? type != 0 : (type < 1 || type > 4)) return false;
+    if (!import_blob(reader, 13768) || !import_list(reader, 0xB9, 9)) return false;
+    for (int i = 0; i < 3; i++) if (!import_boolean(reader)) return false;
+    return import_detail(reader, 17, false) && import_detail(reader, 17, false) &&
+           import_detail(reader, 11, false) && import_detail(reader, 33, true) &&
+           import_detail(reader, 65, false) && import_detail(reader, 65, false);
+}
+
+static bool import_validate(const uint8_t *data, size_t length)
+{
+    tPresetImportReader reader = {.data = data, .length = length, .offset = 0};
+    if (!import_list(&reader, 0xB9, 3) || !import_expect(&reader, 1) ||
+        reader.offset >= length || data[reader.offset++] >= MAX_PRESETS_TONEX_ONE ||
+        !import_list(&reader, 0xB9, 4) || !import_list(&reader, 0xB9, 4) ||
+        !import_detail(&reader, 33, false) || !import_floats(&reader, 2) ||
+        !import_list(&reader, 0xBA, 3)) return false;
+    for (int i = 0; i < 3; i++) if (!import_floats(&reader, 109)) return false;
+    if (!import_list(&reader, 0xB9, 13) || !import_detail(&reader, 33, false) ||
+        !import_detail(&reader, 11, false)) return false;
+    for (int i = 0; i < 10; i++) if (!import_detail(&reader, 33, false)) return false;
+    if (!import_detail(&reader, 65, false) || !import_asset(&reader, false) ||
+        reader.offset >= length) return false;
+    uint8_t separate = data[reader.offset];
+    return import_boolean(&reader) && import_asset(&reader, separate == 0) && reader.offset == length;
+}
+
+static bool usb_tonex_one_supports_txp_transfer(void)
+{
+    switch (usb_get_connected_modeller_type())
+    {
+        case AMP_MODELLER_TONEX_ONE:
+            return true;
+
+        default:
+            ESP_LOGE(TAG, "TXP transfer requested for unsupported modeller %u",
+                     usb_get_connected_modeller_type());
+            return false;
+    }
+}
+
+esp_err_t usb_tonex_one_import_preset(uint8_t *body, size_t length, uint8_t slot,
+                                      bool keep_parameters, uint32_t *id)
+{
+    if (!usb_tonex_one_supports_txp_transfer()) return ESP_ERR_NOT_SUPPORTED;
+    if (body == NULL || id == NULL || slot >= MAX_PRESETS_TONEX_ONE ||
+        length > TONEX_MAX_FULL_PRESET_DATA - 11 || !import_validate(body, length))
+        return ESP_ERR_INVALID_ARG;
+
+    // The HTTP destination is authoritative, never the uploaded body index.
+    body[3] = slot;
+    TickType_t queued_at = xTaskGetTickCount();
+    portENTER_CRITICAL(&import_lock);
+    if (!import_ready || import_state == TONEX_IMPORT_QUEUED ||
+        import_state == TONEX_IMPORT_WAITING_FOR_PARAMETERS || import_state == TONEX_IMPORT_SENDING ||
+        export_state == TONEX_EXPORT_QUEUED || export_state == TONEX_EXPORT_WAITING_FOR_PRESET)
+    {
+        portEXIT_CRITICAL(&import_lock);
+        return ESP_ERR_INVALID_STATE;
+    }
+    import_body = body;
+    import_length = length;
+    import_slot = slot;
+    import_keep_parameters = keep_parameters;
+    if (++import_id == 0) ++import_id;
+    *id = import_id;
+    import_queued_at = queued_at;
+    import_state = TONEX_IMPORT_QUEUED;
+    portEXIT_CRITICAL(&import_lock);
+    return ESP_OK;
+}
+
+usb_tonex_one_import_state_t usb_tonex_one_import_status(uint32_t id)
+{
+    portENTER_CRITICAL(&import_lock);
+    usb_tonex_one_import_state_t state = (id != 0 && id == import_id) ? import_state : TONEX_IMPORT_NONE;
+    portEXIT_CRITICAL(&import_lock);
+    return state;
+}
+
+esp_err_t usb_tonex_one_export_preset(uint8_t slot, uint32_t *id)
+{
+    if (!usb_tonex_one_supports_txp_transfer()) return ESP_ERR_NOT_SUPPORTED;
+    if (id == NULL || slot >= MAX_PRESETS_TONEX_ONE) return ESP_ERR_INVALID_ARG;
+    portENTER_CRITICAL(&import_lock);
+    if (export_state == TONEX_EXPORT_FAILED) export_state = TONEX_EXPORT_NONE;
+    if (!import_ready || export_state != TONEX_EXPORT_NONE ||
+        import_state == TONEX_IMPORT_QUEUED || import_state == TONEX_IMPORT_WAITING_FOR_PARAMETERS ||
+        import_state == TONEX_IMPORT_SENDING)
+    {
+        portEXIT_CRITICAL(&import_lock);
+        return ESP_ERR_INVALID_STATE;
+    }
+    export_slot = slot;
+    if (++export_id == 0) ++export_id;
+    *id = export_id;
+    export_queued_at = xTaskGetTickCount();
+    export_state = TONEX_EXPORT_QUEUED;
+    portEXIT_CRITICAL(&import_lock);
+    return ESP_OK;
+}
+
+usb_tonex_one_export_state_t usb_tonex_one_export_status(uint32_t id)
+{
+    portENTER_CRITICAL(&import_lock);
+    usb_tonex_one_export_state_t state = (id != 0 && id == export_id) ? export_state : TONEX_EXPORT_NONE;
+    portEXIT_CRITICAL(&import_lock);
+    return state;
+}
+
+esp_err_t usb_tonex_one_export_take(uint32_t id, uint8_t **body, size_t *length)
+{
+    if (body == NULL || length == NULL) return ESP_ERR_INVALID_ARG;
+    portENTER_CRITICAL(&import_lock);
+    if (id == 0 || id != export_id || export_state != TONEX_EXPORT_READY)
+    {
+        portEXIT_CRITICAL(&import_lock);
+        return ESP_ERR_INVALID_STATE;
+    }
+    *body = export_body;
+    *length = export_length;
+    export_body = NULL;
+    export_length = 0;
+    export_state = TONEX_EXPORT_NONE;
+    portEXIT_CRITICAL(&import_lock);
+    return ESP_OK;
+}
 
 static void __attribute__((noreturn)) usb_tonex_one_debug_halt(const char *reason, size_t requested_size)
 {
@@ -801,6 +1018,83 @@ static bool usb_tonex_one_replace_full_preset_parameters(const float preset_para
     }
 
     return true;
+}
+
+static bool usb_tonex_one_copy_full_preset_parameter_banks(uint8_t *destination, size_t destination_length,
+                                                            const uint8_t *source, size_t source_length)
+{
+    static const uint8_t parameter_marker[] = {0xBA, 0x03, 0xBA, 0x6D};
+    uint8_t *destination_parameter = memmem(destination, destination_length, parameter_marker,
+                                            sizeof(parameter_marker));
+    const uint8_t *source_parameter = memmem(source, source_length, parameter_marker,
+                                              sizeof(parameter_marker));
+    if (destination_parameter == NULL || source_parameter == NULL)
+    {
+        ESP_LOGE(TAG, "Full preset parameter banks marker not found");
+        return false;
+    }
+
+    destination_parameter += sizeof(parameter_marker);
+    source_parameter += sizeof(parameter_marker);
+    for (uint8_t bank = 0; bank < 3; bank++)
+    {
+        if (bank != 0)
+        {
+            if ((destination_parameter + 2 > destination + destination_length) ||
+                (source_parameter + 2 > source + source_length) ||
+                destination_parameter[0] != 0xBA || destination_parameter[1] != 0x6D ||
+                source_parameter[0] != 0xBA || source_parameter[1] != 0x6D)
+            {
+                ESP_LOGE(TAG, "Invalid full preset parameter bank %u", bank);
+                return false;
+            }
+            destination_parameter += 2;
+            source_parameter += 2;
+        }
+
+        for (uint16_t parameter = 0; parameter < TONEX_PARAM_LAST; parameter++)
+        {
+            if ((destination_parameter + 1 + sizeof(float) > destination + destination_length) ||
+                (source_parameter + 1 + sizeof(float) > source + source_length) ||
+                destination_parameter[0] != 0x88 || source_parameter[0] != 0x88)
+            {
+                ESP_LOGE(TAG, "Invalid full preset parameter %u in bank %u", parameter, bank);
+                return false;
+            }
+            memcpy(destination_parameter + 1, source_parameter + 1, sizeof(float));
+            destination_parameter += 1 + sizeof(float);
+            source_parameter += 1 + sizeof(float);
+        }
+    }
+    return true;
+}
+
+static void usb_tonex_one_send_import(uint8_t *body, size_t body_length, uint8_t slot)
+{
+    memcpy(TonexData->Message.PedalData.FullPresetData, body, body_length);
+    TonexData->Message.PedalData.FullPresetDataLength = body_length;
+    esp_err_t result = usb_tonex_one_send_full_preset_data();
+    if (result == ESP_OK)
+    {
+        // Validated body: B9 03 01 slot B9 04 B9 04 B9 02 BC 21 name[33].
+        char name[33];
+        memcpy(name, body + 12, sizeof(name));
+        name[32] = 0;
+        control_sync_preset_name(slot, name);
+        tScene *scene = scenes_get_current();
+        if (scene != NULL) scene->Presets[slot].Modified = true;
+        UI_UpdatePresetList();
+        if (slot == usb_tonex_one_get_current_active_preset())
+            usb_tonex_one_request_preset_details(slot, 0);
+    }
+    else
+    {
+        wifi_log_msg("TXP preset transfer failed for slot %u", slot + 1);
+    }
+    portENTER_CRITICAL(&import_lock);
+    import_state = result == ESP_OK ? TONEX_IMPORT_SENT : TONEX_IMPORT_FAILED;
+    portEXIT_CRITICAL(&import_lock);
+    free(body);
 }
 
 /****************************************************************************
@@ -2163,56 +2457,120 @@ static esp_err_t usb_tonex_one_process_single_message(uint8_t* data, uint16_t le
                     // UI_Log_Delay("FULL %d %d", scene_sync_in_progress, scene_sync_preset_request);
                     ESP_LOGI(TAG, "Received Preset details full");
 
-                    if (scene_sync_in_progress)
+                    uint8_t *imported_body = NULL;
+                    size_t imported_length = 0;
+                    uint8_t imported_slot = 0;
+                    portENTER_CRITICAL(&import_lock);
+                    if (import_state == TONEX_IMPORT_WAITING_FOR_PARAMETERS)
                     {
-                        tScene *scene = scenes_get_current();
+                        imported_body = import_body;
+                        imported_length = import_length;
+                        imported_slot = import_slot;
+                        import_body = NULL;
+                        import_state = TONEX_IMPORT_SENDING;
+                    }
+                    portEXIT_CRITICAL(&import_lock);
 
-                        if ((scene == NULL) ||
-                            !usb_tonex_one_replace_full_preset_parameters(
-                                scene->Presets[scene_sync_preset_request].PresetParams) ||
-                            (usb_tonex_one_send_full_preset_data() != ESP_OK))
+                    if (imported_body != NULL)
+                    {
+                        if (usb_tonex_one_copy_full_preset_parameter_banks(
+                                imported_body, imported_length,
+                                TonexData->Message.PedalData.FullPresetData,
+                                TonexData->Message.PedalData.FullPresetDataLength))
                         {
-                            wifi_log_msg("Failed to apply scene preset %u", scene_sync_preset_request);
-                            ESP_LOGE(TAG, "Failed to apply scene preset %u", scene_sync_preset_request);
-                            scene_sync_in_progress = false;
-                            UI_HideProgressBar();
-                            break;
-                        }
-
-                        scene->Presets[scene_sync_preset_request].Modified = false;
-
-                        scene_sync_preset_request++;
-                        UI_SetProgressBar((scene_sync_preset_request * 100) / MAX_PRESETS_TONEX_ONE, PROGRESS_SYNC_SCENE);
-
-                        if (scene_sync_preset_request < MAX_PRESETS_TONEX_ONE)
-                        {
-                            if (usb_tonex_one_request_preset_details(scene_sync_preset_request, 1) != ESP_OK)
-                            {
-                                ESP_LOGE(TAG, "Failed to request scene preset %u", scene_sync_preset_request);
-                                wifi_log_msg("Failed to request scene preset %u", scene_sync_preset_request);
-                                scene_sync_in_progress = false;
-                                UI_HideProgressBar();
-                            }
+                            usb_tonex_one_send_import(imported_body, imported_length, imported_slot);
                         }
                         else
                         {
-                            char current_preset_name[MAX_PRESET_NAME_LENGTH];
-                            scene_sync_in_progress = false;
-                            control_get_current_preset_name(current_preset_name);
-                            UI_SetPresetLabel(control_get_current_preset_mapped_index(), current_preset_name);
-                            UI_UpdatePresetList();
-                            UI_HideProgressBar();
+                            ESP_LOGE(TAG, "Failed to preserve parameters for TXP import slot %u", imported_slot);
+                            portENTER_CRITICAL(&import_lock);
+                            import_state = TONEX_IMPORT_FAILED;
+                            portEXIT_CRITICAL(&import_lock);
+                            free(imported_body);
+                        }
+                    }
+                    else
+                    {
+                        bool exporting = false;
+                        portENTER_CRITICAL(&import_lock);
+                        if (export_state == TONEX_EXPORT_WAITING_FOR_PRESET)
+                            exporting = true;
+                        portEXIT_CRITICAL(&import_lock);
+                        if (exporting)
+                        {
+                            uint8_t *body = heap_caps_malloc(
+                                TonexData->Message.PedalData.FullPresetDataLength,
+                                MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT);
+                            if (body == NULL) body = malloc(TonexData->Message.PedalData.FullPresetDataLength);
+                            if (body != NULL)
+                            {
+                                memcpy(body, TonexData->Message.PedalData.FullPresetData,
+                                       TonexData->Message.PedalData.FullPresetDataLength);
+                            }
+                            portENTER_CRITICAL(&import_lock);
+                            if (body != NULL)
+                            {
+                                export_body = body;
+                                export_length = TonexData->Message.PedalData.FullPresetDataLength;
+                                export_state = TONEX_EXPORT_READY;
+                            }
+                            else
+                            {
+                                export_state = TONEX_EXPORT_FAILED;
+                            }
+                            portEXIT_CRITICAL(&import_lock);
+                        }
+                        else if (scene_sync_in_progress)
+                        {
+                            tScene *scene = scenes_get_current();
 
-                            // Refresh the active preset from TONEX after all full preset
-                            // updates have been applied. This updates the live parameters and
-                            // all dependent UI from the pedal's response.
-                            // current_preset = usb_tonex_one_get_current_active_preset();
-                            // if (usb_tonex_one_request_preset_details(current_preset, 0) != ESP_OK)
-                            // {
-                            //     wifi_log_msg("Failed to refresh active preset after scene sync");
-                            //     ESP_LOGE(TAG, "Failed to refresh active preset after scene sync");
-                            //     UI_HideProgressBar();
-                            // }
+                            if ((scene == NULL) ||
+                                !usb_tonex_one_replace_full_preset_parameters(
+                                    scene->Presets[scene_sync_preset_request].PresetParams) ||
+                                (usb_tonex_one_send_full_preset_data() != ESP_OK))
+                            {
+                                wifi_log_msg("Failed to apply scene preset %u", scene_sync_preset_request);
+                                ESP_LOGE(TAG, "Failed to apply scene preset %u", scene_sync_preset_request);
+                                scene_sync_in_progress = false;
+                                UI_HideProgressBar();
+                                break;
+                            }
+
+                            scene->Presets[scene_sync_preset_request].Modified = false;
+
+                            scene_sync_preset_request++;
+                            UI_SetProgressBar((scene_sync_preset_request * 100) / MAX_PRESETS_TONEX_ONE, PROGRESS_SYNC_SCENE);
+
+                            if (scene_sync_preset_request < MAX_PRESETS_TONEX_ONE)
+                            {
+                                if (usb_tonex_one_request_preset_details(scene_sync_preset_request, 1) != ESP_OK)
+                                {
+                                    ESP_LOGE(TAG, "Failed to request scene preset %u", scene_sync_preset_request);
+                                    wifi_log_msg("Failed to request scene preset %u", scene_sync_preset_request);
+                                    scene_sync_in_progress = false;
+                                    UI_HideProgressBar();
+                                }
+                            }
+                            else
+                            {
+                                char current_preset_name[MAX_PRESET_NAME_LENGTH];
+                                scene_sync_in_progress = false;
+                                control_get_current_preset_name(current_preset_name);
+                                UI_SetPresetLabel(control_get_current_preset_mapped_index(), current_preset_name);
+                                UI_UpdatePresetList();
+                                UI_HideProgressBar();
+
+                                // Refresh the active preset from TONEX after all full preset
+                                // updates have been applied. This updates the live parameters and
+                                // all dependent UI from the pedal's response.
+                                // current_preset = usb_tonex_one_get_current_active_preset();
+                                // if (usb_tonex_one_request_preset_details(current_preset, 0) != ESP_OK)
+                                // {
+                                //     wifi_log_msg("Failed to refresh active preset after scene sync");
+                                //     ESP_LOGE(TAG, "Failed to refresh active preset after scene sync");
+                                //     UI_HideProgressBar();
+                                // }
+                            }
                         }
                     }
                 } break;
@@ -2251,6 +2609,81 @@ void usb_tonex_one_handle(class_driver_t* driver_obj)
     tUSBMessage message;
     tUSBMessage next_message;
 
+    bool can_import = TonexData->TonexState == COMMS_STATE_READY &&
+        boot_preset_request > MAX_PRESETS_TONEX_ONE && control_get_sync_complete() &&
+        !scene_save_preset_in_progress && !scene_sync_in_progress &&
+        uxQueueMessagesWaiting(input_queue) == 0;
+    uint8_t *body = NULL;
+    size_t body_length = 0;
+    uint8_t slot = 0;
+    bool import_expired = false;
+    bool request_import_parameters = false;
+    bool request_export_preset = false;
+    uint8_t requested_export_slot = 0;
+    TickType_t now = xTaskGetTickCount();
+    portENTER_CRITICAL(&import_lock);
+    import_ready = can_import;
+    if (import_state == TONEX_IMPORT_QUEUED || import_state == TONEX_IMPORT_WAITING_FOR_PARAMETERS)
+    {
+        import_expired = (now - import_queued_at) > pdMS_TO_TICKS(10000);
+        if (import_state == TONEX_IMPORT_QUEUED && can_import && import_keep_parameters)
+        {
+            request_import_parameters = true;
+            slot = import_slot;
+            import_state = TONEX_IMPORT_WAITING_FOR_PARAMETERS;
+        }
+        else if ((import_state == TONEX_IMPORT_QUEUED && can_import) || import_expired)
+        {
+            body = import_body;
+            body_length = import_length;
+            slot = import_slot;
+            import_body = NULL;
+            import_state = import_expired ? TONEX_IMPORT_FAILED : TONEX_IMPORT_SENDING;
+        }
+    }
+    if (export_state == TONEX_EXPORT_QUEUED || export_state == TONEX_EXPORT_WAITING_FOR_PRESET)
+    {
+        if ((now - export_queued_at) > pdMS_TO_TICKS(10000))
+        {
+            export_state = TONEX_EXPORT_FAILED;
+        }
+        else if (export_state == TONEX_EXPORT_QUEUED && can_import)
+        {
+            requested_export_slot = export_slot;
+            export_state = TONEX_EXPORT_WAITING_FOR_PRESET;
+            request_export_preset = true;
+        }
+    }
+    portEXIT_CRITICAL(&import_lock);
+    const bool handled_import = body != NULL || request_import_parameters || request_export_preset;
+    if (request_import_parameters && usb_tonex_one_request_preset_details(slot, 1) != ESP_OK)
+    {
+        ESP_LOGE(TAG, "Failed to request current parameters for TXP import slot %u", slot);
+        portENTER_CRITICAL(&import_lock);
+        body = import_body;
+        import_body = NULL;
+        import_state = TONEX_IMPORT_FAILED;
+        portEXIT_CRITICAL(&import_lock);
+        free(body);
+    }
+    if (request_export_preset && usb_tonex_one_request_preset_details(requested_export_slot, 1) != ESP_OK)
+    {
+        ESP_LOGE(TAG, "Failed to request preset export slot %u", requested_export_slot);
+        portENTER_CRITICAL(&import_lock);
+        export_state = TONEX_EXPORT_FAILED;
+        portEXIT_CRITICAL(&import_lock);
+    }
+    if (handled_import)
+    {
+        if (!import_expired)
+        {
+            if (body != NULL)
+                usb_tonex_one_send_import(body, body_length, slot);
+        }
+        else
+            free(body);
+    }
+
     // check state
     switch (TonexData->TonexState)
     {
@@ -2276,7 +2709,7 @@ void usb_tonex_one_handle(class_driver_t* driver_obj)
         case COMMS_STATE_READY:
         {
             // check for any input messages
-            if (!scene_save_preset_in_progress && !scene_sync_in_progress &&
+            if (!handled_import && !scene_save_preset_in_progress && !scene_sync_in_progress &&
                 (xQueueReceive(input_queue, (void*)&message, 0) == pdPASS))
             {
                 ESP_LOGI(TAG, "Got Input message: %d. Queue: %d", message.Command, uxQueueMessagesWaiting(input_queue));
@@ -2722,6 +3155,23 @@ void usb_tonex_one_init(class_driver_t* driver_obj, QueueHandle_t comms_queue)
 *****************************************************************************/
 void usb_tonex_one_deinit(void)
 {
+    portENTER_CRITICAL(&import_lock);
+    import_ready = false;
+    uint8_t *pending_import = import_body;
+    import_body = NULL;
+    if (import_state == TONEX_IMPORT_QUEUED ||
+        import_state == TONEX_IMPORT_WAITING_FOR_PARAMETERS || import_state == TONEX_IMPORT_SENDING)
+        import_state = TONEX_IMPORT_FAILED;
+    uint8_t *pending_export = export_body;
+    export_body = NULL;
+    export_length = 0;
+    if (export_state == TONEX_EXPORT_QUEUED || export_state == TONEX_EXPORT_WAITING_FOR_PRESET ||
+        export_state == TONEX_EXPORT_READY)
+        export_state = TONEX_EXPORT_FAILED;
+    portEXIT_CRITICAL(&import_lock);
+    free(pending_import);
+    free(pending_export);
+
     // close USB
     cdc_acm_host_close(cdc_dev);
     vTaskDelay(200);

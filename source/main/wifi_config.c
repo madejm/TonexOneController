@@ -28,6 +28,7 @@ limitations under the License.
 #include "freertos/event_groups.h"
 #include "esp_check.h"
 #include "esp_log.h"
+#include "esp_heap_caps.h"
 #include "usb/usb_host.h"
 #include "nvs_flash.h"
 #include "esp_vfs.h"
@@ -55,6 +56,7 @@ limitations under the License.
 #include "valeton_params.h"
 #include "usb_comms.h"
 #include "usb_tonex_one.h"
+#include "usb_tonex_common.h"
 #include "display.h"
 
 #define WIFI_CONFIG_TASK_STACK_SIZE   (3 * 1024)
@@ -161,6 +163,173 @@ typedef struct
     char IP[20];
     char locater_packet[MAX_LOCATER_PACKET];
 } tLocaterData;
+
+static bool preset_import_query(httpd_req_t *req, const char *key, uint32_t *value)
+{
+    char query[64], number[11];
+    if (httpd_req_get_url_query_str(req, query, sizeof(query)) != ESP_OK ||
+        httpd_query_key_value(query, key, number, sizeof(number)) != ESP_OK || number[0] == 0)
+        return false;
+    uint64_t parsed = 0;
+    for (size_t i = 0; number[i] != 0; i++)
+    {
+        if (number[i] < '0' || number[i] > '9') return false;
+        parsed = parsed * 10 + (number[i] - '0');
+        if (parsed > UINT32_MAX) return false;
+    }
+    *value = (uint32_t)parsed;
+    return true;
+}
+
+static bool preset_transfer_supported(void)
+{
+    switch (usb_get_connected_modeller_type())
+    {
+        case AMP_MODELLER_TONEX_ONE:
+            return true;
+
+        default:
+            ESP_LOGE(TAG, "TXP web transfer requested for unsupported modeller %u",
+                     usb_get_connected_modeller_type());
+            return false;
+    }
+}
+
+static esp_err_t preset_import_post(httpd_req_t *req)
+{
+    uint32_t slot, keep_parameters = 0;
+    char query[64], keep_parameters_text[12];
+    char content_type[40];
+    httpd_resp_set_hdr(req, "Cache-Control", "no-store");
+    // Rejected uploads can leave unread request bytes. Close this connection.
+    httpd_resp_set_hdr(req, "Connection", "close");
+    if (!preset_import_query(req, "slot", &slot) || slot >= MAX_PRESETS_TONEX_ONE)
+        return httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "Invalid preset slot.");
+    if (httpd_req_get_url_query_str(req, query, sizeof(query)) == ESP_OK &&
+        httpd_query_key_value(query, "keep_parameters", keep_parameters_text,
+                              sizeof(keep_parameters_text)) == ESP_OK &&
+        !preset_import_query(req, "keep_parameters", &keep_parameters))
+        return httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "Invalid keep-parameters setting.");
+    if (keep_parameters > 1)
+        return httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "Invalid keep-parameters setting.");
+    if (!preset_transfer_supported() || !control_get_sync_complete())
+        return httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "Connect a TONEX ONE and wait for synchronization.");
+    if (httpd_req_get_hdr_value_str(req, "Content-Type", content_type, sizeof(content_type)) != ESP_OK ||
+        strcmp(content_type, "application/octet-stream") != 0)
+        return httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "Expected a binary full-preset body.");
+    if (req->content_len == 0 || req->content_len > TONEX_MAX_FULL_PRESET_DATA - 11)
+        return httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "Invalid full-preset size.");
+
+    uint8_t *body = heap_caps_malloc(req->content_len, MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT);
+    if (body == NULL) body = malloc(req->content_len);
+    if (body == NULL)
+        return httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Not enough memory for preset upload.");
+    size_t received = 0;
+    while (received < req->content_len)
+    {
+        int count = httpd_req_recv(req, (char *)body + received, req->content_len - received);
+        if (count <= 0)
+        {
+            free(body);
+            return httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "Incomplete preset upload; nothing was sent to the pedal.");
+        }
+        received += count;
+    }
+    uint32_t id;
+    esp_err_t result = usb_tonex_one_import_preset(body, received, (uint8_t)slot,
+                                                    keep_parameters != 0, &id);
+    if (result != ESP_OK)
+    {
+        free(body);
+        return httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST,
+            result == ESP_ERR_INVALID_STATE ? "Pedal is busy or disconnected. Try again when it is ready." : "Invalid full-preset body.");
+    }
+    char response[48];
+    snprintf(response, sizeof(response), "{\"id\":%" PRIu32 "}", id);
+    httpd_resp_set_status(req, "202 Accepted");
+    httpd_resp_set_type(req, "application/json");
+    return httpd_resp_sendstr(req, response);
+}
+
+static esp_err_t preset_import_get(httpd_req_t *req)
+{
+    uint32_t id;
+    httpd_resp_set_hdr(req, "Cache-Control", "no-store");
+    if (!preset_import_query(req, "id", &id))
+        return httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "Invalid import ID.");
+    usb_tonex_one_import_state_t state = usb_tonex_one_import_status(id);
+    if (state == TONEX_IMPORT_NONE)
+        return httpd_resp_send_err(req, HTTPD_404_NOT_FOUND, "Import status is no longer available. Check the pedal before retrying.");
+    const char *status = state == TONEX_IMPORT_SENT ? "sent" :
+                         state == TONEX_IMPORT_FAILED ? "failed" : "pending";
+    char response[48];
+    snprintf(response, sizeof(response), "{\"status\":\"%s\"}", status);
+    httpd_resp_set_type(req, "application/json");
+    return httpd_resp_sendstr(req, response);
+}
+
+static esp_err_t preset_export_post(httpd_req_t *req)
+{
+    uint32_t slot, id;
+    httpd_resp_set_hdr(req, "Cache-Control", "no-store");
+    if (!preset_import_query(req, "slot", &slot) || slot >= MAX_PRESETS_TONEX_ONE)
+        return httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "Invalid preset slot.");
+    if (!preset_transfer_supported() || !control_get_sync_complete())
+        return httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "Connect a TONEX ONE and wait for synchronization.");
+    if (usb_tonex_one_export_preset((uint8_t)slot, &id) != ESP_OK)
+        return httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "Preset transfer is already in progress.");
+    char response[48];
+    snprintf(response, sizeof(response), "{\"id\":%" PRIu32 "}", id);
+    httpd_resp_set_status(req, "202 Accepted");
+    httpd_resp_set_type(req, "application/json");
+    return httpd_resp_sendstr(req, response);
+}
+
+static esp_err_t preset_export_get(httpd_req_t *req)
+{
+    uint32_t id, download = 0;
+    char query[64], download_text[4];
+    httpd_resp_set_hdr(req, "Cache-Control", "no-store");
+    if (!preset_import_query(req, "id", &id))
+        return httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "Invalid export ID.");
+    if (httpd_req_get_url_query_str(req, query, sizeof(query)) == ESP_OK &&
+        httpd_query_key_value(query, "download", download_text, sizeof(download_text)) == ESP_OK &&
+        !preset_import_query(req, "download", &download))
+        return httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "Invalid download setting.");
+    if (download != 0)
+    {
+        uint8_t *body;
+        size_t length;
+        if (usb_tonex_one_export_take(id, &body, &length) != ESP_OK)
+            return httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "Preset export is not ready.");
+        httpd_resp_set_type(req, "application/octet-stream");
+        esp_err_t result = httpd_resp_send(req, (const char *)body, length);
+        free(body);
+        return result;
+    }
+    usb_tonex_one_export_state_t state = usb_tonex_one_export_status(id);
+    if (state == TONEX_EXPORT_NONE)
+        return httpd_resp_send_err(req, HTTPD_404_NOT_FOUND, "Export status is no longer available.");
+    const char *status = state == TONEX_EXPORT_READY ? "ready" :
+                         state == TONEX_EXPORT_FAILED ? "failed" : "pending";
+    char response[48];
+    snprintf(response, sizeof(response), "{\"status\":\"%s\"}", status);
+    httpd_resp_set_type(req, "application/json");
+    return httpd_resp_sendstr(req, response);
+}
+
+static const httpd_uri_t preset_import_upload_uri = {
+    .uri = "/api/preset-import", .method = HTTP_POST, .handler = preset_import_post
+};
+static const httpd_uri_t preset_import_status_uri = {
+    .uri = "/api/preset-import", .method = HTTP_GET, .handler = preset_import_get
+};
+static const httpd_uri_t preset_export_uri = {
+    .uri = "/api/preset-export", .method = HTTP_POST, .handler = preset_export_post
+};
+static const httpd_uri_t preset_export_status_uri = {
+    .uri = "/api/preset-export", .method = HTTP_GET, .handler = preset_export_get
+};
 
 static const httpd_uri_t embedded_uri = 
 {
@@ -1742,6 +1911,14 @@ static esp_err_t embedded_files_handler(httpd_req_t *req)
         requested++;
     }
 
+    // Ignore asset cache-version queries when matching embedded file names.
+    char requested_path[128];
+    size_t path_length = strcspn(requested, "?");
+    if (path_length >= sizeof(requested_path)) return httpd_resp_send_404(req);
+    memcpy(requested_path, requested, path_length);
+    requested_path[path_length] = 0;
+    requested = requested_path;
+
     // check the file requested
     if (strcmp(requested, "index.html") == 0 || strcmp(requested, "") == 0) 
     {
@@ -2081,6 +2258,14 @@ static esp_err_t embedded_files_handler(httpd_req_t *req)
         httpd_resp_set_hdr(req, "Cache-Control", "public, max-age=604800");
         return httpd_resp_send(req, (const char*)web_bootstrap_css_start, web_bootstrap_css_end - web_bootstrap_css_start);
     }
+    else if (strcmp(requested, "txp.js") == 0)
+    {
+        extern const unsigned char web_txp_js_start[] asm("_binary_txp_js_start");
+        extern const unsigned char web_txp_js_end[] asm("_binary_txp_js_end");
+        httpd_resp_set_type(req, "application/javascript");
+        httpd_resp_set_hdr(req, "Cache-Control", "no-cache");
+        return httpd_resp_send(req, (const char*)web_txp_js_start, web_txp_js_end - web_txp_js_start);
+    }
     else if (strcmp(requested, "script.js") == 0) 
     {
         extern const unsigned char web_script_js_start[] asm("_binary_script_js_start");
@@ -2215,7 +2400,7 @@ static esp_err_t http_server_init(void)
     http_config.server_port        = 80;
     http_config.ctrl_port          = 32768;
     http_config.max_open_sockets   = 6;
-    http_config.max_uri_handlers   = 2;
+    http_config.max_uri_handlers   = 6;
     http_config.max_resp_headers   = 8;
     http_config.backlog_conn       = 1;
     http_config.keep_alive_enable  = true;
@@ -2237,6 +2422,10 @@ static esp_err_t http_server_init(void)
 
             ESP_LOGI(TAG, "Http register uri 1");
     	    //httpd_register_uri_handler(http_server, &index_get);
+            httpd_register_uri_handler(http_server, &preset_import_upload_uri);
+            httpd_register_uri_handler(http_server, &preset_import_status_uri);
+            httpd_register_uri_handler(http_server, &preset_export_uri);
+            httpd_register_uri_handler(http_server, &preset_export_status_uri);
             httpd_register_uri_handler(http_server, &embedded_uri);           
         }
 	}
