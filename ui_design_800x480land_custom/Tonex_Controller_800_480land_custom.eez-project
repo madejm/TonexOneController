@@ -729,6 +729,15 @@
       "componentGroups": [],
       "userProperties": [],
       "name": "OpenPresetsBackupPage"
+    },
+    {
+      "objID": "2b604361-12ef-4056-a595-d31428fccdcc",
+      "components": [],
+      "connectionLines": [],
+      "localVariables": [],
+      "componentGroups": [],
+      "userProperties": [],
+      "name": "USBHostChanged"
     }
   ],
   "userPages": [
@@ -846,7 +855,7 @@
                           "eventHandlers": [
                             {
                               "objID": "c048413f-dd4a-48d3-f588-d6a226d896b1",
-                              "eventName": "PRESSED",
+                              "eventName": "CLICKED",
                               "handlerType": "action",
                               "action": "usb",
                               "userData": 0
@@ -944,7 +953,7 @@
                           "eventHandlers": [
                             {
                               "objID": "dbe19ab5-b264-424f-cf61-d821b7672dae",
-                              "eventName": "PRESSED",
+                              "eventName": "CLICKED",
                               "handlerType": "action",
                               "action": "wifi",
                               "userData": 0
@@ -1232,7 +1241,7 @@
                       "type": "LVGLButtonWidget",
                       "left": 0,
                       "top": 0,
-                      "width": 163,
+                      "width": 64,
                       "height": 100,
                       "customInputs": [],
                       "customOutputs": [],
@@ -1259,32 +1268,147 @@
                       "heightUnit": "%",
                       "children": [
                         {
-                          "objID": "aceffbb6-c6f8-49c6-cd15-8497b956cd63",
-                          "type": "LVGLLabelWidget",
+                          "objID": "cc20cae7-c60a-4228-f151-3412b04221d2",
+                          "type": "LVGLContainerWidget",
                           "left": 0,
-                          "top": 64,
-                          "width": 66,
-                          "height": 33,
+                          "top": 0,
+                          "width": 40,
+                          "height": 38,
                           "customInputs": [],
                           "customOutputs": [],
                           "style": {
-                            "objID": "9e7d5ac0-9816-4a62-f1d6-08ad4a0e7d59",
+                            "objID": "1f56a3ec-3452-4433-b54a-e0ca92f9a858",
                             "useStyle": "default",
                             "conditionalStyles": [],
                             "childStyles": []
                           },
-                          "hiddenInEditor": false,
                           "timeline": [],
                           "eventHandlers": [],
-                          "identifier": "",
                           "leftUnit": "px",
                           "topUnit": "px",
                           "widthUnit": "content",
                           "heightUnit": "content",
-                          "children": [],
+                          "children": [
+                            {
+                              "objID": "aceffbb6-c6f8-49c6-cd15-8497b956cd63",
+                              "type": "LVGLLabelWidget",
+                              "left": 0,
+                              "top": 0,
+                              "width": 38,
+                              "height": 19,
+                              "customInputs": [],
+                              "customOutputs": [],
+                              "style": {
+                                "objID": "9e7d5ac0-9816-4a62-f1d6-08ad4a0e7d59",
+                                "useStyle": "default",
+                                "conditionalStyles": [],
+                                "childStyles": []
+                              },
+                              "hiddenInEditor": false,
+                              "timeline": [],
+                              "eventHandlers": [],
+                              "identifier": "",
+                              "leftUnit": "px",
+                              "topUnit": "px",
+                              "widthUnit": "content",
+                              "heightUnit": "content",
+                              "children": [],
+                              "widgetFlags": "CLICK_FOCUSABLE|GESTURE_BUBBLE|PRESS_LOCK|SCROLLABLE|SCROLL_CHAIN_HOR|SCROLL_CHAIN_VER|SCROLL_ELASTIC|SCROLL_MOMENTUM|SCROLL_WITH_ARROW|SNAPPABLE",
+                              "hiddenFlagType": "literal",
+                              "clickableFlag": false,
+                              "clickableFlagType": "literal",
+                              "flagScrollbarMode": "",
+                              "flagScrollDirection": "",
+                              "scrollSnapX": "",
+                              "scrollSnapY": "",
+                              "checkedStateType": "literal",
+                              "disabledStateType": "literal",
+                              "states": "",
+                              "localStyles": {
+                                "objID": "699c9a7f-a10b-4d72-a665-cf13dbc03d2b",
+                                "definition": {
+                                  "MAIN": {
+                                    "SCROLLED": {
+                                      "text_font": "MONTSERRAT_14"
+                                    },
+                                    "DEFAULT": {
+                                      "text_color": "label gray",
+                                      "text_font": "IBM 18",
+                                      "text_align": "LEFT"
+                                    }
+                                  }
+                                }
+                              },
+                              "group": "",
+                              "groupIndex": 0,
+                              "text": "BPM",
+                              "textType": "literal",
+                              "longMode": "CLIP",
+                              "recolor": false,
+                              "useStaticText": true
+                            },
+                            {
+                              "objID": "7ddedd07-2401-4139-c080-297e8c616f8f",
+                              "type": "LVGLLabelWidget",
+                              "left": 0,
+                              "top": 0,
+                              "width": 40,
+                              "height": 19,
+                              "customInputs": [],
+                              "customOutputs": [],
+                              "style": {
+                                "objID": "2c727b69-842a-4817-f69c-17aa16220413",
+                                "useStyle": "default",
+                                "conditionalStyles": [],
+                                "childStyles": []
+                              },
+                              "hiddenInEditor": false,
+                              "timeline": [],
+                              "eventHandlers": [],
+                              "identifier": "ui_BPMValueLabel",
+                              "leftUnit": "px",
+                              "topUnit": "px",
+                              "widthUnit": "px",
+                              "heightUnit": "content",
+                              "children": [],
+                              "widgetFlags": "CLICK_FOCUSABLE|GESTURE_BUBBLE|PRESS_LOCK|SCROLLABLE|SCROLL_CHAIN_HOR|SCROLL_CHAIN_VER|SCROLL_ELASTIC|SCROLL_MOMENTUM|SCROLL_WITH_ARROW|SNAPPABLE",
+                              "hiddenFlagType": "literal",
+                              "clickableFlag": false,
+                              "clickableFlagType": "literal",
+                              "flagScrollbarMode": "",
+                              "flagScrollDirection": "",
+                              "scrollSnapX": "",
+                              "scrollSnapY": "",
+                              "checkedStateType": "literal",
+                              "disabledStateType": "literal",
+                              "states": "",
+                              "localStyles": {
+                                "objID": "4f5eaeb5-e470-4ade-fc66-90e15caa6412",
+                                "definition": {
+                                  "MAIN": {
+                                    "SCROLLED": {
+                                      "text_font": "MONTSERRAT_14"
+                                    },
+                                    "DEFAULT": {
+                                      "text_color": "white",
+                                      "text_font": "IBM 18",
+                                      "text_align": "LEFT"
+                                    }
+                                  }
+                                }
+                              },
+                              "group": "",
+                              "groupIndex": 0,
+                              "text": "120",
+                              "textType": "literal",
+                              "longMode": "CLIP",
+                              "recolor": false,
+                              "useStaticText": true
+                            }
+                          ],
                           "widgetFlags": "CLICK_FOCUSABLE|GESTURE_BUBBLE|PRESS_LOCK|SCROLLABLE|SCROLL_CHAIN_HOR|SCROLL_CHAIN_VER|SCROLL_ELASTIC|SCROLL_MOMENTUM|SCROLL_WITH_ARROW|SNAPPABLE",
                           "hiddenFlagType": "literal",
-                          "clickableFlag": false,
+                          "clickableFlag": true,
                           "clickableFlagType": "literal",
                           "flagScrollbarMode": "",
                           "flagScrollDirection": "",
@@ -1294,85 +1418,19 @@
                           "disabledStateType": "literal",
                           "states": "",
                           "localStyles": {
-                            "objID": "699c9a7f-a10b-4d72-a665-cf13dbc03d2b",
+                            "objID": "07f031dd-85d9-4737-bd11-866320899e67",
                             "definition": {
                               "MAIN": {
-                                "SCROLLED": {
-                                  "text_font": "MONTSERRAT_14"
-                                },
                                 "DEFAULT": {
-                                  "text_color": "label gray",
-                                  "text_font": "IBM 32",
-                                  "text_align": "LEFT"
+                                  "layout": "FLEX",
+                                  "flex_flow": "COLUMN",
+                                  "pad_row": 0
                                 }
                               }
                             }
                           },
                           "group": "",
-                          "groupIndex": 0,
-                          "text": "BPM",
-                          "textType": "literal",
-                          "longMode": "CLIP",
-                          "recolor": false,
-                          "useStaticText": true
-                        },
-                        {
-                          "objID": "7ddedd07-2401-4139-c080-297e8c616f8f",
-                          "type": "LVGLLabelWidget",
-                          "left": 75,
-                          "top": 64,
-                          "width": 65,
-                          "height": 33,
-                          "customInputs": [],
-                          "customOutputs": [],
-                          "style": {
-                            "objID": "2c727b69-842a-4817-f69c-17aa16220413",
-                            "useStyle": "default",
-                            "conditionalStyles": [],
-                            "childStyles": []
-                          },
-                          "hiddenInEditor": false,
-                          "timeline": [],
-                          "eventHandlers": [],
-                          "identifier": "ui_BPMValueLabel",
-                          "leftUnit": "px",
-                          "topUnit": "px",
-                          "widthUnit": "px",
-                          "heightUnit": "content",
-                          "children": [],
-                          "widgetFlags": "CLICK_FOCUSABLE|GESTURE_BUBBLE|PRESS_LOCK|SCROLLABLE|SCROLL_CHAIN_HOR|SCROLL_CHAIN_VER|SCROLL_ELASTIC|SCROLL_MOMENTUM|SCROLL_WITH_ARROW|SNAPPABLE",
-                          "hiddenFlagType": "literal",
-                          "clickableFlag": false,
-                          "clickableFlagType": "literal",
-                          "flagScrollbarMode": "",
-                          "flagScrollDirection": "",
-                          "scrollSnapX": "",
-                          "scrollSnapY": "",
-                          "checkedStateType": "literal",
-                          "disabledStateType": "literal",
-                          "states": "",
-                          "localStyles": {
-                            "objID": "4f5eaeb5-e470-4ade-fc66-90e15caa6412",
-                            "definition": {
-                              "MAIN": {
-                                "SCROLLED": {
-                                  "text_font": "MONTSERRAT_14"
-                                },
-                                "DEFAULT": {
-                                  "text_color": "white",
-                                  "text_font": "IBM 32",
-                                  "text_align": "LEFT"
-                                }
-                              }
-                            }
-                          },
-                          "group": "",
-                          "groupIndex": 0,
-                          "text": "120",
-                          "textType": "literal",
-                          "longMode": "CLIP",
-                          "recolor": false,
-                          "useStaticText": true
+                          "groupIndex": 0
                         },
                         {
                           "objID": "c9bc3f64-6d3b-4bd0-e083-0d16fc022b84",
@@ -1486,15 +1544,112 @@
                               "layout": "FLEX",
                               "flex_flow": "ROW",
                               "flex_cross_place": "CENTER",
-                              "pad_row": 0,
                               "bg_opa": 0,
-                              "pad_top": 4,
-                              "pad_bottom": 0,
                               "pad_left": 0,
-                              "pad_right": 0
+                              "pad_right": 0,
+                              "pad_bottom": 0,
+                              "pad_top": 0,
+                              "flex_track_place": "CENTER",
+                              "pad_column": 0
                             }
                           }
                         }
+                      },
+                      "group": "",
+                      "groupIndex": 0
+                    },
+                    {
+                      "objID": "5efba2e1-eb05-4cdf-9a4f-0719911431f8",
+                      "type": "LVGLButtonWidget",
+                      "left": 0,
+                      "top": 0,
+                      "width": 113,
+                      "height": 100,
+                      "customInputs": [],
+                      "customOutputs": [],
+                      "style": {
+                        "objID": "e849671c-e17d-4ff9-ec50-a6c56e9b4efc",
+                        "useStyle": "default",
+                        "conditionalStyles": [],
+                        "childStyles": []
+                      },
+                      "hiddenInEditor": false,
+                      "timeline": [],
+                      "eventHandlers": [
+                        {
+                          "objID": "8c5e7254-ed28-4622-cd93-3f5dd5bcc4e6",
+                          "eventName": "CLICKED",
+                          "handlerType": "action",
+                          "action": "OpenPresetsPage",
+                          "userData": 0
+                        }
+                      ],
+                      "identifier": "",
+                      "leftUnit": "px",
+                      "topUnit": "px",
+                      "widthUnit": "content",
+                      "heightUnit": "%",
+                      "children": [
+                        {
+                          "objID": "a7462a8c-cf09-4d3e-b65d-3019f8ba0971",
+                          "type": "LVGLLabelWidget",
+                          "left": 0,
+                          "top": 0,
+                          "width": 73,
+                          "height": 19,
+                          "customInputs": [],
+                          "customOutputs": [],
+                          "style": {
+                            "objID": "18aec0de-fb2b-4e73-9bea-8fb2f2af30ea",
+                            "useStyle": "default",
+                            "conditionalStyles": [],
+                            "childStyles": []
+                          },
+                          "hiddenInEditor": false,
+                          "timeline": [],
+                          "eventHandlers": [],
+                          "identifier": "",
+                          "leftUnit": "px",
+                          "topUnit": "px",
+                          "widthUnit": "content",
+                          "heightUnit": "content",
+                          "children": [],
+                          "widgetFlags": "CLICK_FOCUSABLE|GESTURE_BUBBLE|PRESS_LOCK|SCROLLABLE|SCROLL_CHAIN_HOR|SCROLL_CHAIN_VER|SCROLL_ELASTIC|SCROLL_MOMENTUM|SCROLL_WITH_ARROW|SNAPPABLE",
+                          "hiddenFlagType": "literal",
+                          "clickableFlagType": "literal",
+                          "flagScrollbarMode": "",
+                          "flagScrollDirection": "",
+                          "scrollSnapX": "",
+                          "scrollSnapY": "",
+                          "checkedStateType": "literal",
+                          "disabledStateType": "literal",
+                          "states": "",
+                          "localStyles": {
+                            "objID": "5cfee93a-7469-44fb-cfa7-d436a8977b58"
+                          },
+                          "group": "",
+                          "groupIndex": 0,
+                          "text": "PRESETS",
+                          "textType": "literal",
+                          "longMode": "WRAP",
+                          "recolor": false,
+                          "useStaticText": true
+                        }
+                      ],
+                      "widgetFlags": "CLICK_FOCUSABLE|GESTURE_BUBBLE|PRESS_LOCK|SCROLL_CHAIN_HOR|SCROLL_CHAIN_VER|SCROLL_ELASTIC|SCROLL_MOMENTUM|SCROLL_ON_FOCUS|SCROLL_WITH_ARROW|SNAPPABLE",
+                      "hiddenFlagType": "literal",
+                      "clickableFlag": true,
+                      "clickableFlagType": "literal",
+                      "flagScrollbarMode": "",
+                      "flagScrollDirection": "",
+                      "scrollSnapX": "",
+                      "scrollSnapY": "",
+                      "checkedStateType": "literal",
+                      "disabledStateType": "literal",
+                      "states": "",
+                      "useStyle": "Button Basic",
+                      "localStyles": {
+                        "objID": "8c8c3289-2fd4-4549-dcc0-d7ff538bc5d1"
                       },
                       "group": "",
                       "groupIndex": 0
@@ -1519,7 +1674,7 @@
                       "eventHandlers": [
                         {
                           "objID": "21fdb9fc-4b48-44f5-a020-dc104db38336",
-                          "eventName": "PRESSED",
+                          "eventName": "CLICKED",
                           "handlerType": "action",
                           "action": "ShowSettingsPage",
                           "userData": 0
@@ -1615,7 +1770,7 @@
                       "eventHandlers": [
                         {
                           "objID": "03b0a731-7aac-4198-816a-07f862afffc5",
-                          "eventName": "PRESSED",
+                          "eventName": "CLICKED",
                           "handlerType": "action",
                           "action": "AltButtonClicked",
                           "userData": 0
@@ -2308,7 +2463,7 @@
                           "eventHandlers": [
                             {
                               "objID": "780b860d-e0ae-4c6d-d236-090a45429a27",
-                              "eventName": "PRESSED",
+                              "eventName": "CLICKED",
                               "handlerType": "action",
                               "action": "OpenPresetsPage",
                               "userData": 0
@@ -4503,7 +4658,7 @@
                                   "checkedStateType": "literal",
                                   "disabledStateType": "literal",
                                   "states": "",
-                                  "useStyle": "Switch Dark",
+                                  "useStyle": "Switch Dark Green",
                                   "localStyles": {
                                     "objID": "2c007781-b944-4f52-ba91-d3f1220dfbda"
                                   },
@@ -4657,7 +4812,7 @@
                                   "checkedStateType": "literal",
                                   "disabledStateType": "literal",
                                   "states": "",
-                                  "useStyle": "Switch Dark",
+                                  "useStyle": "Switch Dark Green",
                                   "localStyles": {
                                     "objID": "e8a3f446-265f-4ae9-e712-4c4a4ecf35bb"
                                   },
@@ -4762,7 +4917,7 @@
                               "eventHandlers": [
                                 {
                                   "objID": "eb755f5e-5d76-4968-9f36-941d28583d71",
-                                  "eventName": "PRESSED",
+                                  "eventName": "CLICKED",
                                   "handlerType": "action",
                                   "action": "SettingsCopyGate",
                                   "userData": 0
@@ -4858,7 +5013,7 @@
                               "eventHandlers": [
                                 {
                                   "objID": "c33e1c56-52e7-4655-fe7b-ad86b1c3a4b1",
-                                  "eventName": "PRESSED",
+                                  "eventName": "CLICKED",
                                   "handlerType": "action",
                                   "action": "SettingsPaste",
                                   "userData": 0
@@ -5700,7 +5855,7 @@
                                   "checkedStateType": "literal",
                                   "disabledStateType": "literal",
                                   "states": "",
-                                  "useStyle": "Switch Dark",
+                                  "useStyle": "Switch Dark Green",
                                   "localStyles": {
                                     "objID": "5002eafc-36e6-4242-e4ec-93c39aa5dfc6"
                                   },
@@ -5854,7 +6009,7 @@
                                   "checkedStateType": "literal",
                                   "disabledStateType": "literal",
                                   "states": "",
-                                  "useStyle": "Switch Dark",
+                                  "useStyle": "Switch Dark Green",
                                   "localStyles": {
                                     "objID": "f522eb3c-01b7-4cc8-d725-6b1466fd06c0"
                                   },
@@ -5959,7 +6114,7 @@
                               "eventHandlers": [
                                 {
                                   "objID": "08bb6afb-0236-421c-86c2-a9def7443c77",
-                                  "eventName": "PRESSED",
+                                  "eventName": "CLICKED",
                                   "handlerType": "action",
                                   "action": "SettingsCopyCompressor",
                                   "userData": 0
@@ -6055,7 +6210,7 @@
                               "eventHandlers": [
                                 {
                                   "objID": "f20ce863-7a8b-4ab3-abe2-638c1547dd35",
-                                  "eventName": "PRESSED",
+                                  "eventName": "CLICKED",
                                   "handlerType": "action",
                                   "action": "SettingsPaste",
                                   "userData": 0
@@ -6895,7 +7050,7 @@
                                   "checkedStateType": "literal",
                                   "disabledStateType": "literal",
                                   "states": "",
-                                  "useStyle": "Switch Dark",
+                                  "useStyle": "Switch Dark Green",
                                   "localStyles": {
                                     "objID": "676a24b8-c84f-466f-f2c6-2bd6fb7682f3"
                                   },
@@ -7023,7 +7178,7 @@
                                   "eventHandlers": [
                                     {
                                       "objID": "de3d6b11-61d2-4ea1-8273-e966ab4f79fc",
-                                      "eventName": "PRESSED",
+                                      "eventName": "CLICKED",
                                       "handlerType": "action",
                                       "action": "SettingsCopyAmp",
                                       "userData": 0
@@ -7119,7 +7274,7 @@
                                   "eventHandlers": [
                                     {
                                       "objID": "e0cca73c-cace-4049-a4ce-adcba6884d61",
-                                      "eventName": "PRESSED",
+                                      "eventName": "CLICKED",
                                       "handlerType": "action",
                                       "action": "SettingsPaste",
                                       "userData": 0
@@ -8114,7 +8269,7 @@
                                   "eventHandlers": [
                                     {
                                       "objID": "f3061003-6ef2-4e5d-c823-a480e8b6cfdb",
-                                      "eventName": "PRESSED",
+                                      "eventName": "CLICKED",
                                       "handlerType": "action",
                                       "action": "SettingsCopyCab",
                                       "userData": 0
@@ -8210,7 +8365,7 @@
                                   "eventHandlers": [
                                     {
                                       "objID": "60fef620-ba55-486c-dd2b-4c30be4dbff7",
-                                      "eventName": "PRESSED",
+                                      "eventName": "CLICKED",
                                       "handlerType": "action",
                                       "action": "SettingsPaste",
                                       "userData": 0
@@ -8459,7 +8614,7 @@
                                   "eventHandlers": [
                                     {
                                       "objID": "dbea49eb-d586-4a47-d2b9-4576f11598b8",
-                                      "eventName": "PRESSED",
+                                      "eventName": "CLICKED",
                                       "handlerType": "action",
                                       "action": "SettingsVIRDialogOpen",
                                       "userData": 0
@@ -10638,7 +10793,7 @@
                               "eventHandlers": [
                                 {
                                   "objID": "4ebe8c53-48db-4c2a-d5a7-f614473fa9b8",
-                                  "eventName": "PRESSED",
+                                  "eventName": "CLICKED",
                                   "handlerType": "action",
                                   "action": "SettingsCopyEQ",
                                   "userData": 0
@@ -10734,7 +10889,7 @@
                               "eventHandlers": [
                                 {
                                   "objID": "361dbfb3-ce35-4ac4-dc5f-0d23f8ccc8a4",
-                                  "eventName": "PRESSED",
+                                  "eventName": "CLICKED",
                                   "handlerType": "action",
                                   "action": "SettingsPaste",
                                   "userData": 0
@@ -10922,7 +11077,7 @@
                                   "checkedStateType": "literal",
                                   "disabledStateType": "literal",
                                   "states": "",
-                                  "useStyle": "Switch Dark",
+                                  "useStyle": "Switch Dark Green",
                                   "localStyles": {
                                     "objID": "ca068b34-7ea3-4854-a18e-5e6256f39c82"
                                   },
@@ -11216,7 +11371,7 @@
                                   "checkedStateType": "literal",
                                   "disabledStateType": "literal",
                                   "states": "",
-                                  "useStyle": "Switch Dark",
+                                  "useStyle": "Switch Dark Green",
                                   "localStyles": {
                                     "objID": "3b4c62c2-bd80-454b-e4ed-97311fd3aaad"
                                   },
@@ -11370,7 +11525,7 @@
                                   "checkedStateType": "literal",
                                   "disabledStateType": "literal",
                                   "states": "",
-                                  "useStyle": "Switch Dark",
+                                  "useStyle": "Switch Dark Green",
                                   "localStyles": {
                                     "objID": "9a09e968-a1dd-46de-ac12-5ff85413655e"
                                   },
@@ -11524,7 +11679,7 @@
                                   "checkedStateType": "literal",
                                   "disabledStateType": "literal",
                                   "states": "",
-                                  "useStyle": "Switch Dark",
+                                  "useStyle": "Switch Dark Green",
                                   "localStyles": {
                                     "objID": "15bd1848-6b61-4390-d3d0-08c09d7653d2"
                                   },
@@ -11853,7 +12008,7 @@
                                   "eventHandlers": [
                                     {
                                       "objID": "1409088c-8ef3-4497-9600-348c8802ba1c",
-                                      "eventName": "PRESSED",
+                                      "eventName": "CLICKED",
                                       "handlerType": "action",
                                       "action": "SettingsCopyModulation",
                                       "userData": 0
@@ -11949,7 +12104,7 @@
                                   "eventHandlers": [
                                     {
                                       "objID": "bf4791e0-e174-460f-a934-613a7b3be6ed",
-                                      "eventName": "PRESSED",
+                                      "eventName": "CLICKED",
                                       "handlerType": "action",
                                       "action": "SettingsPaste",
                                       "userData": 0
@@ -13110,7 +13265,7 @@
                                   "checkedStateType": "literal",
                                   "disabledStateType": "literal",
                                   "states": "",
-                                  "useStyle": "Switch Dark",
+                                  "useStyle": "Switch Dark Green",
                                   "localStyles": {
                                     "objID": "451f369d-4359-49c7-e306-cca8f8205ea8"
                                   },
@@ -13264,7 +13419,7 @@
                                   "checkedStateType": "literal",
                                   "disabledStateType": "literal",
                                   "states": "",
-                                  "useStyle": "Switch Dark",
+                                  "useStyle": "Switch Dark Green",
                                   "localStyles": {
                                     "objID": "6e5ac9cd-c35b-42ff-8c58-8fbb7576b048"
                                   },
@@ -13418,7 +13573,7 @@
                                   "checkedStateType": "literal",
                                   "disabledStateType": "literal",
                                   "states": "",
-                                  "useStyle": "Switch Dark",
+                                  "useStyle": "Switch Dark Green",
                                   "localStyles": {
                                     "objID": "aa6e977a-7526-41fb-a4f3-8a010453a6b0"
                                   },
@@ -13572,7 +13727,7 @@
                                   "checkedStateType": "literal",
                                   "disabledStateType": "literal",
                                   "states": "",
-                                  "useStyle": "Switch Dark",
+                                  "useStyle": "Switch Dark Green",
                                   "localStyles": {
                                     "objID": "a1ca4e19-5cf2-45f2-d290-9675ed3e0e03"
                                   },
@@ -13901,7 +14056,7 @@
                                   "eventHandlers": [
                                     {
                                       "objID": "6c57cca9-41a7-454f-fe48-19f953f08f11",
-                                      "eventName": "PRESSED",
+                                      "eventName": "CLICKED",
                                       "handlerType": "action",
                                       "action": "SettingsCopyDelay",
                                       "userData": 0
@@ -13997,7 +14152,7 @@
                                   "eventHandlers": [
                                     {
                                       "objID": "ec27cd13-79cf-4693-96c9-ccd22a3cb11c",
-                                      "eventName": "PRESSED",
+                                      "eventName": "CLICKED",
                                       "handlerType": "action",
                                       "action": "SettingsPaste",
                                       "userData": 0
@@ -15006,7 +15161,7 @@
                                   "checkedStateType": "literal",
                                   "disabledStateType": "literal",
                                   "states": "",
-                                  "useStyle": "Switch Dark",
+                                  "useStyle": "Switch Dark Green",
                                   "localStyles": {
                                     "objID": "79d4214b-51e8-4e25-841c-acdc224e9c0c"
                                   },
@@ -15160,7 +15315,7 @@
                                   "checkedStateType": "literal",
                                   "disabledStateType": "literal",
                                   "states": "",
-                                  "useStyle": "Switch Dark",
+                                  "useStyle": "Switch Dark Green",
                                   "localStyles": {
                                     "objID": "eefeeaf5-269f-4fa4-9dd3-a0bff27be074"
                                   },
@@ -15489,7 +15644,7 @@
                                   "eventHandlers": [
                                     {
                                       "objID": "bcfdda46-1e0b-4a4a-e036-d0fbdd732e69",
-                                      "eventName": "PRESSED",
+                                      "eventName": "CLICKED",
                                       "handlerType": "action",
                                       "action": "SettingsCopyReverb",
                                       "userData": 0
@@ -15585,7 +15740,7 @@
                                   "eventHandlers": [
                                     {
                                       "objID": "91781035-1f15-4c99-b4cc-3ec731e2bbe6",
-                                      "eventName": "PRESSED",
+                                      "eventName": "CLICKED",
                                       "handlerType": "action",
                                       "action": "SettingsPaste",
                                       "userData": 0
@@ -16628,7 +16783,7 @@
                                       "checkedStateType": "literal",
                                       "disabledStateType": "literal",
                                       "states": "",
-                                      "useStyle": "Switch Dark",
+                                      "useStyle": "Switch Dark Green",
                                       "localStyles": {
                                         "objID": "139af5a9-00a5-45f3-b4f9-20de51f51b28"
                                       },
@@ -16782,7 +16937,7 @@
                                       "checkedStateType": "literal",
                                       "disabledStateType": "literal",
                                       "states": "",
-                                      "useStyle": "Switch Dark",
+                                      "useStyle": "Switch Dark Green",
                                       "localStyles": {
                                         "objID": "57a5db20-68d7-4639-e2cc-8f951eceb529"
                                       },
@@ -16988,7 +17143,7 @@
                                       "checkedStateType": "literal",
                                       "disabledStateType": "literal",
                                       "states": "",
-                                      "useStyle": "Switch Dark",
+                                      "useStyle": "Switch Dark Green",
                                       "localStyles": {
                                         "objID": "9a111167-44d6-4c9c-f823-9db6290c5fa8"
                                       },
@@ -18806,7 +18961,7 @@
                                   "checkedStateType": "literal",
                                   "disabledStateType": "literal",
                                   "states": "",
-                                  "useStyle": "Switch Dark",
+                                  "useStyle": "Switch Dark Green",
                                   "localStyles": {
                                     "objID": "b15f3601-f7a4-420a-ebac-9f2553d508dc"
                                   },
@@ -18860,7 +19015,7 @@
                               "eventHandlers": [
                                 {
                                   "objID": "93958f0c-01db-4e9a-f1ab-afcc60e1eb38",
-                                  "eventName": "PRESSED",
+                                  "eventName": "CLICKED",
                                   "handlerType": "action",
                                   "action": "SaveWIFISettings",
                                   "userData": 0
@@ -19258,6 +19413,158 @@
                           "groupIndex": 0
                         },
                         {
+                          "objID": "3ba9ee74-b4cf-44dd-9cbd-f9fe5bba890d",
+                          "type": "LVGLContainerWidget",
+                          "left": 0,
+                          "top": 0,
+                          "width": 300,
+                          "height": 200,
+                          "customInputs": [],
+                          "customOutputs": [],
+                          "style": {
+                            "objID": "091530ba-8119-4ba1-81ee-03eb1d3d2f72",
+                            "useStyle": "default",
+                            "conditionalStyles": [],
+                            "childStyles": []
+                          },
+                          "hiddenInEditor": false,
+                          "timeline": [],
+                          "eventHandlers": [],
+                          "leftUnit": "px",
+                          "topUnit": "px",
+                          "widthUnit": "content",
+                          "heightUnit": "content",
+                          "children": [
+                            {
+                              "objID": "afdadc17-67c3-46cc-a986-36ba418d1cf8",
+                              "type": "LVGLLabelWidget",
+                              "left": 0,
+                              "top": 0,
+                              "width": 80,
+                              "height": 32,
+                              "customInputs": [],
+                              "customOutputs": [],
+                              "style": {
+                                "objID": "66738d0c-da5b-4860-a64d-8b8441cf070b",
+                                "useStyle": "default",
+                                "conditionalStyles": [],
+                                "childStyles": []
+                              },
+                              "hiddenInEditor": false,
+                              "timeline": [],
+                              "eventHandlers": [],
+                              "leftUnit": "px",
+                              "topUnit": "px",
+                              "widthUnit": "content",
+                              "heightUnit": "content",
+                              "children": [],
+                              "widgetFlags": "CLICK_FOCUSABLE|GESTURE_BUBBLE|PRESS_LOCK|SCROLLABLE|SCROLL_CHAIN_HOR|SCROLL_CHAIN_VER|SCROLL_ELASTIC|SCROLL_MOMENTUM|SCROLL_WITH_ARROW|SNAPPABLE",
+                              "hiddenFlagType": "literal",
+                              "clickableFlagType": "literal",
+                              "flagScrollbarMode": "",
+                              "flagScrollDirection": "",
+                              "scrollSnapX": "",
+                              "scrollSnapY": "",
+                              "checkedStateType": "literal",
+                              "disabledStateType": "literal",
+                              "states": "",
+                              "localStyles": {
+                                "objID": "1f5ed4d2-ab9b-4b03-9af6-0ad60a0349b1",
+                                "definition": {
+                                  "MAIN": {
+                                    "DEFAULT": {
+                                      "text_color": "white"
+                                    }
+                                  }
+                                }
+                              },
+                              "group": "",
+                              "groupIndex": 0,
+                              "text": "USB Host",
+                              "textType": "literal",
+                              "longMode": "WRAP",
+                              "recolor": false,
+                              "useStaticText": true
+                            },
+                            {
+                              "objID": "5d9cabda-9786-4828-fb7a-a4f46f292c77",
+                              "type": "LVGLSwitchWidget",
+                              "left": 0,
+                              "top": 0,
+                              "width": 50,
+                              "height": 25,
+                              "customInputs": [],
+                              "customOutputs": [],
+                              "style": {
+                                "objID": "d58c5a99-2d15-468c-b8a2-b1afcffd8d7f",
+                                "useStyle": "default",
+                                "conditionalStyles": [],
+                                "childStyles": []
+                              },
+                              "hiddenInEditor": false,
+                              "timeline": [],
+                              "eventHandlers": [
+                                {
+                                  "objID": "b5d14157-d708-454f-b404-96b4803c106b",
+                                  "eventName": "RELEASED",
+                                  "handlerType": "action",
+                                  "action": "USBHostChanged",
+                                  "userData": 0
+                                }
+                              ],
+                              "identifier": "ui_USBHostSwitch",
+                              "leftUnit": "px",
+                              "topUnit": "px",
+                              "widthUnit": "px",
+                              "heightUnit": "px",
+                              "children": [],
+                              "widgetFlags": "CHECKABLE|CLICK_FOCUSABLE|GESTURE_BUBBLE|PRESS_LOCK|SCROLL_CHAIN_HOR|SCROLL_CHAIN_VER|SCROLL_ELASTIC|SCROLL_MOMENTUM|SCROLL_ON_FOCUS|SCROLL_WITH_ARROW|SNAPPABLE",
+                              "hiddenFlagType": "literal",
+                              "clickableFlag": true,
+                              "clickableFlagType": "literal",
+                              "flagScrollbarMode": "",
+                              "flagScrollDirection": "",
+                              "scrollSnapX": "",
+                              "scrollSnapY": "",
+                              "checkedState": true,
+                              "checkedStateType": "literal",
+                              "disabledStateType": "literal",
+                              "states": "",
+                              "useStyle": "Switch Dark Green",
+                              "localStyles": {
+                                "objID": "ed376738-2551-41c3-9625-6f4af5a8c0d2"
+                              },
+                              "group": "",
+                              "groupIndex": 0
+                            }
+                          ],
+                          "widgetFlags": "CLICK_FOCUSABLE|GESTURE_BUBBLE|PRESS_LOCK|SCROLLABLE|SCROLL_CHAIN_HOR|SCROLL_CHAIN_VER|SCROLL_ELASTIC|SCROLL_MOMENTUM|SCROLL_WITH_ARROW|SNAPPABLE",
+                          "hiddenFlagType": "literal",
+                          "clickableFlag": true,
+                          "clickableFlagType": "literal",
+                          "flagScrollbarMode": "",
+                          "flagScrollDirection": "",
+                          "scrollSnapX": "",
+                          "scrollSnapY": "",
+                          "checkedStateType": "literal",
+                          "disabledStateType": "literal",
+                          "states": "",
+                          "localStyles": {
+                            "objID": "34f28a1f-55eb-45db-8fb6-c9fb4fcfae99",
+                            "definition": {
+                              "MAIN": {
+                                "DEFAULT": {
+                                  "layout": "FLEX",
+                                  "flex_flow": "ROW",
+                                  "flex_cross_place": "CENTER"
+                                }
+                              }
+                            }
+                          },
+                          "group": "",
+                          "groupIndex": 0
+                        },
+                        {
                           "objID": "5d37d99f-6d59-493d-b127-bbaf101d07c5",
                           "type": "LVGLButtonWidget",
                           "left": 0,
@@ -19277,7 +19584,7 @@
                           "eventHandlers": [
                             {
                               "objID": "f106352b-3f12-4cc2-eebb-988170cecc24",
-                              "eventName": "PRESSED",
+                              "eventName": "CLICKED",
                               "handlerType": "action",
                               "action": "USBReboot",
                               "userData": 0
@@ -19373,7 +19680,7 @@
                           "eventHandlers": [
                             {
                               "objID": "a0e5e5c9-de50-4b99-e842-675c06453c85",
-                              "eventName": "PRESSED",
+                              "eventName": "CLICKED",
                               "handlerType": "action",
                               "action": "USBFlash",
                               "userData": 0
@@ -19623,7 +19930,7 @@
                   "eventHandlers": [
                     {
                       "objID": "a2b0dc8d-a066-4517-a1ca-acb250a575a4",
-                      "eventName": "PRESSED",
+                      "eventName": "CLICKED",
                       "handlerType": "action",
                       "action": "CloseSettingsPage",
                       "userData": 0
@@ -20464,7 +20771,7 @@
                           "eventHandlers": [
                             {
                               "objID": "ae25d2b1-6900-4392-fa55-6f53610714d0",
-                              "eventName": "PRESSED",
+                              "eventName": "CLICKED",
                               "handlerType": "action",
                               "action": "SettingsVIRDialogPagePrevious",
                               "userData": 0
@@ -20574,7 +20881,7 @@
                           "eventHandlers": [
                             {
                               "objID": "54601f50-e9d0-491a-dbff-617debdc9098",
-                              "eventName": "PRESSED",
+                              "eventName": "CLICKED",
                               "handlerType": "action",
                               "action": "SettingsVIRDialogPageNext",
                               "userData": 0
@@ -20711,7 +21018,7 @@
                       "eventHandlers": [
                         {
                           "objID": "b1266845-52bd-4210-9812-66aebb242803",
-                          "eventName": "PRESSED",
+                          "eventName": "CLICKED",
                           "handlerType": "action",
                           "action": "SettingsVIRDialogClose",
                           "userData": 0
@@ -20974,114 +21281,6 @@
                   "heightUnit": "content",
                   "children": [
                     {
-                      "objID": "72d2f5da-0b18-499e-a967-e4b2b16c2268",
-                      "type": "LVGLButtonWidget",
-                      "left": 170,
-                      "top": 0,
-                      "width": 68,
-                      "height": 50,
-                      "customInputs": [],
-                      "customOutputs": [],
-                      "style": {
-                        "objID": "d8359351-49ce-43d4-aa16-7411f3f63ca7",
-                        "useStyle": "default",
-                        "conditionalStyles": [],
-                        "childStyles": []
-                      },
-                      "timeline": [],
-                      "eventHandlers": [
-                        {
-                          "objID": "cc4b2338-a211-497c-cd67-f8a4461eddf8",
-                          "eventName": "PRESSED",
-                          "handlerType": "action",
-                          "action": "PresetListPrevious",
-                          "userData": 0
-                        }
-                      ],
-                      "leftUnit": "px",
-                      "topUnit": "px",
-                      "widthUnit": "px",
-                      "heightUnit": "px",
-                      "children": [
-                        {
-                          "objID": "ae4459cc-57d3-44ff-adbb-b18c8b29b356",
-                          "type": "LVGLLabelWidget",
-                          "left": 0,
-                          "top": 0,
-                          "width": 18,
-                          "height": 23,
-                          "customInputs": [],
-                          "customOutputs": [],
-                          "style": {
-                            "objID": "52dfba00-5fcb-4189-bfa6-5a7bf169366c",
-                            "useStyle": "default",
-                            "conditionalStyles": [],
-                            "childStyles": []
-                          },
-                          "timeline": [],
-                          "eventHandlers": [],
-                          "leftUnit": "px",
-                          "topUnit": "px",
-                          "widthUnit": "content",
-                          "heightUnit": "content",
-                          "children": [],
-                          "widgetFlags": "CLICK_FOCUSABLE|GESTURE_BUBBLE|PRESS_LOCK|SCROLLABLE|SCROLL_CHAIN_HOR|SCROLL_CHAIN_VER|SCROLL_ELASTIC|SCROLL_MOMENTUM|SCROLL_WITH_ARROW|SNAPPABLE",
-                          "hiddenFlagType": "literal",
-                          "clickableFlagType": "literal",
-                          "flagScrollbarMode": "",
-                          "flagScrollDirection": "",
-                          "scrollSnapX": "",
-                          "scrollSnapY": "",
-                          "checkedStateType": "literal",
-                          "disabledStateType": "literal",
-                          "states": "",
-                          "localStyles": {
-                            "objID": "daca2e64-a56d-426a-fb15-e64f39a35b9e",
-                            "definition": {
-                              "MAIN": {
-                                "DEFAULT": {
-                                  "text_font": "IBM 22"
-                                }
-                              }
-                            }
-                          },
-                          "group": "",
-                          "groupIndex": 0,
-                          "text": "←",
-                          "textType": "literal",
-                          "longMode": "WRAP",
-                          "recolor": false,
-                          "useStaticText": true
-                        }
-                      ],
-                      "widgetFlags": "CLICK_FOCUSABLE|GESTURE_BUBBLE|PRESS_LOCK|SCROLL_CHAIN_HOR|SCROLL_CHAIN_VER|SCROLL_ELASTIC|SCROLL_MOMENTUM|SCROLL_ON_FOCUS|SCROLL_WITH_ARROW|SNAPPABLE",
-                      "hiddenFlagType": "literal",
-                      "clickableFlag": true,
-                      "clickableFlagType": "literal",
-                      "flagScrollbarMode": "",
-                      "flagScrollDirection": "",
-                      "scrollSnapX": "",
-                      "scrollSnapY": "",
-                      "checkedStateType": "literal",
-                      "disabledStateType": "literal",
-                      "states": "",
-                      "useStyle": "Button Basic",
-                      "localStyles": {
-                        "objID": "bc6a1878-7f95-4d5f-9a8e-4362f8a4fd13",
-                        "definition": {
-                          "MAIN": {
-                            "DEFAULT": {
-                              "layout": "FLEX",
-                              "flex_flow": "ROW",
-                              "flex_main_place": "CENTER"
-                            }
-                          }
-                        }
-                      },
-                      "group": "",
-                      "groupIndex": 0
-                    },
-                    {
                       "objID": "3cc6d8ab-ca09-4619-aa40-c69ad9ce3d21",
                       "type": "LVGLButtonWidget",
                       "left": 0,
@@ -21100,7 +21299,7 @@
                       "eventHandlers": [
                         {
                           "objID": "d7eb84ed-5183-4c5c-9383-894d5a1ead5a",
-                          "eventName": "PRESSED",
+                          "eventName": "CLICKED",
                           "handlerType": "action",
                           "action": "PresetListCancel",
                           "userData": 0
@@ -21190,6 +21389,114 @@
                       "groupIndex": 0
                     },
                     {
+                      "objID": "72d2f5da-0b18-499e-a967-e4b2b16c2268",
+                      "type": "LVGLButtonWidget",
+                      "left": 170,
+                      "top": 0,
+                      "width": 68,
+                      "height": 50,
+                      "customInputs": [],
+                      "customOutputs": [],
+                      "style": {
+                        "objID": "d8359351-49ce-43d4-aa16-7411f3f63ca7",
+                        "useStyle": "default",
+                        "conditionalStyles": [],
+                        "childStyles": []
+                      },
+                      "timeline": [],
+                      "eventHandlers": [
+                        {
+                          "objID": "cc4b2338-a211-497c-cd67-f8a4461eddf8",
+                          "eventName": "CLICKED",
+                          "handlerType": "action",
+                          "action": "PresetListPrevious",
+                          "userData": 0
+                        }
+                      ],
+                      "leftUnit": "px",
+                      "topUnit": "px",
+                      "widthUnit": "px",
+                      "heightUnit": "px",
+                      "children": [
+                        {
+                          "objID": "ae4459cc-57d3-44ff-adbb-b18c8b29b356",
+                          "type": "LVGLLabelWidget",
+                          "left": 0,
+                          "top": 0,
+                          "width": 18,
+                          "height": 23,
+                          "customInputs": [],
+                          "customOutputs": [],
+                          "style": {
+                            "objID": "52dfba00-5fcb-4189-bfa6-5a7bf169366c",
+                            "useStyle": "default",
+                            "conditionalStyles": [],
+                            "childStyles": []
+                          },
+                          "timeline": [],
+                          "eventHandlers": [],
+                          "leftUnit": "px",
+                          "topUnit": "px",
+                          "widthUnit": "content",
+                          "heightUnit": "content",
+                          "children": [],
+                          "widgetFlags": "CLICK_FOCUSABLE|GESTURE_BUBBLE|PRESS_LOCK|SCROLLABLE|SCROLL_CHAIN_HOR|SCROLL_CHAIN_VER|SCROLL_ELASTIC|SCROLL_MOMENTUM|SCROLL_WITH_ARROW|SNAPPABLE",
+                          "hiddenFlagType": "literal",
+                          "clickableFlagType": "literal",
+                          "flagScrollbarMode": "",
+                          "flagScrollDirection": "",
+                          "scrollSnapX": "",
+                          "scrollSnapY": "",
+                          "checkedStateType": "literal",
+                          "disabledStateType": "literal",
+                          "states": "",
+                          "localStyles": {
+                            "objID": "daca2e64-a56d-426a-fb15-e64f39a35b9e",
+                            "definition": {
+                              "MAIN": {
+                                "DEFAULT": {
+                                  "text_font": "IBM 22"
+                                }
+                              }
+                            }
+                          },
+                          "group": "",
+                          "groupIndex": 0,
+                          "text": "←",
+                          "textType": "literal",
+                          "longMode": "WRAP",
+                          "recolor": false,
+                          "useStaticText": true
+                        }
+                      ],
+                      "widgetFlags": "CLICK_FOCUSABLE|GESTURE_BUBBLE|PRESS_LOCK|SCROLL_CHAIN_HOR|SCROLL_CHAIN_VER|SCROLL_ELASTIC|SCROLL_MOMENTUM|SCROLL_ON_FOCUS|SCROLL_WITH_ARROW|SNAPPABLE",
+                      "hiddenFlagType": "literal",
+                      "clickableFlag": true,
+                      "clickableFlagType": "literal",
+                      "flagScrollbarMode": "",
+                      "flagScrollDirection": "",
+                      "scrollSnapX": "",
+                      "scrollSnapY": "",
+                      "checkedStateType": "literal",
+                      "disabledStateType": "literal",
+                      "states": "",
+                      "useStyle": "Button Basic",
+                      "localStyles": {
+                        "objID": "bc6a1878-7f95-4d5f-9a8e-4362f8a4fd13",
+                        "definition": {
+                          "MAIN": {
+                            "DEFAULT": {
+                              "layout": "FLEX",
+                              "flex_flow": "ROW",
+                              "flex_main_place": "CENTER"
+                            }
+                          }
+                        }
+                      },
+                      "group": "",
+                      "groupIndex": 0
+                    },
+                    {
                       "objID": "1e69a1b8-dad7-4f55-d162-245baa714f2e",
                       "type": "LVGLButtonWidget",
                       "left": -60,
@@ -21208,7 +21515,7 @@
                       "eventHandlers": [
                         {
                           "objID": "21c674a6-ed0c-43a9-f159-a1bef1e5835f",
-                          "eventName": "PRESSED",
+                          "eventName": "CLICKED",
                           "handlerType": "action",
                           "action": "OpenScenesPage",
                           "userData": 0
@@ -21317,7 +21624,7 @@
                       "eventHandlers": [
                         {
                           "objID": "c8024fd0-2519-4dcd-c86a-96d14744f875",
-                          "eventName": "PRESSED",
+                          "eventName": "CLICKED",
                           "handlerType": "action",
                           "action": "OpenPresetsBackupPage",
                           "userData": 0
@@ -21426,7 +21733,7 @@
                       "eventHandlers": [
                         {
                           "objID": "3614e1b3-d8a0-4cd7-d3b1-5a7db2febf6e",
-                          "eventName": "PRESSED",
+                          "eventName": "CLICKED",
                           "handlerType": "action",
                           "action": "PresetListNext",
                           "userData": 0
@@ -21534,7 +21841,7 @@
                       "eventHandlers": [
                         {
                           "objID": "a653d2fc-ae2c-47dd-a47e-af60a28f6e63",
-                          "eventName": "PRESSED",
+                          "eventName": "CLICKED",
                           "handlerType": "action",
                           "action": "ClosePresetsPage",
                           "userData": 0
@@ -22580,7 +22887,7 @@
                                       "eventHandlers": [
                                         {
                                           "objID": "d14f3a49-ccee-47c0-e065-d1a8f45dddb5",
-                                          "eventName": "PRESSED",
+                                          "eventName": "CLICKED",
                                           "handlerType": "action",
                                           "action": "PresetListColor",
                                           "userData": 0
@@ -22690,7 +22997,7 @@
                                       "eventHandlers": [
                                         {
                                           "objID": "a75e5e32-b6ad-464b-b8d9-cdb23216e5ef",
-                                          "eventName": "PRESSED",
+                                          "eventName": "CLICKED",
                                           "handlerType": "action",
                                           "action": "PresetListColor",
                                           "userData": 1
@@ -22800,7 +23107,7 @@
                                       "eventHandlers": [
                                         {
                                           "objID": "16312f86-6a6f-41b2-a09d-d0d41e977b59",
-                                          "eventName": "PRESSED",
+                                          "eventName": "CLICKED",
                                           "handlerType": "action",
                                           "action": "PresetListColor",
                                           "userData": 2
@@ -22909,7 +23216,7 @@
                                       "eventHandlers": [
                                         {
                                           "objID": "d0b3fbb8-3bbc-433e-9374-20ca7d29c163",
-                                          "eventName": "PRESSED",
+                                          "eventName": "CLICKED",
                                           "handlerType": "action",
                                           "action": "PresetListColor",
                                           "userData": 3
@@ -23019,7 +23326,7 @@
                                       "eventHandlers": [
                                         {
                                           "objID": "241ff4f0-145f-4d98-afdd-ea1c6e32061a",
-                                          "eventName": "PRESSED",
+                                          "eventName": "CLICKED",
                                           "handlerType": "action",
                                           "action": "PresetListColor",
                                           "userData": 4
@@ -23128,7 +23435,7 @@
                                       "eventHandlers": [
                                         {
                                           "objID": "d25e5fc8-147f-40b3-e7ca-b518d228f0ca",
-                                          "eventName": "PRESSED",
+                                          "eventName": "CLICKED",
                                           "handlerType": "action",
                                           "action": "PresetListColor",
                                           "userData": 5
@@ -23237,7 +23544,7 @@
                                       "eventHandlers": [
                                         {
                                           "objID": "dc786c66-8f7f-4882-b5fb-3fe4c04fbe2d",
-                                          "eventName": "PRESSED",
+                                          "eventName": "CLICKED",
                                           "handlerType": "action",
                                           "action": "PresetListColor",
                                           "userData": 6
@@ -23347,7 +23654,7 @@
                                       "eventHandlers": [
                                         {
                                           "objID": "9072c4c2-bd84-48b9-b1d1-3ee33004c2f6",
-                                          "eventName": "PRESSED",
+                                          "eventName": "CLICKED",
                                           "handlerType": "action",
                                           "action": "PresetListColor",
                                           "userData": 7
@@ -23456,7 +23763,7 @@
                                       "eventHandlers": [
                                         {
                                           "objID": "632e1361-983e-476f-ad6b-5e32452874f3",
-                                          "eventName": "PRESSED",
+                                          "eventName": "CLICKED",
                                           "handlerType": "action",
                                           "action": "PresetListColor",
                                           "userData": 8
@@ -23565,7 +23872,7 @@
                                       "eventHandlers": [
                                         {
                                           "objID": "e2c1985d-e1b9-4ecf-f7ed-85b1bbffc046",
-                                          "eventName": "PRESSED",
+                                          "eventName": "CLICKED",
                                           "handlerType": "action",
                                           "action": "PresetListColor",
                                           "userData": 9
@@ -23724,7 +24031,7 @@
                                       "eventHandlers": [
                                         {
                                           "objID": "a7bf75a0-f9a3-4c63-eeee-3e55bad7cd44",
-                                          "eventName": "PRESSED",
+                                          "eventName": "CLICKED",
                                           "handlerType": "action",
                                           "action": "PresetListColor",
                                           "userData": 10
@@ -23833,7 +24140,7 @@
                                       "eventHandlers": [
                                         {
                                           "objID": "e6890f82-7a0b-404a-d09a-529e5f305ce5",
-                                          "eventName": "PRESSED",
+                                          "eventName": "CLICKED",
                                           "handlerType": "action",
                                           "action": "PresetListColor",
                                           "userData": 11
@@ -23942,7 +24249,7 @@
                                       "eventHandlers": [
                                         {
                                           "objID": "3e64ab5a-e2f8-4c7c-9554-7ca8dab45254",
-                                          "eventName": "PRESSED",
+                                          "eventName": "CLICKED",
                                           "handlerType": "action",
                                           "action": "PresetListColor",
                                           "userData": 12
@@ -24051,7 +24358,7 @@
                                       "eventHandlers": [
                                         {
                                           "objID": "da524109-b219-4523-ffcd-c357b88f45c7",
-                                          "eventName": "PRESSED",
+                                          "eventName": "CLICKED",
                                           "handlerType": "action",
                                           "action": "PresetListColor",
                                           "userData": 13
@@ -24160,7 +24467,7 @@
                                       "eventHandlers": [
                                         {
                                           "objID": "0c17866c-cac9-47c9-9905-a39eab8b064f",
-                                          "eventName": "PRESSED",
+                                          "eventName": "CLICKED",
                                           "handlerType": "action",
                                           "action": "PresetListColor",
                                           "userData": 14
@@ -24269,7 +24576,7 @@
                                       "eventHandlers": [
                                         {
                                           "objID": "bb4fb215-1b4a-4c93-d9fd-f51268bc7b24",
-                                          "eventName": "PRESSED",
+                                          "eventName": "CLICKED",
                                           "handlerType": "action",
                                           "action": "PresetListColor",
                                           "userData": 15
@@ -24378,7 +24685,7 @@
                                       "eventHandlers": [
                                         {
                                           "objID": "f9eb8c79-48b5-468b-f483-2ffa7faeb6fc",
-                                          "eventName": "PRESSED",
+                                          "eventName": "CLICKED",
                                           "handlerType": "action",
                                           "action": "PresetListColor",
                                           "userData": 16
@@ -24487,7 +24794,7 @@
                                       "eventHandlers": [
                                         {
                                           "objID": "6c128d92-0999-4201-bc0b-4647a0a469fd",
-                                          "eventName": "PRESSED",
+                                          "eventName": "CLICKED",
                                           "handlerType": "action",
                                           "action": "PresetListColor",
                                           "userData": 17
@@ -24596,7 +24903,7 @@
                                       "eventHandlers": [
                                         {
                                           "objID": "8024dbba-d754-43ea-d069-cfd42b371d92",
-                                          "eventName": "PRESSED",
+                                          "eventName": "CLICKED",
                                           "handlerType": "action",
                                           "action": "PresetListColor",
                                           "userData": 18
@@ -24705,7 +25012,7 @@
                                       "eventHandlers": [
                                         {
                                           "objID": "bfc0a55a-2e7d-4bf1-808e-0c254a135233",
-                                          "eventName": "PRESSED",
+                                          "eventName": "CLICKED",
                                           "handlerType": "action",
                                           "action": "PresetListColor",
                                           "userData": 19
@@ -24868,7 +25175,7 @@
                               "eventHandlers": [
                                 {
                                   "objID": "18009c29-d66a-4033-eb89-f0b2aaa89f46",
-                                  "eventName": "PRESSED",
+                                  "eventName": "CLICKED",
                                   "handlerType": "action",
                                   "action": "PresetListColor",
                                   "userData": 20
@@ -25039,7 +25346,7 @@
                       "eventHandlers": [
                         {
                           "objID": "31c3176d-a671-4414-e451-3a0aa19d5d27",
-                          "eventName": "PRESSED",
+                          "eventName": "CLICKED",
                           "handlerType": "action",
                           "action": "PresetListDialogClose",
                           "userData": 0
@@ -26331,7 +26638,7 @@
                   "eventHandlers": [
                     {
                       "objID": "dd16c05a-ec0b-4042-9d96-71563bcea247",
-                      "eventName": "PRESSED",
+                      "eventName": "CLICKED",
                       "handlerType": "action",
                       "action": "NewScene",
                       "userData": 0
@@ -26536,19 +26843,9 @@
                       "checkedStateType": "literal",
                       "disabledStateType": "literal",
                       "states": "",
-                      "useStyle": "Switch Default",
+                      "useStyle": "Switch Blue",
                       "localStyles": {
-                        "objID": "55040095-da60-4831-aa6c-2d0e3fb5b927",
-                        "definition": {
-                          "KNOB": {
-                            "DEFAULT": {
-                              "border_color": "highlight blue"
-                            },
-                            "CHECKED": {
-                              "bg_color": "highlight blue"
-                            }
-                          }
-                        }
+                        "objID": "55040095-da60-4831-aa6c-2d0e3fb5b927"
                       },
                       "group": "",
                       "groupIndex": 0
@@ -26601,7 +26898,7 @@
                   "eventHandlers": [
                     {
                       "objID": "336f80c4-8530-4af6-e898-e1bc71585223",
-                      "eventName": "PRESSED",
+                      "eventName": "CLICKED",
                       "handlerType": "action",
                       "action": "CloseScenesPage",
                       "userData": 0
@@ -26956,7 +27253,7 @@
                           "eventHandlers": [
                             {
                               "objID": "5afce07c-4a58-45e1-fe7a-27bbb9109a94",
-                              "eventName": "PRESSED",
+                              "eventName": "CLICKED",
                               "handlerType": "action",
                               "action": "SceneDeleteDialogDelete",
                               "userData": 0
@@ -27066,7 +27363,7 @@
                           "eventHandlers": [
                             {
                               "objID": "3e62d629-0745-4c5c-f9a5-5f714262c278",
-                              "eventName": "PRESSED",
+                              "eventName": "CLICKED",
                               "handlerType": "action",
                               "action": "SceneDeleteDialogCancel",
                               "userData": 0
@@ -27485,7 +27782,7 @@
                       "eventHandlers": [
                         {
                           "objID": "d7623379-f143-4e0a-8d1a-1581ef5f0834",
-                          "eventName": "PRESSED",
+                          "eventName": "CLICKED",
                           "handlerType": "action",
                           "action": "SceneRenameDialogClose",
                           "userData": 0
@@ -27833,7 +28130,7 @@
                       "eventHandlers": [
                         {
                           "objID": "ae94e799-f187-4fc5-89f3-ce01e006c63c",
-                          "eventName": "PRESSED",
+                          "eventName": "CLICKED",
                           "handlerType": "action",
                           "action": "PresetBackupListPrevious",
                           "userData": 0
@@ -27994,7 +28291,7 @@
                       "eventHandlers": [
                         {
                           "objID": "a652e982-e85d-4a50-98d0-ba1bfe165827",
-                          "eventName": "PRESSED",
+                          "eventName": "CLICKED",
                           "handlerType": "action",
                           "action": "PresetBackupListNext",
                           "userData": 0
@@ -28102,7 +28399,7 @@
                       "eventHandlers": [
                         {
                           "objID": "51ded417-e743-41ad-e3d6-f51e8b6a4571",
-                          "eventName": "PRESSED",
+                          "eventName": "CLICKED",
                           "handlerType": "action",
                           "action": "PresetBackupListCancel",
                           "userData": 0
@@ -28210,7 +28507,7 @@
                       "eventHandlers": [
                         {
                           "objID": "84f38cf1-8c25-4f33-d0b8-61b98b74cba3",
-                          "eventName": "PRESSED",
+                          "eventName": "CLICKED",
                           "handlerType": "action",
                           "action": "ClosePresetsBackupPage",
                           "userData": 0
@@ -29092,7 +29389,7 @@
                           "eventHandlers": [
                             {
                               "objID": "3d08270c-72c8-4918-e3d9-9b7c4e287c80",
-                              "eventName": "PRESSED",
+                              "eventName": "CLICKED",
                               "handlerType": "action",
                               "action": "PresetBackupDeleteDialogDelete",
                               "userData": 0
@@ -29202,7 +29499,7 @@
                           "eventHandlers": [
                             {
                               "objID": "4fb516b1-ee67-4baa-e366-3f6dd33e5f33",
-                              "eventName": "PRESSED",
+                              "eventName": "CLICKED",
                               "handlerType": "action",
                               "action": "PresetBackupDeleteDialogCancel",
                               "userData": 0
@@ -29820,7 +30117,7 @@
                           "eventHandlers": [
                             {
                               "objID": "20e42076-aa47-4547-bfd1-9d9dc48fc57a",
-                              "eventName": "PRESSED",
+                              "eventName": "CLICKED",
                               "handlerType": "action",
                               "action": "PresetBackupLoadDialogLoad",
                               "userData": 0
@@ -29930,7 +30227,7 @@
                           "eventHandlers": [
                             {
                               "objID": "5e562ea0-439d-460a-bdd8-9399e6f48db0",
-                              "eventName": "PRESSED",
+                              "eventName": "CLICKED",
                               "handlerType": "action",
                               "action": "PresetBackupLoadDialogCancel",
                               "userData": 0
@@ -30173,7 +30470,7 @@
           "eventHandlers": [
             {
               "objID": "a6a41eaa-463d-46d5-fe7c-1d8129f1ac39",
-              "eventName": "PRESSED",
+              "eventName": "CLICKED",
               "handlerType": "action",
               "action": "PresetListButton",
               "userData": 0
@@ -31532,7 +31829,7 @@
           "eventHandlers": [
             {
               "objID": "9f04c219-2e6e-4332-febe-5056c3a39742",
-              "eventName": "PRESSED",
+              "eventName": "CLICKED",
               "handlerType": "action",
               "action": "PresetBackupListButton",
               "userData": 0
@@ -31607,9 +31904,6 @@
                         "DEFAULT": {
                           "text_font": "IBM 22",
                           "text_color": "white"
-                        },
-                        "CHECKED": {
-                          "text_font": "IBM 22 Italic"
                         }
                       }
                     }
@@ -31650,7 +31944,7 @@
                       "type": "LVGLContainerWidget",
                       "left": 0,
                       "top": 0,
-                      "width": 30,
+                      "width": 29,
                       "height": 42,
                       "customInputs": [],
                       "customOutputs": [],
@@ -31706,15 +32000,16 @@
                             "objID": "b54cb192-092a-4c85-a301-d21995c5fa1b",
                             "definition": {
                               "MAIN": {
-                                "CHECKED": {
-                                  "text_font": "IBM 22 Italic"
+                                "DEFAULT": {
+                                  "text_color": "#FFFFFF",
+                                  "text_font": "IBM 18"
                                 }
                               }
                             }
                           },
                           "group": "",
                           "groupIndex": 0,
-                          "text": "Drive",
+                          "text": "Hi-Gain",
                           "textType": "literal",
                           "longMode": "WRAP",
                           "recolor": false,
@@ -31759,15 +32054,16 @@
                             "objID": "9373b7c4-cfe4-4350-9f5c-c0b1f445dc47",
                             "definition": {
                               "MAIN": {
-                                "CHECKED": {
-                                  "text_font": "IBM 22 Italic"
+                                "DEFAULT": {
+                                  "text_color": "#FFFFFF",
+                                  "text_font": "IBM 18"
                                 }
                               }
                             }
                           },
                           "group": "",
                           "groupIndex": 0,
-                          "text": "Amp & Cab",
+                          "text": "Stomp+Cab",
                           "textType": "literal",
                           "longMode": "WRAP",
                           "recolor": false,
@@ -31776,7 +32072,7 @@
                       ],
                       "widgetFlags": "CLICK_FOCUSABLE|GESTURE_BUBBLE|PRESS_LOCK|SCROLL_CHAIN_HOR|SCROLL_CHAIN_VER|SCROLL_ELASTIC|SCROLL_MOMENTUM|SCROLL_WITH_ARROW|SNAPPABLE",
                       "hiddenFlagType": "literal",
-                      "clickableFlag": true,
+                      "clickableFlag": false,
                       "clickableFlagType": "literal",
                       "flagScrollbarMode": "",
                       "flagScrollDirection": "",
@@ -31805,7 +32101,7 @@
                       "type": "LVGLContainerWidget",
                       "left": 0,
                       "top": 0,
-                      "width": 69,
+                      "width": 71,
                       "height": 42,
                       "customInputs": [],
                       "customOutputs": [],
@@ -31862,8 +32158,10 @@
                             "objID": "372059cc-f36b-4947-bd68-a0972c35eb3d",
                             "definition": {
                               "MAIN": {
-                                "CHECKED": {
-                                  "text_font": "IBM 22 Italic"
+                                "DEFAULT": {
+                                  "text_opa": 200,
+                                  "text_font": "IBM 18",
+                                  "text_color": "white"
                                 }
                               }
                             }
@@ -31915,8 +32213,10 @@
                             "objID": "e68d2eb5-b2d5-479a-d6d7-72f7ef078b92",
                             "definition": {
                               "MAIN": {
-                                "CHECKED": {
-                                  "text_font": "IBM 22 Italic"
+                                "DEFAULT": {
+                                  "text_color": "white",
+                                  "text_opa": 200,
+                                  "text_font": "IBM 18"
                                 }
                               }
                             }
@@ -31932,7 +32232,7 @@
                       ],
                       "widgetFlags": "CLICK_FOCUSABLE|GESTURE_BUBBLE|PRESS_LOCK|SCROLL_CHAIN_HOR|SCROLL_CHAIN_VER|SCROLL_ELASTIC|SCROLL_MOMENTUM|SCROLL_WITH_ARROW|SNAPPABLE",
                       "hiddenFlagType": "literal",
-                      "clickableFlag": true,
+                      "clickableFlag": false,
                       "clickableFlagType": "literal",
                       "flagScrollbarMode": "",
                       "flagScrollDirection": "",
@@ -31959,7 +32259,7 @@
                   ],
                   "widgetFlags": "CLICK_FOCUSABLE|GESTURE_BUBBLE|PRESS_LOCK|SCROLLABLE|SCROLL_CHAIN_HOR|SCROLL_CHAIN_VER|SCROLL_ELASTIC|SCROLL_MOMENTUM|SCROLL_WITH_ARROW|SNAPPABLE",
                   "hiddenFlagType": "literal",
-                  "clickableFlag": true,
+                  "clickableFlag": false,
                   "clickableFlagType": "literal",
                   "flagScrollbarMode": "",
                   "flagScrollDirection": "",
@@ -31975,9 +32275,6 @@
                         "DEFAULT": {
                           "layout": "FLEX",
                           "flex_flow": "ROW",
-                          "text_color": "white",
-                          "text_font": "IBM 18",
-                          "text_opa": 200,
                           "pad_column": 0,
                           "flex_main_place": "SPACE_BETWEEN"
                         }
@@ -31990,7 +32287,7 @@
               ],
               "widgetFlags": "CLICK_FOCUSABLE|GESTURE_BUBBLE|PRESS_LOCK|SCROLL_CHAIN_HOR|SCROLL_CHAIN_VER|SCROLL_ELASTIC|SCROLL_MOMENTUM|SCROLL_WITH_ARROW|SNAPPABLE",
               "hiddenFlagType": "literal",
-              "clickableFlag": true,
+              "clickableFlag": false,
               "clickableFlagType": "literal",
               "flagScrollbarMode": "",
               "flagScrollDirection": "",
@@ -32004,12 +32301,12 @@
                 "definition": {
                   "MAIN": {
                     "DEFAULT": {
-                      "pad_left": 14,
+                      "pad_left": 8,
                       "align": "LEFT_MID",
-                      "pad_row": 6,
+                      "pad_row": 0,
                       "layout": "FLEX",
                       "flex_flow": "COLUMN",
-                      "flex_main_place": "CENTER",
+                      "flex_main_place": "SPACE_EVENLY",
                       "flex_cross_place": "START"
                     }
                   }
@@ -32263,7 +32560,7 @@
       "name": "PresetBackupListButton",
       "left": 0,
       "top": 0,
-      "width": 400,
+      "width": 384,
       "height": 96,
       "isUsedAsUserWidget": true,
       "createAtStart": true,
@@ -32313,6 +32610,26 @@
                   "CHECKED": {
                     "bg_color": "highlight purple",
                     "border_color": "highlight purple"
+                  }
+                }
+              }
+            }
+          },
+          {
+            "objID": "ebc91a3e-8b9b-44de-d800-d77246bbf2ec",
+            "name": "Button Selectable Red",
+            "forWidgetType": "LVGLButtonWidget",
+            "childStyles": [],
+            "definition": {
+              "objID": "b9442ccf-2a6e-47a2-c55d-36ea36480ae6",
+              "definition": {
+                "MAIN": {
+                  "DEFAULT": {
+                    "bg_color": "highlight red"
+                  },
+                  "CHECKED": {
+                    "bg_color": "highlight red",
+                    "border_color": "highlight red"
                   }
                 }
               }
@@ -32636,12 +32953,12 @@
       },
       {
         "objID": "0aa56dee-4c55-4550-9ed8-7131e1fe649f",
-        "name": "Switch Default",
+        "name": "Switch Green",
         "forWidgetType": "LVGLSwitchWidget",
         "childStyles": [
           {
             "objID": "3644e065-e6ff-44a1-f7fd-40870d337f1b",
-            "name": "Switch Dark",
+            "name": "Switch Dark Green",
             "forWidgetType": "LVGLSwitchWidget",
             "childStyles": [],
             "definition": {
@@ -32650,6 +32967,42 @@
                 "MAIN": {
                   "DEFAULT": {
                     "bg_color": "black"
+                  }
+                }
+              }
+            }
+          },
+          {
+            "objID": "2ceeb4dc-e145-4587-dec0-2e56e0a0ba60",
+            "name": "Switch Blue",
+            "forWidgetType": "LVGLSwitchWidget",
+            "childStyles": [
+              {
+                "objID": "d2e02ad6-70e4-4c9a-fb00-c009e3c1a81d",
+                "name": "Switch Dark",
+                "forWidgetType": "LVGLSwitchWidget",
+                "childStyles": [],
+                "definition": {
+                  "objID": "e9209c3e-e103-4e8b-9ec5-7168131abdd2",
+                  "definition": {
+                    "MAIN": {
+                      "DEFAULT": {
+                        "bg_color": "black"
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "definition": {
+              "objID": "844ffbd4-72dc-4005-8d07-9abe797ea26b",
+              "definition": {
+                "KNOB": {
+                  "DEFAULT": {
+                    "border_color": "highlight blue"
+                  },
+                  "CHECKED": {
+                    "bg_color": "highlight blue"
                   }
                 }
               }

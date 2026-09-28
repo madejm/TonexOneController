@@ -25,6 +25,12 @@ lv_style_t *get_style_button_selectable_purple_MAIN_CHECKED();
 void add_style_button_selectable_purple(lv_obj_t *obj);
 void remove_style_button_selectable_purple(lv_obj_t *obj);
 
+// Style: Button Selectable Red
+lv_style_t *get_style_button_selectable_red_MAIN_DEFAULT();
+lv_style_t *get_style_button_selectable_red_MAIN_CHECKED();
+void add_style_button_selectable_red(lv_obj_t *obj);
+void remove_style_button_selectable_red(lv_obj_t *obj);
+
 // Style: Button Selectable Yellow
 lv_style_t *get_style_button_selectable_yellow_MAIN_DEFAULT();
 lv_style_t *get_style_button_selectable_yellow_MAIN_CHECKED();
@@ -102,13 +108,29 @@ lv_style_t *get_style_container_preset_list_cell_MAIN_CHECKED();
 void add_style_container_preset_list_cell(lv_obj_t *obj);
 void remove_style_container_preset_list_cell(lv_obj_t *obj);
 
-// Style: Switch Default
-lv_style_t *get_style_switch_default_MAIN_DEFAULT();
-lv_style_t *get_style_switch_default_KNOB_DEFAULT();
-lv_style_t *get_style_switch_default_KNOB_CHECKED();
-lv_style_t *get_style_switch_default_INDICATOR_CHECKED();
-void add_style_switch_default(lv_obj_t *obj);
-void remove_style_switch_default(lv_obj_t *obj);
+// Style: Switch Green
+lv_style_t *get_style_switch_green_MAIN_DEFAULT();
+lv_style_t *get_style_switch_green_KNOB_DEFAULT();
+lv_style_t *get_style_switch_green_KNOB_CHECKED();
+lv_style_t *get_style_switch_green_INDICATOR_CHECKED();
+void add_style_switch_green(lv_obj_t *obj);
+void remove_style_switch_green(lv_obj_t *obj);
+
+// Style: Switch Dark Green
+lv_style_t *get_style_switch_dark_green_MAIN_DEFAULT();
+lv_style_t *get_style_switch_dark_green_KNOB_DEFAULT();
+lv_style_t *get_style_switch_dark_green_KNOB_CHECKED();
+lv_style_t *get_style_switch_dark_green_INDICATOR_CHECKED();
+void add_style_switch_dark_green(lv_obj_t *obj);
+void remove_style_switch_dark_green(lv_obj_t *obj);
+
+// Style: Switch Blue
+lv_style_t *get_style_switch_blue_KNOB_DEFAULT();
+lv_style_t *get_style_switch_blue_KNOB_CHECKED();
+lv_style_t *get_style_switch_blue_MAIN_DEFAULT();
+lv_style_t *get_style_switch_blue_INDICATOR_CHECKED();
+void add_style_switch_blue(lv_obj_t *obj);
+void remove_style_switch_blue(lv_obj_t *obj);
 
 // Style: Switch Dark
 lv_style_t *get_style_switch_dark_MAIN_DEFAULT();

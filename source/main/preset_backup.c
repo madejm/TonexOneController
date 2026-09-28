@@ -74,21 +74,21 @@ static void SetModelType(tPresetBackupInfo *info, ModelType model_a_type,
     switch (model_a_type)
     {
         case MODEL_TYPE_STOMP:
-            if (separate_model_enabled && model_b_type == MODEL_TYPE_IR)          snprintf(info->ModelType, sizeof(info->ModelType), "Stomp + IR");
-            else if (separate_model_enabled && model_b_type == MODEL_TYPE_AMPCAB) snprintf(info->ModelType, sizeof(info->ModelType), "Stomp + Cab");
+            if (separate_model_enabled && model_b_type == MODEL_TYPE_IR)          snprintf(info->ModelType, sizeof(info->ModelType), "Stomp+IR");
+            else if (separate_model_enabled && model_b_type == MODEL_TYPE_AMPCAB) snprintf(info->ModelType, sizeof(info->ModelType), "Stomp+Cab");
             else                                                                  snprintf(info->ModelType, sizeof(info->ModelType), "Stomp");
             break;
 
         case MODEL_TYPE_AMP:
-            if (separate_model_enabled && model_b_type == MODEL_TYPE_IR)          snprintf(info->ModelType, sizeof(info->ModelType), "Amp + IR");
-            else if (separate_model_enabled && model_b_type == MODEL_TYPE_AMPCAB) snprintf(info->ModelType, sizeof(info->ModelType), "Amp + Cab");
+            if (separate_model_enabled && model_b_type == MODEL_TYPE_IR)          snprintf(info->ModelType, sizeof(info->ModelType), "Amp+IR");
+            else if (separate_model_enabled && model_b_type == MODEL_TYPE_AMPCAB) snprintf(info->ModelType, sizeof(info->ModelType), "Amp+Cab");
             else                                                                  snprintf(info->ModelType, sizeof(info->ModelType), "Amp");
             break;
 
         case MODEL_TYPE_AMPCAB:
-            if (separate_model_enabled && model_b_type == MODEL_TYPE_IR)          snprintf(info->ModelType, sizeof(info->ModelType), "Amp + IR");
-            else if (separate_model_enabled)                                      snprintf(info->ModelType, sizeof(info->ModelType), "Amp + Cab");
-            else                                                                  snprintf(info->ModelType, sizeof(info->ModelType), "Amp & Cab");
+            if (separate_model_enabled && model_b_type == MODEL_TYPE_IR)          snprintf(info->ModelType, sizeof(info->ModelType), "Amp+IR");
+            else if (separate_model_enabled)                                      snprintf(info->ModelType, sizeof(info->ModelType), "Amp+Cab");
+            else                                                                  snprintf(info->ModelType, sizeof(info->ModelType), "Amp&Cab");
             break;
         default:
             break;
@@ -125,8 +125,8 @@ static bool ParseInfo(const uint8_t *full_details, size_t length, tPresetBackupI
     {
         if (!tonex_read_data_u8(full_details, length, &TonexPresetDetailsFullTree,
                                 TONEX_MODEL_B_TYPE, &model_b_type)) return false;
-        if (model_b_type == MODEL_TYPE_IR)
-            snprintf(info->ModelCabName, sizeof(info->ModelCabName), "IR");
+        // if (model_b_type == MODEL_TYPE_IR)
+        //     snprintf(info->ModelCabName, sizeof(info->ModelCabName), "IR");
         else if (!CopyTreeString(full_details, length, TONEX_MODEL_B_NAME,
                                  info->ModelCabName, sizeof(info->ModelCabName)))
             return false;

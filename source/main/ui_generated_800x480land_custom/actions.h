@@ -75,6 +75,7 @@ extern void action_preset_backup_load_dialog_cancel(lv_event_t * e);
 extern void action_preset_backup_delete_dialog_delete(lv_event_t * e);
 extern void action_preset_backup_delete_dialog_cancel(lv_event_t * e);
 extern void action_open_presets_backup_page(lv_event_t * e);
+extern void action_usb_host_changed(lv_event_t * e);
 
 #ifdef __cplusplus
 }

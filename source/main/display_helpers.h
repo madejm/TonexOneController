@@ -95,9 +95,10 @@ expands into:
         }
     }
 */
-#define str_switch(x)   const char *_s=x; if (0)
-#define str_case(y)     } else if (strcmp(_s, y) == 0) {
-#define str_default     } else {
+#define str_switch(x)        const char *_s=x; if (0)
+#define str_case(y)          } else if (strcmp(_s, y) == 0) {
+#define str_case_contains(y) } else if (strstr(_s, y) != NULL) {
+#define str_default          } else {
 
 typedef struct {
     uint32_t rawColor;

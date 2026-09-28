@@ -124,11 +124,41 @@ static void updatePresetBackupList()
         lv_label_set_text(preset_backup_names(cell), info.PresetName);
         for (uint8_t detail = 0; detail < 4; detail++)
         {
-            lv_label_set_text(preset_backup_details(cell, detail), details[detail]);
-            if (details[detail][0] == 0)
-                lv_obj_add_flag(preset_backup_details(cell, detail), LV_OBJ_FLAG_HIDDEN);
+            const char *text = details[detail];
+            lv_obj_t *label = preset_backup_details(cell, detail);
+
+            switch (detail) {
+                case 0: {
+                    int colorId;
+                    str_switch(text) {
+                        str_case("CLEAN")   colorId = COLOR_ID_HIGHLIGHT_BLUE;   text = "Clean";
+                        str_case("DRIVE")   colorId = COLOR_ID_HIGHLIGHT_YELLOW; text = "Drive";
+                        str_case("HI-GAIN") colorId = COLOR_ID_HIGHLIGHT_RED;    text = "Hi-Gain";
+                        str_case("FUZZY")   colorId = COLOR_ID_HIGHLIGHT_PURPLE; text = "Fuzz";
+                        str_default         colorId = COLOR_ID_HIGHLIGHT_GREEN;  text = "Other";
+                    }
+                    lv_obj_set_style_text_color(label, lv_color_hex(theme_colors[active_theme_index][colorId]), LV_PART_MAIN | LV_STATE_DEFAULT);
+                } break;
+
+                case 1: {
+                    int colorId;
+                    str_switch(text) {
+                        str_case_contains("Stomp") colorId = COLOR_ID_HIGHLIGHT_GREEN;
+                        str_case_contains("Cab")   colorId = COLOR_ID_HIGHLIGHT_RED;
+                        str_case_contains("IR")    colorId = COLOR_ID_HIGHLIGHT_BLUE;
+                        str_case_contains("Amp")   colorId = COLOR_ID_HIGHLIGHT_YELLOW;
+                        str_default                colorId = COLOR_ID_DEFAULT_GRAY;
+                    }
+                    lv_obj_set_style_text_color(label, lv_color_hex(theme_colors[active_theme_index][colorId]), LV_PART_MAIN | LV_STATE_DEFAULT);
+                } break;
+            }
+
+            lv_label_set_text(label, text);
+
+            if (text[0] == 0)
+                lv_obj_add_flag(label, LV_OBJ_FLAG_HIDDEN);
             else
-                lv_obj_clear_flag(preset_backup_details(cell, detail), LV_OBJ_FLAG_HIDDEN);
+                lv_obj_clear_flag(label, LV_OBJ_FLAG_HIDDEN);
         }
     }
 }

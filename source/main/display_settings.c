@@ -4,6 +4,7 @@
     #include "ui.h"
     #include "images.h"
     #include "actions.h"
+    #include "styles.h"
 #endif
 #include "display_helpers.h"
 #include "usb_comms.h"
@@ -59,6 +60,24 @@ void action_settings_copy_reverb(lv_event_t * e)
 void action_settings_paste(lv_event_t * e)
 { 
     usb_paste_settings();
+}
+
+void action_usb_host_changed(lv_event_t * e)
+{
+    bool usbHost = lv_obj_has_state(objects.ui_usb_host_switch, LV_STATE_CHECKED);
+
+    if (usbHost)
+    {
+        remove_style_button_selectable_red(objects.ui_usb_button);
+        add_style_button_selectable_yellow(objects.ui_usb_button);
+    }
+    else
+    {
+        remove_style_button_selectable_yellow(objects.ui_usb_button);
+        add_style_button_selectable_red(objects.ui_usb_button);
+    }
+
+    usb_set_host_enabled(usbHost);
 }
 
 void updateSettingsClipboard(Clipboard_t type)
@@ -170,6 +189,11 @@ void customize_ui_settings()
         LV_EVENT_DRAW_PART_BEGIN,
         NULL
     );
+
+    #if USB_DEBUG
+    remove_style_button_selectable_yellow(objects.ui_usb_button);
+    add_style_button_selectable_red(objects.ui_usb_button);
+    #endif
 }
 
 static void setTheme(uint32_t themeId)

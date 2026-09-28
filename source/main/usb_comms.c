@@ -86,6 +86,10 @@ static volatile usb_comms_state_t usb_comms_state = USB_COMMS_STOPPED;
 static volatile bool usb_stop_requested;
 static volatile bool usb_host_installed;
 static volatile bool usb_download_mode_requested;
+static volatile bool usb_host_enabled = true;
+static volatile bool usb_restart_requested;
+
+static void deinit_usb_comms(void);
 
 /****************************************************************************
 * NAME:        enable_usb_serial_jtag
@@ -552,13 +556,6 @@ static void host_lib_daemon_task(void *arg)
     else
     {
         usb_host_installed = false;
-
-        if (!usb_download_mode_requested)
-        {
-            // USB Host maps the internal PHY to USB OTG. Return it to USB Serial/JTAG.
-            enable_usb_serial_jtag();
-            ESP_LOGI(TAG, "USB Serial/JTAG enabled");
-        }
     }
 
 cleanup:
@@ -583,6 +580,17 @@ cleanup:
     if (usb_download_mode_requested)
     {
         restart_in_usb_download_mode();
+    }
+    else if (usb_restart_requested && usb_host_enabled)
+    {
+        usb_restart_requested = false;
+        init_usb_comms();
+    }
+    else if (!usb_host_enabled)
+    {
+        // USB Host maps the internal PHY to USB OTG. Return it to USB Serial/JTAG.
+        enable_usb_serial_jtag();
+        ESP_LOGI(TAG, "USB Serial/JTAG enabled");
     }
 
     vTaskDelete(NULL);
@@ -1048,6 +1056,40 @@ void init_usb_comms(void)
                             USB_DAEMON_TASK_PRIORITY,
                             &daemon_task_hdl,
                             0);
+}
+
+/****************************************************************************
+* NAME:        usb_set_host_enabled
+* DESCRIPTION: Switch the shared USB PHY between USB Host and USB Serial/JTAG.
+*****************************************************************************/
+void usb_set_host_enabled(bool enabled)
+{
+    usb_host_enabled = enabled;
+
+    if (!enabled)
+    {
+        usb_restart_requested = false;
+        if (usb_comms_state == USB_COMMS_STOPPED)
+        {
+            enable_usb_serial_jtag();
+        }
+        else
+        {
+            deinit_usb_comms();
+        }
+        return;
+    }
+
+    if (usb_comms_state == USB_COMMS_STOPPED)
+    {
+        usb_restart_requested = false;
+        init_usb_comms();
+    }
+    else
+    {
+        usb_restart_requested = true;
+        deinit_usb_comms();
+    }
 }
 
 /****************************************************************************
