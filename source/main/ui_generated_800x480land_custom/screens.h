@@ -15,7 +15,8 @@ enum ScreensEnum {
     SCREEN_ID_SETTINGS = 2,
     SCREEN_ID_PRESETS = 3,
     SCREEN_ID_SCENES = 4,
-    _SCREEN_ID_LAST = 4
+    SCREEN_ID_PRESETS_BACKUP = 5,
+    _SCREEN_ID_LAST = 5
 };
 
 typedef struct _objects_t {
@@ -23,6 +24,7 @@ typedef struct _objects_t {
     lv_obj_t *settings;
     lv_obj_t *presets;
     lv_obj_t *scenes;
+    lv_obj_t *presets_backup;
     lv_obj_t *ui_usb_button;
     lv_obj_t *ui_wi_fi_button;
     lv_obj_t *ui_bt_midi_button;
@@ -503,6 +505,7 @@ typedef struct _objects_t {
     lv_obj_t *obj54;
     lv_obj_t *ui_preset_list_cancel_button;
     lv_obj_t *ui_preset_list_scenes_button;
+    lv_obj_t *ui_preset_list_backups_button;
     lv_obj_t *ui_preset_list_element_0;
     lv_obj_t *ui_preset_list_element_0__button;
     lv_obj_t *ui_preset_list_element_0__color;
@@ -720,6 +723,96 @@ typedef struct _objects_t {
     lv_obj_t *ui_scene_rename_dialog_textarea;
     lv_obj_t *obj61;
     lv_obj_t *ui_scene_rename_dialog_keyboard;
+    lv_obj_t *ui_preset_backup_list_page_label;
+    lv_obj_t *ui_preset_backup_list_cancel_button;
+    lv_obj_t *ui_preset_backup_list_close_button;
+    lv_obj_t *ui_preset_backup_list_element_0;
+    lv_obj_t *ui_preset_backup_list_element_0__button;
+    lv_obj_t *ui_preset_backup_list_element_0__name_label;
+    lv_obj_t *ui_preset_backup_list_element_0__obj1;
+    lv_obj_t *ui_preset_backup_list_element_0__label1;
+    lv_obj_t *ui_preset_backup_list_element_0__label2;
+    lv_obj_t *ui_preset_backup_list_element_0__label3;
+    lv_obj_t *ui_preset_backup_list_element_0__label4;
+    lv_obj_t *ui_preset_backup_list_element_0__options;
+    lv_obj_t *ui_preset_backup_list_element_0__obj2;
+    lv_obj_t *ui_preset_backup_list_element_1;
+    lv_obj_t *ui_preset_backup_list_element_1__button;
+    lv_obj_t *ui_preset_backup_list_element_1__name_label;
+    lv_obj_t *ui_preset_backup_list_element_1__obj1;
+    lv_obj_t *ui_preset_backup_list_element_1__label1;
+    lv_obj_t *ui_preset_backup_list_element_1__label2;
+    lv_obj_t *ui_preset_backup_list_element_1__label3;
+    lv_obj_t *ui_preset_backup_list_element_1__label4;
+    lv_obj_t *ui_preset_backup_list_element_1__options;
+    lv_obj_t *ui_preset_backup_list_element_1__obj2;
+    lv_obj_t *ui_preset_backup_list_element_2;
+    lv_obj_t *ui_preset_backup_list_element_2__button;
+    lv_obj_t *ui_preset_backup_list_element_2__name_label;
+    lv_obj_t *ui_preset_backup_list_element_2__obj1;
+    lv_obj_t *ui_preset_backup_list_element_2__label1;
+    lv_obj_t *ui_preset_backup_list_element_2__label2;
+    lv_obj_t *ui_preset_backup_list_element_2__label3;
+    lv_obj_t *ui_preset_backup_list_element_2__label4;
+    lv_obj_t *ui_preset_backup_list_element_2__options;
+    lv_obj_t *ui_preset_backup_list_element_2__obj2;
+    lv_obj_t *ui_preset_backup_list_element_3;
+    lv_obj_t *ui_preset_backup_list_element_3__button;
+    lv_obj_t *ui_preset_backup_list_element_3__name_label;
+    lv_obj_t *ui_preset_backup_list_element_3__obj1;
+    lv_obj_t *ui_preset_backup_list_element_3__label1;
+    lv_obj_t *ui_preset_backup_list_element_3__label2;
+    lv_obj_t *ui_preset_backup_list_element_3__label3;
+    lv_obj_t *ui_preset_backup_list_element_3__label4;
+    lv_obj_t *ui_preset_backup_list_element_3__options;
+    lv_obj_t *ui_preset_backup_list_element_3__obj2;
+    lv_obj_t *ui_preset_backup_list_element_4;
+    lv_obj_t *ui_preset_backup_list_element_4__button;
+    lv_obj_t *ui_preset_backup_list_element_4__name_label;
+    lv_obj_t *ui_preset_backup_list_element_4__obj1;
+    lv_obj_t *ui_preset_backup_list_element_4__label1;
+    lv_obj_t *ui_preset_backup_list_element_4__label2;
+    lv_obj_t *ui_preset_backup_list_element_4__label3;
+    lv_obj_t *ui_preset_backup_list_element_4__label4;
+    lv_obj_t *ui_preset_backup_list_element_4__options;
+    lv_obj_t *ui_preset_backup_list_element_4__obj2;
+    lv_obj_t *ui_preset_backup_list_element_5;
+    lv_obj_t *ui_preset_backup_list_element_5__button;
+    lv_obj_t *ui_preset_backup_list_element_5__name_label;
+    lv_obj_t *ui_preset_backup_list_element_5__obj1;
+    lv_obj_t *ui_preset_backup_list_element_5__label1;
+    lv_obj_t *ui_preset_backup_list_element_5__label2;
+    lv_obj_t *ui_preset_backup_list_element_5__label3;
+    lv_obj_t *ui_preset_backup_list_element_5__label4;
+    lv_obj_t *ui_preset_backup_list_element_5__options;
+    lv_obj_t *ui_preset_backup_list_element_5__obj2;
+    lv_obj_t *ui_preset_backup_list_element_6;
+    lv_obj_t *ui_preset_backup_list_element_6__button;
+    lv_obj_t *ui_preset_backup_list_element_6__name_label;
+    lv_obj_t *ui_preset_backup_list_element_6__obj1;
+    lv_obj_t *ui_preset_backup_list_element_6__label1;
+    lv_obj_t *ui_preset_backup_list_element_6__label2;
+    lv_obj_t *ui_preset_backup_list_element_6__label3;
+    lv_obj_t *ui_preset_backup_list_element_6__label4;
+    lv_obj_t *ui_preset_backup_list_element_6__options;
+    lv_obj_t *ui_preset_backup_list_element_6__obj2;
+    lv_obj_t *ui_preset_backup_list_element_7;
+    lv_obj_t *ui_preset_backup_list_element_7__button;
+    lv_obj_t *ui_preset_backup_list_element_7__name_label;
+    lv_obj_t *ui_preset_backup_list_element_7__obj1;
+    lv_obj_t *ui_preset_backup_list_element_7__label1;
+    lv_obj_t *ui_preset_backup_list_element_7__label2;
+    lv_obj_t *ui_preset_backup_list_element_7__label3;
+    lv_obj_t *ui_preset_backup_list_element_7__label4;
+    lv_obj_t *ui_preset_backup_list_element_7__options;
+    lv_obj_t *ui_preset_backup_list_element_7__obj2;
+    lv_obj_t *ui_preset_backup_delete_dialog;
+    lv_obj_t *obj62;
+    lv_obj_t *ui_preset_backup_delete_dialog_name;
+    lv_obj_t *ui_preset_backup_load_dialog;
+    lv_obj_t *obj63;
+    lv_obj_t *ui_preset_backup_load_dialog_name;
+    lv_obj_t *ui_preset_backup_load_dialog_old_name;
 } objects_t;
 
 extern objects_t objects;
@@ -736,6 +829,9 @@ void tick_screen_presets();
 void create_screen_scenes();
 void tick_screen_scenes();
 
+void create_screen_presets_backup();
+void tick_screen_presets_backup();
+
 void create_user_widget_preset_list_button(lv_obj_t *parent_obj, int startWidgetIndex);
 void tick_user_widget_preset_list_button(int startWidgetIndex);
 
@@ -744,6 +840,9 @@ void tick_user_widget_preset_button(int startWidgetIndex);
 
 void create_user_widget_arc(lv_obj_t *parent_obj, int startWidgetIndex);
 void tick_user_widget_arc(int startWidgetIndex);
+
+void create_user_widget_preset_backup_list_button(lv_obj_t *parent_obj, int startWidgetIndex);
+void tick_user_widget_preset_backup_list_button(int startWidgetIndex);
 
 void tick_screen_by_id(enum ScreensEnum screenId);
 void tick_screen(int screen_index);

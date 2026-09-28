@@ -2,7 +2,8 @@ idf_component_register(SRCS "platform_ws35.c" "usb_tonex_plug.c" "usb_tonex_one_
                             "usb_comms.c" "usb_tonex_one.c" "usb_tonex_common.c" "usb_tonex.c" "usb_valeton_gp5.c" "CH422G.c" "midi_serial.c" "wifi_config.c" "leds.c" "midi_helper.c" "midi_helper_tonex.c" "midi_helper_valeton.c" "LP5562.c"
                             "platform_devkitc.c" "platform_lgtdisps3.c" "platform_m5atoms3r.c" "platform_ws19t.c" "platform_ws43.c" "platform_wszero.c" "platform_ws169.c" 
                             "platform_ws35b.c" "platform_jc3248w.c" "platform_ws7.c" "fx_handler_helper.c"
-                            "display_helpers.c" "display_preset_list.c" "display_settings.c" "eq_canvas.c" "display_scenes.c" "display_user_widgets.c" "scenes.c" "display_preset_buttons.c" "display_custom_arc.c" "display_cab_vir.c"
+                            "display_helpers.c" "display_preset_list.c" "display_settings.c" "eq_canvas.c" "display_scenes.c" "display_user_widgets.c" "scenes.c" "display_preset_buttons.c" "display_custom_arc.c" "display_cab_vir.c" "display_preset_backup_list.c" "preset_backup.c"
+                            "tonex_parser.c" "tonex_parser_trees.c"
                             INCLUDE_DIRS "." "./" 
                             EMBED_FILES
                                 "web/index.html" "web/amp_disabled.png" "web/amp_off.png" "web/amp_on.png" "web/cab_disabled.png" "web/cab_off.png" "web/cab_on.png"
@@ -15,7 +16,7 @@ idf_component_register(SRCS "platform_ws35.c" "usb_tonex_plug.c" "usb_tonex_one_
                                 "web/effect_icon_reverb_on_s1.png" "web/effect_icon_reverb_on_s2.png" "web/effect_icon_reverb_on_s3.png" "web/effect_icon_reverb_on_s4.png"
                                 "web/eq_off.png" "web/eq_on.png" "web/mod_off.png" "web/mod_on.png" "web/nr_off.png" "web/nr_on.png" "web/pre_off.png" "web/pre_on.png"
                                 "web/rvb_off.png" "web/rvb_on.png" "web/tc_off.png" "web/tc_on.png"
-                                "web/favicon.ico" "web/bootstrap.js" "web/jquery.js" "web/index.css" "web/bootstrap.css" "web/script.js" "web/txp.js"
+                                "web/favicon.ico" "web/bootstrap.js" "web/jquery.js" "web/index.css" "web/bootstrap.css" "web/script.js" "web/txp.js" "web/preset-backups.js"
 )                           
                              
 if(CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B OR CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43DEVONLY)

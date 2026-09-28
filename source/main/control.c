@@ -48,6 +48,7 @@ limitations under the License.
 #include "midi_helper.h"
 #include "leds.h"
 #include "scenes.h"
+#include "preset_backup.h"
 
 #define CTRL_TASK_STACK_SIZE                (3 * 1024)
 
@@ -3918,6 +3919,14 @@ void control_load_config(void)
             abort();
         }
     }
+
+#if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+    ret = preset_backup_init();
+    if (ret != ESP_OK)
+    {
+        ESP_LOGE(TAG, "Failed to init preset backup storage (%s)", esp_err_to_name(ret));
+    }
+#endif
 
     // check if we need to migrate user data from old scheme to new scheme
     MigrateUserData();

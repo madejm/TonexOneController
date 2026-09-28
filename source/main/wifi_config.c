@@ -58,6 +58,7 @@ limitations under the License.
 #include "usb_tonex_one.h"
 #include "usb_tonex_common.h"
 #include "display.h"
+#include "preset_backup.h"
 
 #define WIFI_CONFIG_TASK_STACK_SIZE   (3 * 1024)
 
@@ -329,6 +330,148 @@ static const httpd_uri_t preset_export_uri = {
 };
 static const httpd_uri_t preset_export_status_uri = {
     .uri = "/api/preset-export", .method = HTTP_GET, .handler = preset_export_get
+};
+
+static esp_err_t preset_backup_send_json_string(httpd_req_t *req, const char *text)
+{
+    char escaped[PRESET_BACKUP_TEXT_LENGTH * 6 + 1];
+    size_t output = 0;
+    if (httpd_resp_send_chunk(req, "\"", 1) != ESP_OK) return ESP_FAIL;
+    for (size_t input = 0; text[input] != 0 && output + 6 < sizeof(escaped); input++)
+    {
+        unsigned char character = (unsigned char)text[input];
+        if (character == '"' || character == '\\')
+        {
+            escaped[output++] = '\\';
+            escaped[output++] = character;
+        }
+        else if (character == '\n' || character == '\r' || character == '\t')
+        {
+            escaped[output++] = '\\';
+            escaped[output++] = character == '\n' ? 'n' : character == '\r' ? 'r' : 't';
+        }
+        else if (character < 0x20)
+        {
+            output += snprintf(&escaped[output], sizeof(escaped) - output, "\\u%04x", character);
+        }
+        else
+        {
+            escaped[output++] = character;
+        }
+    }
+    if (output != 0 && httpd_resp_send_chunk(req, escaped, output) != ESP_OK) return ESP_FAIL;
+    return httpd_resp_send_chunk(req, "\"", 1);
+}
+
+static esp_err_t preset_backup_list_get(httpd_req_t *req)
+{
+    httpd_resp_set_hdr(req, "Cache-Control", "no-store");
+    httpd_resp_set_type(req, "application/json");
+    if (httpd_resp_send_chunk(req, "{\"backups\":[", HTTPD_RESP_USE_STRLEN) != ESP_OK) return ESP_FAIL;
+
+    uint16_t count = preset_backup_get_count();
+    for (uint16_t index = 0; index < count; index++)
+    {
+        uint16_t slot;
+        tPresetBackupInfo info;
+        char prefix[24];
+        if (!preset_backup_get_slot(index, &slot) || !preset_backup_get_info(index, &info)) continue;
+        snprintf(prefix, sizeof(prefix), "%s{\"slot\":%u,\"name\":", index == 0 ? "" : ",", slot);
+        if (httpd_resp_send_chunk(req, prefix, HTTPD_RESP_USE_STRLEN) != ESP_OK ||
+            preset_backup_send_json_string(req, info.PresetName) != ESP_OK ||
+            httpd_resp_send_chunk(req, ",\"character\":", HTTPD_RESP_USE_STRLEN) != ESP_OK ||
+            preset_backup_send_json_string(req, info.ModelCharacter) != ESP_OK ||
+            httpd_resp_send_chunk(req, ",\"type\":", HTTPD_RESP_USE_STRLEN) != ESP_OK ||
+            preset_backup_send_json_string(req, info.ModelType) != ESP_OK ||
+            httpd_resp_send_chunk(req, ",\"amp\":", HTTPD_RESP_USE_STRLEN) != ESP_OK ||
+            preset_backup_send_json_string(req, info.ModelAmpName) != ESP_OK ||
+            httpd_resp_send_chunk(req, ",\"cab\":", HTTPD_RESP_USE_STRLEN) != ESP_OK ||
+            preset_backup_send_json_string(req, info.ModelCabName) != ESP_OK ||
+            httpd_resp_send_chunk(req, "}", 1) != ESP_OK) return ESP_FAIL;
+    }
+    return httpd_resp_send_chunk(req, "]}", HTTPD_RESP_USE_STRLEN) == ESP_OK ?
+           httpd_resp_send_chunk(req, NULL, 0) : ESP_FAIL;
+}
+
+static esp_err_t preset_backup_get(httpd_req_t *req)
+{
+    uint32_t slot;
+    if (!preset_import_query(req, "slot", &slot)) return preset_backup_list_get(req);
+    if (slot >= PRESET_BACKUP_MAX_SLOTS)
+        return httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "Invalid backup slot.");
+
+    uint8_t *full_details;
+    size_t length;
+    esp_err_t err = preset_backup_load(slot, &full_details, &length);
+    if (err != ESP_OK)
+        return httpd_resp_send_err(req, HTTPD_404_NOT_FOUND, "Backup not found.");
+    httpd_resp_set_hdr(req, "Cache-Control", "no-store");
+    httpd_resp_set_type(req, "application/octet-stream");
+    err = httpd_resp_send(req, (const char *)full_details, length);
+    free(full_details);
+    return err;
+}
+
+static esp_err_t preset_backup_delete_request(httpd_req_t *req)
+{
+    uint32_t slot;
+    if (!preset_import_query(req, "slot", &slot) || slot >= PRESET_BACKUP_MAX_SLOTS)
+        return httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "Invalid backup slot.");
+    esp_err_t err = preset_backup_delete(slot);
+    if (err != ESP_OK)
+        return httpd_resp_send_err(req, HTTPD_404_NOT_FOUND, "Backup not found.");
+    httpd_resp_set_hdr(req, "Cache-Control", "no-store");
+    return httpd_resp_send(req, NULL, 0);
+}
+
+static esp_err_t preset_backup_upload(httpd_req_t *req)
+{
+    char content_type[40];
+    httpd_resp_set_hdr(req, "Cache-Control", "no-store");
+    httpd_resp_set_hdr(req, "Connection", "close");
+    if (httpd_req_get_hdr_value_str(req, "Content-Type", content_type, sizeof(content_type)) != ESP_OK ||
+        strcmp(content_type, "application/octet-stream") != 0)
+        return httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "Expected a binary full-preset body.");
+    if (req->content_len == 0 || req->content_len > TONEX_MAX_FULL_PRESET_DATA)
+        return httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "Invalid full-preset size.");
+
+    uint8_t *full_details = heap_caps_malloc(req->content_len, MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT);
+    if (full_details == NULL) full_details = malloc(req->content_len);
+    if (full_details == NULL)
+        return httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Not enough memory for preset backup.");
+
+    size_t received = 0;
+    while (received < req->content_len)
+    {
+        int count = httpd_req_recv(req, (char *)full_details + received, req->content_len - received);
+        if (count <= 0)
+        {
+            free(full_details);
+            return httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "Incomplete preset backup upload.");
+        }
+        received += count;
+    }
+
+    uint16_t slot;
+    esp_err_t err = preset_backup_save(full_details, received, &slot);
+    free(full_details);
+    if (err != ESP_OK)
+        return httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "Unable to save preset backup.");
+
+    char response[32];
+    snprintf(response, sizeof(response), "{\"slot\":%u}", slot);
+    httpd_resp_set_type(req, "application/json");
+    return httpd_resp_sendstr(req, response);
+}
+
+static const httpd_uri_t preset_backup_list_uri = {
+    .uri = "/api/preset-backups", .method = HTTP_GET, .handler = preset_backup_get
+};
+static const httpd_uri_t preset_backup_delete_uri = {
+    .uri = "/api/preset-backups", .method = HTTP_DELETE, .handler = preset_backup_delete_request
+};
+static const httpd_uri_t preset_backup_upload_uri = {
+    .uri = "/api/preset-backups", .method = HTTP_POST, .handler = preset_backup_upload
 };
 
 static const httpd_uri_t embedded_uri = 
@@ -872,7 +1015,7 @@ static void wifi_process_json_command(const char *payload, wifi_json_sender_t se
     }
     else if (strcmp(cmd, "GETSYNCCOMPLETE") == 0)
     {
-        ESP_LOGI(TAG, "is Sync request");
+        ESP_LOGD(TAG, "Sync status request");
         wifi_build_is_sync_complete_json();
         send_response(send_ctx, pWebConfig->TempBuffer);
     }
@@ -2266,6 +2409,15 @@ static esp_err_t embedded_files_handler(httpd_req_t *req)
         httpd_resp_set_hdr(req, "Cache-Control", "no-cache");
         return httpd_resp_send(req, (const char*)web_txp_js_start, web_txp_js_end - web_txp_js_start);
     }
+    else if (strcmp(requested, "preset-backups.js") == 0)
+    {
+        extern const unsigned char web_preset_backups_js_start[] asm("_binary_preset_backups_js_start");
+        extern const unsigned char web_preset_backups_js_end[] asm("_binary_preset_backups_js_end");
+        httpd_resp_set_type(req, "application/javascript");
+        httpd_resp_set_hdr(req, "Cache-Control", "no-cache");
+        return httpd_resp_send(req, (const char*)web_preset_backups_js_start,
+                               web_preset_backups_js_end - web_preset_backups_js_start);
+    }
     else if (strcmp(requested, "script.js") == 0) 
     {
         extern const unsigned char web_script_js_start[] asm("_binary_script_js_start");
@@ -2400,7 +2552,7 @@ static esp_err_t http_server_init(void)
     http_config.server_port        = 80;
     http_config.ctrl_port          = 32768;
     http_config.max_open_sockets   = 6;
-    http_config.max_uri_handlers   = 6;
+    http_config.max_uri_handlers   = 12;
     http_config.max_resp_headers   = 8;
     http_config.backlog_conn       = 1;
     http_config.keep_alive_enable  = true;
@@ -2416,17 +2568,26 @@ static esp_err_t http_server_init(void)
     {
         if (http_server != NULL)
         {
-            // Registering the ws handler
-            ESP_LOGI(TAG, "Registering ws handler");
-            httpd_register_uri_handler(http_server, &ws);
-
-            ESP_LOGI(TAG, "Http register uri 1");
-    	    //httpd_register_uri_handler(http_server, &index_get);
-            httpd_register_uri_handler(http_server, &preset_import_upload_uri);
-            httpd_register_uri_handler(http_server, &preset_import_status_uri);
-            httpd_register_uri_handler(http_server, &preset_export_uri);
-            httpd_register_uri_handler(http_server, &preset_export_status_uri);
-            httpd_register_uri_handler(http_server, &embedded_uri);           
+            const httpd_uri_t *uris[] = {
+                &ws,
+                &preset_import_upload_uri,
+                &preset_import_status_uri,
+                &preset_export_uri,
+                &preset_export_status_uri,
+                &preset_backup_list_uri,
+                &preset_backup_delete_uri,
+                &preset_backup_upload_uri,
+                &embedded_uri,
+            };
+            for (size_t index = 0; index < sizeof(uris) / sizeof(uris[0]); index++)
+            {
+                esp_err_t err = httpd_register_uri_handler(http_server, uris[index]);
+                if (err == ESP_OK) continue;
+                ESP_LOGE(TAG, "Failed to register URI %s (%s)", uris[index]->uri, esp_err_to_name(err));
+                httpd_stop(http_server);
+                http_server = NULL;
+                return err;
+            }
         }
 	}
 

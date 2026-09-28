@@ -1,4 +1,5 @@
 #include "display_preset_list.h"
+#include <stdlib.h>
 #include "esp_log.h"
 #if CONFIG_TONEX_CONTROLLER_HAS_DISPLAY
     #include "ui.h"
@@ -16,6 +17,8 @@
 #include "tonex_params.h"
 #include "display_scenes.h"
 #include "display.h"
+#include "display_preset_backup_list.h"
+#include "preset_backup.h"
 
 #if CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI
 static const char *TAG = "app_display_preset_list";
@@ -24,6 +27,10 @@ static const char *TAG = "app_display_preset_list";
 #define OPTION_INSERT       "Insert before..."
 #define OPTION_SWAP         "Swap with..."
 #define OPTION_CHANGE_COLOR "Change color"
+#define OPTION_BACKUP       "Backup"
+#define OPTION_LOAD         "Load from backup"
+
+#define PERSISTENT_OPTIONS  OPTION_INSERT "\n" OPTION_SWAP "\n" OPTION_CHANGE_COLOR "\n" OPTION_BACKUP "\n" OPTION_LOAD
 
 typedef enum
 {
@@ -33,6 +40,39 @@ typedef enum
 
 static PresetListInsertMode_t preset_list_insert_mode = PRESET_LIST_INSERT_MODE_INSERT;
 static int16_t preset_list_edit_index = -1;
+
+static void preset_backup_export_timer_cb(lv_timer_t *timer)
+{
+    uint32_t export_id = (uint32_t)(uintptr_t)timer->user_data;
+    usb_tonex_one_export_state_t state = usb_tonex_one_export_status(export_id);
+
+    if (state == TONEX_EXPORT_READY)
+    {
+        uint8_t *full_details = NULL;
+        size_t length = 0;
+        esp_err_t err = usb_tonex_one_export_take(export_id, &full_details, &length);
+        if (err == ESP_OK)
+        {
+            uint16_t backup_slot;
+            err = preset_backup_save(full_details, length, &backup_slot);
+            free(full_details);
+            if (err == ESP_OK)
+                ESP_LOGI(TAG, "Saved preset backup %u", backup_slot);
+            else
+                ESP_LOGE(TAG, "Failed to store preset backup (%s)", esp_err_to_name(err));
+        }
+        else
+        {
+            ESP_LOGE(TAG, "Failed to collect exported preset (%s)", esp_err_to_name(err));
+        }
+        lv_timer_del(timer);
+    }
+    else if (state == TONEX_EXPORT_FAILED || state == TONEX_EXPORT_NONE)
+    {
+        ESP_LOGE(TAG, "Preset backup export failed");
+        lv_timer_del(timer);
+    }
+}
 
 #define PRESET_LIST_PRESETS_PER_PAGE 10
 static uint8_t preset_list_page = 0;
@@ -75,7 +115,7 @@ static inline void lv_panel_set_preset_color(lv_obj_t* colorPanel, uint8_t index
 {
     uint32_t rawColor = get_preset_color_raw(index);
     uint32_t color = getCustomPresetColorMapping(rawColor).onColor;
-    lv_obj_set_style_outline_color(colorPanel, lv_color_hex(color), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(colorPanel, lv_color_hex(color), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_clear_flag(colorPanel, LV_OBJ_FLAG_HIDDEN);
 }
 
@@ -120,10 +160,10 @@ static const char *preset_options(uint8_t index)
 {
     if (preset_is_modified(index))
     {
-        return OPTION_SAVE "\n" OPTION_INSERT "\n" OPTION_SWAP "\n" OPTION_CHANGE_COLOR;
+        return OPTION_SAVE "\n" PERSISTENT_OPTIONS;
     }
 
-    return OPTION_INSERT "\n" OPTION_SWAP "\n" OPTION_CHANGE_COLOR;
+    return PERSISTENT_OPTIONS;
 }
 
 void updatePresetListOptions(void)
@@ -362,6 +402,40 @@ void presetOptionsSelected(uint8_t buttonIndex, const char *option)
             }
 
             lv_obj_clear_flag(objects.ui_preset_list_color_dialog, LV_OBJ_FLAG_HIDDEN);
+        }
+
+        str_case(OPTION_BACKUP)
+        {
+            uint8_t *preset_order = control_get_preset_order();
+            uint8_t preset_index = preset_order[preset_list_edit_index];
+            uint32_t export_id;
+            lv_timer_t *timer = lv_timer_create(preset_backup_export_timer_cb, 50, NULL);
+            if (timer == NULL)
+            {
+                ESP_LOGE(TAG, "Failed to create preset backup timer");
+            }
+            else
+            {
+                esp_err_t err = usb_tonex_one_export_preset(preset_index, &export_id);
+                if (err != ESP_OK)
+                {
+                    ESP_LOGE(TAG, "Failed to start preset backup for %u (%s)", preset_index, esp_err_to_name(err));
+                    lv_timer_del(timer);
+                }
+                else
+                {
+                    timer->user_data = (void *)(uintptr_t)export_id;
+                    ESP_LOGI(TAG, "Exporting preset %u for backup", preset_index);
+                }
+            }
+
+            preset_list_edit_index = -1;
+        }
+
+        str_case(OPTION_LOAD)
+        {
+            openPresetsBackupPageLoad(preset_list_edit_index);
+            preset_list_edit_index = -1;
         }
     }
 }

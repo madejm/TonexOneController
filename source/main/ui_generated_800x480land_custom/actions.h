@@ -63,6 +63,18 @@ extern void action_settings_vir_dialog_open(lv_event_t * e);
 extern void action_settings_vir_dialog_page_next(lv_event_t * e);
 extern void action_settings_vir_dialog_page_previous(lv_event_t * e);
 extern void action_theme_changed(lv_event_t * e);
+extern void action_preset_backup_list_previous(lv_event_t * e);
+extern void action_preset_backup_list_cancel(lv_event_t * e);
+extern void action_preset_backup_list_next(lv_event_t * e);
+extern void action_close_presets_backup_page(lv_event_t * e);
+extern void action_preset_backup_list_button(lv_event_t * e);
+extern void action_preset_backup_list_button_options(lv_event_t * e);
+extern void action_preset_backup_list_button_options_released(lv_event_t * e);
+extern void action_preset_backup_load_dialog_load(lv_event_t * e);
+extern void action_preset_backup_load_dialog_cancel(lv_event_t * e);
+extern void action_preset_backup_delete_dialog_delete(lv_event_t * e);
+extern void action_preset_backup_delete_dialog_cancel(lv_event_t * e);
+extern void action_open_presets_backup_page(lv_event_t * e);
 
 #ifdef __cplusplus
 }

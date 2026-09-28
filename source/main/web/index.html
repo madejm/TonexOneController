@@ -1315,6 +1315,23 @@
             </div>
         </div>
 
+        <div id="PresetBackups" class="content-section">
+            <div class="col py-3 text-white">
+                <h5 class="selected_text">Presets Backup</h5>
+                <p id="preset-backup-status" role="status" aria-live="polite"></p>
+                <div class="container">
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <input id="preset-backup-import-input" type="file" accept=".txp" multiple hidden>
+                        <button id="preset-backup-import-button" type="button" class="btn btn-success">Import TXP files</button>
+                        <div id="preset-backup-import-progress-container" class="progress flex-grow-1 preset-backup-import-progress" role="progressbar" aria-label="Preset backup import progress" aria-valuemin="0" aria-valuemax="100" hidden>
+                            <div id="preset-backup-import-progress" class="progress-bar" style="width: 0%">0%</div>
+                        </div>
+                    </div>
+                    <div id="preset-backup-list"></div>
+                </div>
+            </div>
+        </div>
+
         <div id="PCMap" class="content-section">
             <div class="col py-3 text-white">
             <h5 class="selected_text">Midi PC Map</h5>
@@ -2713,6 +2730,8 @@
 
 
   </body>
+  <script src="../web-local/tonex-one-test-mode.js"></script>
   <script src="txp.js" defer></script>
-  <script src="script.js?v=txp1" defer></script>
+  <script src="script.js?v=txp3" defer></script>
+  <script src="preset-backups.js?v=1" defer></script>
 </html>

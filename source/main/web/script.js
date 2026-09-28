@@ -888,6 +888,7 @@ const DEVICE_MENUS = {
             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Config</a>
             <ul class="dropdown-menu">
                 <li><a class="dropdown-item menu-link" data-target="Presets" href="#">Preset Map</a></li>
+                <li><a class="dropdown-item menu-link" data-target="PresetBackups" href="#">Presets Backup</a></li>
                 <li><a class="dropdown-item menu-link" data-target="PCMap" href="#">PC Map</a></li>
                 <li><a class="dropdown-item menu-link" data-target="Bluetooth" href="#">Bluetooth</a></li>
                 <li><a class="dropdown-item menu-link" data-target="Midi" href="#">Midi</a></li>
@@ -996,6 +997,7 @@ function updateMenuEventListeners() {
 
             // Show clicked one
             if (section) section.classList.add('active');
+            if (target === 'PresetBackups') refreshPresetBackups();
 
             // Close mobile menu
             const navbar = document.querySelector('.navbar-collapse');
@@ -3967,7 +3969,8 @@ function processReturnCmd(data) {
                     console.log('Clicked:', target);
                     document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
                     const section = document.getElementById(target);
-                    if (section) section.classList.add('active');
+            if (section) section.classList.add('active');
+                    if (target === 'PresetBackups') refreshPresetBackups();
                 };
             });
 

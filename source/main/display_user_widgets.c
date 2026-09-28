@@ -9,6 +9,7 @@
 #include "display_preset_list.h"
 #include "display_scenes.h"
 #include "display_preset_buttons.h"
+#include "display_preset_backup_list.h"
 
 #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
 #define ptr_switch(x)   const void *_p=x; if (0)
@@ -111,7 +112,7 @@ void action_preset_list_button_options(lv_event_t * e)
     }
 }
 
-void action_preset_list_button_options_released(lv_event_t * e)
+static void dropdownReleased(lv_event_t * e)
 {
     lv_obj_t *dropdown = lv_event_get_target(e);
     if (!lv_dropdown_is_open(dropdown)) {
@@ -137,5 +138,48 @@ void action_preset_list_button_options_released(lv_event_t * e)
     if (shift != 0) {
         lv_obj_set_x(list, lv_obj_get_x(list) + shift);
     }
+}
+
+void action_preset_list_button_options_released(lv_event_t * e)
+{
+    dropdownReleased(e);
+}
+
+void action_preset_backup_list_button(lv_event_t * e)
+{
+    lv_obj_t *button = lv_event_get_target(e);
+    ptr_switch(button) {
+        ptr_case(objects.ui_preset_backup_list_element_0__button) { selectPresetListBackupPreset(0); }
+        ptr_case(objects.ui_preset_backup_list_element_1__button) { selectPresetListBackupPreset(1); }
+        ptr_case(objects.ui_preset_backup_list_element_2__button) { selectPresetListBackupPreset(2); }
+        ptr_case(objects.ui_preset_backup_list_element_3__button) { selectPresetListBackupPreset(3); }
+        ptr_case(objects.ui_preset_backup_list_element_4__button) { selectPresetListBackupPreset(4); }
+        ptr_case(objects.ui_preset_backup_list_element_5__button) { selectPresetListBackupPreset(5); }
+        ptr_case(objects.ui_preset_backup_list_element_6__button) { selectPresetListBackupPreset(6); }
+        ptr_case(objects.ui_preset_backup_list_element_7__button) { selectPresetListBackupPreset(7); }
+    }
+}
+
+void action_preset_backup_list_button_options(lv_event_t * e)
+{
+    lv_obj_t *dropdown = lv_event_get_target(e);
+    char option[64];
+    lv_dropdown_get_selected_str(dropdown, option, sizeof(option));
+
+    ptr_switch(dropdown) {
+        ptr_case(objects.ui_preset_backup_list_element_0__options) { presetBackupOptionsSelected(0, option); }
+        ptr_case(objects.ui_preset_backup_list_element_1__options) { presetBackupOptionsSelected(1, option); }
+        ptr_case(objects.ui_preset_backup_list_element_2__options) { presetBackupOptionsSelected(2, option); }
+        ptr_case(objects.ui_preset_backup_list_element_3__options) { presetBackupOptionsSelected(3, option); }
+        ptr_case(objects.ui_preset_backup_list_element_4__options) { presetBackupOptionsSelected(4, option); }
+        ptr_case(objects.ui_preset_backup_list_element_5__options) { presetBackupOptionsSelected(5, option); }
+        ptr_case(objects.ui_preset_backup_list_element_6__options) { presetBackupOptionsSelected(6, option); }
+        ptr_case(objects.ui_preset_backup_list_element_7__options) { presetBackupOptionsSelected(7, option); }
+    }
+}
+
+void action_preset_backup_list_button_options_released(lv_event_t * e)
+{
+    dropdownReleased(e);
 }
 #endif // CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
