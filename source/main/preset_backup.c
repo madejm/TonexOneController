@@ -13,6 +13,7 @@
 #include "usb_comms.h"
 #include "usb_tonex_common.h"
 #include "usb_tonex_one.h"
+#include "scenes.h"
 
 #define PRESET_BACKUP_PARTITION "preset_backups"
 #define PRESET_BACKUP_NAMESPACE "backups"
@@ -31,14 +32,6 @@ typedef struct
     uint16_t Count;
     tPresetBackupCatalogEntry Entries[PRESET_BACKUP_MAX_SLOTS];
 } tPresetBackupCatalog;
-
-typedef enum: uint8_t {
-    MODEL_TYPE_EMPTY = 0,
-    MODEL_TYPE_STOMP = 1,
-    MODEL_TYPE_AMP = 2,
-    MODEL_TYPE_IR = 3,
-    MODEL_TYPE_AMPCAB = 4
-} ModelType;
 
 static const char *TAG = "preset_backup";
 static tPresetBackupCatalog Catalog;
@@ -68,8 +61,8 @@ static bool CopyTreeString(const uint8_t *full_details, size_t length, tTonexDat
     return true;
 }
 
-static void SetModelType(tPresetBackupInfo *info, ModelType model_a_type,
-                         bool separate_model_enabled, ModelType model_b_type)
+static void SetModelType(tPresetBackupInfo *info, tTonexModelType model_a_type,
+                         bool separate_model_enabled, tTonexModelType model_b_type)
 {
     switch (model_a_type)
     {
@@ -97,9 +90,9 @@ static void SetModelType(tPresetBackupInfo *info, ModelType model_a_type,
 
 static bool ParseInfo(const uint8_t *full_details, size_t length, tPresetBackupInfo *info)
 {
-    ModelType model_a_type;
+    tTonexModelType model_a_type;
     uint8_t separate_model_enabled;
-    ModelType model_b_type = 0;
+    tTonexModelType model_b_type = MODEL_TYPE_EMPTY;
 
     if (info == NULL) return false;
     memset(info, 0, sizeof(*info));
@@ -311,4 +304,56 @@ bool preset_backup_get_slot(uint16_t index, uint16_t *slot)
         }
     }
     return false;
+}
+
+preset_backup_err_t preset_backup_load_preset_to_tonex(
+    uint16_t backupIndex, 
+    uint8_t presetIndex,
+    lv_timer_cb_t timer_xcb
+) {
+    tScene *scene = scenes_get_current();
+    if (scene == NULL || presetIndex >= MAX_SUPPORTED_PRESETS)
+    {
+        ESP_LOGE(TAG, "Cannot resolve destination preset %d", presetIndex);
+        return PRESET_BACKUP_LOAD_ERR_WRONG_PRESET_INDEX;
+    }
+    uint8_t destination_preset = scene->PresetOrder[presetIndex];
+
+    uint16_t backup_slot;
+    if (!preset_backup_get_slot(backupIndex, &backup_slot))
+    {
+        ESP_LOGW(TAG, "Selected backup %d no longer exists", backupIndex);
+        return PRESET_BACKUP_LOAD_ERR_NO_BACKUP;
+    }
+
+    uint32_t transfer_id;
+    esp_err_t err = preset_backup_load_to_tonex(backup_slot, destination_preset,
+                                                false, &transfer_id);
+    if (err != ESP_OK)
+    {
+        ESP_LOGE(TAG, "Failed to load backup %u into preset %u (%s)", backup_slot,
+                 destination_preset, esp_err_to_name(err));
+        
+        return PRESET_BACKUP_LOAD_ERR_FAILED;
+    }
+    else
+    {
+        ESP_LOGI(TAG, "Loading backup %u into preset %u (transfer %" PRIu32 ")", backup_slot,
+                 destination_preset, transfer_id);
+
+        if (timer_xcb != NULL)
+        {
+            lv_timer_t *timer = lv_timer_create(timer_xcb, 50, NULL);
+            if (timer == NULL)
+            {
+                ESP_LOGE(TAG, "Failed to create preset backup load timer");
+            }
+            else
+            {
+                timer->user_data = (void *)(uintptr_t)transfer_id;
+            }
+        }
+
+        return PRESET_BACKUP_OK;
+    }
 }

@@ -18,18 +18,41 @@
 #include "display_scenes.h"
 #include "display.h"
 #include "preset_backup.h"
+#include "tonex_parser.h"
+#include "tonex_parser_trees.h"
+#include "display_preset_list.h"
+#include "display_preset_info.h"
 
 #if CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI
 static const char *TAG = "app_display_preset_backup_list";
 
+#define OPTION_INFO         "Preset info"
+#define OPTION_LOAD         "Load into slot..."
 #define OPTION_DELETE       "Delete"
-#define ALL_OPTIONS         OPTION_DELETE
+#define ALL_OPTIONS         OPTION_INFO "\n" OPTION_LOAD "\n" OPTION_DELETE
 
 static int16_t preset_backup_list_edit_index = -1;
 static int16_t preset_backup_list_load_preset_index = -1;
 
 #define PRESET_BACKUP_LIST_PRESETS_PER_PAGE 8
 static uint8_t preset_backup_list_page = 0;
+
+static void preset_backup_load_timer_cb(lv_timer_t *timer)
+{
+    uint32_t transfer_id = (uint32_t)(uintptr_t)timer->user_data;
+    usb_tonex_one_import_state_t state = usb_tonex_one_import_status(transfer_id);
+
+    if (state == TONEX_IMPORT_SENT)
+    {
+        action_open_presets_page(NULL);
+        lv_timer_del(timer);
+    }
+    else if (state == TONEX_IMPORT_FAILED || state == TONEX_IMPORT_NONE)
+    {
+        ESP_LOGE(TAG, "Preset backup load failed");
+        lv_timer_del(timer);
+    }
+}
 
 static lv_obj_t * preset_backup_cells(uint8_t index)
 {
@@ -275,6 +298,18 @@ void presetBackupOptionsSelected(uint8_t buttonIndex, const char *option)
 
     str_switch(option)
     {
+        str_case(OPTION_INFO)
+        {
+            openPresetInfoPageBackup(preset_backup_list_edit_index, action_open_presets_backup_page);
+            preset_backup_list_edit_index = -1;
+        }
+
+        str_case(OPTION_LOAD)
+        {
+            openPresetsPageLoad(preset_backup_list_edit_index);
+            preset_backup_list_edit_index = -1;
+        }
+        
         str_case(OPTION_DELETE)
         {
             tPresetBackupInfo backup_info;
@@ -307,38 +342,15 @@ void action_preset_backup_load_dialog_load(lv_event_t * e)
         return;
     }
 
-    tScene *scene = scenes_get_current();
-    if (scene == NULL || preset_backup_list_load_preset_index >= MAX_SUPPORTED_PRESETS)
-    {
-        ESP_LOGE(TAG, "Cannot resolve destination preset %d", preset_backup_list_load_preset_index);
-        preset_backup_list_edit_index = -1;
-        return;
-    }
-    uint8_t destination_preset = scene->PresetOrder[preset_backup_list_load_preset_index];
+    preset_backup_err_t err = preset_backup_load_preset_to_tonex(
+        preset_backup_list_edit_index,
+        preset_backup_list_load_preset_index,
+        preset_backup_load_timer_cb
+    );
 
-    uint16_t backup_slot;
-    if (!preset_backup_get_slot(preset_backup_list_edit_index, &backup_slot))
-    {
-        ESP_LOGW(TAG, "Selected backup %d no longer exists", preset_backup_list_edit_index);
-        preset_backup_list_edit_index = -1;
+    if (err == PRESET_BACKUP_LOAD_ERR_NO_BACKUP) {
         updatePresetBackupList();
-        return;
     }
-
-    uint32_t transfer_id;
-    esp_err_t err = preset_backup_load_to_tonex(backup_slot, destination_preset,
-                                                false, &transfer_id);
-    if (err != ESP_OK)
-    {
-        ESP_LOGE(TAG, "Failed to load backup %u into preset %u (%s)", backup_slot,
-                 destination_preset, esp_err_to_name(err));
-    }
-    else
-    {
-        ESP_LOGI(TAG, "Loading backup %u into preset %u (transfer %" PRIu32 ")", backup_slot,
-                 destination_preset, transfer_id);
-    }
-    preset_backup_list_edit_index = -1;
 }
 
 void action_preset_backup_load_dialog_cancel(lv_event_t * e)

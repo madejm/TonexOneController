@@ -3,7 +3,7 @@ idf_component_register(SRCS "platform_ws35.c" "usb_tonex_plug.c" "usb_tonex_one_
                             "platform_devkitc.c" "platform_lgtdisps3.c" "platform_m5atoms3r.c" "platform_ws19t.c" "platform_ws43.c" "platform_wszero.c" "platform_ws169.c" 
                             "platform_ws35b.c" "platform_jc3248w.c" "platform_ws7.c" "fx_handler_helper.c"
                             "display_helpers.c" "display_preset_list.c" "display_settings.c" "eq_canvas.c" "display_scenes.c" "display_user_widgets.c" "scenes.c" "display_preset_buttons.c" "display_custom_arc.c" "display_cab_vir.c" "display_preset_backup_list.c" "preset_backup.c"
-                            "tonex_parser.c" "tonex_parser_trees.c"
+                            "tonex_parser.c" "tonex_parser_trees.c" "display_preset_info.c"
                             INCLUDE_DIRS "." "./" 
                             EMBED_FILES
                                 "web/index.html" "web/amp_disabled.png" "web/amp_off.png" "web/amp_on.png" "web/cab_disabled.png" "web/cab_off.png" "web/cab_on.png"
@@ -30,6 +30,7 @@ if(CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B OR CONFIG_TONEX_CONTR
                            "ui_generated_800x480land_custom/ui_font_ibm_18.c"
                            "ui_generated_800x480land_custom/ui_font_ibm_22.c"
                            "ui_generated_800x480land_custom/ui_font_ibm_22_italic.c"
+                           "ui_generated_800x480land_custom/ui_font_ibm_28.c"
                            "ui_generated_800x480land_custom/ui_font_ibm_32.c"
                            "ui_generated_800x480land_custom/ui_font_ibm_36.c"
                            "ui_generated_800x480land_custom/ui_font_ibm_36_italic.c"

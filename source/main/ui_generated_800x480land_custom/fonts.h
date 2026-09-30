@@ -10,6 +10,7 @@ extern "C" {
 extern const lv_font_t ui_font_ibm_72;
 extern const lv_font_t ui_font_ibm_36;
 extern const lv_font_t ui_font_ibm_32;
+extern const lv_font_t ui_font_ibm_28;
 extern const lv_font_t ui_font_ibm_22;
 extern const lv_font_t ui_font_ibm_18;
 extern const lv_font_t ui_font_ibm_22_italic;

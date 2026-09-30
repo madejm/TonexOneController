@@ -8,6 +8,7 @@ extern "C" {
 #include "lvgl.h"
 
 #if CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI
+void openPresetsPageLoad(uint8_t presetIndex);
 void selectPresetListPreset(uint8_t buttonIndex);
 void presetOptionsSelected(uint8_t buttonIndex, const char *option);
 void updatePresetListSelection();

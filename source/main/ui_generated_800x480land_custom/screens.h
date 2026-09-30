@@ -16,7 +16,8 @@ enum ScreensEnum {
     SCREEN_ID_PRESETS = 3,
     SCREEN_ID_SCENES = 4,
     SCREEN_ID_PRESETS_BACKUP = 5,
-    _SCREEN_ID_LAST = 5
+    SCREEN_ID_PRESET_INFO = 6,
+    _SCREEN_ID_LAST = 6
 };
 
 typedef struct _objects_t {
@@ -25,6 +26,7 @@ typedef struct _objects_t {
     lv_obj_t *presets;
     lv_obj_t *scenes;
     lv_obj_t *presets_backup;
+    lv_obj_t *preset_info;
     lv_obj_t *ui_usb_button;
     lv_obj_t *ui_wi_fi_button;
     lv_obj_t *ui_bt_midi_button;
@@ -807,9 +809,73 @@ typedef struct _objects_t {
     lv_obj_t *obj64;
     lv_obj_t *ui_preset_backup_load_dialog_name;
     lv_obj_t *ui_preset_backup_load_dialog_old_name;
+    lv_obj_t *ui_scene_rename_dialog_2;
+    lv_obj_t *obj65;
+    lv_obj_t *obj66;
+    lv_obj_t *ui_scene_rename_dialog_textarea_2;
+    lv_obj_t *obj67;
+    lv_obj_t *ui_scene_rename_dialog_keyboard_2;
+    lv_obj_t *obj68;
+    lv_obj_t *obj69;
+    lv_obj_t *ui_preset_info_name;
+    lv_obj_t *ui_preset_info_author;
+    lv_obj_t *obj70;
+    lv_obj_t *ui_preset_info_model_author;
+    lv_obj_t *ui_preset_info_character;
+    lv_obj_t *ui_preset_info_amp;
+    lv_obj_t *ui_preset_info_cab;
+    lv_obj_t *ui_preset_info_model_description;
+    lv_obj_t *ui_preset_info_song_section;
+    lv_obj_t *obj71;
+    lv_obj_t *ui_preset_info_song;
+    lv_obj_t *ui_preset_info_artist;
+    lv_obj_t *ui_preset_info_album;
+    lv_obj_t *ui_preset_info_part;
+    lv_obj_t *ui_preset_info_genre;
+    lv_obj_t *ui_preset_info_instrument_section;
+    lv_obj_t *obj72;
+    lv_obj_t *ui_preset_info_instrument;
+    lv_obj_t *ui_preset_info_instrument_type;
+    lv_obj_t *ui_preset_info_pickup;
+    lv_obj_t *ui_preset_info_position;
+    lv_obj_t *ui_preset_info_description;
+    lv_obj_t *obj73;
 } objects_t;
 
 extern objects_t objects;
+
+typedef struct {
+    lv_span_t *span_0;
+    lv_span_t *span_1;
+    lv_span_t *span_01;
+    lv_span_t *span_11;
+    lv_span_t *span_02;
+    lv_span_t *span_12;
+    lv_span_t *span_03;
+    lv_span_t *span_13;
+    lv_span_t *span_04;
+    lv_span_t *span_14;
+    lv_span_t *span_05;
+    lv_span_t *span_15;
+    lv_span_t *span_06;
+    lv_span_t *span_16;
+    lv_span_t *span_07;
+    lv_span_t *span_17;
+    lv_span_t *span_08;
+    lv_span_t *span_18;
+    lv_span_t *span_09;
+    lv_span_t *span_19;
+    lv_span_t *span_010;
+    lv_span_t *span_110;
+    lv_span_t *span_011;
+    lv_span_t *span_111;
+    lv_span_t *span_012;
+    lv_span_t *span_112;
+    lv_span_t *span_013;
+    lv_span_t *span_113;
+} screen_preset_info_state_t;
+
+extern screen_preset_info_state_t screen_preset_info_state;
 
 void create_screen_screen1();
 void tick_screen_screen1();
@@ -825,6 +891,9 @@ void tick_screen_scenes();
 
 void create_screen_presets_backup();
 void tick_screen_presets_backup();
+
+void create_screen_preset_info();
+void tick_screen_preset_info();
 
 void create_user_widget_preset_list_button(lv_obj_t *parent_obj, int startWidgetIndex);
 void tick_user_widget_preset_list_button(int startWidgetIndex);

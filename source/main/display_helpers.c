@@ -30,6 +30,14 @@ void lv_obj_set_disabled(lv_obj_t * obj, bool disabled) {
     }
 }
 
+void lv_obj_set_hidden(lv_obj_t * obj, bool hidden) {
+    if (hidden) {
+        lv_obj_add_flag(obj, LV_OBJ_FLAG_HIDDEN);
+    } else {
+        lv_obj_clear_flag(obj, LV_OBJ_FLAG_HIDDEN);
+    }
+}
+
 const tCustomPresetColorMapping CustomColorMap[TONEX_COLORS_COUNT] = {
     {0xFF0000, 0xE61E2D, 0x6E0B14}, // red
     {0xFF3F00, 0xF26500, 0x6A2B00}, // orange

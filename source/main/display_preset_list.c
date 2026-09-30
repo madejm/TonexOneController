@@ -19,18 +19,20 @@
 #include "display.h"
 #include "display_preset_backup_list.h"
 #include "preset_backup.h"
+#include "display_preset_info.h"
 
 #if CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI
 static const char *TAG = "app_display_preset_list";
 
 #define OPTION_SAVE         "Save"
+#define OPTION_INFO         "Preset info"
 #define OPTION_INSERT       "Insert before..."
 #define OPTION_SWAP         "Swap with..."
 #define OPTION_CHANGE_COLOR "Change color"
 #define OPTION_BACKUP       "Backup"
 #define OPTION_LOAD         "Load from backup"
 
-#define PERSISTENT_OPTIONS  OPTION_INSERT "\n" OPTION_SWAP "\n" OPTION_CHANGE_COLOR "\n" OPTION_BACKUP "\n" OPTION_LOAD
+#define PERSISTENT_OPTIONS  OPTION_INFO "\n" OPTION_INSERT "\n" OPTION_SWAP "\n" OPTION_CHANGE_COLOR "\n" OPTION_BACKUP "\n" OPTION_LOAD
 
 typedef enum
 {
@@ -39,7 +41,37 @@ typedef enum
 } PresetListInsertMode_t;
 
 static PresetListInsertMode_t preset_list_insert_mode = PRESET_LIST_INSERT_MODE_INSERT;
+
+typedef enum
+{
+    PRESET_LIST_EDIT_MODE_REORDER,
+    PRESET_LIST_EDIT_MODE_LOAD
+} PresetListEditMode_t;
+
+static PresetListEditMode_t preset_list_edit_mode = PRESET_LIST_EDIT_MODE_REORDER;
+
 static int16_t preset_list_edit_index = -1;
+
+static void preset_backup_load_timer_cb(lv_timer_t *timer)
+{
+    uint32_t transfer_id = (uint32_t)(uintptr_t)timer->user_data;
+    usb_tonex_one_import_state_t state = usb_tonex_one_import_status(transfer_id);
+
+    if (state == TONEX_IMPORT_SENT)
+    {
+        lv_obj_add_flag(objects.ui_preset_list_cancel_button, LV_OBJ_FLAG_HIDDEN);
+        updatePresetListNames();
+        updatePresetListSelection();
+        lv_timer_del(timer);
+    }
+    else if (state == TONEX_IMPORT_FAILED || state == TONEX_IMPORT_NONE)
+    {
+        lv_obj_add_flag(objects.ui_preset_list_cancel_button, LV_OBJ_FLAG_HIDDEN);
+        updatePresetListSelection();
+        ESP_LOGE(TAG, "Preset backup load failed");
+        lv_timer_del(timer);
+    }
+}
 
 static void preset_backup_export_timer_cb(lv_timer_t *timer)
 {
@@ -82,10 +114,17 @@ static uint8_t preset_list_page = 0;
 void updatePresetListSelection()
 {
     uint8_t pageStart = preset_list_page * PRESET_LIST_PRESETS_PER_PAGE;
-    uint8_t selectedPreset;
+    int16_t selectedPreset = -1;
 
     if (preset_list_edit_index > -1) {
-        selectedPreset = preset_list_edit_index;
+        switch (preset_list_edit_mode) {
+            case PRESET_LIST_EDIT_MODE_REORDER:
+                selectedPreset = preset_list_edit_index;
+                break;
+            case PRESET_LIST_EDIT_MODE_LOAD:
+                selectedPreset = -1;
+                break;
+        }
     } else {
         selectedPreset = control_get_current_preset_mapped_index();
     }
@@ -201,12 +240,8 @@ void updatePresetListNames()
 
 // ====== ACTIONS ======
 
-void action_open_presets_page(lv_event_t * e)
+static void openPresetsPage()
 {
-    ESP_LOGI(TAG, "action_open_presets_page");
-
-    preset_list_edit_index = -1;
-    lv_obj_add_flag(objects.ui_preset_list_cancel_button, LV_OBJ_FLAG_HIDDEN);
     lv_obj_add_flag(objects.ui_preset_list_color_dialog, LV_OBJ_FLAG_HIDDEN);
 
     updatePresetListSelection();
@@ -214,6 +249,27 @@ void action_open_presets_page(lv_event_t * e)
     updatePresetListOptions();
 
     lv_scr_load_anim(objects.presets, LV_SCR_LOAD_ANIM_FADE_IN, 0, 0, false);
+}
+
+void action_open_presets_page(lv_event_t * e)
+{
+    ESP_LOGI(TAG, "action_open_presets_page");
+
+    preset_list_edit_index = -1;
+    lv_obj_add_flag(objects.ui_preset_list_cancel_button, LV_OBJ_FLAG_HIDDEN);
+
+    openPresetsPage();
+}
+
+void openPresetsPageLoad(uint8_t presetIndex)
+{
+    ESP_LOGI(TAG, "openPresetsPageLoad %u", presetIndex);
+
+    preset_list_edit_index = presetIndex;
+    preset_list_edit_mode = PRESET_LIST_EDIT_MODE_LOAD;
+    lv_obj_clear_flag(objects.ui_preset_list_cancel_button, LV_OBJ_FLAG_HIDDEN);
+
+    openPresetsPage();
 }
 
 void action_close_presets_page(lv_event_t * e)
@@ -229,60 +285,82 @@ void selectPresetListPreset(uint8_t buttonIndex)
 
     uint8_t preset_index = buttonIndex + preset_list_page * PRESET_LIST_PRESETS_PER_PAGE;
 
-    if (preset_list_edit_index > -1) {
-        uint8_t newPresetOrder[MAX_SUPPORTED_PRESETS];
-        memcpy(newPresetOrder, control_get_preset_order(), MAX_SUPPORTED_PRESETS);
-        
-        switch (preset_list_insert_mode)
-        {
-            case PRESET_LIST_INSERT_MODE_INSERT:
-            {
-                uint8_t movedValue = newPresetOrder[preset_list_edit_index];
-
-                if (preset_list_edit_index < preset_index)
-                {
-                    // Shift left
-                    for (uint8_t i = preset_list_edit_index; i < preset_index; i++)
-                    {
-                        newPresetOrder[i] = newPresetOrder[i + 1];
-                    }
-                }
-                else if (preset_list_edit_index > preset_index)
-                {
-                    // Shift right
-                    for (uint8_t i = preset_list_edit_index; i > preset_index; i--)
-                    {
-                        newPresetOrder[i] = newPresetOrder[i - 1];
-                    }
-                }
-                newPresetOrder[preset_index] = movedValue;
-            } break;
-
-            case PRESET_LIST_INSERT_MODE_SWAP:
-            {
-                uint8_t temp = newPresetOrder[preset_list_edit_index];
-                newPresetOrder[preset_list_edit_index] = newPresetOrder[preset_index];
-                newPresetOrder[preset_index] = temp;
-            } break;
-
-            default:
-                break;
-        }
-
-        control_set_preset_order(newPresetOrder);
-        scenes_save();
-        wifi_request_sync(WIFI_SYNC_TYPE_CONFIG, NULL, NULL);
-        
-        preset_list_edit_index = -1;
-        lv_obj_add_flag(objects.ui_preset_list_cancel_button, LV_OBJ_FLAG_HIDDEN);
-
-        updatePresetListSelection();
-        updatePresetListNames();
-        updatePresetListOptions();
-    } else {
+    if (preset_list_edit_index <= -1) {
         lv_scr_load_anim(objects.screen1, LV_SCR_LOAD_ANIM_FADE_IN, 0, 0, false);
         control_request_preset_index(preset_index);
+        return;
     }
+
+    switch (preset_list_edit_mode)
+    {
+        case PRESET_LIST_EDIT_MODE_REORDER:
+        {
+            uint8_t newPresetOrder[MAX_SUPPORTED_PRESETS];
+            memcpy(newPresetOrder, control_get_preset_order(), MAX_SUPPORTED_PRESETS);
+            
+            switch (preset_list_insert_mode)
+            {
+                case PRESET_LIST_INSERT_MODE_INSERT:
+                {
+                    uint8_t movedValue = newPresetOrder[preset_list_edit_index];
+
+                    if (preset_list_edit_index < preset_index)
+                    {
+                        // Shift left
+                        for (uint8_t i = preset_list_edit_index; i < preset_index; i++)
+                        {
+                            newPresetOrder[i] = newPresetOrder[i + 1];
+                        }
+                    }
+                    else if (preset_list_edit_index > preset_index)
+                    {
+                        // Shift right
+                        for (uint8_t i = preset_list_edit_index; i > preset_index; i--)
+                        {
+                            newPresetOrder[i] = newPresetOrder[i - 1];
+                        }
+                    }
+                    newPresetOrder[preset_index] = movedValue;
+                } break;
+
+                case PRESET_LIST_INSERT_MODE_SWAP:
+                {
+                    uint8_t temp = newPresetOrder[preset_list_edit_index];
+                    newPresetOrder[preset_list_edit_index] = newPresetOrder[preset_index];
+                    newPresetOrder[preset_index] = temp;
+                } break;
+
+                default:
+                    break;
+            }
+
+            control_set_preset_order(newPresetOrder);
+            scenes_save();
+            wifi_request_sync(WIFI_SYNC_TYPE_CONFIG, NULL, NULL);
+            
+            lv_obj_add_flag(objects.ui_preset_list_cancel_button, LV_OBJ_FLAG_HIDDEN);
+
+            updatePresetListSelection();
+            updatePresetListNames();
+            updatePresetListOptions();
+        } break;
+
+        case PRESET_LIST_EDIT_MODE_LOAD:
+        {
+            preset_backup_err_t err = preset_backup_load_preset_to_tonex(
+                preset_list_edit_index,
+                preset_index,
+                preset_backup_load_timer_cb
+            );
+
+            if (err != PRESET_BACKUP_OK) {
+                lv_obj_add_flag(objects.ui_preset_list_cancel_button, LV_OBJ_FLAG_HIDDEN);
+                updatePresetListSelection();
+            }
+        } break;
+    }
+
+    preset_list_edit_index = -1;
 }
 
 void action_preset_list_previous(lv_event_t * e)
@@ -375,8 +453,18 @@ void presetOptionsSelected(uint8_t buttonIndex, const char *option)
             lv_obj_add_flag(objects.ui_preset_list_cancel_button, LV_OBJ_FLAG_HIDDEN);
         }
 
+        str_case(OPTION_INFO)
+        {
+            uint8_t *preset_order = control_get_preset_order();
+            uint8_t preset_index = preset_order[preset_list_edit_index];
+            openPresetInfoPagePreset(preset_index, action_open_presets_page);
+            
+            preset_list_edit_index = -1;
+        }
+
         str_case(OPTION_INSERT)
         {
+            preset_list_edit_mode = PRESET_LIST_EDIT_MODE_REORDER;
             preset_list_insert_mode = PRESET_LIST_INSERT_MODE_INSERT;
 
             lv_obj_clear_flag(objects.ui_preset_list_cancel_button, LV_OBJ_FLAG_HIDDEN);
@@ -385,6 +473,7 @@ void presetOptionsSelected(uint8_t buttonIndex, const char *option)
         
         str_case(OPTION_SWAP)
         {
+            preset_list_edit_mode = PRESET_LIST_EDIT_MODE_REORDER;
             preset_list_insert_mode = PRESET_LIST_INSERT_MODE_SWAP;
 
             lv_obj_clear_flag(objects.ui_preset_list_cancel_button, LV_OBJ_FLAG_HIDDEN);

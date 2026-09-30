@@ -14,6 +14,7 @@
     "ui_font_ibm_18.c",
     "ui_font_ibm_22.c",
     "ui_font_ibm_22_italic.c",
+    "ui_font_ibm_28.c",
     "ui_font_ibm_32.c",
     "ui_font_ibm_36.c",
     "ui_font_ibm_36_italic.c",
