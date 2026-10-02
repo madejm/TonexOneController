@@ -9,7 +9,6 @@
 
 #include "scenes.h"
 
-#define NVS_SCENES_PARTITION                "scenes"
 #define NVS_SCENES_NAMESPACE                "scenes"
 #define NVS_SCENES_CATALOG                  "catalog"
 #define NVS_SCENE_KEY_FORMAT                "scene%02u"

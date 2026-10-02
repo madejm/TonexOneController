@@ -69,6 +69,7 @@ limitations under the License.
 #include "usb_tonex.h"
 #include "display.h"
 #include "display_tonex.h"
+#include "display_tap_tempo.h"
 #include "eq_canvas.h"
 #include "CH422G.h"
 #include "control.h"
@@ -3095,6 +3096,7 @@ uint8_t tonex_update_ui_parameters(void)
                     sprintf(buf, "%.1f", param_entry->Value);
                     #endif
                     lv_label_set_text(objects.ui_bpm_value_label, buf);             
+                    display_tap_tempo_set_bpm(param_entry->Value);
 
 #if CONFIG_TONEX_CONTROLLER_SHOW_BPM_INDICATOR                            
                     ui_BPMAnimate(objects.ui_bpm_indicator, 1000 * 60 / param_entry->Value);

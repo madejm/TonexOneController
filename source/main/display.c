@@ -87,6 +87,7 @@ limitations under the License.
 #include "display_settings.h"
 #include "scenes.h"
 #include "display_preset_buttons.h"
+#include "display_tap_tempo.h"
 
 static const char *TAG = "app_display";
 
@@ -129,6 +130,10 @@ enum UIElements
     UI_ELEMENT_TUNER_STATE,
     UI_ELEMENT_PROGRESS_BAR,
     UI_ELEMENT_PROGRESS_BAR_HIDE,
+    UI_ELEMENT_TAP_TEMPO_CHANGED,
+    UI_ELEMENT_TAP_TEMPO_FOOTSWITCH_TAPPED,
+    UI_ELEMENT_TAP_TEMPO_FOOTSWITCH_PRESSED,
+    UI_ELEMENT_TAP_TEMPO_CLOSE,
     UI_ELEMENT_LOG
 };
 
@@ -446,6 +451,9 @@ void action_next_clicked(lv_event_t * e)
 
 void action_tap_tempo_clicked(lv_event_t * e)
 {
+#if CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI
+    display_tap_tempo_cancel_auto_hide();
+#endif
     control_trigger_tap_tempo();
 }
 void action_alt_button_clicked(lv_event_t * e)
@@ -1469,6 +1477,82 @@ void UI_HideProgressBar(void)
 #endif
 }
 
+void UI_TapTempoChanged(float bpm, bool footswitch)
+{
+#if CONFIG_TONEX_CONTROLLER_HAS_DISPLAY
+    tUIUpdate ui_update = {0};
+    uint16_t bpm_value = (uint16_t)roundf(bpm);
+
+    if (ui_update_queue == NULL) {
+        return;
+    }
+
+    ui_update.ElementID = UI_ELEMENT_TAP_TEMPO_CHANGED;
+    ui_update.Value = bpm_value;
+    ui_update.State = footswitch;
+
+    if (xQueueSend(ui_update_queue, (void*)&ui_update, 0) != pdPASS)
+    {
+        ESP_LOGE(TAG, "UI tap tempo queue send failed!");
+    }
+#endif
+}
+
+void UI_TapTempoFootswitchTapped(void)
+{
+#if CONFIG_TONEX_CONTROLLER_HAS_DISPLAY
+    tUIUpdate ui_update = {0};
+
+    if (ui_update_queue == NULL) {
+        return;
+    }
+
+    ui_update.ElementID = UI_ELEMENT_TAP_TEMPO_FOOTSWITCH_TAPPED;
+
+    if (xQueueSend(ui_update_queue, (void*)&ui_update, 0) != pdPASS)
+    {
+        ESP_LOGE(TAG, "UI tap tempo tap queue send failed!");
+    }
+#endif
+}
+
+void UI_SetTapTempoFootswitchPressed(bool pressed)
+{
+#if CONFIG_TONEX_CONTROLLER_HAS_DISPLAY
+    tUIUpdate ui_update = {0};
+
+    if (ui_update_queue == NULL) {
+        return;
+    }
+
+    ui_update.ElementID = UI_ELEMENT_TAP_TEMPO_FOOTSWITCH_PRESSED;
+    ui_update.Value = pressed;
+
+    if (xQueueSend(ui_update_queue, (void*)&ui_update, 0) != pdPASS)
+    {
+        ESP_LOGE(TAG, "UI tap tempo press queue send failed!");
+    }
+#endif
+}
+
+void UI_CloseTapTempoDialog(void)
+{
+#if CONFIG_TONEX_CONTROLLER_HAS_DISPLAY
+    tUIUpdate ui_update = {0};
+
+    if (ui_update_queue == NULL) {
+        return;
+    }
+
+    ui_update.ElementID = UI_ELEMENT_TAP_TEMPO_CLOSE;
+
+    if (xQueueSend(ui_update_queue, (void*)&ui_update, 0) != pdPASS)
+    {
+        ESP_LOGE(TAG, "UI tap tempo close queue send failed!");
+    }
+#endif
+}
+
 /****************************************************************************
 * NAME:        
 * DESCRIPTION: 
@@ -2083,6 +2167,9 @@ static  __attribute__((unused)) uint8_t update_ui_element(tUIUpdate* update)
                 default:
                 {
                     tonex_update_ui_parameters();
+#if CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI
+                    updateSettingsDefaults();
+#endif
                 } break;
 
                 case AMP_MODELLER_VALETON_GP5:
@@ -2209,6 +2296,54 @@ static  __attribute__((unused)) uint8_t update_ui_element(tUIUpdate* update)
         {
 #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
             lv_obj_add_flag(objects.ui_progress_dialog, LV_OBJ_FLAG_HIDDEN);
+#endif
+        } break;
+
+        case UI_ELEMENT_TAP_TEMPO_CHANGED:
+        {
+#if CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI && CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+            uint16_t bpm_value = (uint16_t)update->Value;
+
+            if (bpm_value == 0) {
+                break;
+            }
+
+            char bpm_text[6];
+            snprintf(bpm_text, sizeof(bpm_text), "%u", (unsigned int)bpm_value);
+            lv_label_set_text(objects.ui_bpm_value_label, bpm_text);
+
+            #if CONFIG_TONEX_CONTROLLER_SHOW_BPM_INDICATOR
+            ui_BPMAnimate(objects.ui_bpm_indicator, 60000 / bpm_value);
+            #endif
+
+            if (update->State != 0) {
+                display_tap_tempo_footswitch_changed((float)bpm_value);
+            } else {
+                display_tap_tempo_set_bpm((float)bpm_value);
+            }
+#endif
+        } break;
+
+        case UI_ELEMENT_TAP_TEMPO_FOOTSWITCH_TAPPED:
+        {
+#if CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI && CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+            display_tap_tempo_footswitch_tapped();
+#endif
+        } break;
+
+        case UI_ELEMENT_TAP_TEMPO_FOOTSWITCH_PRESSED:
+        {
+#if CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI && CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+            display_tap_tempo_set_footswitch_pressed(update->Value != 0);
+#endif
+        } break;
+
+        case UI_ELEMENT_TAP_TEMPO_CLOSE:
+        {
+#if CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI && CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+            if (!lv_obj_has_flag(objects.ui_tap_tempo_dialog, LV_OBJ_FLAG_HIDDEN)) {
+                action_tap_tempo_close(NULL);
+            }
 #endif
         } break;
 
@@ -2501,16 +2636,28 @@ static void ui_anim_deleted_cb(lv_anim_t *anim)
 * NOTES:       
 *****************************************************************************/
 void ui_BPMAnimate(lv_obj_t *target_obj, uint32_t duration)
-{    
-    // Delete any existing animations on the target object to avoid conflicts
-    lv_anim_del(target_obj, (lv_anim_exec_xcb_t)ui_anim_hidden_cb);
+{
+    static lv_obj_t *animated_target;
+    static uint32_t animated_duration;
 
     if (control_get_config_item_int(CONFIG_ITEM_DISABLE_BPM_FLASHER) == 1)
     {
+        lv_anim_del(target_obj, (lv_anim_exec_xcb_t)ui_anim_hidden_cb);
+        animated_target = NULL;
+        animated_duration = 0;
         // disabled, do nothing
         return;
     }
-    
+
+    // Parameter refreshes can repeat the same BPM frequently. Retain the
+    // existing animation phase unless the beat interval actually changed.
+    if ((animated_target == target_obj) && (animated_duration == duration))
+    {
+        return;
+    }
+
+    // Delete any existing animation before applying a new beat interval.
+    lv_anim_del(target_obj, (lv_anim_exec_xcb_t)ui_anim_hidden_cb);
     lv_obj_clear_flag(target_obj, LV_OBJ_FLAG_HIDDEN);
 
     lv_anim_t anim;
@@ -2530,6 +2677,8 @@ void ui_BPMAnimate(lv_obj_t *target_obj, uint32_t duration)
 
     // Start the animation
     lv_anim_start(&anim);
+    animated_target = target_obj;
+    animated_duration = duration;
 }
 #endif
 

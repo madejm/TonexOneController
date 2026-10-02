@@ -6,6 +6,8 @@
 #include "esp_err.h"
 #include "tonex_params.h"
 
+#define NVS_SCENES_PARTITION                "scenes"
+
 #define MAX_SUPPORTED_PRESETS                   150
 #define MAX_SCENES                              20
 #define MAX_SCENE_NAME                          30

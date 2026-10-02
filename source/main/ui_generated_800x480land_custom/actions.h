@@ -41,14 +41,9 @@ extern void action_preset_list_color(lv_event_t * e);
 extern void action_preset_list_dialog_close(lv_event_t * e);
 extern void action_preset_list_cancel(lv_event_t * e);
 extern void action_usb_reboot(lv_event_t * e);
-extern void action_settings_copy_reverb(lv_event_t * e);
-extern void action_settings_copy_gate(lv_event_t * e);
-extern void action_settings_copy_compressor(lv_event_t * e);
-extern void action_settings_copy_amp(lv_event_t * e);
+extern void action_settings_set_as_default(lv_event_t * e);
+extern void action_settings_copy(lv_event_t * e);
 extern void action_settings_paste(lv_event_t * e);
-extern void action_settings_copy_eq(lv_event_t * e);
-extern void action_settings_copy_delay(lv_event_t * e);
-extern void action_settings_copy_modulation(lv_event_t * e);
 extern void action_open_scenes_page(lv_event_t * e);
 extern void action_close_scenes_page(lv_event_t * e);
 extern void action_new_scene(lv_event_t * e);
@@ -57,7 +52,7 @@ extern void action_scene_rename_dialog_close(lv_event_t * e);
 extern void action_scene_delete_dialog_cancel(lv_event_t * e);
 extern void action_scene_delete_dialog_delete(lv_event_t * e);
 extern void action_preset_list_button_options_released(lv_event_t * e);
-extern void action_settings_copy_cab(lv_event_t * e);
+extern void action_settings_load_default(lv_event_t * e);
 extern void action_settings_vir_dialog_close(lv_event_t * e);
 extern void action_settings_vir_dialog_open(lv_event_t * e);
 extern void action_settings_vir_dialog_page_next(lv_event_t * e);
@@ -77,6 +72,8 @@ extern void action_preset_backup_delete_dialog_cancel(lv_event_t * e);
 extern void action_open_presets_backup_page(lv_event_t * e);
 extern void action_usb_host_changed(lv_event_t * e);
 extern void action_preset_info_close(lv_event_t * e);
+extern void action_tap_tempo_open(lv_event_t * e);
+extern void action_tap_tempo_close(lv_event_t * e);
 
 #ifdef __cplusplus
 }

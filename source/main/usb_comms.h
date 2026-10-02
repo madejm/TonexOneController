@@ -58,6 +58,8 @@ enum USB_Commands
     USB_COMMAND_SET_COLOR,
     USB_COMMAND_COPY_SETTINGS,
     USB_COMMAND_PASTE_SETTINGS,
+    USB_COMMAND_LOAD_SETTINGS_DEFAULT,
+    USB_COMMAND_SET_SETTINGS_AS_DEFAULT,
     USB_COMMAND_SET_AB_SLOTS,
     USB_COMMAND_REQUEST_TUNER,
     USB_COMMAND_SYNC_SCENE_PRESETS,
@@ -93,20 +95,6 @@ typedef enum
     CLIPBOARD_REVERB
 } Clipboard_t;
 
-typedef struct
-{
-    Clipboard_t type;
-    float param1;
-    float param2;
-    float param3;
-    float param4;
-    float param5;
-    float param6;
-    float param7;
-    float param8;
-    float param9;
-} tSettingsClipboard;
-
 void init_usb_comms(void);
 void usb_set_host_enabled(bool enabled);
 void usb_reboot(void);
@@ -122,6 +110,8 @@ void usb_save_preset(void);
 void usb_set_preset_color(uint16_t preset_index, uint32_t color);
 void usb_copy_settings(Clipboard_t type);
 void usb_paste_settings();
+void usb_load_settings_default(Clipboard_t type);
+void usb_set_settings_as_default(Clipboard_t type);
 uint8_t usb_get_max_presets_for_connected_modeller(void);
 uint8_t usb_get_first_preset_index_for_connected_modeller(void);
 uint8_t usb_get_connected_modeller_type(void);

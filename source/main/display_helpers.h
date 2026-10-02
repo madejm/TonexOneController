@@ -100,6 +100,10 @@ expands into:
 #define str_case_contains(y) } else if (strstr(_s, y) != NULL) {
 #define str_default          } else {
 
+#define ptr_switch(x)   const void *_p=x; if (0)
+#define ptr_case(y)     } else if (_p == y) {
+#define ptr_default     } else {
+
 typedef struct {
     uint32_t rawColor;
     uint32_t onColor;

@@ -68,6 +68,7 @@ limitations under the License.
 #include "usb_tonex.h"
 #include "display.h"
 #include "display_valeton.h"
+#include "display_tap_tempo.h"
 #include "CH422G.h"
 #include "control.h"
 #include "task_priorities.h" 
@@ -3402,6 +3403,7 @@ uint8_t valeton_update_ui_parameters(void)
                     
                     // set user data for later use
                     lv_obj_set_user_data(objects.ui_bpm_value_label, (void*)(uintptr_t)VALETON_GLOBAL_BPM);                    
+                    display_tap_tempo_set_bpm(param_entry->Value);
 
 #if CONFIG_TONEX_CONTROLLER_SHOW_BPM_INDICATOR                            
                     ui_BPMAnimate(objects.ui_bpm_indicator, 1000 * 60 / param_entry->Value);

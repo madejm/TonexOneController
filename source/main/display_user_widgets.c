@@ -12,9 +12,6 @@
 #include "display_preset_backup_list.h"
 
 #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
-#define ptr_switch(x)   const void *_p=x; if (0)
-#define ptr_case(y)     } else if (_p == y) {
-#define ptr_default     } else {
 
 void action_preset_button(lv_event_t * e)
 {

@@ -64,6 +64,7 @@ limitations under the License.
 #include "wifi_config.h"
 #include "tonex_params.h"
 #include "scenes.h"
+#include "nvs.h"
 
 static const char *TAG = "app_TonexOne";
 
@@ -81,6 +82,8 @@ static const uint8_t ToneOnePresetByteMarker[] = {0xB9, 0x04, 0xB9, 0x02, 0xBC, 
 
 #define PROGRESS_SYNC_INIT  "Synchronizing presets"
 #define PROGRESS_SYNC_SCENE "Uploading scene presets to Tonex"
+
+#define NVS_FX_DEFAULTS_NAMESPACE "fx_defaults"
 
 // credit to https://github.com/vit3k/tonex_controller for some of the below details and implementation
 enum CommsState
@@ -438,6 +441,20 @@ static void usb_tonex_one_debug_check(esp_err_t result, const char *operation)
     }
 }
 
+typedef struct
+{
+    Clipboard_t type;
+    float param1;
+    float param2;
+    float param3;
+    float param4;
+    float param5;
+    float param6;
+    float param7;
+    float param8;
+    float param9;
+} tSettingsClipboard;
+
 static tSettingsClipboard settingsClipboard = {
     .type = CLIPBOARD_NONE
 };
@@ -453,7 +470,7 @@ static uint16_t usb_tonex_one_get_current_active_preset(void);
 static void usb_tonex_one_mark_current_scene_preset_modified(void);
 static esp_err_t usb_tonex_one_send_single_parameter(uint16_t index, float value);
 
-static esp_err_t clipboard_copy(Clipboard_t type)
+static esp_err_t settings_copy(Clipboard_t type, tSettingsClipboard *settings)
 {
     tModellerParameter* param_ptr = NULL;
 
@@ -461,53 +478,53 @@ static esp_err_t clipboard_copy(Clipboard_t type)
         return ESP_FAIL;
     }
 
-    settingsClipboard.type = type;
+    settings->type = type;
 
     switch (type) {
         case CLIPBOARD_NONE: {
         } break;
 
         case CLIPBOARD_GATE: {
-            settingsClipboard.param1 = param_ptr[TONEX_PARAM_NOISE_GATE_THRESHOLD].Value;
-            settingsClipboard.param2 = param_ptr[TONEX_PARAM_NOISE_GATE_RELEASE].Value;
-            settingsClipboard.param3 = param_ptr[TONEX_PARAM_NOISE_GATE_DEPTH].Value;
+            settings->param1 = param_ptr[TONEX_PARAM_NOISE_GATE_THRESHOLD].Value;
+            settings->param2 = param_ptr[TONEX_PARAM_NOISE_GATE_RELEASE].Value;
+            settings->param3 = param_ptr[TONEX_PARAM_NOISE_GATE_DEPTH].Value;
         } break;
 
         case CLIPBOARD_COMPRESSOR: {
-            settingsClipboard.param1 = param_ptr[TONEX_PARAM_COMP_THRESHOLD].Value;
-            settingsClipboard.param2 = param_ptr[TONEX_PARAM_COMP_MAKE_UP].Value;
-            settingsClipboard.param3 = param_ptr[TONEX_PARAM_COMP_ATTACK].Value;
+            settings->param1 = param_ptr[TONEX_PARAM_COMP_THRESHOLD].Value;
+            settings->param2 = param_ptr[TONEX_PARAM_COMP_MAKE_UP].Value;
+            settings->param3 = param_ptr[TONEX_PARAM_COMP_ATTACK].Value;
         } break;
 
         case CLIPBOARD_AMP: {
-            settingsClipboard.param1 = param_ptr[TONEX_PARAM_MODEL_GAIN].Value;
-            settingsClipboard.param2 = param_ptr[TONEX_PARAM_MODEL_VOLUME].Value;
-            settingsClipboard.param3 = param_ptr[TONEX_PARAM_MODEX_MIX].Value;
-            settingsClipboard.param4 = param_ptr[TONEX_PARAM_VIR_CABINET_MODEL].Value;
+            settings->param1 = param_ptr[TONEX_PARAM_MODEL_GAIN].Value;
+            settings->param2 = param_ptr[TONEX_PARAM_MODEL_VOLUME].Value;
+            settings->param3 = param_ptr[TONEX_PARAM_MODEX_MIX].Value;
+            settings->param4 = param_ptr[TONEX_PARAM_VIR_CABINET_MODEL].Value;
         } break;
 
         case CLIPBOARD_CAB: {
-            settingsClipboard.param1 = param_ptr[TONEX_PARAM_VIR_CABINET_MODEL].Value;
-            settingsClipboard.param2 = param_ptr[TONEX_PARAM_VIR_RESO].Value;
-            settingsClipboard.param3 = param_ptr[TONEX_PARAM_VIR_MIC_1].Value;
-            settingsClipboard.param4 = param_ptr[TONEX_PARAM_VIR_MIC_1_X].Value;
-            settingsClipboard.param5 = param_ptr[TONEX_PARAM_VIR_MIC_1_Z].Value;
-            settingsClipboard.param6 = param_ptr[TONEX_PARAM_VIR_MIC_2].Value;
-            settingsClipboard.param7 = param_ptr[TONEX_PARAM_VIR_MIC_2_X].Value;
-            settingsClipboard.param8 = param_ptr[TONEX_PARAM_VIR_MIC_2_Z].Value;
-            settingsClipboard.param9 = param_ptr[TONEX_PARAM_VIR_BLEND].Value;
+            settings->param1 = param_ptr[TONEX_PARAM_VIR_CABINET_MODEL].Value;
+            settings->param2 = param_ptr[TONEX_PARAM_VIR_RESO].Value;
+            settings->param3 = param_ptr[TONEX_PARAM_VIR_MIC_1].Value;
+            settings->param4 = param_ptr[TONEX_PARAM_VIR_MIC_1_X].Value;
+            settings->param5 = param_ptr[TONEX_PARAM_VIR_MIC_1_Z].Value;
+            settings->param6 = param_ptr[TONEX_PARAM_VIR_MIC_2].Value;
+            settings->param7 = param_ptr[TONEX_PARAM_VIR_MIC_2_X].Value;
+            settings->param8 = param_ptr[TONEX_PARAM_VIR_MIC_2_Z].Value;
+            settings->param9 = param_ptr[TONEX_PARAM_VIR_BLEND].Value;
         } break;
 
         case CLIPBOARD_EQ: {
-            settingsClipboard.param1 = param_ptr[TONEX_PARAM_EQ_BASS].Value;
-            settingsClipboard.param2 = param_ptr[TONEX_PARAM_EQ_BASS_FREQ].Value;
-            settingsClipboard.param3 = param_ptr[TONEX_PARAM_EQ_MID].Value;
-            settingsClipboard.param4 = param_ptr[TONEX_PARAM_EQ_MIDQ].Value;
-            settingsClipboard.param5 = param_ptr[TONEX_PARAM_EQ_MID_FREQ].Value;
-            settingsClipboard.param6 = param_ptr[TONEX_PARAM_EQ_TREBLE].Value;
-            settingsClipboard.param7 = param_ptr[TONEX_PARAM_EQ_TREBLE_FREQ].Value;
-            settingsClipboard.param8 = param_ptr[TONEX_PARAM_MODEL_PRESENCE].Value;
-            settingsClipboard.param9 = param_ptr[TONEX_PARAM_MODEL_DEPTH].Value;
+            settings->param1 = param_ptr[TONEX_PARAM_EQ_BASS].Value;
+            settings->param2 = param_ptr[TONEX_PARAM_EQ_BASS_FREQ].Value;
+            settings->param3 = param_ptr[TONEX_PARAM_EQ_MID].Value;
+            settings->param4 = param_ptr[TONEX_PARAM_EQ_MIDQ].Value;
+            settings->param5 = param_ptr[TONEX_PARAM_EQ_MID_FREQ].Value;
+            settings->param6 = param_ptr[TONEX_PARAM_EQ_TREBLE].Value;
+            settings->param7 = param_ptr[TONEX_PARAM_EQ_TREBLE_FREQ].Value;
+            settings->param8 = param_ptr[TONEX_PARAM_MODEL_PRESENCE].Value;
+            settings->param9 = param_ptr[TONEX_PARAM_MODEL_DEPTH].Value;
         } break;
 
         case CLIPBOARD_DELAY: {
@@ -515,23 +532,23 @@ static esp_err_t clipboard_copy(Clipboard_t type)
             {
                 case TONEX_DELAY_DIGITAL:
                 {
-                    settingsClipboard.param1 = param_ptr[TONEX_PARAM_DELAY_DIGITAL_SYNC].Value;
-                    settingsClipboard.param2 = param_ptr[TONEX_PARAM_DELAY_DIGITAL_TS].Value;
-                    settingsClipboard.param3 = param_ptr[TONEX_PARAM_DELAY_DIGITAL_TIME].Value;
-                    settingsClipboard.param4 = param_ptr[TONEX_PARAM_DELAY_DIGITAL_FEEDBACK].Value;
-                    settingsClipboard.param5 = param_ptr[TONEX_PARAM_DELAY_DIGITAL_MODE].Value;
-                    settingsClipboard.param6 = param_ptr[TONEX_PARAM_DELAY_DIGITAL_MIX].Value;
+                    settings->param1 = param_ptr[TONEX_PARAM_DELAY_DIGITAL_SYNC].Value;
+                    settings->param2 = param_ptr[TONEX_PARAM_DELAY_DIGITAL_TS].Value;
+                    settings->param3 = param_ptr[TONEX_PARAM_DELAY_DIGITAL_TIME].Value;
+                    settings->param4 = param_ptr[TONEX_PARAM_DELAY_DIGITAL_FEEDBACK].Value;
+                    settings->param5 = param_ptr[TONEX_PARAM_DELAY_DIGITAL_MODE].Value;
+                    settings->param6 = param_ptr[TONEX_PARAM_DELAY_DIGITAL_MIX].Value;
                 } break;
 
                 case TONEX_DELAY_TAPE:
                 default:
                 {
-                    settingsClipboard.param1 = param_ptr[TONEX_PARAM_DELAY_TAPE_SYNC].Value;
-                    settingsClipboard.param2 = param_ptr[TONEX_PARAM_DELAY_TAPE_TS].Value;
-                    settingsClipboard.param3 = param_ptr[TONEX_PARAM_DELAY_TAPE_TIME].Value;
-                    settingsClipboard.param4 = param_ptr[TONEX_PARAM_DELAY_TAPE_FEEDBACK].Value;
-                    settingsClipboard.param5 = param_ptr[TONEX_PARAM_DELAY_TAPE_MODE].Value;
-                    settingsClipboard.param6 = param_ptr[TONEX_PARAM_DELAY_TAPE_MIX].Value;
+                    settings->param1 = param_ptr[TONEX_PARAM_DELAY_TAPE_SYNC].Value;
+                    settings->param2 = param_ptr[TONEX_PARAM_DELAY_TAPE_TS].Value;
+                    settings->param3 = param_ptr[TONEX_PARAM_DELAY_TAPE_TIME].Value;
+                    settings->param4 = param_ptr[TONEX_PARAM_DELAY_TAPE_FEEDBACK].Value;
+                    settings->param5 = param_ptr[TONEX_PARAM_DELAY_TAPE_MODE].Value;
+                    settings->param6 = param_ptr[TONEX_PARAM_DELAY_TAPE_MIX].Value;
                 } break;
             }
         } break;
@@ -541,101 +558,101 @@ static esp_err_t clipboard_copy(Clipboard_t type)
             {
                 case TONEX_REVERB_SPRING_1:
                 {
-                    settingsClipboard.param1 = param_ptr[TONEX_PARAM_REVERB_SPRING1_TIME].Value;
-                    settingsClipboard.param2 = param_ptr[TONEX_PARAM_REVERB_SPRING1_PREDELAY].Value;
-                    settingsClipboard.param3 = param_ptr[TONEX_PARAM_REVERB_SPRING1_COLOR].Value;
-                    settingsClipboard.param4 = param_ptr[TONEX_PARAM_REVERB_SPRING1_MIX].Value;
+                    settings->param1 = param_ptr[TONEX_PARAM_REVERB_SPRING1_TIME].Value;
+                    settings->param2 = param_ptr[TONEX_PARAM_REVERB_SPRING1_PREDELAY].Value;
+                    settings->param3 = param_ptr[TONEX_PARAM_REVERB_SPRING1_COLOR].Value;
+                    settings->param4 = param_ptr[TONEX_PARAM_REVERB_SPRING1_MIX].Value;
                 } break;
 
                 case TONEX_REVERB_SPRING_2:
                 {
-                    settingsClipboard.param1 = param_ptr[TONEX_PARAM_REVERB_SPRING2_TIME].Value;
-                    settingsClipboard.param2 = param_ptr[TONEX_PARAM_REVERB_SPRING2_PREDELAY].Value;
-                    settingsClipboard.param3 = param_ptr[TONEX_PARAM_REVERB_SPRING2_COLOR].Value;
-                    settingsClipboard.param4 = param_ptr[TONEX_PARAM_REVERB_SPRING2_MIX].Value;
+                    settings->param1 = param_ptr[TONEX_PARAM_REVERB_SPRING2_TIME].Value;
+                    settings->param2 = param_ptr[TONEX_PARAM_REVERB_SPRING2_PREDELAY].Value;
+                    settings->param3 = param_ptr[TONEX_PARAM_REVERB_SPRING2_COLOR].Value;
+                    settings->param4 = param_ptr[TONEX_PARAM_REVERB_SPRING2_MIX].Value;
                 } break;
 
                 case TONEX_REVERB_SPRING_3:
                 {
-                    settingsClipboard.param1 = param_ptr[TONEX_PARAM_REVERB_SPRING3_TIME].Value;
-                    settingsClipboard.param2 = param_ptr[TONEX_PARAM_REVERB_SPRING3_PREDELAY].Value;
-                    settingsClipboard.param3 = param_ptr[TONEX_PARAM_REVERB_SPRING3_COLOR].Value;
-                    settingsClipboard.param4 = param_ptr[TONEX_PARAM_REVERB_SPRING3_MIX].Value;
+                    settings->param1 = param_ptr[TONEX_PARAM_REVERB_SPRING3_TIME].Value;
+                    settings->param2 = param_ptr[TONEX_PARAM_REVERB_SPRING3_PREDELAY].Value;
+                    settings->param3 = param_ptr[TONEX_PARAM_REVERB_SPRING3_COLOR].Value;
+                    settings->param4 = param_ptr[TONEX_PARAM_REVERB_SPRING3_MIX].Value;
                 } break;
 
                 case TONEX_REVERB_SPRING_4:
                 {
-                    settingsClipboard.param1 = param_ptr[TONEX_PARAM_REVERB_SPRING4_TIME].Value;
-                    settingsClipboard.param2 = param_ptr[TONEX_PARAM_REVERB_SPRING4_PREDELAY].Value;
-                    settingsClipboard.param3 = param_ptr[TONEX_PARAM_REVERB_SPRING4_COLOR].Value;
-                    settingsClipboard.param4 = param_ptr[TONEX_PARAM_REVERB_SPRING4_MIX].Value;
+                    settings->param1 = param_ptr[TONEX_PARAM_REVERB_SPRING4_TIME].Value;
+                    settings->param2 = param_ptr[TONEX_PARAM_REVERB_SPRING4_PREDELAY].Value;
+                    settings->param3 = param_ptr[TONEX_PARAM_REVERB_SPRING4_COLOR].Value;
+                    settings->param4 = param_ptr[TONEX_PARAM_REVERB_SPRING4_MIX].Value;
                 } break;
 
                 case TONEX_REVERB_ROOM:
                 {
-                    settingsClipboard.param1 = param_ptr[TONEX_PARAM_REVERB_ROOM_TIME].Value;
-                    settingsClipboard.param2 = param_ptr[TONEX_PARAM_REVERB_ROOM_PREDELAY].Value;
-                    settingsClipboard.param3 = param_ptr[TONEX_PARAM_REVERB_ROOM_COLOR].Value;
-                    settingsClipboard.param4 = param_ptr[TONEX_PARAM_REVERB_ROOM_MIX].Value;
+                    settings->param1 = param_ptr[TONEX_PARAM_REVERB_ROOM_TIME].Value;
+                    settings->param2 = param_ptr[TONEX_PARAM_REVERB_ROOM_PREDELAY].Value;
+                    settings->param3 = param_ptr[TONEX_PARAM_REVERB_ROOM_COLOR].Value;
+                    settings->param4 = param_ptr[TONEX_PARAM_REVERB_ROOM_MIX].Value;
                 } break;
 
                 case TONEX_REVERB_PLATE:
                 {
-                    settingsClipboard.param1 = param_ptr[TONEX_PARAM_REVERB_PLATE_TIME].Value;
-                    settingsClipboard.param2 = param_ptr[TONEX_PARAM_REVERB_PLATE_PREDELAY].Value;
-                    settingsClipboard.param3 = param_ptr[TONEX_PARAM_REVERB_PLATE_COLOR].Value;
-                    settingsClipboard.param4 = param_ptr[TONEX_PARAM_REVERB_PLATE_MIX].Value;
+                    settings->param1 = param_ptr[TONEX_PARAM_REVERB_PLATE_TIME].Value;
+                    settings->param2 = param_ptr[TONEX_PARAM_REVERB_PLATE_PREDELAY].Value;
+                    settings->param3 = param_ptr[TONEX_PARAM_REVERB_PLATE_COLOR].Value;
+                    settings->param4 = param_ptr[TONEX_PARAM_REVERB_PLATE_MIX].Value;
                 } break;
             }
         } break;
 
         case CLIPBOARD_MODULATION: {
             float model = param_ptr[TONEX_PARAM_MODULATION_MODEL].Value;
-            settingsClipboard.param1 = model;
+            settings->param1 = model;
 
             switch ((int)model)
             {
                 case TONEX_MODULATION_CHORUS: {
-                    settingsClipboard.param2 = param_ptr[TONEX_PARAM_MODULATION_CHORUS_SYNC].Value;
-                    settingsClipboard.param3 = param_ptr[TONEX_PARAM_MODULATION_CHORUS_TS].Value;
-                    settingsClipboard.param4 = param_ptr[TONEX_PARAM_MODULATION_CHORUS_RATE].Value;
-                    settingsClipboard.param5 = param_ptr[TONEX_PARAM_MODULATION_CHORUS_DEPTH].Value;
-                    settingsClipboard.param6 = param_ptr[TONEX_PARAM_MODULATION_CHORUS_LEVEL].Value;
+                    settings->param2 = param_ptr[TONEX_PARAM_MODULATION_CHORUS_SYNC].Value;
+                    settings->param3 = param_ptr[TONEX_PARAM_MODULATION_CHORUS_TS].Value;
+                    settings->param4 = param_ptr[TONEX_PARAM_MODULATION_CHORUS_RATE].Value;
+                    settings->param5 = param_ptr[TONEX_PARAM_MODULATION_CHORUS_DEPTH].Value;
+                    settings->param6 = param_ptr[TONEX_PARAM_MODULATION_CHORUS_LEVEL].Value;
                 } break;
                 
                 case TONEX_MODULATION_TREMOLO: {
-                    settingsClipboard.param2 = param_ptr[TONEX_PARAM_MODULATION_TREMOLO_SYNC].Value;
-                    settingsClipboard.param3 = param_ptr[TONEX_PARAM_MODULATION_TREMOLO_TS].Value;
-                    settingsClipboard.param4 = param_ptr[TONEX_PARAM_MODULATION_TREMOLO_RATE].Value;
-                    settingsClipboard.param5 = param_ptr[TONEX_PARAM_MODULATION_TREMOLO_SHAPE].Value;
-                    settingsClipboard.param6 = param_ptr[TONEX_PARAM_MODULATION_TREMOLO_SPREAD].Value;
-                    settingsClipboard.param7 = param_ptr[TONEX_PARAM_MODULATION_TREMOLO_LEVEL].Value;
+                    settings->param2 = param_ptr[TONEX_PARAM_MODULATION_TREMOLO_SYNC].Value;
+                    settings->param3 = param_ptr[TONEX_PARAM_MODULATION_TREMOLO_TS].Value;
+                    settings->param4 = param_ptr[TONEX_PARAM_MODULATION_TREMOLO_RATE].Value;
+                    settings->param5 = param_ptr[TONEX_PARAM_MODULATION_TREMOLO_SHAPE].Value;
+                    settings->param6 = param_ptr[TONEX_PARAM_MODULATION_TREMOLO_SPREAD].Value;
+                    settings->param7 = param_ptr[TONEX_PARAM_MODULATION_TREMOLO_LEVEL].Value;
                 } break;
                 
                 case TONEX_MODULATION_PHASER: {
-                    settingsClipboard.param2 = param_ptr[TONEX_PARAM_MODULATION_PHASER_SYNC].Value;
-                    settingsClipboard.param3 = param_ptr[TONEX_PARAM_MODULATION_PHASER_TS].Value;
-                    settingsClipboard.param4 = param_ptr[TONEX_PARAM_MODULATION_PHASER_RATE].Value;
-                    settingsClipboard.param5 = param_ptr[TONEX_PARAM_MODULATION_PHASER_DEPTH].Value;
-                    settingsClipboard.param6 = param_ptr[TONEX_PARAM_MODULATION_PHASER_LEVEL].Value;
+                    settings->param2 = param_ptr[TONEX_PARAM_MODULATION_PHASER_SYNC].Value;
+                    settings->param3 = param_ptr[TONEX_PARAM_MODULATION_PHASER_TS].Value;
+                    settings->param4 = param_ptr[TONEX_PARAM_MODULATION_PHASER_RATE].Value;
+                    settings->param5 = param_ptr[TONEX_PARAM_MODULATION_PHASER_DEPTH].Value;
+                    settings->param6 = param_ptr[TONEX_PARAM_MODULATION_PHASER_LEVEL].Value;
                 } break;
                 
                 case TONEX_MODULATION_FLANGER: {
-                    settingsClipboard.param2 = param_ptr[TONEX_PARAM_MODULATION_FLANGER_SYNC].Value;
-                    settingsClipboard.param3 = param_ptr[TONEX_PARAM_MODULATION_FLANGER_TS].Value;
-                    settingsClipboard.param4 = param_ptr[TONEX_PARAM_MODULATION_FLANGER_RATE].Value;
-                    settingsClipboard.param5 = param_ptr[TONEX_PARAM_MODULATION_FLANGER_DEPTH].Value;
-                    settingsClipboard.param6 = param_ptr[TONEX_PARAM_MODULATION_FLANGER_FEEDBACK].Value;
-                    settingsClipboard.param7 = param_ptr[TONEX_PARAM_MODULATION_FLANGER_LEVEL].Value;
+                    settings->param2 = param_ptr[TONEX_PARAM_MODULATION_FLANGER_SYNC].Value;
+                    settings->param3 = param_ptr[TONEX_PARAM_MODULATION_FLANGER_TS].Value;
+                    settings->param4 = param_ptr[TONEX_PARAM_MODULATION_FLANGER_RATE].Value;
+                    settings->param5 = param_ptr[TONEX_PARAM_MODULATION_FLANGER_DEPTH].Value;
+                    settings->param6 = param_ptr[TONEX_PARAM_MODULATION_FLANGER_FEEDBACK].Value;
+                    settings->param7 = param_ptr[TONEX_PARAM_MODULATION_FLANGER_LEVEL].Value;
                 } break;
                 
                 case TONEX_MODULATION_ROTARY: {
-                    settingsClipboard.param2 = param_ptr[TONEX_PARAM_MODULATION_ROTARY_SYNC].Value;
-                    settingsClipboard.param3 = param_ptr[TONEX_PARAM_MODULATION_ROTARY_TS].Value;
-                    settingsClipboard.param4 = param_ptr[TONEX_PARAM_MODULATION_ROTARY_SPEED].Value;
-                    settingsClipboard.param5 = param_ptr[TONEX_PARAM_MODULATION_ROTARY_RADIUS].Value;
-                    settingsClipboard.param6 = param_ptr[TONEX_PARAM_MODULATION_ROTARY_SPREAD].Value;
-                    settingsClipboard.param7 = param_ptr[TONEX_PARAM_MODULATION_ROTARY_LEVEL].Value;
+                    settings->param2 = param_ptr[TONEX_PARAM_MODULATION_ROTARY_SYNC].Value;
+                    settings->param3 = param_ptr[TONEX_PARAM_MODULATION_ROTARY_TS].Value;
+                    settings->param4 = param_ptr[TONEX_PARAM_MODULATION_ROTARY_SPEED].Value;
+                    settings->param5 = param_ptr[TONEX_PARAM_MODULATION_ROTARY_RADIUS].Value;
+                    settings->param6 = param_ptr[TONEX_PARAM_MODULATION_ROTARY_SPREAD].Value;
+                    settings->param7 = param_ptr[TONEX_PARAM_MODULATION_ROTARY_LEVEL].Value;
                 } break;
             }
         } break;
@@ -643,7 +660,6 @@ static esp_err_t clipboard_copy(Clipboard_t type)
 
     tonex_params_release_locked_access();
 
-    UI_SettingsCopied(type);
 
     return ESP_OK;
 }
@@ -661,60 +677,60 @@ static esp_err_t clipboard_paste_param(TonexParameter_t index, float value)
     return ESP_OK;
 }
 
-static esp_err_t clipboard_paste()
+static esp_err_t settings_paste(const tSettingsClipboard *settings)
 {
-    if (settingsClipboard.type == CLIPBOARD_NONE) {
+    if (settings->type == CLIPBOARD_NONE) {
         return ESP_FAIL;
     }
 
     esp_err_t res = ESP_OK;
 
 
-    switch (settingsClipboard.type) {
+    switch (settings->type) {
         case CLIPBOARD_NONE: {
         } break;
 
         case CLIPBOARD_GATE: {
-            res |= clipboard_paste_param(TONEX_PARAM_NOISE_GATE_THRESHOLD, settingsClipboard.param1);
-            res |= clipboard_paste_param(TONEX_PARAM_NOISE_GATE_RELEASE, settingsClipboard.param2);
-            res |= clipboard_paste_param(TONEX_PARAM_NOISE_GATE_DEPTH, settingsClipboard.param3);
+            res |= clipboard_paste_param(TONEX_PARAM_NOISE_GATE_THRESHOLD, settings->param1);
+            res |= clipboard_paste_param(TONEX_PARAM_NOISE_GATE_RELEASE, settings->param2);
+            res |= clipboard_paste_param(TONEX_PARAM_NOISE_GATE_DEPTH, settings->param3);
         } break;
 
         case CLIPBOARD_COMPRESSOR: {
-            res |= clipboard_paste_param(TONEX_PARAM_COMP_THRESHOLD, settingsClipboard.param1);
-            res |= clipboard_paste_param(TONEX_PARAM_COMP_MAKE_UP, settingsClipboard.param2);
-            res |= clipboard_paste_param(TONEX_PARAM_COMP_ATTACK, settingsClipboard.param3);
+            res |= clipboard_paste_param(TONEX_PARAM_COMP_THRESHOLD, settings->param1);
+            res |= clipboard_paste_param(TONEX_PARAM_COMP_MAKE_UP, settings->param2);
+            res |= clipboard_paste_param(TONEX_PARAM_COMP_ATTACK, settings->param3);
         } break;
 
         case CLIPBOARD_AMP: {
-            res |= clipboard_paste_param(TONEX_PARAM_MODEL_GAIN, settingsClipboard.param1);
-            res |= clipboard_paste_param(TONEX_PARAM_MODEL_VOLUME, settingsClipboard.param2);
-            res |= clipboard_paste_param(TONEX_PARAM_MODEX_MIX, settingsClipboard.param3);
-            res |= clipboard_paste_param(TONEX_PARAM_VIR_CABINET_MODEL, settingsClipboard.param4);
+            res |= clipboard_paste_param(TONEX_PARAM_MODEL_GAIN, settings->param1);
+            res |= clipboard_paste_param(TONEX_PARAM_MODEL_VOLUME, settings->param2);
+            res |= clipboard_paste_param(TONEX_PARAM_MODEX_MIX, settings->param3);
+            res |= clipboard_paste_param(TONEX_PARAM_VIR_CABINET_MODEL, settings->param4);
         } break;
 
         case CLIPBOARD_CAB: {
-            res |= clipboard_paste_param(TONEX_PARAM_VIR_CABINET_MODEL, settingsClipboard.param1);
-            res |= clipboard_paste_param(TONEX_PARAM_VIR_RESO, settingsClipboard.param2);
-            res |= clipboard_paste_param(TONEX_PARAM_VIR_MIC_1, settingsClipboard.param3);
-            res |= clipboard_paste_param(TONEX_PARAM_VIR_MIC_1_X, settingsClipboard.param4);
-            res |= clipboard_paste_param(TONEX_PARAM_VIR_MIC_1_Z, settingsClipboard.param5);
-            res |= clipboard_paste_param(TONEX_PARAM_VIR_MIC_2, settingsClipboard.param6);
-            res |= clipboard_paste_param(TONEX_PARAM_VIR_MIC_2_X, settingsClipboard.param7);
-            res |= clipboard_paste_param(TONEX_PARAM_VIR_MIC_2_Z, settingsClipboard.param8);
-            res |= clipboard_paste_param(TONEX_PARAM_VIR_BLEND, settingsClipboard.param9);
+            res |= clipboard_paste_param(TONEX_PARAM_VIR_CABINET_MODEL, settings->param1);
+            res |= clipboard_paste_param(TONEX_PARAM_VIR_RESO, settings->param2);
+            res |= clipboard_paste_param(TONEX_PARAM_VIR_MIC_1, settings->param3);
+            res |= clipboard_paste_param(TONEX_PARAM_VIR_MIC_1_X, settings->param4);
+            res |= clipboard_paste_param(TONEX_PARAM_VIR_MIC_1_Z, settings->param5);
+            res |= clipboard_paste_param(TONEX_PARAM_VIR_MIC_2, settings->param6);
+            res |= clipboard_paste_param(TONEX_PARAM_VIR_MIC_2_X, settings->param7);
+            res |= clipboard_paste_param(TONEX_PARAM_VIR_MIC_2_Z, settings->param8);
+            res |= clipboard_paste_param(TONEX_PARAM_VIR_BLEND, settings->param9);
         } break;
 
         case CLIPBOARD_EQ: {
-            res |= clipboard_paste_param(TONEX_PARAM_EQ_BASS, settingsClipboard.param1);
-            res |= clipboard_paste_param(TONEX_PARAM_EQ_BASS_FREQ, settingsClipboard.param2);
-            res |= clipboard_paste_param(TONEX_PARAM_EQ_MID, settingsClipboard.param3);
-            res |= clipboard_paste_param(TONEX_PARAM_EQ_MIDQ, settingsClipboard.param4);
-            res |= clipboard_paste_param(TONEX_PARAM_EQ_MID_FREQ, settingsClipboard.param5);
-            res |= clipboard_paste_param(TONEX_PARAM_EQ_TREBLE, settingsClipboard.param6);
-            res |= clipboard_paste_param(TONEX_PARAM_EQ_TREBLE_FREQ, settingsClipboard.param7);
-            res |= clipboard_paste_param(TONEX_PARAM_MODEL_PRESENCE, settingsClipboard.param8);
-            res |= clipboard_paste_param(TONEX_PARAM_MODEL_DEPTH, settingsClipboard.param9);
+            res |= clipboard_paste_param(TONEX_PARAM_EQ_BASS, settings->param1);
+            res |= clipboard_paste_param(TONEX_PARAM_EQ_BASS_FREQ, settings->param2);
+            res |= clipboard_paste_param(TONEX_PARAM_EQ_MID, settings->param3);
+            res |= clipboard_paste_param(TONEX_PARAM_EQ_MIDQ, settings->param4);
+            res |= clipboard_paste_param(TONEX_PARAM_EQ_MID_FREQ, settings->param5);
+            res |= clipboard_paste_param(TONEX_PARAM_EQ_TREBLE, settings->param6);
+            res |= clipboard_paste_param(TONEX_PARAM_EQ_TREBLE_FREQ, settings->param7);
+            res |= clipboard_paste_param(TONEX_PARAM_MODEL_PRESENCE, settings->param8);
+            res |= clipboard_paste_param(TONEX_PARAM_MODEL_DEPTH, settings->param9);
         } break;
 
         case CLIPBOARD_DELAY: {
@@ -729,23 +745,23 @@ static esp_err_t clipboard_paste()
             {
                 case TONEX_DELAY_DIGITAL:
                 {
-                    res |= clipboard_paste_param(TONEX_PARAM_DELAY_DIGITAL_SYNC, settingsClipboard.param1);
-                    res |= clipboard_paste_param(TONEX_PARAM_DELAY_DIGITAL_TS, settingsClipboard.param2);
-                    res |= clipboard_paste_param(TONEX_PARAM_DELAY_DIGITAL_TIME, settingsClipboard.param3);
-                    res |= clipboard_paste_param(TONEX_PARAM_DELAY_DIGITAL_FEEDBACK, settingsClipboard.param4);
-                    res |= clipboard_paste_param(TONEX_PARAM_DELAY_DIGITAL_MODE, settingsClipboard.param5);
-                    res |= clipboard_paste_param(TONEX_PARAM_DELAY_DIGITAL_MIX, settingsClipboard.param6);
+                    res |= clipboard_paste_param(TONEX_PARAM_DELAY_DIGITAL_SYNC, settings->param1);
+                    res |= clipboard_paste_param(TONEX_PARAM_DELAY_DIGITAL_TS, settings->param2);
+                    res |= clipboard_paste_param(TONEX_PARAM_DELAY_DIGITAL_TIME, settings->param3);
+                    res |= clipboard_paste_param(TONEX_PARAM_DELAY_DIGITAL_FEEDBACK, settings->param4);
+                    res |= clipboard_paste_param(TONEX_PARAM_DELAY_DIGITAL_MODE, settings->param5);
+                    res |= clipboard_paste_param(TONEX_PARAM_DELAY_DIGITAL_MIX, settings->param6);
                 } break;
 
                 case TONEX_DELAY_TAPE:
                 default:
                 {
-                    res |= clipboard_paste_param(TONEX_PARAM_DELAY_TAPE_SYNC, settingsClipboard.param1);
-                    res |= clipboard_paste_param(TONEX_PARAM_DELAY_TAPE_TS, settingsClipboard.param2);
-                    res |= clipboard_paste_param(TONEX_PARAM_DELAY_TAPE_TIME, settingsClipboard.param3);
-                    res |= clipboard_paste_param(TONEX_PARAM_DELAY_TAPE_FEEDBACK, settingsClipboard.param4);
-                    res |= clipboard_paste_param(TONEX_PARAM_DELAY_TAPE_MODE, settingsClipboard.param5);
-                    res |= clipboard_paste_param(TONEX_PARAM_DELAY_TAPE_MIX, settingsClipboard.param6);
+                    res |= clipboard_paste_param(TONEX_PARAM_DELAY_TAPE_SYNC, settings->param1);
+                    res |= clipboard_paste_param(TONEX_PARAM_DELAY_TAPE_TS, settings->param2);
+                    res |= clipboard_paste_param(TONEX_PARAM_DELAY_TAPE_TIME, settings->param3);
+                    res |= clipboard_paste_param(TONEX_PARAM_DELAY_TAPE_FEEDBACK, settings->param4);
+                    res |= clipboard_paste_param(TONEX_PARAM_DELAY_TAPE_MODE, settings->param5);
+                    res |= clipboard_paste_param(TONEX_PARAM_DELAY_TAPE_MIX, settings->param6);
                 } break;
             }
         } break;
@@ -762,107 +778,227 @@ static esp_err_t clipboard_paste()
             {
                 case TONEX_REVERB_SPRING_1:
                 {
-                    res |= clipboard_paste_param(TONEX_PARAM_REVERB_SPRING1_TIME, settingsClipboard.param1);
-                    res |= clipboard_paste_param(TONEX_PARAM_REVERB_SPRING1_PREDELAY, settingsClipboard.param2);
-                    res |= clipboard_paste_param(TONEX_PARAM_REVERB_SPRING1_COLOR, settingsClipboard.param3);
-                    res |= clipboard_paste_param(TONEX_PARAM_REVERB_SPRING1_MIX, settingsClipboard.param4);
+                    res |= clipboard_paste_param(TONEX_PARAM_REVERB_SPRING1_TIME, settings->param1);
+                    res |= clipboard_paste_param(TONEX_PARAM_REVERB_SPRING1_PREDELAY, settings->param2);
+                    res |= clipboard_paste_param(TONEX_PARAM_REVERB_SPRING1_COLOR, settings->param3);
+                    res |= clipboard_paste_param(TONEX_PARAM_REVERB_SPRING1_MIX, settings->param4);
                 } break;
 
                 case TONEX_REVERB_SPRING_2:
                 {
-                    res |= clipboard_paste_param(TONEX_PARAM_REVERB_SPRING2_TIME, settingsClipboard.param1);
-                    res |= clipboard_paste_param(TONEX_PARAM_REVERB_SPRING2_PREDELAY, settingsClipboard.param2);
-                    res |= clipboard_paste_param(TONEX_PARAM_REVERB_SPRING2_COLOR, settingsClipboard.param3);
-                    res |= clipboard_paste_param(TONEX_PARAM_REVERB_SPRING2_MIX, settingsClipboard.param4);
+                    res |= clipboard_paste_param(TONEX_PARAM_REVERB_SPRING2_TIME, settings->param1);
+                    res |= clipboard_paste_param(TONEX_PARAM_REVERB_SPRING2_PREDELAY, settings->param2);
+                    res |= clipboard_paste_param(TONEX_PARAM_REVERB_SPRING2_COLOR, settings->param3);
+                    res |= clipboard_paste_param(TONEX_PARAM_REVERB_SPRING2_MIX, settings->param4);
                 } break;
 
                 case TONEX_REVERB_SPRING_3:
                 {
-                    res |= clipboard_paste_param(TONEX_PARAM_REVERB_SPRING3_TIME, settingsClipboard.param1);
-                    res |= clipboard_paste_param(TONEX_PARAM_REVERB_SPRING3_PREDELAY, settingsClipboard.param2);
-                    res |= clipboard_paste_param(TONEX_PARAM_REVERB_SPRING3_COLOR, settingsClipboard.param3);
-                    res |= clipboard_paste_param(TONEX_PARAM_REVERB_SPRING3_MIX, settingsClipboard.param4);
+                    res |= clipboard_paste_param(TONEX_PARAM_REVERB_SPRING3_TIME, settings->param1);
+                    res |= clipboard_paste_param(TONEX_PARAM_REVERB_SPRING3_PREDELAY, settings->param2);
+                    res |= clipboard_paste_param(TONEX_PARAM_REVERB_SPRING3_COLOR, settings->param3);
+                    res |= clipboard_paste_param(TONEX_PARAM_REVERB_SPRING3_MIX, settings->param4);
                 } break;
 
                 case TONEX_REVERB_SPRING_4:
                 {
-                    res |= clipboard_paste_param(TONEX_PARAM_REVERB_SPRING4_TIME, settingsClipboard.param1);
-                    res |= clipboard_paste_param(TONEX_PARAM_REVERB_SPRING4_PREDELAY, settingsClipboard.param2);
-                    res |= clipboard_paste_param(TONEX_PARAM_REVERB_SPRING4_COLOR, settingsClipboard.param3);
-                    res |= clipboard_paste_param(TONEX_PARAM_REVERB_SPRING4_MIX, settingsClipboard.param4);
+                    res |= clipboard_paste_param(TONEX_PARAM_REVERB_SPRING4_TIME, settings->param1);
+                    res |= clipboard_paste_param(TONEX_PARAM_REVERB_SPRING4_PREDELAY, settings->param2);
+                    res |= clipboard_paste_param(TONEX_PARAM_REVERB_SPRING4_COLOR, settings->param3);
+                    res |= clipboard_paste_param(TONEX_PARAM_REVERB_SPRING4_MIX, settings->param4);
                 } break;
 
                 case TONEX_REVERB_ROOM:
                 {
-                    res |= clipboard_paste_param(TONEX_PARAM_REVERB_ROOM_TIME, settingsClipboard.param1);
-                    res |= clipboard_paste_param(TONEX_PARAM_REVERB_ROOM_PREDELAY, settingsClipboard.param2);
-                    res |= clipboard_paste_param(TONEX_PARAM_REVERB_ROOM_COLOR, settingsClipboard.param3);
-                    res |= clipboard_paste_param(TONEX_PARAM_REVERB_ROOM_MIX, settingsClipboard.param4);
+                    res |= clipboard_paste_param(TONEX_PARAM_REVERB_ROOM_TIME, settings->param1);
+                    res |= clipboard_paste_param(TONEX_PARAM_REVERB_ROOM_PREDELAY, settings->param2);
+                    res |= clipboard_paste_param(TONEX_PARAM_REVERB_ROOM_COLOR, settings->param3);
+                    res |= clipboard_paste_param(TONEX_PARAM_REVERB_ROOM_MIX, settings->param4);
                 } break;
 
                 case TONEX_REVERB_PLATE:
                 default:
                 {
-                    res |= clipboard_paste_param(TONEX_PARAM_REVERB_PLATE_TIME, settingsClipboard.param1);
-                    res |= clipboard_paste_param(TONEX_PARAM_REVERB_PLATE_PREDELAY, settingsClipboard.param2);
-                    res |= clipboard_paste_param(TONEX_PARAM_REVERB_PLATE_COLOR, settingsClipboard.param3);
-                    res |= clipboard_paste_param(TONEX_PARAM_REVERB_PLATE_MIX, settingsClipboard.param4);
+                    res |= clipboard_paste_param(TONEX_PARAM_REVERB_PLATE_TIME, settings->param1);
+                    res |= clipboard_paste_param(TONEX_PARAM_REVERB_PLATE_PREDELAY, settings->param2);
+                    res |= clipboard_paste_param(TONEX_PARAM_REVERB_PLATE_COLOR, settings->param3);
+                    res |= clipboard_paste_param(TONEX_PARAM_REVERB_PLATE_MIX, settings->param4);
                 } break;
             }
         } break;
 
         case CLIPBOARD_MODULATION: {
-            res |= clipboard_paste_param(TONEX_PARAM_MODULATION_MODEL, settingsClipboard.param1);
+            res |= clipboard_paste_param(TONEX_PARAM_MODULATION_MODEL, settings->param1);
 
-            switch ((int)settingsClipboard.param1)
+            switch ((int)settings->param1)
             {
                 case TONEX_MODULATION_CHORUS: {
-                    res |= clipboard_paste_param(TONEX_PARAM_MODULATION_CHORUS_SYNC, settingsClipboard.param2);
-                    res |= clipboard_paste_param(TONEX_PARAM_MODULATION_CHORUS_TS, settingsClipboard.param3);
-                    res |= clipboard_paste_param(TONEX_PARAM_MODULATION_CHORUS_RATE, settingsClipboard.param4);
-                    res |= clipboard_paste_param(TONEX_PARAM_MODULATION_CHORUS_DEPTH, settingsClipboard.param5);
-                    res |= clipboard_paste_param(TONEX_PARAM_MODULATION_CHORUS_LEVEL, settingsClipboard.param6);
+                    res |= clipboard_paste_param(TONEX_PARAM_MODULATION_CHORUS_SYNC, settings->param2);
+                    res |= clipboard_paste_param(TONEX_PARAM_MODULATION_CHORUS_TS, settings->param3);
+                    res |= clipboard_paste_param(TONEX_PARAM_MODULATION_CHORUS_RATE, settings->param4);
+                    res |= clipboard_paste_param(TONEX_PARAM_MODULATION_CHORUS_DEPTH, settings->param5);
+                    res |= clipboard_paste_param(TONEX_PARAM_MODULATION_CHORUS_LEVEL, settings->param6);
                 } break;
                 
                 case TONEX_MODULATION_TREMOLO: {
-                    res |= clipboard_paste_param(TONEX_PARAM_MODULATION_TREMOLO_SYNC, settingsClipboard.param2);
-                    res |= clipboard_paste_param(TONEX_PARAM_MODULATION_TREMOLO_TS, settingsClipboard.param3);
-                    res |= clipboard_paste_param(TONEX_PARAM_MODULATION_TREMOLO_RATE, settingsClipboard.param4);
-                    res |= clipboard_paste_param(TONEX_PARAM_MODULATION_TREMOLO_SHAPE, settingsClipboard.param5);
-                    res |= clipboard_paste_param(TONEX_PARAM_MODULATION_TREMOLO_SPREAD, settingsClipboard.param6);
-                    res |= clipboard_paste_param(TONEX_PARAM_MODULATION_TREMOLO_LEVEL, settingsClipboard.param7);
+                    res |= clipboard_paste_param(TONEX_PARAM_MODULATION_TREMOLO_SYNC, settings->param2);
+                    res |= clipboard_paste_param(TONEX_PARAM_MODULATION_TREMOLO_TS, settings->param3);
+                    res |= clipboard_paste_param(TONEX_PARAM_MODULATION_TREMOLO_RATE, settings->param4);
+                    res |= clipboard_paste_param(TONEX_PARAM_MODULATION_TREMOLO_SHAPE, settings->param5);
+                    res |= clipboard_paste_param(TONEX_PARAM_MODULATION_TREMOLO_SPREAD, settings->param6);
+                    res |= clipboard_paste_param(TONEX_PARAM_MODULATION_TREMOLO_LEVEL, settings->param7);
                 } break;
                 
                 case TONEX_MODULATION_PHASER: {
-                    res |= clipboard_paste_param(TONEX_PARAM_MODULATION_PHASER_SYNC, settingsClipboard.param2);
-                    res |= clipboard_paste_param(TONEX_PARAM_MODULATION_PHASER_TS, settingsClipboard.param3);
-                    res |= clipboard_paste_param(TONEX_PARAM_MODULATION_PHASER_RATE, settingsClipboard.param4);
-                    res |= clipboard_paste_param(TONEX_PARAM_MODULATION_PHASER_DEPTH, settingsClipboard.param5);
-                    res |= clipboard_paste_param(TONEX_PARAM_MODULATION_PHASER_LEVEL, settingsClipboard.param6);
+                    res |= clipboard_paste_param(TONEX_PARAM_MODULATION_PHASER_SYNC, settings->param2);
+                    res |= clipboard_paste_param(TONEX_PARAM_MODULATION_PHASER_TS, settings->param3);
+                    res |= clipboard_paste_param(TONEX_PARAM_MODULATION_PHASER_RATE, settings->param4);
+                    res |= clipboard_paste_param(TONEX_PARAM_MODULATION_PHASER_DEPTH, settings->param5);
+                    res |= clipboard_paste_param(TONEX_PARAM_MODULATION_PHASER_LEVEL, settings->param6);
                 } break;
                 
                 case TONEX_MODULATION_FLANGER: {
-                    res |= clipboard_paste_param(TONEX_PARAM_MODULATION_FLANGER_SYNC, settingsClipboard.param2);
-                    res |= clipboard_paste_param(TONEX_PARAM_MODULATION_FLANGER_TS, settingsClipboard.param3);
-                    res |= clipboard_paste_param(TONEX_PARAM_MODULATION_FLANGER_RATE, settingsClipboard.param4);
-                    res |= clipboard_paste_param(TONEX_PARAM_MODULATION_FLANGER_DEPTH, settingsClipboard.param5);
-                    res |= clipboard_paste_param(TONEX_PARAM_MODULATION_FLANGER_FEEDBACK, settingsClipboard.param6);
-                    res |= clipboard_paste_param(TONEX_PARAM_MODULATION_FLANGER_LEVEL, settingsClipboard.param7);
+                    res |= clipboard_paste_param(TONEX_PARAM_MODULATION_FLANGER_SYNC, settings->param2);
+                    res |= clipboard_paste_param(TONEX_PARAM_MODULATION_FLANGER_TS, settings->param3);
+                    res |= clipboard_paste_param(TONEX_PARAM_MODULATION_FLANGER_RATE, settings->param4);
+                    res |= clipboard_paste_param(TONEX_PARAM_MODULATION_FLANGER_DEPTH, settings->param5);
+                    res |= clipboard_paste_param(TONEX_PARAM_MODULATION_FLANGER_FEEDBACK, settings->param6);
+                    res |= clipboard_paste_param(TONEX_PARAM_MODULATION_FLANGER_LEVEL, settings->param7);
                 } break;
                 
                 case TONEX_MODULATION_ROTARY: {
-                    res |= clipboard_paste_param(TONEX_PARAM_MODULATION_ROTARY_SYNC, settingsClipboard.param2);
-                    res |= clipboard_paste_param(TONEX_PARAM_MODULATION_ROTARY_TS, settingsClipboard.param3);
-                    res |= clipboard_paste_param(TONEX_PARAM_MODULATION_ROTARY_SPEED, settingsClipboard.param4);
-                    res |= clipboard_paste_param(TONEX_PARAM_MODULATION_ROTARY_RADIUS, settingsClipboard.param5);
-                    res |= clipboard_paste_param(TONEX_PARAM_MODULATION_ROTARY_SPREAD, settingsClipboard.param6);
-                    res |= clipboard_paste_param(TONEX_PARAM_MODULATION_ROTARY_LEVEL, settingsClipboard.param7);
+                    res |= clipboard_paste_param(TONEX_PARAM_MODULATION_ROTARY_SYNC, settings->param2);
+                    res |= clipboard_paste_param(TONEX_PARAM_MODULATION_ROTARY_TS, settings->param3);
+                    res |= clipboard_paste_param(TONEX_PARAM_MODULATION_ROTARY_SPEED, settings->param4);
+                    res |= clipboard_paste_param(TONEX_PARAM_MODULATION_ROTARY_RADIUS, settings->param5);
+                    res |= clipboard_paste_param(TONEX_PARAM_MODULATION_ROTARY_SPREAD, settings->param6);
+                    res |= clipboard_paste_param(TONEX_PARAM_MODULATION_ROTARY_LEVEL, settings->param7);
                 } break;
             }
         } break;
     }
     
     return res;
+}
+
+// Versioned records are isolated from the scene catalog in the same NVS partition.
+static esp_err_t settings_default_key(Clipboard_t type, char *key, size_t size)
+{
+    if (type <= CLIPBOARD_NONE || type > CLIPBOARD_REVERB)
+    {
+        return ESP_ERR_INVALID_ARG;
+    }
+
+    uint8_t model = 0;
+    if (type == CLIPBOARD_DELAY || type == CLIPBOARD_REVERB || type == CLIPBOARD_MODULATION)
+    {
+        tModellerParameter *params = NULL;
+        esp_err_t err = tonex_params_get_locked_access(&params);
+        if (err != ESP_OK)
+        {
+            return err;
+        }
+        TonexParameter_t index;
+        switch (type) {
+            case CLIPBOARD_DELAY:  index = TONEX_PARAM_DELAY_MODEL; break;
+            case CLIPBOARD_REVERB: index = TONEX_PARAM_REVERB_MODEL; break;
+            default:               index = TONEX_PARAM_MODULATION_MODEL; break;
+        }
+        float value = params[index].Value;
+        tonex_params_release_locked_access();
+
+        uint8_t last;
+        switch (type) {
+            case CLIPBOARD_DELAY:  last = TONEX_DELAY_TAPE; break;
+            case CLIPBOARD_REVERB: last = TONEX_REVERB_PLATE; break;
+            default:               last = TONEX_MODULATION_ROTARY; break;
+        }
+
+        if (!isfinite(value) || value < 0 || value > last || value != floorf(value))
+        {
+            return ESP_ERR_INVALID_STATE;
+        }
+        model = (uint8_t)value;
+    }
+    snprintf(key, size, "set_%u_%u", (uint8_t)type, model);
+    return ESP_OK;
+}
+
+static esp_err_t settings_default_read(Clipboard_t type, tSettingsClipboard *settings)
+{
+    char key[16];
+    esp_err_t err = settings_default_key(type, key, sizeof(key));
+    if (err != ESP_OK)
+    {
+        return err;
+    }
+    nvs_handle_t handle;
+    err = nvs_open_from_partition(NVS_SCENES_PARTITION, NVS_FX_DEFAULTS_NAMESPACE, NVS_READONLY, &handle);
+    if (err != ESP_OK)
+    {
+        return err;
+    }
+    size_t size = sizeof(*settings);
+    err = nvs_get_blob(handle, key, settings, &size);
+    nvs_close(handle);
+    if (err == ESP_OK && (size != sizeof(*settings) || settings->type != type))
+    {
+        err = ESP_ERR_INVALID_SIZE;
+    }
+    return err;
+}
+
+bool usb_tonex_one_has_settings_default(Clipboard_t type)
+{
+    char key[16];
+    esp_err_t err = settings_default_key(type, key, sizeof(key));
+    if (err != ESP_OK)
+    {
+        return false;
+    }
+    nvs_handle_t handle;
+    err = nvs_open_from_partition(NVS_SCENES_PARTITION, NVS_FX_DEFAULTS_NAMESPACE, NVS_READONLY, &handle);
+    if (err != ESP_OK)
+    {
+        return false;
+    }
+    size_t size = 0;
+    err = nvs_get_blob(handle, key, NULL, &size);
+    nvs_close(handle);
+    return err == ESP_OK && size == sizeof(tSettingsClipboard);
+}
+
+static esp_err_t settings_default_save(Clipboard_t type)
+{
+    char key[16];
+    esp_err_t err = settings_default_key(type, key, sizeof(key));
+    if (err != ESP_OK)
+    {
+        return err;
+    }
+    tSettingsClipboard settings = {0};
+    err = settings_copy(type, &settings);
+    if (err != ESP_OK)
+    {
+        return err;
+    }
+    nvs_handle_t handle;
+    err = nvs_open_from_partition(NVS_SCENES_PARTITION, NVS_FX_DEFAULTS_NAMESPACE, NVS_READWRITE, &handle);
+    if (err != ESP_OK)
+    {
+        return err;
+    }
+    err = nvs_set_blob(handle, key, &settings, sizeof(settings));
+    if (err == ESP_OK)
+    {
+        err = nvs_commit(handle);
+    }
+    nvs_close(handle);
+    if (err == ESP_OK)
+    {
+        UI_SettingsCopied(settingsClipboard.type);
+    }
+    return err;
 }
 
 /****************************************************************************
@@ -2856,17 +2992,41 @@ void usb_tonex_one_handle(class_driver_t* driver_obj)
 
                     case USB_COMMAND_COPY_SETTINGS:
                     {
-                        if (clipboard_copy(message.Payload) != ESP_OK)
+                        if (settings_copy(message.Payload, &settingsClipboard) != ESP_OK)
                         {
                             ESP_LOGE(TAG, "Failed to copy settings");
                         }
+                        else UI_SettingsCopied(settingsClipboard.type);
                     } break;
 
                     case USB_COMMAND_PASTE_SETTINGS:
                     {
-                        if (clipboard_paste() != ESP_OK)
+                        if (settings_paste(&settingsClipboard) != ESP_OK)
                         {
                             ESP_LOGE(TAG, "Failed to paste settings");
+                        }
+                    } break;
+
+                    case USB_COMMAND_LOAD_SETTINGS_DEFAULT:
+                    {
+                        tSettingsClipboard settings;
+                        esp_err_t err = settings_default_read(message.Payload, &settings);
+                        if (err == ESP_OK)
+                        {
+                            err = settings_paste(&settings);
+                        }
+                        if (err != ESP_OK)
+                        {
+                            ESP_LOGE(TAG, "Failed to load default: %s", esp_err_to_name(err));
+                        }
+                    } break;
+
+                    case USB_COMMAND_SET_SETTINGS_AS_DEFAULT:
+                    {
+                        esp_err_t err = settings_default_save(message.Payload);
+                        if (err != ESP_OK)
+                        {
+                            ESP_LOGE(TAG, "Failed to save default: %s", esp_err_to_name(err));
                         }
                     } break;
 

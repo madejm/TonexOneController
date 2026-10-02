@@ -45,6 +45,7 @@ limitations under the License.
 #include "midi_helper.h"
 #include "tonex_params.h"
 #include "display.h"
+#include "display_tap_tempo.h"
 #include "fx_handler_helper.h"
 
 #define FOOTSWITCH_TASK_STACK_SIZE          (3 * 1024)
@@ -119,6 +120,7 @@ typedef struct
     uint32_t external_press_started_tick;
     bool external_press_alt_mode;
     bool external_long_press_handled;
+    bool external_tap_tempo_pressed;
 } tFootswitchControl;
 
 typedef struct
@@ -156,6 +158,14 @@ static const __attribute__((unused)) tFootswitchLayoutEntry FootswitchLayouts[FO
 
 static void footswitch_toggle_alt_mode(void)
 {
+#if CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI && CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+    if (display_tap_tempo_is_open())
+    {
+        UI_CloseTapTempoDialog();
+        return;
+    }
+#endif
+
     if (UI_ShowScreen1IfNeeded())
     {
         return;
@@ -749,7 +759,8 @@ static void footswitch_execute_external_effects(uint16_t pressed_mask, bool alt_
         if (is_tap_tempo)
         {
             ESP_LOGI(TAG, "Footswitch Tap Tempo action");
-            control_trigger_tap_tempo_at(tap_tempo_tick);
+            UI_TapTempoFootswitchTapped();
+            control_trigger_tap_tempo_from_footswitch_at(tap_tempo_tick);
             break;
         }
 
@@ -985,6 +996,15 @@ static void footswitch_handle_external_release(void)
         // individual switches are pressed or released a few milliseconds apart.
         FootswitchControl.external_pressed_mask |= pressed_mask;
 
+        if (!FootswitchControl.external_tap_tempo_pressed &&
+            footswitch_external_effect_is_tap_tempo(
+                FootswitchControl.external_pressed_mask,
+                FootswitchControl.external_press_alt_mode))
+        {
+            FootswitchControl.external_tap_tempo_pressed = true;
+            UI_SetTapTempoFootswitchPressed(true);
+        }
+
         if (!FootswitchControl.external_long_press_handled &&
             footswitch_external_effect_is_alt_mode(
                 FootswitchControl.external_pressed_mask,
@@ -1025,6 +1045,12 @@ static void footswitch_handle_external_release(void)
 
     if (FootswitchControl.external_pressed_mask != 0)
     {
+        if (FootswitchControl.external_tap_tempo_pressed)
+        {
+            UI_SetTapTempoFootswitchPressed(false);
+            FootswitchControl.external_tap_tempo_pressed = false;
+        }
+
         if (!FootswitchControl.external_long_press_handled)
         {
             bool action_alt_mode = FootswitchControl.external_press_alt_mode;

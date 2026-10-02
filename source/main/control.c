@@ -68,6 +68,7 @@ limitations under the License.
 
 #define MAX_CONFIG_SAVE_RETRIES             10
 #define CONTROL_QUEUE_WRITE_TIMEOUT         1000    // msec
+#define TAP_TEMPO_SOURCE_FOOTSWITCH          1
 
 enum CommandEvents
 {
@@ -1359,6 +1360,8 @@ static uint8_t process_control_command(tControlMessage* message)
 
                 ControlData.TapTempo.BPM = bpm;
 
+                UI_TapTempoChanged(bpm, message->Item == TAP_TEMPO_SOURCE_FOOTSWITCH);
+
                 ESP_LOGI(TAG, "Tap Tempo BPM = %d", (int)bpm);
 
                 // update pedal
@@ -1855,6 +1858,22 @@ void control_trigger_tap_tempo_at(uint32_t tick_count)
     if (xQueueSend(control_input_queue, (void*)&message, pdMS_TO_TICKS(CONTROL_QUEUE_WRITE_TIMEOUT)) != pdPASS)
     {
         ESP_LOGE(TAG, "control_trigger_tap_tempo queue send failed!");            
+    }
+}
+
+void control_trigger_tap_tempo_from_footswitch_at(uint32_t tick_count)
+{
+    tControlMessage message = {0};
+
+    ESP_LOGI(TAG, "control_trigger_tap_tempo_from_footswitch");
+
+    message.Event = EVENT_TRIGGER_TAP_TEMPO;
+    message.Value = tick_count;
+    message.Item = TAP_TEMPO_SOURCE_FOOTSWITCH;
+
+    if (xQueueSend(control_input_queue, (void*)&message, pdMS_TO_TICKS(CONTROL_QUEUE_WRITE_TIMEOUT)) != pdPASS)
+    {
+        ESP_LOGE(TAG, "control_trigger_tap_tempo queue send failed!");
     }
 }
 

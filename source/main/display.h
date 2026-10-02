@@ -68,6 +68,10 @@ void UI_SetTunerFrequencies(float error, float ref_freq, uint8_t midi_note);
 void UI_SetTunerState(uint8_t state);
 void UI_SetProgressBar(uint8_t progress, char *title);
 void UI_HideProgressBar(void);
+void UI_TapTempoChanged(float bpm, bool footswitch);
+void UI_TapTempoFootswitchTapped(void);
+void UI_SetTapTempoFootswitchPressed(bool pressed);
+void UI_CloseTapTempoDialog(void);
 void UI_Log(const char *format, ...);
 
 #define UI_Log_Delay(...) \

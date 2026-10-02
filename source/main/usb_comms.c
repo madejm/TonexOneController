@@ -900,6 +900,48 @@ void usb_paste_settings()
     }
 }
 
+void usb_load_settings_default(Clipboard_t type)
+{
+    tUSBMessage message;
+
+    if (usb_input_queue == NULL)
+    {
+        ESP_LOGE(TAG, "usb_copy_settings queue null");            
+    }
+    else
+    {
+        message.Command = USB_COMMAND_LOAD_SETTINGS_DEFAULT;
+        message.Payload = type;
+
+        // send to queue
+        if (xQueueSend(usb_input_queue, (void*)&message, 0) != pdPASS)
+        {
+            ESP_LOGE(TAG, "usb_load_settings_default queue send failed!");            
+        }
+    }
+}
+
+void usb_set_settings_as_default(Clipboard_t type)
+{
+    tUSBMessage message;
+
+    if (usb_input_queue == NULL)
+    {
+        ESP_LOGE(TAG, "usb_copy_settings queue null");            
+    }
+    else
+    {
+        message.Command = USB_COMMAND_SET_SETTINGS_AS_DEFAULT;
+        message.Payload = type;
+
+        // send to queue
+        if (xQueueSend(usb_input_queue, (void*)&message, 0) != pdPASS)
+        {
+            ESP_LOGE(TAG, "usb_set_settings_as_default queue send failed!");            
+        }
+    }
+}
+
 /****************************************************************************
 * NAME:        
 * DESCRIPTION: 

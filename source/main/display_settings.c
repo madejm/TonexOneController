@@ -24,42 +24,79 @@ static const char *TAG = "display_settings";
 #define THEME_STORAGE   "theme_storage"
 #define THEME_ID_KEY    "theme_id"
 
-void action_settings_copy_gate(lv_event_t * e)
+void action_settings_copy(lv_event_t * e)
 {
-    usb_copy_settings(CLIPBOARD_GATE);
-}
-void action_settings_copy_compressor(lv_event_t * e)
-{
-    usb_copy_settings(CLIPBOARD_COMPRESSOR);
-}
-void action_settings_copy_amp(lv_event_t * e)
-{
-    usb_copy_settings(CLIPBOARD_AMP);
-}
-void action_settings_copy_cab(lv_event_t *e)
-{
-    usb_copy_settings(CLIPBOARD_CAB);
-}
-void action_settings_copy_eq(lv_event_t * e)
-{
-    usb_copy_settings(CLIPBOARD_EQ);
-}
-void action_settings_copy_modulation(lv_event_t * e)
-{
-    usb_copy_settings(CLIPBOARD_MODULATION);
-}
-void action_settings_copy_delay(lv_event_t * e)
-{
-    usb_copy_settings(CLIPBOARD_DELAY);
-}
-void action_settings_copy_reverb(lv_event_t * e)
-{
-    usb_copy_settings(CLIPBOARD_REVERB);
+    lv_obj_t *button = lv_event_get_target(e);
+    ptr_switch(button) {
+        ptr_case(objects.ui_settings_clipboard_gate__1__copy) { usb_copy_settings(CLIPBOARD_GATE); }
+        ptr_case(objects.ui_settings_clipboard_comp__1__copy) { usb_copy_settings(CLIPBOARD_COMPRESSOR); }
+        ptr_case(objects.ui_settings_clipboard_amp__1__copy) { usb_copy_settings(CLIPBOARD_AMP); }
+        ptr_case(objects.ui_settings_clipboard_cab__1__copy) { usb_copy_settings(CLIPBOARD_CAB); }
+        ptr_case(objects.ui_settings_clipboard_eq__1__copy) { usb_copy_settings(CLIPBOARD_EQ); }
+        ptr_case(objects.ui_settings_clipboard_mod__1__copy) { usb_copy_settings(CLIPBOARD_MODULATION); }
+        ptr_case(objects.ui_settings_clipboard_delay__1__copy) { usb_copy_settings(CLIPBOARD_DELAY); }
+        ptr_case(objects.ui_settings_clipboard_reverb__1__copy) { usb_copy_settings(CLIPBOARD_REVERB); }
+    }
 }
 
 void action_settings_paste(lv_event_t * e)
 { 
     usb_paste_settings();
+}
+
+void action_settings_load_default(lv_event_t * e)
+{
+    lv_obj_t *button = lv_event_get_target(e);
+    ptr_switch(button) {
+        ptr_case(objects.ui_settings_clipboard_gate__2__load_default) { usb_load_settings_default(CLIPBOARD_GATE); }
+        ptr_case(objects.ui_settings_clipboard_comp__2__load_default) { usb_load_settings_default(CLIPBOARD_COMPRESSOR); }
+        ptr_case(objects.ui_settings_clipboard_amp__2__load_default) { usb_load_settings_default(CLIPBOARD_AMP); }
+        ptr_case(objects.ui_settings_clipboard_cab__2__load_default) { usb_load_settings_default(CLIPBOARD_CAB); }
+        ptr_case(objects.ui_settings_clipboard_eq__2__load_default) { usb_load_settings_default(CLIPBOARD_EQ); }
+        ptr_case(objects.ui_settings_clipboard_mod__2__load_default) { usb_load_settings_default(CLIPBOARD_MODULATION); }
+        ptr_case(objects.ui_settings_clipboard_delay__2__load_default) { usb_load_settings_default(CLIPBOARD_DELAY); }
+        ptr_case(objects.ui_settings_clipboard_reverb__2__load_default) { usb_load_settings_default(CLIPBOARD_REVERB); }
+    }
+}
+
+void action_settings_set_as_default(lv_event_t * e)
+{
+    lv_obj_t *button = lv_event_get_target(e);
+    ptr_switch(button) {
+        ptr_case(objects.ui_settings_clipboard_gate__2__set_default) { usb_set_settings_as_default(CLIPBOARD_GATE); }
+        ptr_case(objects.ui_settings_clipboard_comp__2__set_default) { usb_set_settings_as_default(CLIPBOARD_COMPRESSOR); }
+        ptr_case(objects.ui_settings_clipboard_amp__2__set_default) { usb_set_settings_as_default(CLIPBOARD_AMP); }
+        ptr_case(objects.ui_settings_clipboard_cab__2__set_default) { usb_set_settings_as_default(CLIPBOARD_CAB); }
+        ptr_case(objects.ui_settings_clipboard_eq__2__set_default) { usb_set_settings_as_default(CLIPBOARD_EQ); }
+        ptr_case(objects.ui_settings_clipboard_mod__2__set_default) { usb_set_settings_as_default(CLIPBOARD_MODULATION); }
+        ptr_case(objects.ui_settings_clipboard_delay__2__set_default) { usb_set_settings_as_default(CLIPBOARD_DELAY); }
+        ptr_case(objects.ui_settings_clipboard_reverb__2__set_default) { usb_set_settings_as_default(CLIPBOARD_REVERB); }
+    }
+}
+
+void updateSettingsDefaults(void)
+{
+    lv_obj_set_disabled(objects.ui_settings_clipboard_gate__2__load_default, !usb_tonex_one_has_settings_default(CLIPBOARD_GATE));
+    lv_obj_set_disabled(objects.ui_settings_clipboard_comp__2__load_default, !usb_tonex_one_has_settings_default(CLIPBOARD_COMPRESSOR));
+    lv_obj_set_disabled(objects.ui_settings_clipboard_amp__2__load_default, !usb_tonex_one_has_settings_default(CLIPBOARD_AMP));
+    lv_obj_set_disabled(objects.ui_settings_clipboard_cab__2__load_default, !usb_tonex_one_has_settings_default(CLIPBOARD_CAB));
+    lv_obj_set_disabled(objects.ui_settings_clipboard_eq__2__load_default, !usb_tonex_one_has_settings_default(CLIPBOARD_EQ));
+    lv_obj_set_disabled(objects.ui_settings_clipboard_mod__2__load_default, !usb_tonex_one_has_settings_default(CLIPBOARD_MODULATION));
+    lv_obj_set_disabled(objects.ui_settings_clipboard_delay__2__load_default, !usb_tonex_one_has_settings_default(CLIPBOARD_DELAY));
+    lv_obj_set_disabled(objects.ui_settings_clipboard_reverb__2__load_default, !usb_tonex_one_has_settings_default(CLIPBOARD_REVERB));
+}
+
+void updateSettingsClipboard(Clipboard_t type)
+{
+    updateSettingsDefaults();
+    lv_obj_set_disabled(objects.ui_settings_clipboard_gate__1__paste, type != CLIPBOARD_GATE);
+    lv_obj_set_disabled(objects.ui_settings_clipboard_comp__1__paste, type != CLIPBOARD_COMPRESSOR);
+    lv_obj_set_disabled(objects.ui_settings_clipboard_amp__1__paste, type != CLIPBOARD_AMP);
+    lv_obj_set_disabled(objects.ui_settings_clipboard_cab__1__paste, type != CLIPBOARD_CAB);
+    lv_obj_set_disabled(objects.ui_settings_clipboard_eq__1__paste, type != CLIPBOARD_EQ);
+    lv_obj_set_disabled(objects.ui_settings_clipboard_mod__1__paste, type != CLIPBOARD_MODULATION);
+    lv_obj_set_disabled(objects.ui_settings_clipboard_delay__1__paste, type != CLIPBOARD_DELAY);
+    lv_obj_set_disabled(objects.ui_settings_clipboard_reverb__1__paste, type != CLIPBOARD_REVERB);
 }
 
 void action_usb_host_changed(lv_event_t * e)
@@ -78,18 +115,6 @@ void action_usb_host_changed(lv_event_t * e)
     }
 
     usb_set_host_enabled(usbHost);
-}
-
-void updateSettingsClipboard(Clipboard_t type)
-{
-    lv_obj_set_disabled(objects.ui_settings_paste_gate, type != CLIPBOARD_GATE);
-    lv_obj_set_disabled(objects.ui_settings_paste_compressor, type != CLIPBOARD_COMPRESSOR);
-    lv_obj_set_disabled(objects.ui_settings_paste_amp, type != CLIPBOARD_AMP);
-    lv_obj_set_disabled(objects.ui_settings_paste_cab, type != CLIPBOARD_CAB);
-    lv_obj_set_disabled(objects.ui_settings_paste_eq, type != CLIPBOARD_EQ);
-    lv_obj_set_disabled(objects.ui_settings_paste_modulation, type != CLIPBOARD_MODULATION);
-    lv_obj_set_disabled(objects.ui_settings_paste_delay, type != CLIPBOARD_DELAY);
-    lv_obj_set_disabled(objects.ui_settings_paste_reverb, type != CLIPBOARD_REVERB);
 }
 
 lv_color_t eq_color_depth() {
@@ -112,7 +137,7 @@ lv_color_t eq_color_presence() {
     return lv_color_hex(theme_colors[active_theme_index][COLOR_ID_NOISE_GATE]);
 }
 
-void updateEQColors()
+static void updateEQColors()
 {
     lv_obj_set_style_arc_color(objects.ui_amplifier_depth_slider__arc,    eq_color_depth(),    LV_PART_INDICATOR | LV_STATE_DEFAULT);
     lv_obj_set_style_arc_color(objects.ui_eq_bass_freq_slider__arc,       eq_color_bass(),     LV_PART_INDICATOR | LV_STATE_DEFAULT);
@@ -182,6 +207,9 @@ static void tab_btn_draw_cb(lv_event_t *e)
 
 void customize_ui_settings()
 {
+    updateEQColors();
+    updateSettingsDefaults();
+
     lv_obj_t *tab_btns = lv_tabview_get_tab_btns(objects.ui_settings_eq_tabview);
     lv_obj_add_event_cb(
         tab_btns,

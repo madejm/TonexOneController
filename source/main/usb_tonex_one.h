@@ -26,6 +26,7 @@ extern "C" {
 #include <stddef.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include "usb_comms.h"
 
 #define MAX_PRESETS_TONEX_ONE             20
 
@@ -33,6 +34,7 @@ void usb_tonex_one_handle(class_driver_t* driver_obj);
 void usb_tonex_one_init(class_driver_t* driver_obj, QueueHandle_t comms_queue);
 void usb_tonex_one_deinit(void);
 void usb_tonex_one_preallocate_memory(void);
+bool usb_tonex_one_has_settings_default(Clipboard_t type);
 
 typedef enum
 {
