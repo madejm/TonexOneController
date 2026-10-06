@@ -929,7 +929,7 @@ void tonex_action_parameter_changed(lv_event_t * e)
         usb_modify_parameter(TONEX_PARAM_VIR_BLEND, LV_SLIDER_GET_VALUE(obj)/ParamFormats.CAB_VIR_MIC_BLEND.multiplier);
     }
     #endif //CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
-    else if (obj == objects.ui_bpm_slider)
+    else if (obj == objects.ui_bpm_slider || obj == objects.ui_bpm_dialog_slider)
     {
         usb_modify_parameter(TONEX_GLOBAL_BPM, LV_SLIDER_GET_VALUE(obj)/ParamFormats.BPM.multiplier);
     }
@@ -3080,18 +3080,28 @@ uint8_t tonex_update_ui_parameters(void)
                 {
                     TonexParamFormat_t format = ParamFormats.BPM;
                     LV_SLIDER_SET_RANGE(objects.ui_bpm_slider, param_entry, format.multiplier);
-                    LV_SLIDER_SET_VALUE(objects.ui_bpm_slider, param_entry->Value, format.multiplier); 
+                    LV_SLIDER_SET_VALUE(objects.ui_bpm_slider, param_entry->Value, format.multiplier);
+                    #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+                    LV_SLIDER_SET_RANGE(objects.ui_bpm_dialog_slider, param_entry, format.multiplier);
+                    LV_SLIDER_SET_VALUE(objects.ui_bpm_dialog_slider, param_entry->Value, format.multiplier);
+                    #endif
                                                                                                                                                              
                     // show value and units
                     sprintf(value_string, format.format, param_entry->Value);
-                    LV_LABEL_SET_TEXT(objects.ui_bpm, value_string);                                                                                                         
+                    LV_LABEL_SET_TEXT(objects.ui_bpm, value_string);
+                    #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+                    lv_label_set_text(objects.ui_bpm_dialog_slider__value, value_string);
+                    #endif
 
                     // set user data for later use
-                    LV_OBJ_SET_USER_DATA(objects.ui_bpm, (void*)(uintptr_t)TONEX_GLOBAL_BPM);           
+                    LV_OBJ_SET_USER_DATA(objects.ui_bpm, (void*)(uintptr_t)TONEX_GLOBAL_BPM);   
+                    #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+                    lv_obj_set_user_data(objects.ui_bpm_dialog_slider__arc,  (void*)(uintptr_t)TONEX_GLOBAL_BPM);
+                    #endif
 
                     char buf[128];
                     #if CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
-                    sprintf(buf, "%.0f", param_entry->Value);
+                    sprintf(buf, "%.0f", param_entry->Value); 
                     #else
                     sprintf(buf, "%.1f", param_entry->Value);
                     #endif

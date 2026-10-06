@@ -234,6 +234,7 @@ void customize_ui() {
     SETUP_ARC(objects.ui_reverb_color_slider,            ParamFormats.REVERB_COLOR,         NULL,    0);
     SETUP_ARC(objects.ui_reverb_mix_slider,              ParamFormats.REVERB_MIX,           "%",    30);
 
+    SETUP_ARC(objects.ui_bpm_dialog_slider,              ParamFormats.BPM,                  NULL,  120);
     SETUP_ARC(objects.ui_bpm_slider,                     ParamFormats.BPM,                  NULL,  120);
     SETUP_ARC(objects.ui_input_trim_slider,              ParamFormats.INPUT_TRIM,           "dB",    0);
     SETUP_ARC(objects.ui_tuning_reference_slider,        ParamFormats.TUNING_REF,           "Hz",  440);

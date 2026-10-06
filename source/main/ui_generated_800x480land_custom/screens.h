@@ -151,6 +151,12 @@ typedef struct _objects_t {
     lv_obj_t *ui_tap_tempo_dialog_indicator2;
     lv_obj_t *ui_tap_tempo_dialog_indicator3;
     lv_obj_t *ui_tap_tempo_dialog_indicator4;
+    lv_obj_t *ui_bpm_dialog_slider;
+    lv_obj_t *ui_bpm_dialog_slider__drag;
+    lv_obj_t *ui_bpm_dialog_slider__arc;
+    lv_obj_t *ui_bpm_dialog_slider__content;
+    lv_obj_t *ui_bpm_dialog_slider__value;
+    lv_obj_t *ui_bpm_dialog_slider__unit;
     lv_obj_t *ui_tap_tempo_dialog_tap_button;
     lv_obj_t *obj4;
     lv_obj_t *ui_progress_dialog;

@@ -1391,7 +1391,7 @@
                           ],
                           "widgetFlags": "CLICK_FOCUSABLE|GESTURE_BUBBLE|PRESS_LOCK|SCROLLABLE|SCROLL_CHAIN_HOR|SCROLL_CHAIN_VER|SCROLL_ELASTIC|SCROLL_MOMENTUM|SCROLL_WITH_ARROW|SNAPPABLE",
                           "hiddenFlagType": "literal",
-                          "clickableFlag": true,
+                          "clickableFlag": false,
                           "clickableFlagType": "literal",
                           "flagScrollbarMode": "",
                           "flagScrollDirection": "",
@@ -4047,8 +4047,8 @@
                   "type": "LVGLPanelWidget",
                   "left": 0,
                   "top": 0,
-                  "width": 426,
-                  "height": 311,
+                  "width": 498,
+                  "height": 381,
                   "customInputs": [],
                   "customOutputs": [],
                   "style": {
@@ -4071,8 +4071,8 @@
                       "type": "LVGLContainerWidget",
                       "left": 0,
                       "top": 0,
-                      "width": 422,
-                      "height": 307,
+                      "width": 494,
+                      "height": 377,
                       "customInputs": [],
                       "customOutputs": [],
                       "style": {
@@ -4521,48 +4521,39 @@
                           "groupIndex": 0
                         },
                         {
-                          "objID": "1b29d170-e1a3-4de9-a058-8b9e7469e759",
-                          "type": "LVGLButtonWidget",
+                          "objID": "8333c53e-0270-4b21-8648-ac43a7f2ea43",
+                          "type": "LVGLContainerWidget",
                           "left": 0,
                           "top": 0,
-                          "width": 200,
-                          "height": 80,
+                          "width": 382,
+                          "height": 150,
                           "customInputs": [],
                           "customOutputs": [],
                           "style": {
-                            "objID": "15bbd967-155e-4556-be09-1d8f6de96397",
+                            "objID": "cb97d5f6-724d-4c23-ad88-da5179fe0d31",
                             "useStyle": "default",
                             "conditionalStyles": [],
                             "childStyles": []
                           },
                           "hiddenInEditor": true,
                           "timeline": [],
-                          "eventHandlers": [
-                            {
-                              "objID": "1ebfc80f-c380-4329-c23c-02b33a1d4b7e",
-                              "eventName": "PRESSED",
-                              "handlerType": "action",
-                              "action": "TapTempoClicked",
-                              "userData": 0
-                            }
-                          ],
-                          "identifier": "ui_TapTempoDialogTapButton",
+                          "eventHandlers": [],
                           "leftUnit": "px",
                           "topUnit": "px",
-                          "widthUnit": "px",
-                          "heightUnit": "px",
+                          "widthUnit": "content",
+                          "heightUnit": "content",
                           "children": [
                             {
-                              "objID": "12b9b2e2-7c62-4ba3-cde7-9d7650f56109",
-                              "type": "LVGLLabelWidget",
+                              "objID": "cf2126da-6350-499e-eae6-8f1bbbb877ed",
+                              "type": "LVGLUserWidgetWidget",
                               "left": 0,
                               "top": 0,
-                              "width": 33,
-                              "height": 19,
+                              "width": 150,
+                              "height": 150,
                               "customInputs": [],
                               "customOutputs": [],
                               "style": {
-                                "objID": "bff172bb-2b73-4b02-c3a0-cd03753779d5",
+                                "objID": "46ac371f-724b-4f37-fad8-9179f5748de7",
                                 "useStyle": "default",
                                 "conditionalStyles": [],
                                 "childStyles": []
@@ -4570,13 +4561,15 @@
                               "hiddenInEditor": true,
                               "timeline": [],
                               "eventHandlers": [],
+                              "identifier": "ui_BPMDialogSlider",
                               "leftUnit": "px",
                               "topUnit": "px",
-                              "widthUnit": "content",
-                              "heightUnit": "content",
+                              "widthUnit": "px",
+                              "heightUnit": "px",
                               "children": [],
                               "widgetFlags": "CLICK_FOCUSABLE|GESTURE_BUBBLE|PRESS_LOCK|SCROLLABLE|SCROLL_CHAIN_HOR|SCROLL_CHAIN_VER|SCROLL_ELASTIC|SCROLL_MOMENTUM|SCROLL_WITH_ARROW|SNAPPABLE",
                               "hiddenFlagType": "literal",
+                              "clickableFlag": true,
                               "clickableFlagType": "literal",
                               "flagScrollbarMode": "",
                               "flagScrollDirection": "",
@@ -4586,25 +4579,131 @@
                               "disabledStateType": "literal",
                               "states": "",
                               "localStyles": {
-                                "objID": "a27ea9bc-1712-4334-8185-207733092b45",
+                                "objID": "33cd3851-43ca-4507-bcb5-25daf3daebed"
+                              },
+                              "group": "",
+                              "groupIndex": 0,
+                              "userWidgetPageName": "Arc",
+                              "userPropertyValues": {
+                                "objID": "1f784bb0-72b7-4c7d-fcc3-fb2860df53b1",
+                                "values": {}
+                              }
+                            },
+                            {
+                              "objID": "1b29d170-e1a3-4de9-a058-8b9e7469e759",
+                              "type": "LVGLButtonWidget",
+                              "left": 0,
+                              "top": 0,
+                              "width": 200,
+                              "height": 80,
+                              "customInputs": [],
+                              "customOutputs": [],
+                              "style": {
+                                "objID": "15bbd967-155e-4556-be09-1d8f6de96397",
+                                "useStyle": "default",
+                                "conditionalStyles": [],
+                                "childStyles": []
+                              },
+                              "hiddenInEditor": true,
+                              "timeline": [],
+                              "eventHandlers": [
+                                {
+                                  "objID": "1ebfc80f-c380-4329-c23c-02b33a1d4b7e",
+                                  "eventName": "PRESSED",
+                                  "handlerType": "action",
+                                  "action": "TapTempoClicked",
+                                  "userData": 0
+                                }
+                              ],
+                              "identifier": "ui_TapTempoDialogTapButton",
+                              "leftUnit": "px",
+                              "topUnit": "px",
+                              "widthUnit": "px",
+                              "heightUnit": "px",
+                              "children": [
+                                {
+                                  "objID": "12b9b2e2-7c62-4ba3-cde7-9d7650f56109",
+                                  "type": "LVGLLabelWidget",
+                                  "left": 0,
+                                  "top": 0,
+                                  "width": 33,
+                                  "height": 19,
+                                  "customInputs": [],
+                                  "customOutputs": [],
+                                  "style": {
+                                    "objID": "bff172bb-2b73-4b02-c3a0-cd03753779d5",
+                                    "useStyle": "default",
+                                    "conditionalStyles": [],
+                                    "childStyles": []
+                                  },
+                                  "hiddenInEditor": true,
+                                  "timeline": [],
+                                  "eventHandlers": [],
+                                  "leftUnit": "px",
+                                  "topUnit": "px",
+                                  "widthUnit": "content",
+                                  "heightUnit": "content",
+                                  "children": [],
+                                  "widgetFlags": "CLICK_FOCUSABLE|GESTURE_BUBBLE|PRESS_LOCK|SCROLLABLE|SCROLL_CHAIN_HOR|SCROLL_CHAIN_VER|SCROLL_ELASTIC|SCROLL_MOMENTUM|SCROLL_WITH_ARROW|SNAPPABLE",
+                                  "hiddenFlagType": "literal",
+                                  "clickableFlagType": "literal",
+                                  "flagScrollbarMode": "",
+                                  "flagScrollDirection": "",
+                                  "scrollSnapX": "",
+                                  "scrollSnapY": "",
+                                  "checkedStateType": "literal",
+                                  "disabledStateType": "literal",
+                                  "states": "",
+                                  "localStyles": {
+                                    "objID": "a27ea9bc-1712-4334-8185-207733092b45",
+                                    "definition": {
+                                      "MAIN": {
+                                        "DEFAULT": {
+                                          "align": "CENTER"
+                                        }
+                                      }
+                                    }
+                                  },
+                                  "group": "",
+                                  "groupIndex": 0,
+                                  "text": "TAP",
+                                  "textType": "literal",
+                                  "longMode": "WRAP",
+                                  "recolor": false,
+                                  "useStaticText": true
+                                }
+                              ],
+                              "widgetFlags": "CLICK_FOCUSABLE|GESTURE_BUBBLE|PRESS_LOCK|SCROLL_CHAIN_HOR|SCROLL_CHAIN_VER|SCROLL_ELASTIC|SCROLL_MOMENTUM|SCROLL_ON_FOCUS|SCROLL_WITH_ARROW|SNAPPABLE",
+                              "hiddenFlagType": "literal",
+                              "clickableFlag": true,
+                              "clickableFlagType": "literal",
+                              "flagScrollbarMode": "",
+                              "flagScrollDirection": "",
+                              "scrollSnapX": "",
+                              "scrollSnapY": "",
+                              "checkedStateType": "literal",
+                              "disabledStateType": "literal",
+                              "states": "",
+                              "useStyle": "Button Secondary",
+                              "localStyles": {
+                                "objID": "759d86a1-763a-493b-f1fa-9b1f0b9ee7a1",
                                 "definition": {
                                   "MAIN": {
                                     "DEFAULT": {
-                                      "align": "CENTER"
+                                      "flex_main_place": "CENTER"
+                                    },
+                                    "PRESSED": {
+                                      "border_color": "highlight red",
+                                      "border_width": 2
                                     }
                                   }
                                 }
                               },
                               "group": "",
-                              "groupIndex": 0,
-                              "text": "TAP",
-                              "textType": "literal",
-                              "longMode": "WRAP",
-                              "recolor": false,
-                              "useStaticText": true
+                              "groupIndex": 0
                             }
                           ],
-                          "widgetFlags": "CLICK_FOCUSABLE|GESTURE_BUBBLE|PRESS_LOCK|SCROLL_CHAIN_HOR|SCROLL_CHAIN_VER|SCROLL_ELASTIC|SCROLL_MOMENTUM|SCROLL_ON_FOCUS|SCROLL_WITH_ARROW|SNAPPABLE",
+                          "widgetFlags": "CLICK_FOCUSABLE|GESTURE_BUBBLE|PRESS_LOCK|SCROLLABLE|SCROLL_CHAIN_HOR|SCROLL_CHAIN_VER|SCROLL_ELASTIC|SCROLL_MOMENTUM|SCROLL_WITH_ARROW|SNAPPABLE",
                           "hiddenFlagType": "literal",
                           "clickableFlag": true,
                           "clickableFlagType": "literal",
@@ -4615,17 +4714,15 @@
                           "checkedStateType": "literal",
                           "disabledStateType": "literal",
                           "states": "",
-                          "useStyle": "Button Secondary",
                           "localStyles": {
-                            "objID": "759d86a1-763a-493b-f1fa-9b1f0b9ee7a1",
+                            "objID": "2ee6122b-ef44-4b58-f298-e455572a09b1",
                             "definition": {
                               "MAIN": {
                                 "DEFAULT": {
-                                  "flex_main_place": "CENTER"
-                                },
-                                "PRESSED": {
-                                  "border_color": "highlight red",
-                                  "border_width": 2
+                                  "layout": "FLEX",
+                                  "flex_flow": "ROW",
+                                  "flex_cross_place": "CENTER",
+                                  "pad_column": 32
                                 }
                               }
                             }
@@ -8139,7 +8236,7 @@
                     "conditionalStyles": [],
                     "childStyles": []
                   },
-                  "hiddenInEditor": false,
+                  "hiddenInEditor": true,
                   "timeline": [],
                   "eventHandlers": [],
                   "identifier": "ui_CabTab",
@@ -8163,7 +8260,7 @@
                         "conditionalStyles": [],
                         "childStyles": []
                       },
-                      "hiddenInEditor": false,
+                      "hiddenInEditor": true,
                       "timeline": [],
                       "eventHandlers": [],
                       "leftUnit": "px",
@@ -8186,7 +8283,7 @@
                             "conditionalStyles": [],
                             "childStyles": []
                           },
-                          "hiddenInEditor": false,
+                          "hiddenInEditor": true,
                           "timeline": [],
                           "eventHandlers": [],
                           "leftUnit": "px",
@@ -8209,7 +8306,7 @@
                                 "conditionalStyles": [],
                                 "childStyles": []
                               },
-                              "hiddenInEditor": false,
+                              "hiddenInEditor": true,
                               "timeline": [],
                               "eventHandlers": [],
                               "leftUnit": "px",
@@ -8232,7 +8329,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [],
                                   "identifier": "",
@@ -8285,7 +8382,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [
                                     {
@@ -8317,7 +8414,7 @@
                                         "conditionalStyles": [],
                                         "childStyles": []
                                       },
-                                      "hiddenInEditor": false,
+                                      "hiddenInEditor": true,
                                       "timeline": [],
                                       "eventHandlers": [],
                                       "leftUnit": "px",
@@ -8413,7 +8510,7 @@
                                 "conditionalStyles": [],
                                 "childStyles": []
                               },
-                              "hiddenInEditor": false,
+                              "hiddenInEditor": true,
                               "timeline": [],
                               "eventHandlers": [],
                               "identifier": "ui_SettingsClipboardCab",
@@ -8488,7 +8585,7 @@
                             "conditionalStyles": [],
                             "childStyles": []
                           },
-                          "hiddenInEditor": false,
+                          "hiddenInEditor": true,
                           "timeline": [],
                           "eventHandlers": [],
                           "leftUnit": "px",
@@ -8511,7 +8608,7 @@
                                 "conditionalStyles": [],
                                 "childStyles": []
                               },
-                              "hiddenInEditor": false,
+                              "hiddenInEditor": true,
                               "timeline": [],
                               "eventHandlers": [],
                               "leftUnit": "px",
@@ -8534,7 +8631,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [],
                                   "identifier": "",
@@ -8587,7 +8684,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [
                                     {
@@ -8619,7 +8716,7 @@
                                         "conditionalStyles": [],
                                         "childStyles": []
                                       },
-                                      "hiddenInEditor": false,
+                                      "hiddenInEditor": true,
                                       "timeline": [],
                                       "eventHandlers": [],
                                       "identifier": "ui_CabinetVIRModelLabel",
@@ -8719,7 +8816,7 @@
                                 "conditionalStyles": [],
                                 "childStyles": []
                               },
-                              "hiddenInEditor": false,
+                              "hiddenInEditor": true,
                               "timeline": [],
                               "eventHandlers": [],
                               "leftUnit": "px",
@@ -8742,7 +8839,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [],
                                   "identifier": "",
@@ -8795,7 +8892,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [
                                     {
@@ -8827,7 +8924,7 @@
                                         "conditionalStyles": [],
                                         "childStyles": []
                                       },
-                                      "hiddenInEditor": false,
+                                      "hiddenInEditor": true,
                                       "timeline": [],
                                       "eventHandlers": [],
                                       "leftUnit": "px",
@@ -8923,7 +9020,7 @@
                                 "conditionalStyles": [],
                                 "childStyles": []
                               },
-                              "hiddenInEditor": false,
+                              "hiddenInEditor": true,
                               "timeline": [],
                               "eventHandlers": [],
                               "leftUnit": "px",
@@ -8946,7 +9043,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [],
                                   "identifier": "",
@@ -8999,7 +9096,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [
                                     {
@@ -9031,7 +9128,7 @@
                                         "conditionalStyles": [],
                                         "childStyles": []
                                       },
-                                      "hiddenInEditor": false,
+                                      "hiddenInEditor": true,
                                       "timeline": [],
                                       "eventHandlers": [],
                                       "leftUnit": "px",
@@ -9155,7 +9252,7 @@
                             "conditionalStyles": [],
                             "childStyles": []
                           },
-                          "hiddenInEditor": false,
+                          "hiddenInEditor": true,
                           "timeline": [],
                           "eventHandlers": [],
                           "leftUnit": "px",
@@ -9178,7 +9275,7 @@
                                 "conditionalStyles": [],
                                 "childStyles": []
                               },
-                              "hiddenInEditor": false,
+                              "hiddenInEditor": true,
                               "timeline": [],
                               "eventHandlers": [],
                               "identifier": "",
@@ -9202,7 +9299,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [],
                                   "identifier": "",
@@ -9255,7 +9352,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [],
                                   "identifier": "ui_CabinetVIRResonanceSlider",
@@ -9328,7 +9425,7 @@
                                 "conditionalStyles": [],
                                 "childStyles": []
                               },
-                              "hiddenInEditor": false,
+                              "hiddenInEditor": true,
                               "timeline": [],
                               "eventHandlers": [],
                               "identifier": "",
@@ -9352,7 +9449,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [],
                                   "identifier": "",
@@ -9405,7 +9502,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [],
                                   "identifier": "ui_CabinetVIRBlendSlider",
@@ -9478,7 +9575,7 @@
                                 "conditionalStyles": [],
                                 "childStyles": []
                               },
-                              "hiddenInEditor": false,
+                              "hiddenInEditor": true,
                               "timeline": [],
                               "eventHandlers": [],
                               "leftUnit": "px",
@@ -9501,7 +9598,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [],
                                   "leftUnit": "px",
@@ -9542,7 +9639,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [],
                                   "leftUnit": "px",
@@ -9565,7 +9662,7 @@
                                         "conditionalStyles": [],
                                         "childStyles": []
                                       },
-                                      "hiddenInEditor": false,
+                                      "hiddenInEditor": true,
                                       "timeline": [],
                                       "eventHandlers": [],
                                       "identifier": "ui_CabinetVIRMic1X_Slider",
@@ -9611,7 +9708,7 @@
                                         "conditionalStyles": [],
                                         "childStyles": []
                                       },
-                                      "hiddenInEditor": false,
+                                      "hiddenInEditor": true,
                                       "timeline": [],
                                       "eventHandlers": [],
                                       "identifier": "ui_CabinetVIRMic1Z_Slider",
@@ -9678,7 +9775,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": false,
+                                  "hiddenInEditor": true,
                                   "timeline": [],
                                   "eventHandlers": [],
                                   "leftUnit": "px",
@@ -9701,7 +9798,7 @@
                                         "conditionalStyles": [],
                                         "childStyles": []
                                       },
-                                      "hiddenInEditor": false,
+                                      "hiddenInEditor": true,
                                       "timeline": [],
                                       "eventHandlers": [],
                                       "identifier": "ui_CabinetVIRMic2X_Slider",
@@ -9747,7 +9844,7 @@
                                         "conditionalStyles": [],
                                         "childStyles": []
                                       },
-                                      "hiddenInEditor": false,
+                                      "hiddenInEditor": true,
                                       "timeline": [],
                                       "eventHandlers": [],
                                       "identifier": "ui_CabinetVIRMic2Z_Slider",
@@ -12728,7 +12825,7 @@
                     "conditionalStyles": [],
                     "childStyles": []
                   },
-                  "hiddenInEditor": true,
+                  "hiddenInEditor": false,
                   "timeline": [],
                   "eventHandlers": [],
                   "identifier": "ui_DelayTab",
@@ -12752,7 +12849,7 @@
                         "conditionalStyles": [],
                         "childStyles": []
                       },
-                      "hiddenInEditor": true,
+                      "hiddenInEditor": false,
                       "timeline": [],
                       "eventHandlers": [],
                       "leftUnit": "px",
@@ -12775,7 +12872,7 @@
                             "conditionalStyles": [],
                             "childStyles": []
                           },
-                          "hiddenInEditor": true,
+                          "hiddenInEditor": false,
                           "timeline": [],
                           "eventHandlers": [],
                           "leftUnit": "px",
@@ -12798,7 +12895,7 @@
                                 "conditionalStyles": [],
                                 "childStyles": []
                               },
-                              "hiddenInEditor": true,
+                              "hiddenInEditor": false,
                               "timeline": [],
                               "eventHandlers": [],
                               "leftUnit": "px",
@@ -12821,7 +12918,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": true,
+                                  "hiddenInEditor": false,
                                   "timeline": [],
                                   "eventHandlers": [],
                                   "identifier": "",
@@ -12874,7 +12971,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": true,
+                                  "hiddenInEditor": false,
                                   "timeline": [],
                                   "eventHandlers": [
                                     {
@@ -12952,7 +13049,7 @@
                                 "conditionalStyles": [],
                                 "childStyles": []
                               },
-                              "hiddenInEditor": true,
+                              "hiddenInEditor": false,
                               "timeline": [],
                               "eventHandlers": [],
                               "leftUnit": "px",
@@ -12975,7 +13072,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": true,
+                                  "hiddenInEditor": false,
                                   "timeline": [],
                                   "eventHandlers": [],
                                   "identifier": "",
@@ -13028,7 +13125,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": true,
+                                  "hiddenInEditor": false,
                                   "timeline": [],
                                   "eventHandlers": [
                                     {
@@ -13106,7 +13203,7 @@
                                 "conditionalStyles": [],
                                 "childStyles": []
                               },
-                              "hiddenInEditor": true,
+                              "hiddenInEditor": false,
                               "timeline": [],
                               "eventHandlers": [],
                               "leftUnit": "px",
@@ -13129,7 +13226,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": true,
+                                  "hiddenInEditor": false,
                                   "timeline": [],
                                   "eventHandlers": [],
                                   "identifier": "",
@@ -13182,7 +13279,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": true,
+                                  "hiddenInEditor": false,
                                   "timeline": [],
                                   "eventHandlers": [
                                     {
@@ -13260,7 +13357,7 @@
                                 "conditionalStyles": [],
                                 "childStyles": []
                               },
-                              "hiddenInEditor": true,
+                              "hiddenInEditor": false,
                               "timeline": [],
                               "eventHandlers": [],
                               "leftUnit": "px",
@@ -13283,7 +13380,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": true,
+                                  "hiddenInEditor": false,
                                   "timeline": [],
                                   "eventHandlers": [],
                                   "identifier": "",
@@ -13336,7 +13433,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": true,
+                                  "hiddenInEditor": false,
                                   "timeline": [],
                                   "eventHandlers": [
                                     {
@@ -13442,7 +13539,7 @@
                             "conditionalStyles": [],
                             "childStyles": []
                           },
-                          "hiddenInEditor": true,
+                          "hiddenInEditor": false,
                           "timeline": [],
                           "eventHandlers": [],
                           "leftUnit": "px",
@@ -13465,7 +13562,7 @@
                                 "conditionalStyles": [],
                                 "childStyles": []
                               },
-                              "hiddenInEditor": true,
+                              "hiddenInEditor": false,
                               "timeline": [],
                               "eventHandlers": [],
                               "leftUnit": "px",
@@ -13488,7 +13585,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": true,
+                                  "hiddenInEditor": false,
                                   "timeline": [],
                                   "eventHandlers": [],
                                   "identifier": "",
@@ -13541,7 +13638,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": true,
+                                  "hiddenInEditor": false,
                                   "timeline": [],
                                   "eventHandlers": [
                                     {
@@ -13573,7 +13670,7 @@
                                         "conditionalStyles": [],
                                         "childStyles": []
                                       },
-                                      "hiddenInEditor": true,
+                                      "hiddenInEditor": false,
                                       "timeline": [],
                                       "eventHandlers": [],
                                       "leftUnit": "px",
@@ -13666,7 +13763,7 @@
                                 "conditionalStyles": [],
                                 "childStyles": []
                               },
-                              "hiddenInEditor": true,
+                              "hiddenInEditor": false,
                               "timeline": [],
                               "eventHandlers": [],
                               "identifier": "ui_SettingsClipboardDelay",
@@ -13740,7 +13837,7 @@
                             "conditionalStyles": [],
                             "childStyles": []
                           },
-                          "hiddenInEditor": true,
+                          "hiddenInEditor": false,
                           "timeline": [],
                           "eventHandlers": [],
                           "leftUnit": "px",
@@ -13763,7 +13860,7 @@
                                 "conditionalStyles": [],
                                 "childStyles": []
                               },
-                              "hiddenInEditor": true,
+                              "hiddenInEditor": false,
                               "timeline": [],
                               "eventHandlers": [],
                               "identifier": "",
@@ -13787,7 +13884,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": true,
+                                  "hiddenInEditor": false,
                                   "timeline": [],
                                   "eventHandlers": [],
                                   "identifier": "",
@@ -13840,7 +13937,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": true,
+                                  "hiddenInEditor": false,
                                   "timeline": [],
                                   "eventHandlers": [],
                                   "leftUnit": "px",
@@ -13863,7 +13960,7 @@
                                         "conditionalStyles": [],
                                         "childStyles": []
                                       },
-                                      "hiddenInEditor": true,
+                                      "hiddenInEditor": false,
                                       "timeline": [],
                                       "eventHandlers": [],
                                       "identifier": "ui_DelayTSSlider",
@@ -13909,7 +14006,7 @@
                                         "conditionalStyles": [],
                                         "childStyles": []
                                       },
-                                      "hiddenInEditor": true,
+                                      "hiddenInEditor": false,
                                       "timeline": [],
                                       "eventHandlers": [
                                         {
@@ -13941,7 +14038,7 @@
                                             "conditionalStyles": [],
                                             "childStyles": []
                                           },
-                                          "hiddenInEditor": true,
+                                          "hiddenInEditor": false,
                                           "timeline": [],
                                           "eventHandlers": [],
                                           "leftUnit": "px",
@@ -14053,7 +14150,7 @@
                                 "conditionalStyles": [],
                                 "childStyles": []
                               },
-                              "hiddenInEditor": true,
+                              "hiddenInEditor": false,
                               "timeline": [],
                               "eventHandlers": [],
                               "identifier": "",
@@ -14077,7 +14174,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": true,
+                                  "hiddenInEditor": false,
                                   "timeline": [],
                                   "eventHandlers": [],
                                   "identifier": "",
@@ -14130,7 +14227,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": true,
+                                  "hiddenInEditor": false,
                                   "timeline": [],
                                   "eventHandlers": [],
                                   "identifier": "ui_DelayFeedbackSlider",
@@ -14203,7 +14300,7 @@
                                 "conditionalStyles": [],
                                 "childStyles": []
                               },
-                              "hiddenInEditor": true,
+                              "hiddenInEditor": false,
                               "timeline": [],
                               "eventHandlers": [],
                               "identifier": "",
@@ -14227,7 +14324,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": true,
+                                  "hiddenInEditor": false,
                                   "timeline": [],
                                   "eventHandlers": [],
                                   "identifier": "",
@@ -14280,7 +14377,7 @@
                                     "conditionalStyles": [],
                                     "childStyles": []
                                   },
-                                  "hiddenInEditor": true,
+                                  "hiddenInEditor": false,
                                   "timeline": [],
                                   "eventHandlers": [],
                                   "identifier": "ui_DelayMixSlider",
