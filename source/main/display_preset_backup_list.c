@@ -114,12 +114,6 @@ static uint16_t preset_backup_list_pages()
     return count == 0 ? 1 : (count + PRESET_BACKUP_LIST_PRESETS_PER_PAGE - 1) / PRESET_BACKUP_LIST_PRESETS_PER_PAGE;
 }
 
-static bool selected_preset_backup_info(tPresetBackupInfo *info)
-{
-    return preset_backup_list_edit_index >= 0 &&
-           preset_backup_get_info(preset_backup_list_edit_index, info);
-}
-
 // ====== UPDATES ======
 
 static void updatePresetBackupList()
@@ -256,16 +250,17 @@ void selectPresetListBackupPreset(uint8_t buttonIndex)
 
     tPresetBackupInfo backup_info;
     tScene *scene = scenes_get_current();
-    if (!selected_preset_backup_info(&backup_info) || scene == NULL ||
-        preset_backup_list_load_preset_index >= MAX_SUPPORTED_PRESETS)
-    {
+    if (
+        scene == NULL
+        || preset_backup_list_load_preset_index >= MAX_SUPPORTED_PRESETS
+        || !preset_backup_get_info(preset_backup_list_edit_index, &backup_info)
+    ) {
         preset_backup_list_edit_index = -1;
         return;
     }
 
-    uint8_t destination_preset = scene->PresetOrder[preset_backup_list_load_preset_index];
     char old_preset_name[MAX_PRESET_NAME_LENGTH];
-    control_get_preset_name(destination_preset, old_preset_name);
+    control_get_preset_name(preset_backup_list_load_preset_index, old_preset_name);
     lv_label_set_text(objects.ui_preset_backup_load_dialog_name, backup_info.PresetName);
     lv_label_set_text(objects.ui_preset_backup_load_dialog_old_name, old_preset_name);
 
@@ -300,7 +295,9 @@ void presetBackupOptionsSelected(uint8_t buttonIndex, const char *option)
     {
         str_case(OPTION_INFO)
         {
-            openPresetInfoPageBackup(preset_backup_list_edit_index, action_open_presets_backup_page);
+            uint16_t slot;
+            if (preset_backup_get_slot(preset_backup_list_edit_index, &slot))
+                openPresetInfoPageBackup(slot, action_open_presets_backup_page);
             preset_backup_list_edit_index = -1;
         }
 
@@ -313,7 +310,7 @@ void presetBackupOptionsSelected(uint8_t buttonIndex, const char *option)
         str_case(OPTION_DELETE)
         {
             tPresetBackupInfo backup_info;
-            if (!selected_preset_backup_info(&backup_info))
+            if (!preset_backup_get_info(preset_backup_list_edit_index, &backup_info))
             {
                 preset_backup_list_edit_index = -1;
                 return;

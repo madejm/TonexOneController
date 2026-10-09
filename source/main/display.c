@@ -2311,6 +2311,10 @@ static  __attribute__((unused)) uint8_t update_ui_element(tUIUpdate* update)
             char bpm_text[6];
             snprintf(bpm_text, sizeof(bpm_text), "%u", (unsigned int)bpm_value);
             lv_label_set_text(objects.ui_bpm_value_label, bpm_text);
+            LV_SLIDER_SET_VALUE(objects.ui_bpm_slider, bpm_value, ParamFormats.BPM.multiplier);
+            LV_SLIDER_SET_VALUE(objects.ui_bpm_dialog_slider, bpm_value, ParamFormats.BPM.multiplier);
+            lv_label_set_text(objects.ui_bpm_slider__value, bpm_text);
+            lv_label_set_text(objects.ui_bpm_dialog_slider__value, bpm_text);
 
             #if CONFIG_TONEX_CONTROLLER_SHOW_BPM_INDICATOR
             ui_BPMAnimate(objects.ui_bpm_indicator, 60000 / bpm_value);
@@ -2597,7 +2601,7 @@ static  __attribute__((unused)) uint8_t update_ui_element(tUIUpdate* update)
 * RETURN:      
 * NOTES:       
 *****************************************************************************/
-static void ui_anim_hidden_cb(void *obj, int32_t value)
+static void __attribute__((unused)) ui_anim_hidden_cb(void *obj, int32_t value)
 {
     lv_obj_t *target = (lv_obj_t *)obj;
 
@@ -2620,7 +2624,7 @@ static void ui_anim_hidden_cb(void *obj, int32_t value)
 * RETURN:      
 * NOTES:       
 *****************************************************************************/
-static void ui_anim_deleted_cb(lv_anim_t *anim) 
+static void __attribute__((unused)) ui_anim_deleted_cb(lv_anim_t *anim)
 {
     if (anim->user_data) 
     {
@@ -2637,6 +2641,10 @@ static void ui_anim_deleted_cb(lv_anim_t *anim)
 *****************************************************************************/
 void ui_BPMAnimate(lv_obj_t *target_obj, uint32_t duration)
 {
+#if CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI && CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+    (void)target_obj;
+    display_tap_tempo_set_beat_period(duration);
+#else
     static lv_obj_t *animated_target;
     static uint32_t animated_duration;
 
@@ -2679,6 +2687,7 @@ void ui_BPMAnimate(lv_obj_t *target_obj, uint32_t duration)
     lv_anim_start(&anim);
     animated_target = target_obj;
     animated_duration = duration;
+#endif
 }
 #endif
 

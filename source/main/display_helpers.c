@@ -246,6 +246,7 @@ void customize_ui() {
     SETUP_ARC_FORMAT_CB(objects.ui_modulation_param4_slider,    mod_format_cb);
 
     lv_keyboard_set_custom_map(objects.ui_scene_rename_dialog_keyboard);
+    lv_keyboard_set_custom_map(objects.ui_preset_info_rename_dialog_keyboard);
 
     lv_dropdown_set_options(
         objects.ui_theme_dropdown,

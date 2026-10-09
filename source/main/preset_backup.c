@@ -195,6 +195,36 @@ esp_err_t preset_backup_save(const uint8_t *full_details, size_t length, uint16_
     return err;
 }
 
+esp_err_t preset_backup_update(uint16_t slot, const uint8_t *full_details, size_t length)
+{
+    tPresetBackupInfo info;
+    if (slot >= PRESET_BACKUP_MAX_SLOTS || !Catalog.Entries[slot].Used ||
+        full_details == NULL || length == 0 || length > TONEX_MAX_FULL_PRESET_DATA ||
+        !ParseInfo(full_details, length, &info)) return ESP_ERR_INVALID_ARG;
+
+    tPresetBackupCatalog *updated = heap_caps_malloc(sizeof(*updated), MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT);
+    if (updated == NULL) updated = malloc(sizeof(*updated));
+    if (updated == NULL) return ESP_ERR_NO_MEM;
+    *updated = Catalog;
+    updated->Entries[slot].Info = info;
+
+    char key[8];
+    BackupKey(slot, key, sizeof(key));
+    nvs_handle_t handle;
+    esp_err_t err = OpenStorage(NVS_READWRITE, &handle);
+    if (err == ESP_OK)
+    {
+        err = nvs_set_blob(handle, key, full_details, length);
+        if (err == ESP_OK)
+            err = nvs_set_blob(handle, PRESET_BACKUP_CATALOG_KEY, updated, sizeof(*updated));
+        if (err == ESP_OK) err = nvs_commit(handle);
+        nvs_close(handle);
+    }
+    if (err == ESP_OK) Catalog = *updated;
+    free(updated);
+    return err;
+}
+
 esp_err_t preset_backup_load(uint16_t slot, uint8_t **full_details, size_t *length)
 {
     if (full_details == NULL || length == NULL || slot >= PRESET_BACKUP_MAX_SLOTS || !Catalog.Entries[slot].Used)

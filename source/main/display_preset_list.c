@@ -51,6 +51,7 @@ typedef enum
 static PresetListEditMode_t preset_list_edit_mode = PRESET_LIST_EDIT_MODE_REORDER;
 
 static int16_t preset_list_edit_index = -1;
+static int16_t preset_list_load_index = -1;
 
 static void preset_backup_load_timer_cb(lv_timer_t *timer)
 {
@@ -243,6 +244,7 @@ void updatePresetListNames()
 static void openPresetsPage()
 {
     lv_obj_add_flag(objects.ui_preset_list_color_dialog, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_add_flag(objects.ui_preset_list_load_dialog, LV_OBJ_FLAG_HIDDEN);
 
     updatePresetListSelection();
     updatePresetListNames();
@@ -340,6 +342,8 @@ void selectPresetListPreset(uint8_t buttonIndex)
             
             lv_obj_add_flag(objects.ui_preset_list_cancel_button, LV_OBJ_FLAG_HIDDEN);
 
+            preset_list_edit_index = -1;
+
             updatePresetListSelection();
             updatePresetListNames();
             updatePresetListOptions();
@@ -347,20 +351,28 @@ void selectPresetListPreset(uint8_t buttonIndex)
 
         case PRESET_LIST_EDIT_MODE_LOAD:
         {
-            preset_backup_err_t err = preset_backup_load_preset_to_tonex(
-                preset_list_edit_index,
-                preset_index,
-                preset_backup_load_timer_cb
-            );
-
-            if (err != PRESET_BACKUP_OK) {
+            tPresetBackupInfo backup_info;
+            tScene *scene = scenes_get_current();
+            if (
+                scene == NULL
+                || !preset_backup_get_info(preset_list_edit_index, &backup_info)
+            ) {
+                preset_list_edit_index = -1;
+                preset_list_edit_mode = PRESET_LIST_EDIT_MODE_REORDER;
                 lv_obj_add_flag(objects.ui_preset_list_cancel_button, LV_OBJ_FLAG_HIDDEN);
-                updatePresetListSelection();
+                return;
             }
+
+            preset_list_load_index = preset_index;
+
+            char old_preset_name[MAX_PRESET_NAME_LENGTH];
+            control_get_preset_name(preset_index, old_preset_name);
+            lv_label_set_text(objects.ui_preset_list_load_dialog_name, backup_info.PresetName);
+            lv_label_set_text(objects.ui_preset_list_load_dialog_old_name, old_preset_name);
+
+            lv_obj_clear_flag(objects.ui_preset_list_load_dialog, LV_OBJ_FLAG_HIDDEN);
         } break;
     }
-
-    preset_list_edit_index = -1;
 }
 
 void action_preset_list_previous(lv_event_t * e)
@@ -560,5 +572,36 @@ void action_preset_list_cancel(lv_event_t * e)
     lv_obj_add_flag(objects.ui_preset_list_cancel_button, LV_OBJ_FLAG_HIDDEN);
 
     updatePresetListSelection();
+}
+
+void action_preset_list_load_dialog_load(lv_event_t * e)
+{
+    bool load_failed = false;
+    if (preset_list_load_index >= 0 && preset_list_edit_index >= 0)
+    {
+        preset_backup_err_t err = preset_backup_load_preset_to_tonex(
+            preset_list_edit_index,
+            preset_list_load_index,
+            preset_backup_load_timer_cb
+        );
+
+        load_failed = err != PRESET_BACKUP_OK;
+    }
+
+    preset_list_edit_index = -1;
+    preset_list_load_index = -1;
+    preset_list_edit_mode = PRESET_LIST_EDIT_MODE_REORDER;
+    lv_obj_add_flag(objects.ui_preset_list_cancel_button, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_add_flag(objects.ui_preset_list_load_dialog, LV_OBJ_FLAG_HIDDEN);
+
+    if (load_failed)
+    {
+        updatePresetListSelection();
+    }
+}
+
+void action_preset_list_load_dialog_cancel(lv_event_t * e)
+{
+    lv_obj_add_flag(objects.ui_preset_list_load_dialog, LV_OBJ_FLAG_HIDDEN);
 }
 #endif // CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI

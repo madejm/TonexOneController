@@ -1,6 +1,9 @@
 #include "display_preset_info.h"
 #include <inttypes.h>
+#include <stdlib.h>
+#include <string.h>
 #include "esp_log.h"
+#include "esp_heap_caps.h"
 #if CONFIG_TONEX_CONTROLLER_HAS_DISPLAY
     #include "ui.h"
     #include "images.h"
@@ -28,6 +31,52 @@ static const char *TAG = "display_preset_info";
 #if CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI
 
 display_preset_info_close_cb_t close_callback;
+
+typedef enum {
+    INFO_TYPE_PRESET,
+    INFO_TYPE_BACKUP
+} InfoType;
+
+static void openPresetInfoPage();
+static void labelSetText(lv_obj_t *label, const char *text);
+static uint8_t info_index;
+static InfoType info_type;
+static uint8_t *info_details;
+static size_t info_length;
+static lv_timer_t *rename_timer;
+static char rename_name[PRESET_BACKUP_TEXT_LENGTH];
+
+static void preset_info_rename_timer_cb(lv_timer_t *timer)
+{
+    usb_tonex_one_import_state_t state = usb_tonex_one_import_status((uint32_t)(uintptr_t)timer->user_data);
+    switch (state)
+    {
+        case TONEX_IMPORT_SENT: {
+            const char *stored_name;
+            size_t capacity;
+            if (tonex_read_data_str(info_details, info_length, &TonexPresetDetailsFullTree,
+                                    TONEX_PRESET_NAME, &stored_name, &capacity))
+            {
+                uint8_t *destination = info_details + ((const uint8_t *)stored_name - info_details);
+                memset(destination, 0, capacity);
+                memcpy(destination, rename_name, strlen(rename_name));
+                destination[capacity] = (uint8_t)strlen(rename_name);
+            }
+            labelSetText(objects.ui_preset_info_name, rename_name);
+        } break;
+
+        case TONEX_IMPORT_FAILED:
+        case TONEX_IMPORT_NONE:
+            ESP_LOGE(TAG, "Preset rename transfer failed, state: %d", state);
+            break;
+
+        default:
+            return;
+    }
+    
+    rename_timer = NULL;
+    lv_timer_del(timer);
+}
 
 // ====== UPDATES ======
 
@@ -186,8 +235,11 @@ static void preset_info_preset_timer_cb(lv_timer_t *timer)
         esp_err_t err = usb_tonex_one_export_take(export_id, &full_details, &length);
         if (err == ESP_OK)
         {
+            free(info_details);
+            info_details = full_details;
+            info_length = length;
             updateInfo(full_details, length);
-            lv_scr_load_anim(objects.preset_info, LV_SCR_LOAD_ANIM_FADE_IN, 0, 0, false);
+            openPresetInfoPage();
         }
         else
         {
@@ -204,9 +256,17 @@ static void preset_info_preset_timer_cb(lv_timer_t *timer)
 
 // ====== ACTIONS ======
 
+static void openPresetInfoPage()
+{
+    lv_obj_add_flag(objects.ui_preset_info_rename_dialog, LV_OBJ_FLAG_HIDDEN);
+    lv_scr_load_anim(objects.preset_info, LV_SCR_LOAD_ANIM_FADE_IN, 0, 0, false);
+}
+
 void openPresetInfoPagePreset(uint8_t presetIndex, display_preset_info_close_cb_t close_action)
 {
     close_callback = close_action;
+    info_index = presetIndex;
+    info_type = INFO_TYPE_PRESET;
 
     uint32_t export_id;
     lv_timer_t *timer = lv_timer_create(preset_info_preset_timer_cb, 50, NULL);
@@ -233,22 +293,131 @@ void openPresetInfoPagePreset(uint8_t presetIndex, display_preset_info_close_cb_
 void openPresetInfoPageBackup(uint8_t slot, display_preset_info_close_cb_t close_action)
 {
     close_callback = close_action;
+    info_index = slot;
+    info_type = INFO_TYPE_BACKUP;
 
     uint8_t *full_details;
     size_t length;
     esp_err_t err = preset_backup_load(slot, &full_details, &length);
-    if (err != ESP_OK) return;
+    if (err != ESP_OK)
+    {
+        return;
+    }
 
     updateInfo(full_details, length);
 
-    free(full_details);
+    free(info_details);
+    info_details = full_details;
+    info_length = length;
 
-    lv_scr_load_anim(objects.preset_info, LV_SCR_LOAD_ANIM_FADE_IN, 0, 0, false);
+    openPresetInfoPage();
 }
 
 void action_preset_info_close(lv_event_t *e)
 {
+    if (rename_timer != NULL)
+    {
+        return;
+    }
+    free(info_details);
+    info_details = NULL;
+    info_length = 0;
     close_callback(NULL);
 }
 
+void action_preset_info_rename_preset_name(lv_event_t * e)
+{
+    lv_textarea_set_text(
+        objects.ui_preset_info_rename_dialog_textarea,
+        lv_label_get_text(objects.ui_preset_info_name)
+    );
+    lv_obj_add_state(objects.ui_preset_info_rename_dialog_textarea, LV_STATE_FOCUSED);
+
+    lv_obj_clear_flag(objects.ui_preset_info_rename_dialog, LV_OBJ_FLAG_HIDDEN);
+}
+
+void action_preset_info_rename_dialog_keyboard_ok(lv_event_t * e)
+{
+    if (rename_timer != NULL || info_details == NULL) return;
+    const char *name = lv_textarea_get_text(objects.ui_preset_info_rename_dialog_textarea);
+    size_t name_length = strlen(name);
+    const char *stored_name;
+    size_t capacity;
+    if (name_length == 0 || name_length >= sizeof(rename_name) ||
+        !tonex_read_data_str(info_details, info_length, &TonexPresetDetailsFullTree,
+                             TONEX_PRESET_NAME, &stored_name, &capacity) ||
+        name_length >= capacity)
+    {
+        ESP_LOGW(TAG, "Invalid preset name: %s", name);
+        return;
+    }
+
+    uint8_t *updated = heap_caps_malloc(info_length, MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT);
+    if (updated == NULL) updated = malloc(info_length);
+    if (updated == NULL)
+    {
+        ESP_LOGE(TAG, "Failed to allocate renamed preset buffer with length %zu", info_length);
+        return;
+    }
+    memcpy(updated, info_details, info_length);
+    size_t offset = (const uint8_t *)stored_name - info_details;
+    memset(updated + offset, 0, capacity);
+    memcpy(updated + offset, name, name_length);
+    // The detail stores its actual string length after the fixed-capacity buffer.
+    updated[offset + capacity] = (uint8_t)name_length;
+    memcpy(rename_name, name, name_length + 1);
+
+    esp_err_t err = ESP_OK;
+    switch (info_type)
+    {
+        case INFO_TYPE_BACKUP: {
+            err = preset_backup_update(info_index, updated, info_length);
+            if (err == ESP_OK)
+            {
+                memcpy(info_details + offset, updated + offset, capacity);
+                info_details[offset + capacity] = (uint8_t)name_length;
+                labelSetText(objects.ui_preset_info_name, rename_name);
+                lv_obj_add_flag(objects.ui_preset_info_rename_dialog, LV_OBJ_FLAG_HIDDEN);
+            }
+            free(updated);
+        } break;
+
+        case INFO_TYPE_PRESET: {
+            rename_timer = lv_timer_create(preset_info_rename_timer_cb, 50, NULL);
+            if (rename_timer == NULL)
+            {
+                ESP_LOGE(TAG, "Failed to create rename timer");
+                free(updated);
+                return;
+            }
+            uint32_t import_id;
+            err = usb_tonex_one_import_preset(updated, info_length, info_index, true, &import_id);
+            if (err == ESP_OK)
+            {
+                rename_timer->user_data = (void *)(uintptr_t)import_id;
+                lv_obj_add_flag(objects.ui_preset_info_rename_dialog, LV_OBJ_FLAG_HIDDEN);
+            }
+            else
+            {
+                free(updated);
+                lv_timer_del(rename_timer);
+                rename_timer = NULL;
+            }
+        } break;
+    }
+
+    if (err != ESP_OK)
+    {
+        ESP_LOGE(TAG, "Failed to rename preset (%s)", esp_err_to_name(err));
+    }
+}
+
+void action_preset_info_rename_dialog_close(lv_event_t * e)
+{
+    if (rename_timer != NULL)
+    {
+        return;
+    }
+    lv_obj_add_flag(objects.ui_preset_info_rename_dialog, LV_OBJ_FLAG_HIDDEN);
+}
 #endif // CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI

@@ -1,10 +1,6 @@
 #include "images.h"
 
-const ext_img_desc_t images[22] = {
-    { "next", &img_next },
-    { "next_down", &img_next_down },
-    { "previous", &img_previous },
-    { "previous_down", &img_previous_down },
+const ext_img_desc_t images[18] = {
     { "amp", &img_amp },
     { "cab", &img_cab },
     { "comp", &img_comp },

@@ -29,6 +29,7 @@ typedef enum: uint8_t
 
 esp_err_t preset_backup_init(void);
 esp_err_t preset_backup_save(const uint8_t *full_details, size_t length, uint16_t *slot);
+esp_err_t preset_backup_update(uint16_t slot, const uint8_t *full_details, size_t length);
 esp_err_t preset_backup_load(uint16_t slot, uint8_t **full_details, size_t *length);
 esp_err_t preset_backup_load_to_tonex(uint16_t slot, uint8_t destination_slot,
                                       bool keep_parameters, uint32_t *id);

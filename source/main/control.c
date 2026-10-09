@@ -280,6 +280,9 @@ typedef struct
 static const char *TAG = "app_control";
 static QueueHandle_t control_input_queue;
 static tControlData ControlData;
+static bool tap_tempo_usb_pending;
+static TickType_t tap_tempo_last_received_tick;
+static uint8_t tap_tempo_usb_modeller;
 
 // #if CONFIG_TONEX_CONTROLLER_HAS_DISPLAY
 static uint8_t PresetIndexForOrderValue(uint8_t value);
@@ -1312,6 +1315,7 @@ static uint8_t process_control_command(tControlMessage* message)
         {
             ESP_LOGI(TAG, "EVENT_TRIGGER_TAP_TEMPO");
             uint32_t current_time = message->Value;
+            tap_tempo_last_received_tick = xTaskGetTickCount();
             uint32_t last_time_delta = current_time - ControlData.TapTempo.Times[0];
 
             // debug
@@ -1364,23 +1368,8 @@ static uint8_t process_control_command(tControlMessage* message)
 
                 ESP_LOGI(TAG, "Tap Tempo BPM = %d", (int)bpm);
 
-                // update pedal
-                switch (usb_get_connected_modeller_type())
-                {
-                    case AMP_MODELLER_TONEX_ONE:        // fallthrough
-                    case AMP_MODELLER_TONEX:            // fallthrough
-                    case AMP_MODELLER_TONEX_ONE_PLUS:   // fallthrough
-                    case AMP_MODELLER_TONEX_PLUG:
-                    default:
-                    {
-                        usb_modify_parameter(TONEX_GLOBAL_BPM, ControlData.TapTempo.BPM);
-                    } break;
-
-                    case AMP_MODELLER_VALETON_GP5:
-                    {
-                        usb_modify_parameter(VALETON_GLOBAL_BPM, ControlData.TapTempo.BPM);
-                    } break;
-                }
+                tap_tempo_usb_pending = true;
+                tap_tempo_usb_modeller = usb_get_connected_modeller_type();
             }
         } break;
 
@@ -3894,6 +3883,20 @@ void control_task(void *arg)
         {
             // process it
             process_control_command(&message);
+        }
+
+        // Allow even 40 BPM taps (1500 ms apart) to continue the sequence.
+        // Send only the final value after 1600 ms without another tap.
+        if (tap_tempo_usb_pending &&
+            (xTaskGetTickCount() - tap_tempo_last_received_tick >= pdMS_TO_TICKS(1600)))
+        {
+            tap_tempo_usb_pending = false;
+            if (tap_tempo_usb_modeller == usb_get_connected_modeller_type()) {
+                usb_modify_parameter(
+                    tap_tempo_usb_modeller == AMP_MODELLER_VALETON_GP5 ?
+                        VALETON_GLOBAL_BPM : TONEX_GLOBAL_BPM,
+                    ControlData.TapTempo.BPM);
+            }
         }
 
         // don't hog the CPU

@@ -254,8 +254,9 @@ static bool import_detail(tPresetImportReader *reader, size_t capacity, bool opa
     if (reader->offset >= reader->length) return false;
     uint8_t length = reader->data[reader->offset++];
     if (length >= capacity) return false;
-    // One editor metadata field deliberately has length zero with opaque bytes.
-    return opaque ? length == 0 :
+    // Opaque model metadata may have a nonzero length in pedal exports.
+    // Its bounds are checked above; preserve its bytes without string validation.
+    return opaque ||
         (reader->data[start + length] == 0 && memchr(reader->data + start, 0, length) == NULL);
 }
 
@@ -330,8 +331,17 @@ esp_err_t usb_tonex_one_import_preset(uint8_t *body, size_t length, uint8_t slot
 {
     if (!usb_tonex_one_supports_txp_transfer()) return ESP_ERR_NOT_SUPPORTED;
     if (body == NULL || id == NULL || slot >= MAX_PRESETS_TONEX_ONE ||
-        length > TONEX_MAX_FULL_PRESET_DATA - 11 || !import_validate(body, length))
+        length > TONEX_MAX_FULL_PRESET_DATA - 11)
+    {
+        ESP_LOGE(TAG, "Invalid preset import arguments: slot %u, length %zu (maximum %u)",
+                 slot, length, (unsigned)(TONEX_MAX_FULL_PRESET_DATA - 11));
         return ESP_ERR_INVALID_ARG;
+    }
+    if (!import_validate(body, length))
+    {
+        ESP_LOGE(TAG, "Preset import validation failed: slot %u, length %zu", slot, length);
+        return ESP_ERR_INVALID_ARG;
+    }
 
     // The HTTP destination is authoritative, never the uploaded body index.
     body[3] = slot;

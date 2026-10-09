@@ -121,6 +121,7 @@ typedef struct
     bool external_press_alt_mode;
     bool external_long_press_handled;
     bool external_tap_tempo_pressed;
+    bool external_dialog_tap;
 } tFootswitchControl;
 
 typedef struct
@@ -990,6 +991,14 @@ static void footswitch_handle_external_release(void)
             FootswitchControl.external_press_started_tick = xTaskGetTickCount();
             FootswitchControl.external_press_alt_mode = FootswitchControl.footswitch_alt_mode;
             FootswitchControl.external_long_press_handled = false;
+            FootswitchControl.external_dialog_tap = false;
+#if CONFIG_TONEX_CONTROLLER_DISPLAY_FULL_UI && CONFIG_TONEX_CONTROLLER_HARDWARE_PLATFORM_WAVESHARE_43B_CUSTOM
+            if (display_tap_tempo_is_open()) {
+                FootswitchControl.external_dialog_tap =
+                    footswitch_external_effect_is_tap_tempo(pressed_mask, false) ||
+                    footswitch_external_effect_is_tap_tempo(pressed_mask, true);
+            }
+#endif
         }
 
         // Keep every switch involved so bank chords still work when their
@@ -997,15 +1006,16 @@ static void footswitch_handle_external_release(void)
         FootswitchControl.external_pressed_mask |= pressed_mask;
 
         if (!FootswitchControl.external_tap_tempo_pressed &&
-            footswitch_external_effect_is_tap_tempo(
+            (FootswitchControl.external_dialog_tap || footswitch_external_effect_is_tap_tempo(
                 FootswitchControl.external_pressed_mask,
-                FootswitchControl.external_press_alt_mode))
+                FootswitchControl.external_press_alt_mode)))
         {
             FootswitchControl.external_tap_tempo_pressed = true;
             UI_SetTapTempoFootswitchPressed(true);
         }
 
         if (!FootswitchControl.external_long_press_handled &&
+            !FootswitchControl.external_dialog_tap &&
             footswitch_external_effect_is_alt_mode(
                 FootswitchControl.external_pressed_mask,
                 FootswitchControl.external_press_alt_mode))
@@ -1024,7 +1034,8 @@ static void footswitch_handle_external_release(void)
 
             // A held tap-tempo switch must not contribute a delayed tap and
             // distort the interval measured between intentional quick taps.
-            if (!footswitch_external_effect_is_tap_tempo(FootswitchControl.external_pressed_mask, action_alt_mode))
+            if (!FootswitchControl.external_dialog_tap &&
+                !footswitch_external_effect_is_tap_tempo(FootswitchControl.external_pressed_mask, action_alt_mode))
             {
                 if (!action_alt_mode)
                 {
@@ -1053,21 +1064,27 @@ static void footswitch_handle_external_release(void)
 
         if (!FootswitchControl.external_long_press_handled)
         {
-            bool action_alt_mode = FootswitchControl.external_press_alt_mode;
+            if (FootswitchControl.external_dialog_tap) {
+                UI_TapTempoFootswitchTapped();
+                control_trigger_tap_tempo_from_footswitch_at(FootswitchControl.external_press_started_tick);
+            } else {
+                bool action_alt_mode = FootswitchControl.external_press_alt_mode;
 
-            if (!action_alt_mode)
-            {
-                footswitch_execute_external_presets(FootswitchControl.external_pressed_mask);
+                if (!action_alt_mode)
+                {
+                    footswitch_execute_external_presets(FootswitchControl.external_pressed_mask);
+                }
+
+                footswitch_execute_external_effects(
+                    FootswitchControl.external_pressed_mask,
+                    action_alt_mode,
+                    FootswitchControl.external_press_started_tick);
             }
-
-            footswitch_execute_external_effects(
-                FootswitchControl.external_pressed_mask,
-                action_alt_mode,
-                FootswitchControl.external_press_started_tick);
         }
 
         FootswitchControl.external_pressed_mask = 0;
         FootswitchControl.external_long_press_handled = false;
+        FootswitchControl.external_dialog_tap = false;
 
         // Ignore contact bounce after the release action has been dispatched.
         vTaskDelay(pdMS_TO_TICKS(100));

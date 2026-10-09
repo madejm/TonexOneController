@@ -74,6 +74,11 @@ extern void action_usb_host_changed(lv_event_t * e);
 extern void action_preset_info_close(lv_event_t * e);
 extern void action_tap_tempo_open(lv_event_t * e);
 extern void action_tap_tempo_close(lv_event_t * e);
+extern void action_preset_list_load_dialog_load(lv_event_t * e);
+extern void action_preset_list_load_dialog_cancel(lv_event_t * e);
+extern void action_preset_info_rename_dialog_close(lv_event_t * e);
+extern void action_preset_info_rename_dialog_keyboard_ok(lv_event_t * e);
+extern void action_preset_info_rename_preset_name(lv_event_t * e);
 
 #ifdef __cplusplus
 }
