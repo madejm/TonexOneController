@@ -737,7 +737,7 @@ static void footswitch_handle_effects(tFootswitchHandler* handler, tFootswitchEf
 * RETURN:
 * NOTES:
 *****************************************************************************/
-static void footswitch_execute_external_effects(uint16_t pressed_mask, bool alt_mode, uint32_t tap_tempo_tick)
+static void footswitch_execute_external_effects(uint16_t pressed_mask, bool alt_mode)
 {
     tFootswitchEffectHandler* fx_handler = alt_mode ?
         FootswitchControl.ExternalFootswitchAltEffectHandler :
@@ -761,7 +761,6 @@ static void footswitch_execute_external_effects(uint16_t pressed_mask, bool alt_
         {
             ESP_LOGI(TAG, "Footswitch Tap Tempo action");
             UI_TapTempoFootswitchTapped();
-            control_trigger_tap_tempo_from_footswitch_at(tap_tempo_tick);
             break;
         }
 
@@ -999,6 +998,13 @@ static void footswitch_handle_external_release(void)
                     footswitch_external_effect_is_tap_tempo(pressed_mask, true);
             }
 #endif
+            if (FootswitchControl.external_dialog_tap) {
+                UI_TapTempoFootswitchTapped();
+                control_trigger_tap_tempo_from_footswitch_at(
+                    FootswitchControl.external_press_started_tick);
+                // The press-down tap consumes this gesture, including any hold.
+                FootswitchControl.external_long_press_handled = true;
+            }
         }
 
         // Keep every switch involved so bank chords still work when their
@@ -1022,8 +1028,7 @@ static void footswitch_handle_external_release(void)
         {
             footswitch_execute_external_effects(
                 FootswitchControl.external_pressed_mask,
-                FootswitchControl.external_press_alt_mode,
-                FootswitchControl.external_press_started_tick);
+                FootswitchControl.external_press_alt_mode);
             FootswitchControl.external_long_press_handled = true;
         }
 
@@ -1032,10 +1037,13 @@ static void footswitch_handle_external_release(void)
         {
             bool action_alt_mode = !FootswitchControl.external_press_alt_mode;
 
-            // A held tap-tempo switch must not contribute a delayed tap and
-            // distort the interval measured between intentional quick taps.
-            if (!FootswitchControl.external_dialog_tap &&
-                !footswitch_external_effect_is_tap_tempo(FootswitchControl.external_pressed_mask, action_alt_mode))
+            // A TAP hold opens the timed dialog without recording a BPM sample.
+            if (footswitch_external_effect_is_tap_tempo(
+                    FootswitchControl.external_pressed_mask, action_alt_mode))
+            {
+                UI_TapTempoFootswitchTapped();
+            }
+            else
             {
                 if (!action_alt_mode)
                 {
@@ -1044,8 +1052,7 @@ static void footswitch_handle_external_release(void)
 
                 footswitch_execute_external_effects(
                     FootswitchControl.external_pressed_mask,
-                    action_alt_mode,
-                    FootswitchControl.external_press_started_tick);
+                    action_alt_mode);
             }
 
             FootswitchControl.external_long_press_handled = true;
@@ -1064,12 +1071,11 @@ static void footswitch_handle_external_release(void)
 
         if (!FootswitchControl.external_long_press_handled)
         {
-            if (FootswitchControl.external_dialog_tap) {
+            bool action_alt_mode = FootswitchControl.external_press_alt_mode;
+            if (footswitch_external_effect_is_tap_tempo(
+                    FootswitchControl.external_pressed_mask, action_alt_mode)) {
                 UI_TapTempoFootswitchTapped();
-                control_trigger_tap_tempo_from_footswitch_at(FootswitchControl.external_press_started_tick);
             } else {
-                bool action_alt_mode = FootswitchControl.external_press_alt_mode;
-
                 if (!action_alt_mode)
                 {
                     footswitch_execute_external_presets(FootswitchControl.external_pressed_mask);
@@ -1077,8 +1083,7 @@ static void footswitch_handle_external_release(void)
 
                 footswitch_execute_external_effects(
                     FootswitchControl.external_pressed_mask,
-                    action_alt_mode,
-                    FootswitchControl.external_press_started_tick);
+                    action_alt_mode);
             }
         }
 
